@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RootNamespace>Customer_Information</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Title>UITS Desktop Support App</Title>
+    <Description>UITS Desktop Support App</Description>
+    <ApplicationIcon>Screenshot_20230127_112512.ico</ApplicationIcon>
+    <Version>2.1.0-beta</Version>
+    <UseWindowsForms>True</UseWindowsForms>
+    <PackageIcon>Screenshot_20230127_112512.png</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Screenshot_20230127_112512.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\test\Screenshot_20230127_112512.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Colors.Net" Version="1.1.0" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.DirectoryServices" Version="8.0.0" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="obj\" />
+  </ItemGroup>
+
+</Project>
