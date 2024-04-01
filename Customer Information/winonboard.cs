@@ -44,6 +44,10 @@ public class WinOnboard
                 case "clear":
                     Console.Clear();
                     break;
+                case "help":
+                    Program.OpenURL("https://support.microsoft.com/en-us/windows/which-version-of-windows-operating-system-am-i-running-628bec99-476a-2c13-5296-9dd081cdd808");
+                    winOnboardMenuAnswer = Console.ReadLine().ToLower().Trim();
+                    break;
             }
 
         }
@@ -137,6 +141,10 @@ public class WinOnboard
                 case "clear":
                     Console.Clear();
                     break;
+                case "help":
+                    Program.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/TLC-ProjectTeam/Shared%20Documents/Knowledge%20Articles%20and%20Walkthroughs/Best%20Practices%20%E2%80%93%20PAW%20%26%20BitLocker%20(DS).docx?d=wb97008f4db9045068b12366981734846&csf=1&web=1&e=Shdpub");
+                    winMenuBCAnswer = Console.ReadLine().ToLower().Trim();
+                    break;
             }
         }
     }
@@ -180,6 +188,10 @@ public class WinOnboard
                 case "clear":
                     Console.Clear();
                     break;
+                case "help":
+                    Program.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/TLC-ProjectTeam/Shared%20Documents/Knowledge%20Articles%20and%20Walkthroughs/Best%20Practices%20%E2%80%93%20PAW%20%26%20BitLocker%20(DS).docx?d=wb97008f4db9045068b12366981734846&csf=1&web=1&e=Shdpub");
+                    winMenuOUAnswer = Console.ReadLine().ToLower().Trim();
+                    break;
             }
         }
     }
@@ -191,8 +203,8 @@ public class WinOnboard
         while(winMenuShared)
         {
             ColoredConsole.WriteLine($"Is the computer a shared device ({Green("Y")}/{DarkRed("N")})?");
-            string winMenuShared1Answer = Console.ReadLine().ToLower().Trim();
-            switch(winMenuShared1Answer)
+            string winMenuSharedAnswer = Console.ReadLine().ToLower().Trim();
+            switch(winMenuSharedAnswer)
             {
                 case "y": case "yes":
                     ColoredConsole.WriteLine($"The computer is onboarded! Complete the Setup Checklist. Press {DarkYellow("enter")} to return to main menu.");
@@ -220,6 +232,10 @@ public class WinOnboard
                     break;
                 case "clear":
                     Console.Clear();
+                    break;
+                case "help":
+                    Program.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/TLC-ProjectTeam/Shared%20Documents/Knowledge%20Articles%20and%20Walkthroughs/Migration%20to%20%20BlueCat.docx?d=wb6968b0a4ace42f192c97e870e42a23d&csf=1&web=1&e=R4e5KN");
+                    winMenuSharedAnswer = Console.ReadLine().ToLower().Trim();
                     break;
             }
         }
@@ -268,6 +284,10 @@ public class WinOnboard
                 case "clear":
                     Console.Clear();
                     break;
+                case "help":
+                    Program.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/TLC-ProjectTeam/Shared%20Documents/Knowledge%20Articles%20and%20Walkthroughs/Migration%20to%20%20BlueCat.docx?d=wb6968b0a4ace42f192c97e870e42a23d&csf=1&web=1&e=R4e5KN");
+                    winMenuUserData1Answer = Console.ReadLine().ToLower().Trim();
+                    break;
             }
         }
     }
@@ -310,6 +330,10 @@ public class WinOnboard
                     break;
                 case "clear":
                     Console.Clear();
+                    break;
+                case "help":
+                    Program.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/TLC-ProjectTeam/Shared%20Documents/Knowledge%20Articles%20and%20Walkthroughs/Migration%20to%20%20BlueCat.docx?d=wb6968b0a4ace42f192c97e870e42a23d&csf=1&web=1&e=R4e5KN");
+                    winMenuUserData2Answer = Console.ReadLine().ToLower().Trim();
                     break;
             }
         }
@@ -355,6 +379,10 @@ public class WinOnboard
                 case "clear":
                     Console.Clear();
                     break;
+                case "help":
+                    Program.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/TLC-ProjectTeam/Shared%20Documents/Knowledge%20Articles%20and%20Walkthroughs/Best%20Practices%20%E2%80%93%20PAW%20%26%20BitLocker%20(DS).docx?d=wb97008f4db9045068b12366981734846&csf=1&web=1&e=Shdpub");
+                    winMenuBCRightsAnswer = Console.ReadLine().ToLower().Trim();
+                    break;
             }
         }
     }
@@ -394,6 +422,10 @@ public class WinOnboard
                     break;
                 case "clear":
                     Console.Clear();
+                    break;
+                case "help":
+                    Program.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/TLC-ProjectTeam/Shared%20Documents/Knowledge%20Articles%20and%20Walkthroughs/Migration%20to%20%20BlueCat.docx?d=wb6968b0a4ace42f192c97e870e42a23d&csf=1&web=1&e=R4e5KN");
+                    winMenuHubAnswer = Console.ReadLine().ToLower().Trim();
                     break;
             }
         }
@@ -435,6 +467,10 @@ public class WinOnboard
                     break;
                 case "clear":
                     Console.Clear();
+                    break;
+                case "help":
+                    Program.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/TLC-ProjectTeam/Shared%20Documents/Knowledge%20Articles%20and%20Walkthroughs/Migration%20to%20%20BlueCat.docx?d=wb6968b0a4ace42f192c97e870e42a23d&csf=1&web=1&e=R4e5KN");
+                    winMenuVerifyUEMAnswer = Console.ReadLine().ToLower().Trim();
                     break;
 
             }
