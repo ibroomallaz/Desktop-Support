@@ -60,7 +60,7 @@ class Program
     public static void AboutMenu()
     {
         Console.Clear();
-        ColoredConsole.WriteLine($"UITS Desktop Support App \n {Red("Version")} {version} \n Developed by Isaac {Cyan("Broomall")} ({Green("i")}{Cyan("broomall")})\n Press enter to go back.");
+        ColoredConsole.WriteLine($"UITS Desktop Support App \n {Red("Version")} {version} \n Developed by Isaac {Cyan("Broomall")} ({Green("i")}{Cyan("broomall")})\n Press {DarkYellow("Enter")} to go back.");
         Console.ReadLine();
         Console.Clear();
         Menu();
@@ -71,7 +71,7 @@ class Program
         bool userMenu = true;
         while (userMenu)
         {
-            Console.WriteLine("User Information: Enter NetID, 'clear', or 'back':");
+            ColoredConsole.WriteLine($"User Information: Enter NetID, {Cyan("clear")}, or {DarkYellow("back")}:");
             string userMenuText = Console.ReadLine().ToLower();
            
             if (userMenuText == "clear")
@@ -100,7 +100,7 @@ class Program
         bool computerMenu = true;
         while (computerMenu)
         {
-            Console.WriteLine("Computer Information: Enter Hostname, 'clear' or 'back':");
+            ColoredConsole.WriteLine($"Computer Information: Enter Hostname, {Cyan("clear")}, or {DarkYellow("back")}:");
             string computerMenuText = Console.ReadLine().ToLower().Trim();
             if (computerMenuText == "clear")
             {
