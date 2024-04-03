@@ -62,7 +62,6 @@ class CSV
                 PrintEntryField(entry, "ABR", "ABR");
                 PrintEntryField(entry, "team", "Team");
                 PrintServiceNowTeam(entry);
-
                 Console.WriteLine();
                 found = true;
             }

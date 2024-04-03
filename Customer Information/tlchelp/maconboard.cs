@@ -168,7 +168,7 @@ public class MacOnboard
                 case "clear":
                     break;
                 case "help":
-                    Program.OpenURL("https://support.apple.com/guide/mac-help/add-a-user-or-group-mchl3e281fc9/14.0/mac/14.0");
+                    Program.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011356");
                     macUEMAllowMenuAnswer = Console.ReadLine().ToLower().Trim();
                     break;
             }
@@ -425,7 +425,7 @@ public class MacOnboard
                     Console.Clear();
                     break;
                 case "help":
-                    Program.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011734");
+                    Program.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011356");
                     macBCSignInMenuAnswer = Console.ReadLine().ToLower().Trim();
                     break;
 
@@ -461,7 +461,7 @@ public class MacOnboard
                     Console.Clear();
                     break;
                 case "help":
-                    Program.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011340");
+                    Program.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011356");
                     macUserPWSyncMenuAnswer = Console.ReadLine().ToLower().Trim();
                     break;
 
