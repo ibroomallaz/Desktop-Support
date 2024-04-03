@@ -68,6 +68,7 @@ public class MacOnboard
                     MacAdminMenu();
                     break;
                 case "n": case "no":
+                    macUserDataMenu= false;
                     MacReimageMenu();                                                                                                                
                     break;
                 case "back":
@@ -180,7 +181,7 @@ public class MacOnboard
         macMenuStack.Push(MacReimageMenu);
         while(macReimageMenu)
         {
-            Console.WriteLine($"ReImage the device. \n Press {DarkYellow("Enter")} to continue.");
+            ColoredConsole.WriteLine($"Re-image the device. \n Press {DarkYellow("Enter")} to continue.");
             string macReimageMenuAnswer = Console.ReadLine().ToLower().Trim();
             switch(macReimageMenuAnswer)
             {
@@ -257,7 +258,7 @@ public class MacOnboard
         {
             ColoredConsole.WriteLine($"Assign the computer to the MDM in Apple School Manager.\n Press {DarkYellow("Enter")} to continue");
             string macASMAssignMenuAnswer = Console.ReadLine().ToLower().Trim();
-            switch( macASMAssignMenuAnswer)
+            switch(macASMAssignMenuAnswer)
             {
                 default:
                     macASMAssignMenu = false;
@@ -288,7 +289,7 @@ public class MacOnboard
     }
     public static void MacSyncWS1Menu()
     {
-        bool macSyncWS1Menu = false;
+        bool macSyncWS1Menu = true;
         macMenuStack.Push(MacSyncWS1Menu);
         while (macSyncWS1Menu)
         {
@@ -493,7 +494,7 @@ public class MacOnboard
                     Program.Menu();
                     break;
                 case "help":
-                    Program.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011359");
+                    Program.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/TLC%20Customer%20Checklist_2pg.docx");
                     macUserSetupDoneAnswer = Console.ReadLine().ToLower().Trim();
                     break;
             }
