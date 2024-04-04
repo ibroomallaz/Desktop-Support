@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Security.Policy;
 class Program
 {
-    public static string version = "2.1.0-beta-2";
+    public static string version = "2.1.0";
     public static void Main()
     {
         //Download CSV and load information into memory

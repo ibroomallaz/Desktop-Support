@@ -9,10 +9,14 @@
     <Title>UITS Desktop Support App</Title>
     <Description>UITS Desktop Support App</Description>
     <ApplicationIcon>Screenshot_20230127_112512.ico</ApplicationIcon>
-    <Version>2.1.0-beta-2</Version>
+    <Version>2.1.0</Version>
     <UseWindowsForms>True</UseWindowsForms>
     <PackageIcon>Screenshot_20230127_112512.png</PackageIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="tlchelp\mimcheck.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Screenshot_20230127_112512.ico" />

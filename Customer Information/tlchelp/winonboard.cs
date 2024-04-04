@@ -210,6 +210,7 @@ public class WinOnboard
                     ColoredConsole.WriteLine($"The computer is onboarded! Complete the Setup Checklist. Press {DarkYellow("enter")} to return to main menu.");
                     Console.ReadLine();
                     winMenuShared = false;
+                    Program.Menu();
                     break;
                 case "n": case "no":
                     winMenuShared = false;
@@ -249,7 +250,7 @@ public class WinOnboard
         bool winMenuUserData1 = true;
         while(winMenuUserData1)
         {
-            ColoredConsole.WriteLine($"Is there important User Data on the computer ({Green("Y")}/{DarkRed("N")}?");
+            ColoredConsole.WriteLine($"Is there important User Data on the computer ({Green("Y")}/{DarkRed("N")})?");
             string winMenuUserData1Answer = Console.ReadLine().ToLower().Trim();
             switch (winMenuUserData1Answer)
             {
@@ -398,6 +399,8 @@ public class WinOnboard
             {
                 case "y":
                 case "yes":
+                    winMenuHub = false;
+                    WinMenuVerifyUEM();
                     break;
                 case "n": case "no":
                     ColoredConsole.WriteLine($"Use LAPS to instal the WS1 Hub.\n Press {DarkYellow("Enter")} to continue.");
@@ -442,11 +445,13 @@ public class WinOnboard
                 case "y":
                 case "yes":
                     ColoredConsole.WriteLine($"The computer is onboarded! Continue with the setup checklist. \n Press {DarkYellow("Enter")} to go back to main menu.");
+                    Console.ReadLine();
                     winMenuVerifyUEM = false;
                     Program.Menu();
                     break;
                 case "n": case "no":
                     ColoredConsole.WriteLine($"Check with SSA to ensure that the serial number is properly registering. \n Once registered the computer is fully onboarded and you can continue with the setup checklist.\n Press {DarkYellow("Enter")} to return to main menu.");
+                    Console.ReadLine();
                     winMenuVerifyUEM = false;
                     Program.Menu();
                     break;
