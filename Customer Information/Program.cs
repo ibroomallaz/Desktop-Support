@@ -90,6 +90,8 @@ class Program
                 case "exit":
                     userMenu = false;
                     break;
+                case "":
+                    break;
                 default:
                     Console.WriteLine();
                     AD.ADUser(userMenuText);
@@ -119,6 +121,8 @@ class Program
                     break;
                 case "exit":
                     computerMenu = false;
+                    break;
+                case "":
                     break;
                 default:
                     Console.WriteLine();
