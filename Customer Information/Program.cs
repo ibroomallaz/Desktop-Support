@@ -33,14 +33,17 @@ class Program
             {
                 case "1":
                 case "user":
+                    showMenu = false;
                     UserInfoMenu();
                     break;
                 case "2":
                 case "computer":
+                    showMenu = false;
                     ComputerInfoMenu();
                     break;
                 case "3":
                 case "about":
+                    showMenu = false;
                     AboutMenu();
                     break;
                 case "5":
@@ -71,26 +74,27 @@ class Program
         bool userMenu = true;
         while (userMenu)
         {
-            ColoredConsole.WriteLine($"User Information: Enter NetID, {Cyan("clear")}, or {DarkYellow("back")}:");
-            string userMenuText = Console.ReadLine().ToLower();
-           
-            if (userMenuText == "clear")
+            ColoredConsole.WriteLine($"User Information: Enter NetID, {Cyan("clear")}, {DarkYellow("back")}, or {DarkRed("exit")}:");
+            string userMenuText = Console.ReadLine().ToLower().Trim();
+
+            switch (userMenuText)
             {
-                Console.Clear();
-                userMenu = true;
-            }
-            else if (userMenuText == "back")
-            {
-                Console.Clear();
-                userMenu = false;
-                Menu();
-            }
-            else
-            {
-                Console.WriteLine();
-                AD.ADUser(userMenuText);
-                Console.WriteLine();
-                userMenu = true;
+                case "clear":
+                    Console.Clear();
+                    break;
+                case "back":
+                    Console.Clear();
+                    userMenu = false;
+                    Menu();
+                    break;
+                case "exit":
+                    userMenu = false;
+                    break;
+                default:
+                    Console.WriteLine();
+                    AD.ADUser(userMenuText);
+                    Console.WriteLine();
+                    break;
             }
         }
     }
@@ -100,29 +104,31 @@ class Program
         bool computerMenu = true;
         while (computerMenu)
         {
-            ColoredConsole.WriteLine($"Computer Information: Enter Hostname, {Cyan("clear")}, or {DarkYellow("back")}:");
+            ColoredConsole.WriteLine($"Computer Information: Enter Hostname, {Cyan("clear")}, {DarkYellow("back")}, or {DarkRed("exit")}:");
             string computerMenuText = Console.ReadLine().ToLower().Trim();
-            if (computerMenuText == "clear")
-            {
-                Console.Clear();
-                computerMenu = true;
 
-            }
-            if (computerMenuText == "back")
+            switch (computerMenuText)
             {
-                Console.Clear();
-                computerMenu = false;
-                Menu();
-            }
-            else
-            {
-                Console.WriteLine();
-                AD.ADComputer(computerMenuText);
-                Console.WriteLine();
-                computerMenu = true;
+                case "clear":
+                    Console.Clear();
+                    break;
+                case "back":
+                    Console.Clear();
+                    computerMenu = false;
+                    Menu();
+                    break;
+                case "exit":
+                    computerMenu = false;
+                    break;
+                default:
+                    Console.WriteLine();
+                    AD.ADComputer(computerMenuText);
+                    Console.WriteLine();
+                    break;
             }
         }
     }
+
     public static void OpenURL(string target)
     {
         try

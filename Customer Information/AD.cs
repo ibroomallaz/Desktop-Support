@@ -81,12 +81,12 @@ class AD
                 }
                 ColoredConsole.WriteLine($"{Cyan("Location:")} " + ous.Red());
                 if (computer.Properties["description"].Value != null)
-                    {
+                {
                     string description = computer.Properties["description"].Value.ToString();
                     ColoredConsole.WriteLine($"{Cyan("Description:")} " + description.Red());
-                    }
-             
-              
+                }
+
+
             }
             else
             {
@@ -97,5 +97,40 @@ class AD
         {
             Console.WriteLine($"Error occurred: {ex.Message}");
         }
+    }
+    public static List<string> ADGroupMembers(string groupName)
+    {
+        List<string> groupMembers = new List<string>();
+        try
+        {
+            using (PrincipalContext ctx = new PrincipalContext(ContextType.Domain))
+            {
+                using (GroupPrincipal grp = GroupPrincipal.FindByIdentity(ctx, IdentityType.Name, groupName))
+                {
+                    if (grp != null)
+                    {
+                        foreach (Principal p in grp.GetMembers())
+                        {
+                                groupMembers.Add(p.Name);   
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"No group {groupName} exists");
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+
+        if (groupMembers.Count == 0)
+        {
+            groupMembers.Add("No group members exist.");
+        }
+
+        return groupMembers;
     }
 }

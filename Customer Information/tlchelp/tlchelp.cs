@@ -21,7 +21,8 @@ public class TLCHelp
             //more to be added later if thought of
             Console.WriteLine("TLC Help Menu:");
             Console.WriteLine("Select option:");
-            ColoredConsole.WriteLine($"({Green("1")}) Computer Onboarding.");
+            ColoredConsole.WriteLine($"({Green("1")}) Computer Onboarding");
+            ColoredConsole.WriteLine($"({DarkYellow("2")}) MIM Group check");
             ColoredConsole.WriteLine($"At any time: type '{Red("exit")}' to go back to main menu");
             string tlcMenuAnswer = Console.ReadLine().ToLower().Trim();
 
@@ -30,6 +31,10 @@ public class TLCHelp
                 case "1":
                     tlcMenu = false;
                     OnboardMenu();
+                    break;
+                case "2":
+                    tlcMenu = false;
+                    MimCheck.MimCheckMenu();
                     break;
                 case "back":
                 case "exit":
