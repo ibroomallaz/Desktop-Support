@@ -3,9 +3,10 @@ using Colors.Net.StringColorExtensions;
 using static Colors.Net.StringStaticMethods;
 using System.Diagnostics;
 using System.Security.Policy;
+using System.DirectoryServices.AccountManagement;
 class Program
 {
-    public static string version = "2.1.0";
+    public static string version = "2.2.0";
     public static void Main()
     {
         //Download CSV and load information into memory
@@ -149,4 +150,5 @@ class Program
             MessageBox.Show(other.Message);
         }
     }
+
 }

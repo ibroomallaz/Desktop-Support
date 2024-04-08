@@ -103,6 +103,7 @@ class AD
         List<string> groupMembers = new List<string>();
         try
         {
+           
             using (PrincipalContext ctx = new PrincipalContext(ContextType.Domain))
             {
                 using (GroupPrincipal grp = GroupPrincipal.FindByIdentity(ctx, IdentityType.Name, groupName))
@@ -111,7 +112,8 @@ class AD
                     {
                         foreach (Principal p in grp.GetMembers())
                         {
-                                groupMembers.Add(p.Name);   
+                            groupMembers.Add(p.Name);
+                            groupMembers.Sort();
                         }
                     }
                     else
@@ -132,5 +134,51 @@ class AD
         }
 
         return groupMembers;
+    }
+    public static bool ADGroupExistsCheck(string groupName)
+    {
+            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain))
+            {
+                GroupPrincipal groupPrincipal = GroupPrincipal.FindByIdentity(AD, groupName);
+                if (groupPrincipal != null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        
+    }
+    public static void ADMIMGroupCheck(string netid)
+    {
+        try
+        {
+            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain))
+            {
+                UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
+                if (userPrincipal != null)
+                {
+                    var groups = userPrincipal.GetGroups().ToArray();
+                    if (groups != null)
+                    {
+                        Console.WriteLine("Current MIM Groups:");
+                        foreach (var group in groups)
+                        {
+                            if (group.Name.Contains("MIM"))
+                            {
+                                Console.WriteLine(group.Name);
+                            }
+                           
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
