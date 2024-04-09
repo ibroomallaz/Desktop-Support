@@ -114,35 +114,49 @@ public class MIMCheck
                     }
                     else
                     {
-                        Console.WriteLine("Please enter user NetIDs:");
-                        string netid = Console.ReadLine().Trim().ToLower();
-                        string[] netids = new string[19];
-                        List<string> groupMembers = AD.ADGroupMembers(expectedDept);
-                        netids = netid.Split(",");
-                        if (netids.Length == 1)
+                        bool expectedDeptL2 = true;
+                        while (expectedDeptL2)
                         {
+                            Console.WriteLine("Please enter user NetIDs:");
+                            string netid = Console.ReadLine().Trim().ToLower();
+                            switch (netid)
+                            {
+                                default:
+                                    List<string> groupMembers = AD.ADGroupMembers(expectedDept);
+                                    if (!netid.Contains(","))
+                                    {
+                                        if (groupMembers.Contains(netid))
+                                        {
+                                            ColoredConsole.WriteLine($"{DarkYellow(netid)} {Green("exists")} in {DarkGreen(expectedDept)}");
+                                        }
+                                        else
+                                        {
+                                            ColoredConsole.WriteLine($"{DarkYellow(netid)} does {Red("not")} exist in {DarkGreen(expectedDept)}");
+                                        }
+                                    }
 
-                            if (groupMembers.Contains(netid))
-                            {
-                                ColoredConsole.WriteLine($"{DarkYellow(netid)} {Green("exists")} in {DarkGreen(expectedDept)}");
-                            }
-                            else
-                            {
-                                ColoredConsole.WriteLine($"{DarkYellow(netid)} does {Red("not")} exist in {DarkGreen(expectedDept)}");
-                            }
-                        }
-                        if (netids.Length >= 2)
-                        {
-                            for (int i = 0; i <= (netids.Length - 1); i++)
-                            {
-                                if (groupMembers.Contains(netids[i].Trim()))
-                                {
-                                    ColoredConsole.WriteLine($"{netids[i].Trim().DarkYellow()} {Green("exists")} in {expectedDept.DarkGreen()}");
-                                }
-                                else
-                                {
-                                    ColoredConsole.WriteLine($"{netids[i].Trim().DarkYellow()} does {Red("not")} exist in {expectedDept.DarkGreen()}");
-                                }
+                                    if (netid.Contains(","))
+                                    {
+                                        string[] netids = new string[19];
+                                        netids = netid.Split(",");
+                                        for (int i = 0; i <= (netids.Length - 1); i++)
+                                        {
+                                            if (groupMembers.Contains(netids[i].Trim()))
+                                            {
+                                                ColoredConsole.WriteLine($"{netids[i].Trim().DarkYellow()} {Green("exists")} in {expectedDept.DarkGreen()}");
+                                            }
+                                            else
+                                            {
+                                                ColoredConsole.WriteLine($"{netids[i].Trim().DarkYellow()} does {Red("not")} exist in {expectedDept.DarkGreen()}");
+                                            }
+                                        }
+                                        Array.Clear(netids, 0, netids.Length);
+                                    }
+                                    expectedDeptL2 = false;
+                                    break;
+                                case "":
+                                    break;
+
                             }
                         }
                     }
