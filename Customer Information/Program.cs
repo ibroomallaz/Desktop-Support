@@ -6,7 +6,7 @@ using System.Security.Policy;
 using System.DirectoryServices.AccountManagement;
 class Program
 {
-    public static string version = "2.2.0";
+    public static string version = "2.2.1";
     public static void Main()
     {
         //Download CSV and load information into memory
