@@ -10,7 +10,7 @@ public class MIMCheck
         bool mimCheckMenu = true;
         while (mimCheckMenu)
         {
-            ColoredConsole.WriteLine($"MIM Group Checking options:\n ({Green("1")}) Check for expected MIM group.\n ({DarkYellow("2")}) Report current MIM Groups.\n ({Magenta("3")}) Check current members of Dept MIM group.\n ({DarkRed("4")}) Exit");
+            ColoredConsole.WriteLine($"MIM Group Checking options:\n ({Green("1")}) Check if NetID is in expected MIM group.\n ({DarkYellow("2")}) Report individual's current MIM Groups.\n ({Magenta("3")}) Check current members of Dept MIM group.\n ({DarkRed("4")}) Exit");
             string mimCheckMenuAnswer = Console.ReadLine().Trim().ToLower();
             switch (mimCheckMenuAnswer)
             {
