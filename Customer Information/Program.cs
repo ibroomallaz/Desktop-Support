@@ -94,9 +94,17 @@ class Program
                 case "":
                     break;
                 default:
+                    AD.adDeptStack.Clear(); //#fr
                     Console.WriteLine();
                     AD.ADUser(userMenuText);
                     Console.WriteLine();
+                    break;
+//#fr
+                case "-fr":
+                    if (AD.adDeptStack.Peek() != null)
+                    {
+                        CSV.FREntry(AD.adDeptStack.Peek());
+                    }
                     break;
             }
         }
