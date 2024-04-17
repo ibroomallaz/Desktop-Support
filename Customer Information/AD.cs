@@ -174,6 +174,10 @@ class AD
                         }
                     }
                 }
+                if (userPrincipal == null)
+                {
+                    Console.WriteLine($"NetID {netid} does not exist.");
+                }
             }
         }
         catch (Exception ex)
