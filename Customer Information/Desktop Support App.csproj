@@ -9,7 +9,7 @@
     <Title>UITS Desktop Support App</Title>
     <Description>UITS Desktop Support App</Description>
     <ApplicationIcon>img\PXL_20231117_134624953.ico</ApplicationIcon>
-    <Version>2.2.1</Version>
+    <Version>2.2.2</Version>
     <UseWindowsForms>True</UseWindowsForms>
     <PackageIcon>PXL_20231117_134624953.jpg</PackageIcon>
     <SignAssembly>False</SignAssembly>
