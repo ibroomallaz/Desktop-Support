@@ -9,6 +9,21 @@ class CSV
  
     public static void GetCSV()
     {
+        //check for C:\temp\ and create folder if it doesn't exist
+        string path = @"c:\temp\";
+        try
+        {
+            if (Directory.Exists(path))
+            {
+                return;
+            }
+            DirectoryInfo dir = Directory.CreateDirectory(path);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("The process failed: {0}", e.ToString());
+        }
+
         //Obsolete method using webClient, but simple code
         WebClient webClient = new WebClient();
         webClient.DownloadFile("https://arizona.box.com/shared/static/27qy9jc64b0cpz4l6zzeu8pnri65y4d0.csv", @"c:\temp\ci.csv");
