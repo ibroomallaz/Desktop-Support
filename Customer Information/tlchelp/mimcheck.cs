@@ -120,7 +120,7 @@ public class MIMCheck
                         bool expectedDeptL2 = true;
                         while (expectedDeptL2)
                         {
-                            Console.WriteLine("Please enter user NetIDs:");
+                            Console.WriteLine("Please enter user NetIDs (up to 20 separated by commas):");
                             string netid = Console.ReadLine().Trim().ToLower();
                             switch (netid)
                             {
