@@ -27,11 +27,7 @@ public class Version
             {
                 if (BetaCheck() == false)
                 {
-                    var result = MessageBox.Show($"Please update to Version {checkedVersion}. Current version: {version}.", "Desktop Support App: Alert", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
-                    if (result == DialogResult.OK)
-                    {
-                        Program.OpenURL("https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/ProjectHome.aspx");
-                    }
+                    MessageBox.Show($"Please update to Version {checkedVersion}. Current version: {version}.", "Desktop Support App: Alert", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
             }
         }
@@ -41,5 +37,6 @@ public class Version
             Console.WriteLine("Message :{0} ", e.Message);
         }
     }
+   
 }
    
