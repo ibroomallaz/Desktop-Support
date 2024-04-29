@@ -13,11 +13,10 @@ class CSV
         string path = Environment.GetEnvironmentVariable("LocalAppData") + @"\Desktop_Support_App\";
         try
         {
-            if (Directory.Exists(path))
+            if (!Directory.Exists(path))
             {
-                return;
+                DirectoryInfo dir = Directory.CreateDirectory(path);
             }
-            DirectoryInfo dir = Directory.CreateDirectory(path);
         }
         catch (Exception e)
         {
