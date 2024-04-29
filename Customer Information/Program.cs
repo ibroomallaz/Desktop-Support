@@ -98,6 +98,19 @@ class Program
                     AD.ADUser(userMenuText);
                     Console.WriteLine();
                     break;
+                case "-reload":
+                    try
+                    {
+                        CSV.GetCSV();
+                        CSV._entries.Clear();
+                        CSV.CSVMain();
+                        Console.WriteLine("Reloaded data.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error: {ex}. Data not reloaded properly. Please restart app.");
+                    }
+                    break;
             }
         }
     }
