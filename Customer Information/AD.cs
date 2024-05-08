@@ -5,7 +5,8 @@ using static Colors.Net.StringStaticMethods;
 using Colors.Net.StringColorExtensions;
 class AD
 {
-
+    //#fr
+    public static Stack<string> adDeptStack = new Stack<string>();
     public static void ADUser(string netid)
     {
         try
@@ -34,6 +35,8 @@ class AD
                     {
                         ColoredConsole.WriteLine($"{Cyan("Department:")} {department.Red()}");
                         CSV.PrintDepartmentInfo(department.Remove(4));
+                        //#fr
+                        adDeptStack.Push(department.Remove(4));
                     }
                     if (department == null)
                     {

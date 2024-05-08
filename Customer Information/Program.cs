@@ -94,6 +94,7 @@ class Program
                 case "":
                     break;
                 default:
+                    AD.adDeptStack.Clear(); //#fr
                     Console.WriteLine();
                     AD.ADUser(userMenuText);
                     Console.WriteLine();
@@ -109,6 +110,13 @@ class Program
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Error: {ex}. Data not reloaded properly. Please restart app.");
+                    }
+                    break;
+//#fr
+                case "-fr":
+                    if (AD.adDeptStack.Peek() != null)
+                    {
+                        CSV.FREntry(AD.adDeptStack.Peek());
                     }
                     break;
             }

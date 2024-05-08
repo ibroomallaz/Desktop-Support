@@ -6,7 +6,7 @@ class CSV
 {
     public static List<Dictionary<string, string>> _entries;
     //Download CSV from box
- 
+
     public static void GetCSV()
     {
         //check for %localappdata%\Desktop_Support_App and create folder if it doesn't exist
@@ -101,6 +101,32 @@ class CSV
         {
             if (entry["SN"] == "Y")
                 ColoredConsole.WriteLine($"{Cyan("Service Now Team:")} {entry["sn-team"].Red()}");
+        }
+    }
+    //#fr
+    public static void FREntry(string department)
+    {
+        bool found = false;
+        foreach (var entry in _entries)
+        {
+            // Check if the department matches
+            if (entry.ContainsKey("department") && entry["department"] == department)
+            {
+                if (entry.ContainsKey("fr") && entry["fr"] != null)
+                {
+                    Program.OpenURL(entry["fr"]);
+                    found = true;
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine($"No File repository for {department}");
+                }
+            }
+        }
+        if (!found)
+        {
+            Console.WriteLine("No entry found for the specified department.");
         }
     }
 }
