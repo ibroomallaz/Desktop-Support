@@ -11,7 +11,7 @@ class CSV
     {
         //Obsolete method using webClient, but simple code
         WebClient webClient = new WebClient();
-        webClient.DownloadFile("https://arizona.box.com/shared/static/27qy9jc64b0cpz4l6zzeu8pnri65y4d0.csv", @"c:\temp\ci.csv");
+        webClient.DownloadFile("https://arizona.box.com/shared/static/osspbuwb9bgqknom1ts1uk2c173xgn5k.csv", @"c:\temp\ci.csv");
     }
     public static void CSVMain()
     {
@@ -102,6 +102,7 @@ class CSV
                 {
                     Program.OpenURL(entry["fr"]);
                     found = true;
+                    break;
                 }
                 else
                 {
@@ -109,7 +110,6 @@ class CSV
                 }
             }
         }
-
         if (!found)
         {
             Console.WriteLine("No entry found for the specified department.");

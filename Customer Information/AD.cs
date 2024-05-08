@@ -36,7 +36,7 @@ class AD
                         ColoredConsole.WriteLine($"{Cyan("Department:")} {department.Red()}");
                         CSV.PrintDepartmentInfo(department.Remove(4));
                         //#fr
-                        adDeptStack.Push(department);
+                        adDeptStack.Push(department.Remove(4));
                     }
                     if (department == null)
                     {
