@@ -13,7 +13,7 @@
     <PackageIcon>PXL_20231117_134624953.jpg</PackageIcon>
     <SignAssembly>False</SignAssembly>
     <RepositoryUrl>https://github.com/ibroomallaz/Desktop-Support</RepositoryUrl>
-    <Version>2.2.3</Version>
+    <Version>2.3.0</Version>
 	  <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
