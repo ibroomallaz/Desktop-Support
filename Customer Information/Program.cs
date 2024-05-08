@@ -94,7 +94,7 @@ class Program
                 case "":
                     break;
                 default:
-                    AD.adDeptStack.Clear(); //#fr
+                    AD.adDeptStack.Clear(); //Clear stack of File repo functionality
                     Console.WriteLine();
                     AD.ADUser(userMenuText);
                     Console.WriteLine();
@@ -112,7 +112,6 @@ class Program
                         Console.WriteLine($"Error: {ex}. Data not reloaded properly. Please restart app.");
                     }
                     break;
-//#fr
                 case "-fr":
                     if (AD.adDeptStack.Peek() != null)
                     {

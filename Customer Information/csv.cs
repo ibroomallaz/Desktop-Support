@@ -73,9 +73,10 @@ class CSV
             // Check if the department matches
             if (entry.ContainsKey("department") && entry["department"] == department)
             {
-                PrintEntryField(entry, "ABR", "ABR");
+                PrintABRStatus(entry);
                 PrintEntryField(entry, "team", "Team");
                 PrintServiceNowTeam(entry);
+                PrintFileRepoStatus(entry);
                 Console.WriteLine();
                 found = true;
             }
@@ -103,7 +104,25 @@ class CSV
                 ColoredConsole.WriteLine($"{Cyan("Service Now Team:")} {entry["sn-team"].Red()}");
         }
     }
-    //#fr
+    static void PrintABRStatus(Dictionary<string, string> entry)
+    {
+        if (entry.ContainsKey("ABR") && entry.ContainsKey("ABR"))
+        {
+            if (entry["ABR"] == "YES")
+                ColoredConsole.WriteLine($"{Cyan("ABR:")} {Green("Yes")}");
+            else
+                ColoredConsole.WriteLine($"{Cyan("ABR:")} {Red("No")}");
+        }
+    }
+    static void PrintFileRepoStatus(Dictionary<string, string> entry)
+    {
+        if (entry.ContainsKey("fr") && entry.ContainsKey("fr"))
+        {
+            if (entry["fr"] == "Y")
+                ColoredConsole.WriteLine($"{Cyan("File Repo:")} {Green("Yes")}");
+        }
+    }
+ 
     public static void FREntry(string department)
     {
         bool found = false;
@@ -112,21 +131,18 @@ class CSV
             // Check if the department matches
             if (entry.ContainsKey("department") && entry["department"] == department)
             {
-                if (entry.ContainsKey("fr") && entry["fr"] != null)
+                if (entry.ContainsKey("fr") && entry["fr"] == "Y")
                 {
-                    Program.OpenURL(entry["fr"]);
+                    Program.OpenURL(entry["frepoloc"]);
                     found = true;
                     break;
-                }
-                else
-                {
-                    Console.WriteLine($"No File repository for {department}");
                 }
             }
         }
         if (!found)
         {
-            Console.WriteLine("No entry found for the specified department.");
+            Console.WriteLine($"No File repository for {department}");
+            Console.WriteLine();
         }
     }
 }

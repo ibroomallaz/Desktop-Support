@@ -5,7 +5,7 @@ using static Colors.Net.StringStaticMethods;
 using Colors.Net.StringColorExtensions;
 class AD
 {
-    //#fr
+    //Stack used for fr functionality
     public static Stack<string> adDeptStack = new Stack<string>();
     public static void ADUser(string netid)
     {
