@@ -8,17 +8,22 @@
     <Nullable>enable</Nullable>
     <Title>UITS Desktop Support App</Title>
     <Description>UITS Desktop Support App</Description>
-    <ApplicationIcon>img\PXL_20231117_134624953.ico</ApplicationIcon>
     <UseWindowsForms>True</UseWindowsForms>
-    <PackageIcon>PXL_20231117_134624953.jpg</PackageIcon>
     <SignAssembly>False</SignAssembly>
     <RepositoryUrl>https://github.com/ibroomallaz/Desktop-Support</RepositoryUrl>
     <Version>2.3.0</Version>
 	  <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+	  <ApplicationIcon>img\PXL_20240504_214657726.ico</ApplicationIcon>
+	  <PackageIcon>PXL_20240504_214657726.jpg</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="img\PXL_20231117_134624953.ico" />
+    <None Remove="img\PXL_20231117_134624953.ico" />
+    <None Remove="img\PXL_20231117_134624953.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="img\PXL_20240504_214657726.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,7 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="img\PXL_20231117_134624953.jpg">
+    <None Update="img\PXL_20240504_214657726.jpg">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

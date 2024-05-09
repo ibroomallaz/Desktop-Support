@@ -16,6 +16,7 @@ class AD
                 UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
                 if (userPrincipal != null)
                 {
+                    adDeptStack.Clear(); //Clear stack of File repo functionality; Placed under ADUser function to account for typos
                     DirectoryEntry dirEntry = (DirectoryEntry)userPrincipal.GetUnderlyingObject();
                     string department = dirEntry.Properties["Department"].Value.ToString();
                     var displayName = userPrincipal.DisplayName.DarkYellow();

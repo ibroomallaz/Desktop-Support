@@ -94,7 +94,6 @@ class Program
                 case "":
                     break;
                 default:
-                    AD.adDeptStack.Clear(); //Clear stack of File repo functionality
                     Console.WriteLine();
                     AD.ADUser(userMenuText);
                     Console.WriteLine();
