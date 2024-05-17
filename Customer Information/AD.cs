@@ -20,8 +20,9 @@ class AD
                     DirectoryEntry dirEntry = (DirectoryEntry)userPrincipal.GetUnderlyingObject();
                     string department = dirEntry.Properties["Department"].Value.ToString();
                     var displayName = userPrincipal.DisplayName.DarkYellow();
+                    string eduAffiliation = dirEntry.Properties["eduPersonPrimaryAffiliation"].Value.ToString();
                     ColoredConsole.WriteLine($"{displayName}");
-
+                    ColoredConsole.WriteLine($"{Cyan("Affiliation:")} {eduAffiliation.Red()}");
 
 
                     foreach (GroupPrincipal group in userPrincipal.GetGroups())
