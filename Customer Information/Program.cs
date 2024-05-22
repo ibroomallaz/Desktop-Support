@@ -4,6 +4,7 @@ using static Colors.Net.StringStaticMethods;
 using System.Diagnostics;
 using System.Security.Policy;
 using System.DirectoryServices.AccountManagement;
+using Microsoft.VisualBasic.ApplicationServices;
 class Program
 {
     public static string version = Application.ProductVersion;
@@ -116,6 +117,10 @@ class Program
                     {
                         CSV.FREntry(AD.adDeptStack.Peek());
                     }
+                    break;
+                case "-cl":
+                    OpenURL("https://emailarizona.sharepoint.com/:x:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/Customer%20List%20by%20Core%20Support%20Team.xlsx?d=w086768426f3745cda79987cc374d1ed5&csf=1&web=1&e=SbhIsJ");
+                    Console.WriteLine("Opening Customer List by Core Support Team");
                     break;
             }
         }
