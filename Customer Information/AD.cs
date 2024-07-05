@@ -7,6 +7,7 @@ class AD
 {
     //Stack used for fr functionality
     public static Stack<string> adDeptStack = new Stack<string>();
+    //TODO: further testing for speed on VPN. Connect to specific DCs etc.
     public static void ADUser(string netid)
     {
         try
@@ -53,7 +54,7 @@ class AD
         }
         catch (Exception ex)
         {
-            //Console.WriteLine($"Error: {ex.Message}");   disabling for now
+            Console.WriteLine($"Error: {ex.Message}");
         }
     }
 

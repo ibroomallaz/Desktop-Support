@@ -74,7 +74,6 @@ class CSV
             if (entry.ContainsKey("department") && entry["department"] == department)
             {
                 PrintABRStatus(entry);
-                PrintEntryField(entry, "team", "Team");
                 PrintServiceNowTeam(entry);
                 PrintFileRepoStatus(entry);
                 Console.WriteLine();
@@ -87,7 +86,8 @@ class CSV
             Console.WriteLine("No entries found for the specified department.");
         }
     }
-    //printing method
+    //generic printing method
+    //TODO: look at combining print methods later for better efficiency
     static void PrintEntryField(Dictionary<string, string> entry, string fieldName, string displayName)
     {
         if (entry.ContainsKey(fieldName))
@@ -95,13 +95,15 @@ class CSV
         else
             Console.WriteLine($"{displayName}: Not available");
     }
-    //combine with PrintDepartmentInfo() later
+    //check for SN entry, if not print out marked entry for "team"
     static void PrintServiceNowTeam(Dictionary<string, string> entry)
     {
         if (entry.ContainsKey("SN") && entry.ContainsKey("sn-team"))
         {
             if (entry["SN"] == "Y")
                 ColoredConsole.WriteLine($"{Cyan("Service Now Team:")} {entry["sn-team"].Red()}");
+            else
+                PrintEntryField(entry, "team", "Team");
         }
     }
     static void PrintABRStatus(Dictionary<string, string> entry)
