@@ -8,7 +8,7 @@ using Colors.Net;
 using Colors.Net.StringColorExtensions;
 using static Colors.Net.StringStaticMethods;
 
-public class TLCHelp
+public class DSTools
 
 {
    

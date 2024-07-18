@@ -12,7 +12,7 @@ class AD
     {
         try
         {
-            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain))
+            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain,VPNMode.Domain()))
             {
                 UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
                 if (userPrincipal != null)

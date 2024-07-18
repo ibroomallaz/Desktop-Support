@@ -32,7 +32,7 @@ public class MacOnboard
                     break;
                 case "back":
                     macOnboardMenu = false;
-                    TLCHelp.OnboardMenu();
+                    DSTools.OnboardMenu();
                     macMenuStack.Clear();
                     break;
                 case "exit":

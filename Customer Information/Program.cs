@@ -23,12 +23,14 @@ class Program
         bool showMenu = true;
         while (showMenu)
         {
+            //TODO: Edit menu for VPNMode
             Console.WriteLine("Choose an option:");
             ColoredConsole.WriteLine($"({Green("1")}) User Info:");
             ColoredConsole.WriteLine($"({DarkYellow("2")}) Computer Info:");
             ColoredConsole.WriteLine($"({Cyan("3")}) About:");
-            ColoredConsole.WriteLine($"({Magenta("4")}) TLC Help:");
+            ColoredConsole.WriteLine($"({Magenta("4")}) Desktop Support Tools:");
             ColoredConsole.WriteLine($"({DarkRed("5")}) Quit");
+ //           Console.WriteLine("6 for VPN mode");
             Console.Write("\r\nSelect an option: ");
 
             switch (Console.ReadLine().Trim().ToLower())
@@ -52,13 +54,28 @@ class Program
                     showMenu = false;
                     break;
                 case "4": showMenu = false;
-                    TLCHelp.TLCHelpMenu();
+                    DSTools.TLCHelpMenu();
                     break;
                 case "clear":
                     Console.Clear();
                     break;
                 default:
                     break;
+  /*              case "vpn":
+                case "6":
+                    if (VPNMode.vpn)
+                    { VPNMode.vpn = false;
+                        Console.Clear();
+                        Console.WriteLine("VPN Mode disabled.");
+                        break;
+                    }
+                    if (!VPNMode.vpn) { VPNMode.vpn = true;
+                        Console.Clear();
+                        Console.WriteLine("VPN Mode Enabled");
+                        break;
+                     }
+                    break;
+ */
             }
         }
     }

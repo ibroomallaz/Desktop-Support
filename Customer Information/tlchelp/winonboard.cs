@@ -32,7 +32,7 @@ public class WinOnboard
                     break;
                 case "back":
                     winOnboardMenu = false;
-                    TLCHelp.OnboardMenu();
+                    DSTools.OnboardMenu();
                     menuStack.Clear(); break;
                 case "exit":
                     winOnboardMenu = false;
@@ -73,7 +73,7 @@ public class WinOnboard
                     ColoredConsole.WriteLine($"Do {Red("not")} onboard the computer.");
                     Console.ReadLine();
                     winOnboardMenuN = false;
-                    TLCHelp.TLCHelpMenu();
+                    DSTools.TLCHelpMenu();
                     break;
                 case "back":
                     winOnboardMenuN = false;
