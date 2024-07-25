@@ -73,7 +73,7 @@ public class WinOnboard
                     ColoredConsole.WriteLine($"Do {Red("not")} onboard the computer.");
                     Console.ReadLine();
                     winOnboardMenuN = false;
-                    DSTools.TLCHelpMenu();
+                    DSTools.DSToolsMenu();
                     break;
                 case "back":
                     winOnboardMenuN = false;

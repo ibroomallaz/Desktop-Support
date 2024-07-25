@@ -12,14 +12,14 @@ public class DSTools
 
 {
    
-    public static void TLCHelpMenu()
+    public static void DSToolsMenu()
     {
         bool tlcMenu = true;
         Console.Clear();
         while (tlcMenu)
         {
             //more to be added later if thought of
-            Console.WriteLine("TLC Help Menu:");
+            Console.WriteLine("Desktop Support Tools Menu:");
             Console.WriteLine("Select option:");
             ColoredConsole.WriteLine($"({Green("1")}) Computer Onboarding");
             ColoredConsole.WriteLine($"({DarkYellow("2")}) MIM Group Check");
@@ -80,7 +80,7 @@ public class DSTools
                     break;
                 case "back":
                     onboardMenu = false;
-                    TLCHelpMenu();
+                    DSToolsMenu();
                     break;
                 case "exit":
                     onboardMenu = false;

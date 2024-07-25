@@ -30,7 +30,7 @@ class Program
             ColoredConsole.WriteLine($"({Cyan("3")}) About:");
             ColoredConsole.WriteLine($"({Magenta("4")}) Desktop Support Tools:");
             ColoredConsole.WriteLine($"({DarkRed("5")}) Quit");
- //           Console.WriteLine("6 for VPN mode");
+ //           Console.WriteLine("6 for VPN mode");              Commented out while still testing
             Console.Write("\r\nSelect an option: ");
 
             switch (Console.ReadLine().Trim().ToLower())
@@ -54,7 +54,7 @@ class Program
                     showMenu = false;
                     break;
                 case "4": showMenu = false;
-                    DSTools.TLCHelpMenu();
+                    DSTools.DSToolsMenu();
                     break;
                 case "clear":
                     Console.Clear();
@@ -62,20 +62,20 @@ class Program
                 default:
                     break;
   /*              case "vpn":
-                case "6":
+              case "6":
                     if (VPNMode.vpn)
                     { VPNMode.vpn = false;
                         Console.Clear();
-                        Console.WriteLine("VPN Mode disabled.");
+                        Console.WriteLine("VPN Mode disabled. (Experimental)");
                         break;
                     }
                     if (!VPNMode.vpn) { VPNMode.vpn = true;
                         Console.Clear();
-                        Console.WriteLine("VPN Mode Enabled");
+                        Console.WriteLine("VPN Mode Enabled (Experimental)");
                         break;
                      }
-                    break;
- */
+                    break; */
+ 
             }
         }
     }
