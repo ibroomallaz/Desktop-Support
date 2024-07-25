@@ -61,7 +61,8 @@ class Program
                     break;
                 default:
                     break;
-  /*              case "vpn":
+  /*   Awaiting further testing, commenting out for now to disable for production
+   *   case "vpn":
               case "6":
                     if (VPNMode.vpn)
                     { VPNMode.vpn = false;

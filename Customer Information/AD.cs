@@ -12,7 +12,7 @@ class AD
     {
         try
         {
-            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain,VPNMode.Domain()))
+            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain)) //removed vpn-mode for now, reinstate with (*, VPN.Domain()) inside Principal Context
             {
                 UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
                 if (userPrincipal != null)
