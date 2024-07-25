@@ -74,7 +74,7 @@ public class MIMCheck
                         groupMembers = AD.ADGroupMembers(dept);
                         List<string> groupMembersSorted = new List<string>();
                         groupMembersSorted = groupMembers;
-                        Console.WriteLine("Total group members: " +groupMembers.Count);
+                        Console.WriteLine("Total group members: " + groupMembers.Count);
                         foreach (var member in groupMembers)
                         {
                             Console.WriteLine(member);

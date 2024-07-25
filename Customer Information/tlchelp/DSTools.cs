@@ -23,6 +23,7 @@ public class DSTools
             Console.WriteLine("Select option:");
             ColoredConsole.WriteLine($"({Green("1")}) Computer Onboarding");
             ColoredConsole.WriteLine($"({DarkYellow("2")}) MIM Group Check");
+            ColoredConsole.WriteLine($"({Cyan("3")}) Open Customer List by Core Support Team");
             ColoredConsole.WriteLine($"At any time: type '{Red("exit")}' to go back to main menu");
             string tlcMenuAnswer = Console.ReadLine().ToLower().Trim();
 
@@ -47,6 +48,12 @@ public class DSTools
                     break;
                 case "clear":
                     Console.Clear();
+                    break;
+                case "3":
+                case "-cl":
+                    Program.OpenURL("https://emailarizona.sharepoint.com/:x:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/Customer%20List%20by%20Core%20Support%20Team.xlsx?d=w086768426f3745cda79987cc374d1ed5&csf=1&web=1&e=SbhIsJ");
+                    Console.Clear();
+                    ColoredConsole.WriteLine($"{Red("Opening")} Customer List by Core Support Team");
                     break;
             }
 
