@@ -39,6 +39,7 @@ public class DSTools
                 case "back":
                 case "exit":
                     tlcMenu = false;
+                    Console.Clear();
                     Program.Menu();
                     break;
                 default:
@@ -84,6 +85,7 @@ public class DSTools
                     break;
                 case "exit":
                     onboardMenu = false;
+                    Console.Clear();
                     Program.Menu();
                     break;
                 default:
