@@ -11,7 +11,7 @@ class Program
     public static void Main()
     {
         //Download CSV and load information into memory
-      //  CSV.GetCSV();
+        CSV.GetCSV();
         CSV.CSVMain();
         //Run Version check and initial processes
         Version.VersionCheck(version);
