@@ -11,7 +11,7 @@ class Program
     public static void Main()
     {
         //Download CSV and load information into memory
-        CSV.GetCSV();
+      //  CSV.GetCSV();
         CSV.CSVMain();
         //Run Version check and initial processes
         Version.VersionCheck(version);
@@ -30,7 +30,6 @@ class Program
             ColoredConsole.WriteLine($"({Cyan("3")}) About:");
             ColoredConsole.WriteLine($"({Magenta("4")}) Desktop Support Tools:");
             ColoredConsole.WriteLine($"({DarkRed("5")}) Quit");
- //           Console.WriteLine("6 for VPN mode");              Commented out while still testing
             Console.Write("\r\nSelect an option: ");
 
             switch (Console.ReadLine().Trim().ToLower())
@@ -61,21 +60,7 @@ class Program
                     break;
                 default:
                     break;
-  /*   Awaiting further testing, commenting out for now to disable for production
-   *   case "vpn":
-              case "6":
-                    if (VPNMode.vpn)
-                    { VPNMode.vpn = false;
-                        Console.Clear();
-                        Console.WriteLine("VPN Mode disabled. (Experimental)");
-                        break;
-                    }
-                    if (!VPNMode.vpn) { VPNMode.vpn = true;
-                        Console.Clear();
-                        Console.WriteLine("VPN Mode Enabled (Experimental)");
-                        break;
-                     }
-                    break; */
+
  
             }
         }

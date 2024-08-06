@@ -99,6 +99,7 @@ public class MIMCheck
             {
                 case "back":
                     expectedMIMMenu = false;
+                    Console.Clear();
                     MIMCheckMenu();
                     break;
                 case "exit":
@@ -181,6 +182,7 @@ public class MIMCheck
             {
                 case "back":
                     currentMIMMenu = false;
+                    Console.Clear();
                     MIMCheckMenu();
                     break;
                 case "exit":

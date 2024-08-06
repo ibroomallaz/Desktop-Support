@@ -5,8 +5,8 @@ using Colors.Net.StringColorExtensions;
 class CSV
 {
     public static List<Dictionary<string, string>> _entries;
-    //Download CSV from box
 
+    //Download CSV from box
     public static void GetCSV()
     {
         //check for %localappdata%\Desktop_Support_App and create folder if it doesn't exist
@@ -32,10 +32,9 @@ class CSV
         string filePath = Environment.GetEnvironmentVariable("LocalAppData") + @"\Desktop_Support_App\ci.csv";
         
         _entries = ReadCSV(filePath);
-
     }
     // Read CSV and store entries
-    public static List<Dictionary<string, string>> ReadCSV(string filePath)
+    static List<Dictionary<string, string>> ReadCSV(string filePath)
     {
         List<Dictionary<string, string>> entries = new List<Dictionary<string, string>>();
 
@@ -64,7 +63,7 @@ class CSV
 
         return entries;
     }
-    //check csv for department and print valid info
+    //Main printing function from CSV data
     public static void PrintDepartmentInfo(string department)
     {
         bool found = false;
@@ -75,7 +74,12 @@ class CSV
             {
                 PrintABRStatus(entry);
                 PrintServiceNowTeam(entry);
+                if (SplitTeam(entry))
+                {
+                    PrintServiceNowTeamExtra(entry);
+                }
                 PrintFileRepoStatus(entry);
+                PrintNotes(entry);
                 Console.WriteLine();
                 found = true;
             }
@@ -87,7 +91,6 @@ class CSV
         }
     }
     //generic printing method
-    //TODO: look at combining print methods later for better efficiency
     static void PrintEntryField(Dictionary<string, string> entry, string fieldName, string displayName)
     {
         if (entry.ContainsKey(fieldName))
@@ -95,20 +98,54 @@ class CSV
         else
             Console.WriteLine($"{displayName}: Not available");
     }
-    //check for SN entry, if not print out marked entry for "team"
-    static void PrintServiceNowTeam(Dictionary<string, string> entry)
+    //Check if for multiple team support
+    static bool SplitTeam(Dictionary<string, string> entry)
     {
-        if (entry.ContainsKey("SN") && entry.ContainsKey("sn-team"))
+        if (entry.ContainsKey("team.split") && entry["team.split"] != "N")
         {
-            if (entry["SN"] == "Y")
-                ColoredConsole.WriteLine($"{Cyan("Service Now Team:")} {entry["sn-team"].Red()}");
-            else
-                PrintEntryField(entry, "team", "Team");
+            return true;
         }
+        return false;
+    }
+
+        //check for SN entry, if not print out marked entry for "team"
+        static void PrintServiceNowTeam(Dictionary<string, string> entry)
+    {
+
+        if (entry.ContainsKey("SN.1") && entry.ContainsKey("SNTeam.1"))
+        {
+          if (entry["SN.1"] == "Y")
+            { 
+            ColoredConsole.WriteLine($"{Cyan("Service Now Team:")} {entry["SNTeam.1"].Red()}");
+            }
+        else
+        {
+            PrintEntryField(entry, "team.1", "Primary Support Team");
+        }
+        }
+    }
+    //Check for teams beyond first team, if exists loop through and finish printing extra teams
+    static void PrintServiceNowTeamExtra(Dictionary<string, string> entry)
+    {
+
+        Int32.TryParse(entry["team.split"], out int num);
+        for (int i = 2; i <= num; i++)
+            {
+            if (entry.ContainsKey($"SN.{i}") && entry.ContainsKey($"SNTeam.{i}"))
+            {
+                ColoredConsole.WriteLine($"{Cyan("Service Now Team:")} {entry[$"SNTeam.{i}"].Red()}");
+            }
+            else
+            {
+                PrintEntryField(entry, $"team.{i}", "Team");
+            }
+        }        
+            
     }
     static void PrintABRStatus(Dictionary<string, string> entry)
     {
-        if (entry.ContainsKey("ABR") && entry.ContainsKey("ABR"))
+
+        if (entry.ContainsKey("ABR"))
         {
             if (entry["ABR"] == "YES")
                 ColoredConsole.WriteLine($"{Cyan("ABR:")} {Green("Yes")}");
@@ -118,13 +155,21 @@ class CSV
     }
     static void PrintFileRepoStatus(Dictionary<string, string> entry)
     {
-        if (entry.ContainsKey("fr") && entry.ContainsKey("fr"))
+        if (entry.ContainsKey("fr") && entry.ContainsKey("frepoloc"))
         {
             if (entry["fr"] == "Y")
                 ColoredConsole.WriteLine($"{Cyan("File Repo:")} {Green("Yes")}");
         }
     }
- 
+
+    static void PrintNotes(Dictionary<string, string> entry)
+    {
+        if (entry.ContainsKey("notes") && entry["notes"] != "N")
+        {
+                ColoredConsole.WriteLine($"{Cyan("Notes: ")} {entry["notes"].Red()}");
+        }
+    }
+
     public static void FREntry(string department)
     {
         bool found = false;
@@ -147,4 +192,5 @@ class CSV
             Console.WriteLine();
         }
     }
+    
 }

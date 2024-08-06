@@ -12,7 +12,7 @@ class AD
     {
         try
         {
-            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain)) //removed vpn-mode for now, reinstate with (*, VPN.Domain()) inside Principal Context
+            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain))
             {
                 UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
                 if (userPrincipal != null)
@@ -25,7 +25,7 @@ class AD
                     ColoredConsole.WriteLine($"{displayName}");
                     ColoredConsole.WriteLine($"{Cyan("Affiliation:")} {eduAffiliation.Red()}");
 
-
+                    //TODO Look at efficiency of the statement
                     foreach (GroupPrincipal group in userPrincipal.GetGroups())
                     {
                         if (group.Name.Contains("MIM-DivisionRollup"))
