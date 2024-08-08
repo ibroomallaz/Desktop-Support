@@ -1,11 +1,12 @@
 using System;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 public class Version
 {
     static readonly HttpClient client = new HttpClient();
    static bool BetaCheck()
     {
-        if (Program.version.ToLower().Contains("beta") || Program.version.ToLower().Contains("alpha"))
+        if (Application.ProductVersion.ToLower().Contains("beta") || Application.ProductVersion.ToLower().Contains("alpha"))
         {
             return true;
         }
@@ -14,7 +15,7 @@ public class Version
             return false;
         }
     }
-    public static async Task VersionCheck(string version)
+    public static async Task VersionCheck()
     {
 
         try
@@ -23,9 +24,9 @@ public class Version
             response.EnsureSuccessStatusCode();
             string responseBody = await response.Content.ReadAsStringAsync();
             string checkedVersion = responseBody;
-            if (checkedVersion != version & BetaCheck() == false)
+            if (checkedVersion != Application.ProductVersion & BetaCheck() == false)
             {
-                    var result = MessageBox.Show($"Please update to Version {checkedVersion}. Current version: {version}.", "Desktop Support App: Alert", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
+                    var result = MessageBox.Show($"Please update to Version {checkedVersion}. Current version: {Application.ProductVersion}.", "Desktop Support App: Alert", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
                     if (result == DialogResult.OK)
                     {
                         Program.OpenURL("https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/ProjectHome.aspx");

@@ -7,15 +7,14 @@ using System.DirectoryServices.AccountManagement;
 using Microsoft.VisualBasic.ApplicationServices;
 class Program
 {
-    public static string version = Application.ProductVersion;
     public static void Main()
     {
         //Download CSV and load information into memory
         CSV.GetCSV();
         CSV.CSVMain();
         //Run Version check and initial processes
-        Version.VersionCheck(version);
-        ColoredConsole.WriteLine($"UITS Desktop Support App ({Red("ver.")} {version.Cyan()})");
+        Version.VersionCheck();
+        ColoredConsole.WriteLine($"UITS Desktop Support App ({Red("ver.")} {Application.ProductVersion.Cyan()})");
         Menu();
     }
     public static void Menu()
