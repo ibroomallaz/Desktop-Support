@@ -23,16 +23,14 @@ public class Version
             response.EnsureSuccessStatusCode();
             string responseBody = await response.Content.ReadAsStringAsync();
             string checkedVersion = responseBody;
-            if (checkedVersion != version)
+            if (checkedVersion != version & BetaCheck() == false)
             {
-                if (BetaCheck() == false)
-                {
                     var result = MessageBox.Show($"Please update to Version {checkedVersion}. Current version: {version}.", "Desktop Support App: Alert", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
                     if (result == DialogResult.OK)
                     {
                         Program.OpenURL("https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/ProjectHome.aspx");
                     }
-                }
+                
             }
         }
         catch (HttpRequestException e)

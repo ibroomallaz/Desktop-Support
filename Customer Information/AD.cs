@@ -71,7 +71,6 @@ class AD
             DirectorySearcher searcher = new DirectorySearcher(entry);
             searcher.Filter = searchFilter;
             SearchResult result = searcher.FindOne();
-            //canonical name may be easier to read
             if (result != null)
             {
                 DirectoryEntry computer = result.GetDirectoryEntry();
@@ -95,7 +94,6 @@ class AD
                     ColoredConsole.WriteLine($"{Cyan("Description:")} " + description.Red());
                 }
 
-
             }
             else
             {
@@ -107,17 +105,7 @@ class AD
             Console.WriteLine($"Error occurred: {ex.Message}");
         }
     }
-    static void ADUserGroupFilter(string netid, string groupname)
-    {
-        string searchfilter = $"(&(objectClass=user)(cn={netid}))(&(objectClass=group)(cn={groupname}))";
-        string domain = "LDAP://DC=bluecat,DC=arizona,DC=edu";
-        DirectoryEntry entry = new DirectoryEntry(domain);
-        DirectorySearcher searcher = new DirectorySearcher(entry);
-        searcher.Filter = searchfilter;
-        SearchResult result = searcher.FindOne();
-        
-        
-    }
+
     public static List<string> ADGroupMembers(string groupName)
     {
         List<string> groupMembers = new List<string>();
