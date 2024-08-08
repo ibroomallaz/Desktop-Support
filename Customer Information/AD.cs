@@ -24,16 +24,19 @@ class AD
                     string eduAffiliation = dirEntry.Properties["eduPersonPrimaryAffiliation"].Value.ToString();
                     ColoredConsole.WriteLine($"{displayName}");
                     ColoredConsole.WriteLine($"{Cyan("Affiliation:")} {eduAffiliation.Red()}");
-
-                    //TODO Look at efficiency of the statement
-                    foreach (GroupPrincipal group in userPrincipal.GetGroups())
+                    //Filter to find specific Division MIM group
+                    using (DirectorySearcher searcher = new DirectorySearcher(AD.ConnectedServer))
                     {
-                        if (group.Name.Contains("MIM-DivisionRollup"))
+                        searcher.Filter = $"(&(objectCategory=group)(member={userPrincipal.DistinguishedName})(cn=*MIM-DivisionRollup*))";
+                        SearchResult result = searcher.FindOne();
+                        if (result != null)
                         {
-                            var division = group.Name.Remove(4).Red();
-                            ColoredConsole.WriteLine($"{Cyan("Division: ")}" + division);
+                            string groupName = result.Properties["cn"][0].ToString();
+                            var division = groupName.Remove(4);
+                            ColoredConsole.WriteLine($"{Cyan("Division: ")}" + division.Red());
                         }
                     }
+               
                     if (department != null)
                     {
                         ColoredConsole.WriteLine($"{Cyan("Department:")} {department.Red()}");
@@ -104,6 +107,17 @@ class AD
             Console.WriteLine($"Error occurred: {ex.Message}");
         }
     }
+    static void ADUserGroupFilter(string netid, string groupname)
+    {
+        string searchfilter = $"(&(objectClass=user)(cn={netid}))(&(objectClass=group)(cn={groupname}))";
+        string domain = "LDAP://DC=bluecat,DC=arizona,DC=edu";
+        DirectoryEntry entry = new DirectoryEntry(domain);
+        DirectorySearcher searcher = new DirectorySearcher(entry);
+        searcher.Filter = searchfilter;
+        SearchResult result = searcher.FindOne();
+        
+        
+    }
     public static List<string> ADGroupMembers(string groupName)
     {
         List<string> groupMembers = new List<string>();
@@ -157,6 +171,7 @@ class AD
             }
         
     }
+
     public static void ADMIMGroupCheck(string netid)
     {
         try
@@ -170,7 +185,7 @@ class AD
                     if (groups != null)
                     {
                         Console.WriteLine("Current MIM Groups:");
-                        foreach (var group in groups)
+                        foreach (var group in groups) //check on filter method instead of foreach loop
                         {
                             if (group.Name.Contains("MIM"))
                             {

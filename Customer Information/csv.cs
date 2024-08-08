@@ -91,6 +91,8 @@ class CSV
         }
     }
     //generic printing method
+    //TODO: Look at creating more unified function to provide printing that can be used for the various fields
+    //Current fields have small quirks that need to be checked, or slight differences with desired printed output
     static void PrintEntryField(Dictionary<string, string> entry, string fieldName, string displayName)
     {
         if (entry.ContainsKey(fieldName))
