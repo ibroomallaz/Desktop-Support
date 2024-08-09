@@ -37,7 +37,7 @@ public class MacOnboard
                     break;
                 case "exit":
                     macOnboardMenu = false;
-                    Menus.Menu();
+                    Menus.MainMenu();
                     macMenuStack.Clear();
                     break;
                 default:
@@ -82,7 +82,7 @@ public class MacOnboard
                 case "exit":
                     macUserDataMenu = false;
                     macMenuStack.Clear();
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 default:
                     break;
@@ -124,7 +124,7 @@ public class MacOnboard
                     break;
                 case "exit": macAdminMenu = false;
                     macMenuStack.Clear();
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 default:
                     break;
@@ -164,7 +164,7 @@ public class MacOnboard
                 case "exit":
                     macUEMAllowMenu = false;
                     macMenuStack.Clear();
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 case "clear":
                     break;
@@ -200,7 +200,7 @@ public class MacOnboard
                 case "exit":
                     macMenuStack.Clear();
                     macReimageMenu = false;
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 case "clear":
                     Console.Clear();
@@ -238,7 +238,7 @@ public class MacOnboard
                 case "exit":
                     macMenuStack.Clear();
                     macMDMEnrollMenu = false;
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 case "clear":
                     Console.Clear();
@@ -275,7 +275,7 @@ public class MacOnboard
                 case "exit":
                     macMenuStack.Clear();
                     macASMAssignMenu = false;
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 case "clear":
                     Console.Clear();
@@ -312,7 +312,7 @@ public class MacOnboard
                 case "exit":
                   macMenuStack.Clear();
                   macSyncWS1Menu= false;
-                Menus.Menu(); break;
+                Menus.MainMenu(); break;
                 case "clear":
                     Console.Clear();
                     break;
@@ -349,7 +349,7 @@ public class MacOnboard
                 case "exit":
                     macDlWS1Menu = false;
                     macMenuStack.Clear();
-                    Menus.Menu(); break;
+                    Menus.MainMenu(); break;
                 case "clear":
                     Console.Clear();
                     break;
@@ -384,7 +384,7 @@ public class MacOnboard
                     macMenuStack.Peek().Invoke(); break;
                 case "exit":
                     macUserSignInMenu = false;
-                    macMenuStack.Clear(); Menus.Menu();
+                    macMenuStack.Clear(); Menus.MainMenu();
                     break;
                 case "clear":
                     Console.Clear();
@@ -420,7 +420,7 @@ public class MacOnboard
                     break;
                 case "exit":
                     macBCSignInMenu = false;
-                    macMenuStack.Clear(); Menus.Menu();
+                    macMenuStack.Clear(); Menus.MainMenu();
                     break;
                 case "clear":
                     Console.Clear();
@@ -456,7 +456,7 @@ public class MacOnboard
                     macMenuStack.Peek().Invoke(); break;
                 case "exit":
                     macUserPWSyncMenu = false;
-                    macMenuStack.Clear(); Menus.Menu();
+                    macMenuStack.Clear(); Menus.MainMenu();
                     break;
                 case "clear":
                     Console.Clear();
@@ -481,7 +481,7 @@ public class MacOnboard
                 default:
                     macUserSetupDone = false;
                     macMenuStack.Clear();
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 case "back":
                     macUserSetupDone = false;
@@ -491,7 +491,7 @@ public class MacOnboard
                 case "exit":
                     macMenuStack.Clear();
                     macUserSetupDone = false;
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 case "help":
                     HTTP.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/TLC%20Customer%20Checklist_2pg.docx");

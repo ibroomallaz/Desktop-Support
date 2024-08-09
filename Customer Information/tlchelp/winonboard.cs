@@ -37,7 +37,7 @@ public class WinOnboard
                 case "exit":
                     winOnboardMenu = false;
                     menuStack.Clear();
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 default:
                     break;
@@ -86,7 +86,7 @@ public class WinOnboard
                     break;
                 case "exit":
                     winOnboardMenuN = false;
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 default:
                     break;
@@ -135,7 +135,7 @@ public class WinOnboard
                     break;
                 case "exit":
                     winMenuBC = false;
-                    Menus.Menu(); break;
+                    Menus.MainMenu(); break;
                 default:
                     break;
                 case "clear":
@@ -181,7 +181,7 @@ public class WinOnboard
                     break;
                 case "exit":
                     winMenuOU = false;
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 default:
                     break;
@@ -210,7 +210,7 @@ public class WinOnboard
                     ColoredConsole.WriteLine($"The computer is onboarded! Complete the Setup Checklist. Press {DarkYellow("enter")} to return to main menu.");
                     Console.ReadLine();
                     winMenuShared = false;
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 case "n": case "no":
                     winMenuShared = false;
@@ -227,7 +227,7 @@ public class WinOnboard
                     break;
                 case "exit":
                     winMenuShared = false;
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 default:
                     break;
@@ -278,7 +278,7 @@ public class WinOnboard
                     break;
                 case "exit":
                     winMenuUserData1=false;
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 default:
                     break;
@@ -325,7 +325,7 @@ public class WinOnboard
                     break;
                 case "exit":
                     winMenuUserData2 = false;
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 default:
                     break;
@@ -373,7 +373,7 @@ public class WinOnboard
                     break;
                 case "exit":
                     winMenuBCRights = false;
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 default:
                     break;
@@ -419,7 +419,7 @@ public class WinOnboard
                     break;
                 case "exit":
                     winMenuHub = false;
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 default:
                     break;
@@ -447,13 +447,13 @@ public class WinOnboard
                     ColoredConsole.WriteLine($"The computer is onboarded! Continue with the setup checklist. \n Press {DarkYellow("Enter")} to go back to main menu.");
                     Console.ReadLine();
                     winMenuVerifyUEM = false;
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 case "n": case "no":
                     ColoredConsole.WriteLine($"Check with SSA to ensure that the serial number is properly registering. \n Once registered the computer is fully onboarded and you can continue with the setup checklist.\n Press {DarkYellow("Enter")} to return to main menu.");
                     Console.ReadLine();
                     winMenuVerifyUEM = false;
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 case "back":
                     winMenuVerifyUEM = false;
@@ -466,7 +466,7 @@ public class WinOnboard
                     break;
                 case "exit":
                     winMenuVerifyUEM=false;
-                    Menus.Menu();
+                    Menus.MainMenu();
                     break;
                 default:
                     break;

@@ -12,6 +12,6 @@ class Program
         //Run Version check and initial processes
         Version.VersionCheck();
         ColoredConsole.WriteLine($"UITS Desktop Support App ({Red("ver.")} {Application.ProductVersion.Cyan()})");
-        Menus.Menu();
+        Menus.MainMenu();
     }
 }

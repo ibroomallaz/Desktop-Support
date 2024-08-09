@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 class Menus
 {
-    public static void Menu()
+    public static void MainMenu()
     {
         bool showMenu = true;
         while (showMenu)
@@ -63,7 +63,7 @@ class Menus
         ColoredConsole.WriteLine($"UITS Desktop Support App \n {Red("Version")} {Application.ProductVersion} \n Developed by Isaac {Cyan("Broomall")} ({Green("i")}{Cyan("broomall")})\n Press {DarkYellow("Enter")} to go back.");
         Console.ReadLine();
         Console.Clear();
-        Menu();
+        MainMenu();
     }
     public static void UserInfoMenu()
     {
@@ -82,7 +82,7 @@ class Menus
                 case "back":
                     Console.Clear();
                     userMenu = false;
-                    Menu();
+                    MainMenu();
                     break;
                 case "exit":
                     userMenu = false;
@@ -137,7 +137,7 @@ class Menus
                 case "back":
                     Console.Clear();
                     computerMenu = false;
-                    Menu();
+                    MainMenu();
                     break;
                 case "exit":
                     computerMenu = false;
