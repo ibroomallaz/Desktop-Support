@@ -30,7 +30,7 @@ public class MIMCheck
                 case "4":
                     mimCheckMenu = false;
                     Console.Clear();
-                    Program.Menu();
+                    Menus.Menu();
                     break;
                 default:
                     break;
@@ -56,7 +56,7 @@ public class MIMCheck
                 case "exit":
                     listMIMMEnu = false;
                     Console.Clear();
-                    Program.Menu();
+                    Menus.Menu();
                     break;
                 case "clear":
                     Console.Clear();
@@ -105,7 +105,7 @@ public class MIMCheck
                 case "exit":
                     expectedMIMMenu = false;
                     Console.Clear();
-                    Program.Menu();
+                    Menus.Menu();
                     break;
                 case "clear":
                     Console.Clear();
@@ -188,7 +188,7 @@ public class MIMCheck
                 case "exit":
                     currentMIMMenu = false;
                     Console.Clear();
-                    Program.Menu();
+                    Menus.Menu();
                     break;
                 case "":
                     break;

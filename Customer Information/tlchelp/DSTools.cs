@@ -41,7 +41,7 @@ public class DSTools
                 case "exit":
                     tlcMenu = false;
                     Console.Clear();
-                    Program.Menu();
+                    Menus.Menu();
                     break;
                 default:
                     tlcMenu = true;
@@ -51,7 +51,7 @@ public class DSTools
                     break;
                 case "3":
                 case "-cl":
-                    Program.OpenURL("https://emailarizona.sharepoint.com/:x:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/Customer%20List%20by%20Core%20Support%20Team.xlsx?d=w086768426f3745cda79987cc374d1ed5&csf=1&web=1&e=SbhIsJ");
+                    HTTP.OpenURL("https://emailarizona.sharepoint.com/:x:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/Customer%20List%20by%20Core%20Support%20Team.xlsx?d=w086768426f3745cda79987cc374d1ed5&csf=1&web=1&e=SbhIsJ");
                     Console.Clear();
                     ColoredConsole.WriteLine($"{Red("Opening")} Customer List by Core Support Team");
                     break;
@@ -93,7 +93,7 @@ public class DSTools
                 case "exit":
                     onboardMenu = false;
                     Console.Clear();
-                    Program.Menu();
+                    Menus.Menu();
                     break;
                 default:
                     break;

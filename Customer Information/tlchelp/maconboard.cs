@@ -37,7 +37,7 @@ public class MacOnboard
                     break;
                 case "exit":
                     macOnboardMenu = false;
-                    Program.Menu();
+                    Menus.Menu();
                     macMenuStack.Clear();
                     break;
                 default:
@@ -46,7 +46,7 @@ public class MacOnboard
                     Console.Clear();
                     break;
                 case "help":
-                    Program.OpenURL("https://support.apple.com/guide/mac-help/sign-in-or-out-of-your-apple-id-on-mac-mchla99dc8da/mac");
+                    HTTP.OpenURL("https://support.apple.com/guide/mac-help/sign-in-or-out-of-your-apple-id-on-mac-mchla99dc8da/mac");
                     macOnboardMenuAnswer = Console.ReadLine().ToLower().Trim();
                     break;
             }
@@ -82,7 +82,7 @@ public class MacOnboard
                 case "exit":
                     macUserDataMenu = false;
                     macMenuStack.Clear();
-                    Program.Menu();
+                    Menus.Menu();
                     break;
                 default:
                     break;
@@ -90,7 +90,7 @@ public class MacOnboard
                     Console.Clear();
                     break;
                 case "help":
-                    Program.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011356");
+                    HTTP.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011356");
                     macUserDataMenuAnswer = Console.ReadLine().ToLower().Trim();
                     break;
             }
@@ -124,7 +124,7 @@ public class MacOnboard
                     break;
                 case "exit": macAdminMenu = false;
                     macMenuStack.Clear();
-                    Program.Menu();
+                    Menus.Menu();
                     break;
                 default:
                     break;
@@ -132,7 +132,7 @@ public class MacOnboard
                     Console.Clear();
                     break;
                 case "help":
-                    Program.OpenURL("https://support.apple.com/guide/mac-help/add-a-user-or-group-mchl3e281fc9/14.0/mac/14.0");
+                    HTTP.OpenURL("https://support.apple.com/guide/mac-help/add-a-user-or-group-mchl3e281fc9/14.0/mac/14.0");
                     macAdminMenuAnswer = Console.ReadLine().ToLower().Trim();
                     break;
             }
@@ -164,12 +164,12 @@ public class MacOnboard
                 case "exit":
                     macUEMAllowMenu = false;
                     macMenuStack.Clear();
-                    Program.Menu();
+                    Menus.Menu();
                     break;
                 case "clear":
                     break;
                 case "help":
-                    Program.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011356");
+                    HTTP.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011356");
                     macUEMAllowMenuAnswer = Console.ReadLine().ToLower().Trim();
                     break;
             }
@@ -200,13 +200,13 @@ public class MacOnboard
                 case "exit":
                     macMenuStack.Clear();
                     macReimageMenu = false;
-                    Program.Menu();
+                    Menus.Menu();
                     break;
                 case "clear":
                     Console.Clear();
                     break;
                 case "help":
-                    Program.OpenURL("https://support.apple.com/en-us/102655");
+                    HTTP.OpenURL("https://support.apple.com/en-us/102655");
                     macReimageMenuAnswer = Console.ReadLine().ToLower().Trim();
                     break;
             }
@@ -238,13 +238,13 @@ public class MacOnboard
                 case "exit":
                     macMenuStack.Clear();
                     macMDMEnrollMenu = false;
-                    Program.Menu();
+                    Menus.Menu();
                     break;
                 case "clear":
                     Console.Clear();
                     break;
                 case "help":
-                    Program.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011734");
+                    HTTP.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011734");
                     macMDMEnrollMenuAnswer = Console.ReadLine().ToLower().Trim();
                     break;
             }
@@ -275,13 +275,13 @@ public class MacOnboard
                 case "exit":
                     macMenuStack.Clear();
                     macASMAssignMenu = false;
-                    Program.Menu();
+                    Menus.Menu();
                     break;
                 case "clear":
                     Console.Clear();
                     break;
                 case "help":
-                    Program.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011734");
+                    HTTP.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011734");
                     macASMAssignMenuAnswer = Console.ReadLine().ToLower().Trim();
                     break;
             }
@@ -312,12 +312,12 @@ public class MacOnboard
                 case "exit":
                   macMenuStack.Clear();
                   macSyncWS1Menu= false;
-                Program.Menu(); break;
+                Menus.Menu(); break;
                 case "clear":
                     Console.Clear();
                     break;
                 case "help":
-                    Program.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011734");
+                    HTTP.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011734");
                     macSyncWS1MenuAnswer = Console.ReadLine().ToLower().Trim();
                     break;
             }
@@ -349,12 +349,12 @@ public class MacOnboard
                 case "exit":
                     macDlWS1Menu = false;
                     macMenuStack.Clear();
-                    Program.Menu(); break;
+                    Menus.Menu(); break;
                 case "clear":
                     Console.Clear();
                     break;
                 case "help":
-                    Program.OpenURL("https://www.getwsone.com/");
+                    HTTP.OpenURL("https://www.getwsone.com/");
                     macDlWS1MenuAnswer = Console.ReadLine().ToLower().Trim();
                     break;
 
@@ -384,13 +384,13 @@ public class MacOnboard
                     macMenuStack.Peek().Invoke(); break;
                 case "exit":
                     macUserSignInMenu = false;
-                    macMenuStack.Clear(); Program.Menu();
+                    macMenuStack.Clear(); Menus.Menu();
                     break;
                 case "clear":
                     Console.Clear();
  break;
                 case "help":
-                    Program.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011340");
+                    HTTP.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011340");
                     macUserSignInMenuAnswer = Console.ReadLine().ToLower().Trim();
                     break;
             }
@@ -420,13 +420,13 @@ public class MacOnboard
                     break;
                 case "exit":
                     macBCSignInMenu = false;
-                    macMenuStack.Clear(); Program.Menu();
+                    macMenuStack.Clear(); Menus.Menu();
                     break;
                 case "clear":
                     Console.Clear();
                     break;
                 case "help":
-                    Program.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011356");
+                    HTTP.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011356");
                     macBCSignInMenuAnswer = Console.ReadLine().ToLower().Trim();
                     break;
 
@@ -456,13 +456,13 @@ public class MacOnboard
                     macMenuStack.Peek().Invoke(); break;
                 case "exit":
                     macUserPWSyncMenu = false;
-                    macMenuStack.Clear(); Program.Menu();
+                    macMenuStack.Clear(); Menus.Menu();
                     break;
                 case "clear":
                     Console.Clear();
                     break;
                 case "help":
-                    Program.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011356");
+                    HTTP.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011356");
                     macUserPWSyncMenuAnswer = Console.ReadLine().ToLower().Trim();
                     break;
 
@@ -481,7 +481,7 @@ public class MacOnboard
                 default:
                     macUserSetupDone = false;
                     macMenuStack.Clear();
-                    Program.Menu();
+                    Menus.Menu();
                     break;
                 case "back":
                     macUserSetupDone = false;
@@ -491,10 +491,10 @@ public class MacOnboard
                 case "exit":
                     macMenuStack.Clear();
                     macUserSetupDone = false;
-                    Program.Menu();
+                    Menus.Menu();
                     break;
                 case "help":
-                    Program.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/TLC%20Customer%20Checklist_2pg.docx");
+                    HTTP.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/TLC%20Customer%20Checklist_2pg.docx");
                     macUserSetupDoneAnswer = Console.ReadLine().ToLower().Trim();
                     break;
             }

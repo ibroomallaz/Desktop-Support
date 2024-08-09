@@ -7,7 +7,7 @@ class CSV
     public static List<Dictionary<string, string>> _entries;
 
     //Download CSV from box
-    public static void GetCSV()
+    public static async Task GetCSV()
     {
         //check for %localappdata%\Desktop_Support_App and create folder if it doesn't exist
         string path = Environment.GetEnvironmentVariable("LocalAppData") + @"\Desktop_Support_App\";
@@ -22,12 +22,12 @@ class CSV
         {
             Console.WriteLine("The process failed: {0}", e.ToString());
         }
-
+        var url = new Uri("https://arizona.box.com/shared/static/27qy9jc64b0cpz4l6zzeu8pnri65y4d0.csv");
+        string fileName = path + @"\ci.csv";
+        await HTTP.DownloadFile(url, fileName);
         //Obsolete method using webClient, but simple code
-        WebClient webClient = new WebClient();
-        webClient.DownloadFile("https://arizona.box.com/shared/static/27qy9jc64b0cpz4l6zzeu8pnri65y4d0.csv", path + @"\ci.csv");
     }
-    public static void CSVMain()
+    public static async Task CSVMain()
     {
         string filePath = Environment.GetEnvironmentVariable("LocalAppData") + @"\Desktop_Support_App\ci.csv";
         
@@ -182,7 +182,7 @@ class CSV
             {
                 if (entry.ContainsKey("fr") && entry["fr"] == "Y")
                 {
-                    Program.OpenURL(entry["frepoloc"]);
+                    HTTP.OpenURL(entry["frepoloc"]);
                     found = true;
                     break;
                 }
