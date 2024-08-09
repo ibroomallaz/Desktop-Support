@@ -5,7 +5,7 @@ using static Colors.Net.StringStaticMethods;
 using Colors.Net.StringColorExtensions;
 class AD
 {
-    //Stack used for fr functionality
+    //Stack used for filerepo functionality
     public static Stack<string> adDeptStack = new Stack<string>();
     //TODO: further testing for speed on VPN. Connect to specific DCs etc.
     public static void ADUser(string netid)
@@ -41,7 +41,7 @@ class AD
                     {
                         ColoredConsole.WriteLine($"{Cyan("Department:")} {department.Red()}");
                         CSV.PrintDepartmentInfo(department.Remove(4));
-                        //#fr
+                        //for filerepo
                         adDeptStack.Push(department.Remove(4));
                     }
                     if (department == null)
@@ -60,7 +60,7 @@ class AD
             Console.WriteLine($"Error: {ex.Message}");
         }
     }
-
+    //TODO: test for methods without looping through
     public static void ADComputer(string hostname)
     {
         string domainPath = "LDAP://DC=bluecat,DC=arizona,DC=edu";
@@ -105,7 +105,7 @@ class AD
             Console.WriteLine($"Error occurred: {ex.Message}");
         }
     }
-
+    //TODO: test for methods that don't involve foreach loops to improve speed/efficiency
     public static List<string> ADGroupMembers(string groupName)
     {
         List<string> groupMembers = new List<string>();
@@ -173,7 +173,8 @@ class AD
                     if (groups != null)
                     {
                         Console.WriteLine("Current MIM Groups:");
-                        foreach (var group in groups) //check on filter method instead of foreach loop
+                        //TODO: check on filter method instead of foreach loop
+                        foreach (var group in groups) 
                         {
                             if (group.Name.Contains("MIM"))
                             {

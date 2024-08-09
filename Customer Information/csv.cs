@@ -7,6 +7,7 @@ class CSV
     public static List<Dictionary<string, string>> _entries;
 
     //Download CSV from box
+    //TODO: Impliment way to swap from prod csv to test csv
     public static async Task GetCSV()
     {
         //check for %localappdata%\Desktop_Support_App and create folder if it doesn't exist
