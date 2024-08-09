@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /Customer Information/tlchelp/mimcheck.cs
 /Customer Information/vpnmode.cs
+/Customer Information/utils/vpnmode.cs
