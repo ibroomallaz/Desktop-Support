@@ -14,7 +14,6 @@ class Menus
         bool showMenu = true;
         while (showMenu)
         {
-            //TODO: Edit menu for VPNMode
             Console.WriteLine("Choose an option:");
             ColoredConsole.WriteLine($"({Green("1")}) User Info:");
             ColoredConsole.WriteLine($"({DarkYellow("2")}) Computer Info:");

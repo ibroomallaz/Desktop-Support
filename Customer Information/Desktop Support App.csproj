@@ -13,9 +13,13 @@
     <RepositoryUrl>https://github.com/ibroomallaz/Desktop-Support</RepositoryUrl>
     <Version>2.4.0</Version>
 	  <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-	  <ApplicationIcon>img\PXL_20240504_214657726.ico</ApplicationIcon>
+	  <ApplicationIcon>img\PXL_20240721_211727559.ico</ApplicationIcon>
 	  <PackageIcon>PXL_20240504_214657726.jpg</PackageIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="utils\vpnmode.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="img\PXL_20231117_134624953.ico" />
@@ -23,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="img\PXL_20240504_214657726.ico" />
+    <Content Include="img\PXL_20240721_211727559.ico" />
   </ItemGroup>
 
   <ItemGroup>
