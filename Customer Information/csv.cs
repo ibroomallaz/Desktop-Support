@@ -22,7 +22,8 @@ class CSV
         {
             Console.WriteLine("The process failed: {0}", e.ToString());
         }
-        var url = new Uri("https://arizona.box.com/shared/static/27qy9jc64b0cpz4l6zzeu8pnri65y4d0.csv");
+        var url = new Uri("https://arizona.box.com/shared/static/27qy9jc64b0cpz4l6zzeu8pnri65y4d0.csv"); //prod csv
+       // var url = new Uri("https://arizona.box.com/shared/static/osspbuwb9bgqknom1ts1uk2c173xgn5k.csv"); //test csv
         string fileName = path + @"\ci.csv";
         await HTTP.DownloadFile(url, fileName);
         //Obsolete method using webClient, but simple code
