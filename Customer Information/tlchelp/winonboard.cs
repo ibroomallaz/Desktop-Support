@@ -1,7 +1,4 @@
-﻿using Microsoft.VisualBasic.Devices;
-using System;
-using Colors.Net;
-using Colors.Net.StringColorExtensions;
+﻿using Colors.Net;
 using static Colors.Net.StringStaticMethods;
 public class WinOnboard
 {
@@ -94,7 +91,7 @@ public class WinOnboard
                     Console.Clear();
                     break;
                 case "help":
-                        HTTP.OpenURL("https://support.microsoft.com/en-us/windows/windows-10-system-requirements-6d4e9a79-66bf-7950-467c-795cf0386715");
+                    HTTP.OpenURL("https://support.microsoft.com/en-us/windows/windows-10-system-requirements-6d4e9a79-66bf-7950-467c-795cf0386715");
                     winOnboardMenuNAnswer = Console.ReadLine().ToLower().Trim();
                     break;
             }
@@ -148,7 +145,7 @@ public class WinOnboard
             }
         }
     }
-  
+
     public static void WinMenuOU()
     {
         menuStack.Push(WinMenuOU);
@@ -200,19 +197,21 @@ public class WinOnboard
         //from multiple
         menuStack.Push(WinMenuShared);
         bool winMenuShared = true;
-        while(winMenuShared)
+        while (winMenuShared)
         {
             ColoredConsole.WriteLine($"Is the computer a shared device ({Green("Y")}/{DarkRed("N")})?");
             string winMenuSharedAnswer = Console.ReadLine().ToLower().Trim();
-            switch(winMenuSharedAnswer)
+            switch (winMenuSharedAnswer)
             {
-                case "y": case "yes":
+                case "y":
+                case "yes":
                     ColoredConsole.WriteLine($"The computer is onboarded! Complete the Setup Checklist. Press {DarkYellow("enter")} to return to main menu.");
                     Console.ReadLine();
                     winMenuShared = false;
                     Menus.MainMenu();
                     break;
-                case "n": case "no":
+                case "n":
+                case "no":
                     winMenuShared = false;
                     WinMenuHub();
                     break;
@@ -241,14 +240,14 @@ public class WinOnboard
             }
         }
     }
-  //Multiple WinMenuUserData functions due to slight differences between the flowchart. 1 splits from the "no" side of the Exists in BC tree. 2 from the "yes" side
+    //Multiple WinMenuUserData functions due to slight differences between the flowchart. 1 splits from the "no" side of the Exists in BC tree. 2 from the "yes" side
     public static void WinMenuUserData1()
     {
         //comes from WinMenuBC()
-        
+
         menuStack.Push(WinMenuUserData1);
         bool winMenuUserData1 = true;
-        while(winMenuUserData1)
+        while (winMenuUserData1)
         {
             ColoredConsole.WriteLine($"Is there important User Data on the computer ({Green("Y")}/{DarkRed("N")})?");
             string winMenuUserData1Answer = Console.ReadLine().ToLower().Trim();
@@ -261,7 +260,8 @@ public class WinOnboard
                     winMenuUserData1 = false;
                     WinMenuShared();
                     break;
-                case "n": case "no":
+                case "n":
+                case "no":
                     ColoredConsole.WriteLine($"Join the device to the domain and run a gpupdate once completed. \n(Press {DarkYellow("Enter")} to continue).");
                     Console.ReadLine();
                     winMenuUserData1 = false;
@@ -277,7 +277,7 @@ public class WinOnboard
                     menuStack.Peek().Invoke();
                     break;
                 case "exit":
-                    winMenuUserData1=false;
+                    winMenuUserData1 = false;
                     Menus.MainMenu();
                     break;
                 default:
@@ -297,13 +297,14 @@ public class WinOnboard
         //Comes from WinMenuOU
         menuStack.Push(WinMenuUserData2);
         bool winMenuUserData2 = true;
-        while(winMenuUserData2)
+        while (winMenuUserData2)
         {
             ColoredConsole.WriteLine($"Is there important User Data on the computer ({Green("Y")}/{DarkRed("N")})?");
             string winMenuUserData2Answer = Console.ReadLine().ToLower().Trim();
             switch (winMenuUserData2Answer)
             {
-                case "y": case "yes":
+                case "y":
+                case "yes":
                     ColoredConsole.WriteLine($"Send a ticket to SSA to move the device to the proper OU. \nPress {DarkYellow("Enter")} if completed.");
                     Console.ReadLine();
                     winMenuUserData2 = false;
@@ -311,7 +312,7 @@ public class WinOnboard
                     break;
                 case "n":
                 case "no":
-                    winMenuUserData2=false;
+                    winMenuUserData2 = false;
                     WinMenuBCRights();
                     break;
                 case "back":
@@ -342,15 +343,16 @@ public class WinOnboard
     public static void WinMenuBCRights()
     {
         //Comes from WinMenuUserData2()
-     menuStack.Push(WinMenuBCRights);
+        menuStack.Push(WinMenuBCRights);
         bool winMenuBCRights = true;
-        while(winMenuBCRights)
+        while (winMenuBCRights)
         {
             ColoredConsole.WriteLine($"Do you have Workstation Admin PAM rights to the OU ({Green("Y")}/{DarkRed("N")})?");
             string winMenuBCRightsAnswer = Console.ReadLine().ToLower().Trim();
-            switch(winMenuBCRightsAnswer)
+            switch (winMenuBCRightsAnswer)
             {
-                case "y": case "yes":
+                case "y":
+                case "yes":
                     ColoredConsole.WriteLine($"Delete the original Object in AD and re-stage the object into the proper OU. \nPress {DarkYellow("Enter")} when complete.");
                     Console.ReadLine();
                     winMenuBCRights = false;
@@ -391,18 +393,19 @@ public class WinOnboard
     {
         menuStack.Push(WinMenuHub);
         bool winMenuHub = true;
-        while(winMenuHub)
+        while (winMenuHub)
         {
             ColoredConsole.WriteLine($"After running a GPUpdate, Lock the computer and wait about 10 minutes. \n Has WS1 Hub been isntalled ({Green("Y")}/{DarkRed("N")})?");
             string winMenuHubAnswer = Console.ReadLine().ToLower().Trim();
-            switch(winMenuHubAnswer)
+            switch (winMenuHubAnswer)
             {
                 case "y":
                 case "yes":
                     winMenuHub = false;
                     WinMenuVerifyUEM();
                     break;
-                case "n": case "no":
+                case "n":
+                case "no":
                     ColoredConsole.WriteLine($"Use LAPS to instal the WS1 Hub.\n Press {DarkYellow("Enter")} to continue.");
                     Console.ReadLine();
                     winMenuHub = false;
@@ -436,7 +439,7 @@ public class WinOnboard
     public static void WinMenuVerifyUEM()
     {
         bool winMenuVerifyUEM = true;
-        while(winMenuVerifyUEM)
+        while (winMenuVerifyUEM)
         {
             ColoredConsole.WriteLine($"Log into UEM in your browser. \n Are you able to verify that the serial number is registered ({Green("Y")}/{DarkRed("N")})?");
             string winMenuVerifyUEMAnswer = Console.ReadLine().ToLower().Trim();
@@ -449,7 +452,8 @@ public class WinOnboard
                     winMenuVerifyUEM = false;
                     Menus.MainMenu();
                     break;
-                case "n": case "no":
+                case "n":
+                case "no":
                     ColoredConsole.WriteLine($"Check with SSA to ensure that the serial number is properly registering. \n Once registered the computer is fully onboarded and you can continue with the setup checklist.\n Press {DarkYellow("Enter")} to return to main menu.");
                     Console.ReadLine();
                     winMenuVerifyUEM = false;
@@ -465,7 +469,7 @@ public class WinOnboard
                     menuStack.Peek().Invoke();
                     break;
                 case "exit":
-                    winMenuVerifyUEM=false;
+                    winMenuVerifyUEM = false;
                     Menus.MainMenu();
                     break;
                 default:

@@ -1,11 +1,5 @@
-﻿using Colors.Net.StringColorExtensions;
+﻿using Colors.Net;
 using static Colors.Net.StringStaticMethods;
-using Colors.Net;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 class Menus
 {
@@ -116,6 +110,7 @@ class Menus
                     HTTP.OpenURL("https://emailarizona.sharepoint.com/:x:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/Customer%20List%20by%20Core%20Support%20Team.xlsx?d=w086768426f3745cda79987cc374d1ed5&csf=1&web=1&e=SbhIsJ");
                     ColoredConsole.WriteLine($"{Red("Opening")} Customer List by Core Support Team");
                     break;
+
             }
         }
     }

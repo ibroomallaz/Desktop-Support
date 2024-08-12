@@ -1,17 +1,10 @@
-﻿using Microsoft.VisualBasic.Devices;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Colors.Net;
-using Colors.Net.StringColorExtensions;
+﻿using Colors.Net;
 using static Colors.Net.StringStaticMethods;
 
 public class DSTools
 
 {
-   
+
     public static void DSToolsMenu()
     {
         bool tlcMenu = true;
@@ -59,7 +52,7 @@ public class DSTools
 
         }
     }
-  
+
     public static void OnboardMenu()
     {
         bool onboardMenu = true;
@@ -70,7 +63,7 @@ public class DSTools
         {
             ColoredConsole.WriteLine($"Is the computer running {Cyan("Windows")} or {Red("macOS")}?");
             string onboardMenuAnswer = Console.ReadLine().ToLower().Trim();
-            switch(onboardMenuAnswer)
+            switch (onboardMenuAnswer)
             {
                 case "1":
                 case "windows":
@@ -84,7 +77,7 @@ public class DSTools
                 case "macos":
                 case "m":
                     onboardMenu = false;
-                   MacOnboard.MacOnboardMenu();
+                    MacOnboard.MacOnboardMenu();
                     break;
                 case "back":
                     onboardMenu = false;
@@ -103,6 +96,6 @@ public class DSTools
             }
         }
     }
-    
+
 
 }

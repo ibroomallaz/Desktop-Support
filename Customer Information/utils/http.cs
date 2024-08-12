@@ -1,24 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 public static class HTTP
-    {
-    public static async Task DownloadFile(Uri uri, string FileName)
+{
+    public static async Task DownloadFile(string url, string FileName)
     {
         HttpClient client = new HttpClient();
+        var uri = new Uri(url);
         using (var s = await client.GetStreamAsync(uri))
         {
-            using (var fs = new FileStream(FileName, FileMode.CreateNew))
+            using (var fs = new FileStream(FileName, FileMode.Create))
             {
                 await s.CopyToAsync(fs);
             }
         }
     }
-   public static void OpenURL(string target)
+    public static void OpenURL(string target)
     {
         try
         {

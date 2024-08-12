@@ -1,13 +1,16 @@
-using System.Net;
 using Colors.Net;
-using static Colors.Net.StringStaticMethods;
 using Colors.Net.StringColorExtensions;
+using System.Security.Cryptography.X509Certificates;
+using static Colors.Net.StringStaticMethods;
 class CSV
 {
     public static List<Dictionary<string, string>> _entries;
 
     //Download CSV from box
     //TODO: Impliment way to swap from prod csv to test csv
+    const string prodURL = "https://arizona.box.com/shared/static/27qy9jc64b0cpz4l6zzeu8pnri65y4d0.csv"; //prod csv
+    const string testURL = "https://arizona.box.com/shared/static/osspbuwb9bgqknom1ts1uk2c173xgn5k.csv"; //test csv
+
     public static async Task GetCSV()
     {
         //check for %localappdata%\Desktop_Support_App and create folder if it doesn't exist
@@ -21,18 +24,18 @@ class CSV
         }
         catch (Exception e)
         {
-            Console.WriteLine("The process failed: {0}", e.ToString());
+            Console.WriteLine($"The process failed: {0}", e.ToString());
         }
-        var url = new Uri("https://arizona.box.com/shared/static/27qy9jc64b0cpz4l6zzeu8pnri65y4d0.csv"); //prod csv
-       // var url = new Uri("https://arizona.box.com/shared/static/osspbuwb9bgqknom1ts1uk2c173xgn5k.csv"); //test csv
         string fileName = path + @"\ci.csv";
-        await HTTP.DownloadFile(url, fileName);
-        //Obsolete method using webClient, but simple code
+
+            await HTTP.DownloadFile(prodURL, fileName);
     }
+
+    
     public static async Task CSVMain()
     {
         string filePath = Environment.GetEnvironmentVariable("LocalAppData") + @"\Desktop_Support_App\ci.csv";
-        
+
         _entries = ReadCSV(filePath);
     }
     // Read CSV and store entries
@@ -112,20 +115,20 @@ class CSV
         return false;
     }
 
-        //check for SN entry, if not print out marked entry for "team"
-        static void PrintServiceNowTeam(Dictionary<string, string> entry)
+    //check for SN entry, if not print out marked entry for "team"
+    static void PrintServiceNowTeam(Dictionary<string, string> entry)
     {
 
         if (entry.ContainsKey("SN.1") && entry.ContainsKey("SNTeam.1"))
         {
-          if (entry["SN.1"] == "Y")
-            { 
-            ColoredConsole.WriteLine($"{Cyan("Service Now Team:")} {entry["SNTeam.1"].Red()}");
+            if (entry["SN.1"] == "Y")
+            {
+                ColoredConsole.WriteLine($"{Cyan("Service Now Team:")} {entry["SNTeam.1"].Red()}");
             }
-        else
-        {
-            PrintEntryField(entry, "team.1", "Primary Support Team");
-        }
+            else
+            {
+                PrintEntryField(entry, "team.1", "Primary Support Team");
+            }
         }
     }
     //Check for teams beyond first team, if exists loop through and finish printing extra teams
@@ -134,7 +137,7 @@ class CSV
 
         Int32.TryParse(entry["team.split"], out int num);
         for (int i = 2; i <= num; i++)
-            {
+        {
             if (entry.ContainsKey($"SN.{i}") && entry.ContainsKey($"SNTeam.{i}"))
             {
                 ColoredConsole.WriteLine($"{Cyan("Service Now Team:")} {entry[$"SNTeam.{i}"].Red()}");
@@ -143,8 +146,8 @@ class CSV
             {
                 PrintEntryField(entry, $"team.{i}", "Team");
             }
-        }        
-            
+        }
+
     }
     static void PrintABRStatus(Dictionary<string, string> entry)
     {
@@ -170,7 +173,7 @@ class CSV
     {
         if (entry.ContainsKey("notes") && entry["notes"] != "N")
         {
-                ColoredConsole.WriteLine($"{Cyan("Notes: ")} {entry["notes"].Red()}");
+            ColoredConsole.WriteLine($"{Cyan("Notes: ")} {entry["notes"].Red()}");
         }
     }
 
@@ -196,5 +199,5 @@ class CSV
             Console.WriteLine();
         }
     }
-    
+
 }

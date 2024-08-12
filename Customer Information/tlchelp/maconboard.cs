@@ -1,7 +1,4 @@
-﻿using Microsoft.VisualBasic.Logging;
-using System;
-using Colors.Net;
-using Colors.Net.StringColorExtensions;
+﻿using Colors.Net;
 using static Colors.Net.StringStaticMethods;
 
 public class MacOnboard
@@ -26,7 +23,8 @@ public class MacOnboard
                     macOnboardMenu = false;
                     MacUserDataMenu();
                     break;
-                case "n": case "no":
+                case "n":
+                case "no":
                     macOnboardMenu = false;
                     MacUserDataMenu();
                     break;
@@ -57,19 +55,21 @@ public class MacOnboard
     {
         bool macUserDataMenu = true;
         macMenuStack.Push(MacUserDataMenu);
-        while(macUserDataMenu)
+        while (macUserDataMenu)
         {
             ColoredConsole.WriteLine($"Is there important user data on the device ({Green("Y")}/{DarkRed("N")})?");
-           string macUserDataMenuAnswer = Console.ReadLine().ToLower().Trim();
-            switch(macUserDataMenuAnswer)
+            string macUserDataMenuAnswer = Console.ReadLine().ToLower().Trim();
+            switch (macUserDataMenuAnswer)
             {
-                case "y": case "yes":
+                case "y":
+                case "yes":
                     macUserDataMenu = false;
                     MacAdminMenu();
                     break;
-                case "n": case "no":
-                    macUserDataMenu= false;
-                    MacReimageMenu();                                                                                                                
+                case "n":
+                case "no":
+                    macUserDataMenu = false;
+                    MacReimageMenu();
                     break;
                 case "back":
                     macMenuStack.Pop();
@@ -100,18 +100,20 @@ public class MacOnboard
     {
         bool macAdminMenu = true;
         macMenuStack.Push(MacAdminMenu);
-        while(macAdminMenu)
+        while (macAdminMenu)
         {
             ColoredConsole.WriteLine($"Is there an administrator account on the device ({Green("Y")}/{DarkRed("N")})?");
             string macAdminMenuAnswer = Console.ReadLine().ToLower().Trim();
-            switch(macAdminMenuAnswer)
+            switch (macAdminMenuAnswer)
             {
-                case "y": case "yes":
+                case "y":
+                case "yes":
                     ColoredConsole.WriteLine($"Log in as the Administrator.\n Press {DarkYellow("Enter")} to continue.");
                     macAdminMenu = false;
                     MacUEMAllowMenu();
                     break;
-                case "n": case "no":
+                case "n":
+                case "no":
                     ColoredConsole.WriteLine($"Create an Administrator account.\n Press {DarkYellow("Enter")} to continue.");
                     break;
                 case "back":
@@ -122,7 +124,8 @@ public class MacOnboard
                     }
                     macMenuStack.Peek().Invoke();
                     break;
-                case "exit": macAdminMenu = false;
+                case "exit":
+                    macAdminMenu = false;
                     macMenuStack.Clear();
                     Menus.MainMenu();
                     break;
@@ -138,16 +141,16 @@ public class MacOnboard
             }
         }
     }
- 
+
     public static void MacUEMAllowMenu()
     {
         bool macUEMAllowMenu = true;
         macMenuStack.Push(MacUEMAllowMenu);
-        while(macUEMAllowMenu)
+        while (macUEMAllowMenu)
         {
             ColoredConsole.WriteLine($"Allow the device in UEM. \n Press {DarkYellow("Enter")} to continue.");
             string macUEMAllowMenuAnswer = Console.ReadLine().ToLower().Trim();
-            switch(macUEMAllowMenuAnswer)
+            switch (macUEMAllowMenuAnswer)
             {
                 default:
                     macUEMAllowMenu = false;
@@ -179,11 +182,11 @@ public class MacOnboard
     {
         bool macReimageMenu = true;
         macMenuStack.Push(MacReimageMenu);
-        while(macReimageMenu)
+        while (macReimageMenu)
         {
             ColoredConsole.WriteLine($"Re-image the device. \n Press {DarkYellow("Enter")} to continue.");
             string macReimageMenuAnswer = Console.ReadLine().ToLower().Trim();
-            switch(macReimageMenuAnswer)
+            switch (macReimageMenuAnswer)
             {
                 default:
                     macReimageMenu = false;
@@ -221,7 +224,7 @@ public class MacOnboard
         {
             ColoredConsole.WriteLine($"Enroll the computer into MDM using Apple Configurator.\n Press {DarkYellow("Enter")} to continue.");
             string macMDMEnrollMenuAnswer = Console.ReadLine().ToLower().Trim();
-            switch(macMDMEnrollMenuAnswer)
+            switch (macMDMEnrollMenuAnswer)
             {
                 default:
                     macMDMEnrollMenu = false;
@@ -258,7 +261,7 @@ public class MacOnboard
         {
             ColoredConsole.WriteLine($"Assign the computer to the MDM in Apple School Manager.\n Press {DarkYellow("Enter")} to continue");
             string macASMAssignMenuAnswer = Console.ReadLine().ToLower().Trim();
-            switch(macASMAssignMenuAnswer)
+            switch (macASMAssignMenuAnswer)
             {
                 default:
                     macASMAssignMenu = false;
@@ -310,9 +313,9 @@ public class MacOnboard
                     macMenuStack.Peek().Invoke();
                     break;
                 case "exit":
-                  macMenuStack.Clear();
-                  macSyncWS1Menu= false;
-                Menus.MainMenu(); break;
+                    macMenuStack.Clear();
+                    macSyncWS1Menu = false;
+                    Menus.MainMenu(); break;
                 case "clear":
                     Console.Clear();
                     break;
@@ -328,7 +331,7 @@ public class MacOnboard
     {
         bool macDlWS1Menu = true;
         macMenuStack.Push(MacDlWS1Menu);
-        while(macDlWS1Menu)
+        while (macDlWS1Menu)
         {
             ColoredConsole.WriteLine($"Download WS1 Hub. \n Press {DarkYellow("Enter")} to continue.");
             string macDlWS1MenuAnswer = Console.ReadLine().ToLower().Trim();
@@ -365,7 +368,7 @@ public class MacOnboard
     {
         bool macUserSignInMenu = true;
         macMenuStack.Push(MacUserSignInMenu);
-        while(macUserSignInMenu)
+        while (macUserSignInMenu)
         {
             ColoredConsole.WriteLine($"Have the user sign into the Hub.\n Press {DarkYellow("Enter")} to continue.");
             string macUserSignInMenuAnswer = Console.ReadLine().ToLower().Trim();
@@ -388,7 +391,7 @@ public class MacOnboard
                     break;
                 case "clear":
                     Console.Clear();
- break;
+                    break;
                 case "help":
                     HTTP.OpenURL("https://uarizona.service-now.com/sp?id=kb_article_view&sysparm_article=KB0011340");
                     macUserSignInMenuAnswer = Console.ReadLine().ToLower().Trim();
@@ -400,7 +403,7 @@ public class MacOnboard
     {
         bool macBCSignInMenu = true;
         macMenuStack.Push(MacBCSignInMenu);
-        while(macBCSignInMenu)
+        while (macBCSignInMenu)
         {
             ColoredConsole.Write($"Install profiles and have the customer sign into BlueCat. \n Press {DarkYellow("Enter")} to continue.");
             string macBCSignInMenuAnswer = Console.ReadLine().ToLower().Trim();
@@ -437,7 +440,7 @@ public class MacOnboard
     {
         bool macUserPWSyncMenu = true;
         macMenuStack.Push(MacUserPWSyncMenu);
-        while(macUserPWSyncMenu)
+        while (macUserPWSyncMenu)
         {
             ColoredConsole.WriteLine($"Have the customer sync their BlueCat Password.\n Press {DarkYellow("Enter")} to continue.");
             string macUserPWSyncMenuAnswer = Console.ReadLine().ToLower().Trim();

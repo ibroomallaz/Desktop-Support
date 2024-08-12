@@ -1,8 +1,8 @@
-﻿using System.DirectoryServices;
-using System.DirectoryServices.AccountManagement;
-using Colors.Net;
-using static Colors.Net.StringStaticMethods;
+﻿using Colors.Net;
 using Colors.Net.StringColorExtensions;
+using System.DirectoryServices;
+using System.DirectoryServices.AccountManagement;
+using static Colors.Net.StringStaticMethods;
 class AD
 {
     //Stack used for filerepo functionality
@@ -36,7 +36,7 @@ class AD
                             ColoredConsole.WriteLine($"{Cyan("Division: ")}" + division.Red());
                         }
                     }
-               
+
                     if (department != null)
                     {
                         ColoredConsole.WriteLine($"{Cyan("Department:")} {department.Red()}");
@@ -111,7 +111,7 @@ class AD
         List<string> groupMembers = new List<string>();
         try
         {
-           
+
             using (PrincipalContext ctx = new PrincipalContext(ContextType.Domain))
             {
                 using (GroupPrincipal grp = GroupPrincipal.FindByIdentity(ctx, IdentityType.Name, groupName))
@@ -145,19 +145,19 @@ class AD
     }
     public static bool ADGroupExistsCheck(string groupName)
     {
-            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain))
+        using (PrincipalContext AD = new PrincipalContext(ContextType.Domain))
+        {
+            GroupPrincipal groupPrincipal = GroupPrincipal.FindByIdentity(AD, groupName);
+            if (groupPrincipal != null)
             {
-                GroupPrincipal groupPrincipal = GroupPrincipal.FindByIdentity(AD, groupName);
-                if (groupPrincipal != null)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return true;
             }
-        
+            else
+            {
+                return false;
+            }
+        }
+
     }
 
     public static void ADMIMGroupCheck(string netid)
@@ -174,13 +174,13 @@ class AD
                     {
                         Console.WriteLine("Current MIM Groups:");
                         //TODO: check on filter method instead of foreach loop
-                        foreach (var group in groups) 
+                        foreach (var group in groups)
                         {
                             if (group.Name.Contains("MIM"))
                             {
                                 Console.WriteLine(group.Name);
                             }
-                           
+
                         }
                     }
                 }
