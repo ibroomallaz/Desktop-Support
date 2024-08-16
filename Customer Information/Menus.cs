@@ -64,7 +64,7 @@ class Menus
         bool userMenu = true;
         while (userMenu)
         {
-            ColoredConsole.WriteLine($"User Information: Enter NetID, {Cyan("clear")}, {DarkYellow("back")}, or {DarkRed("exit")}:");
+            ColoredConsole.WriteLine($"User Information: Enter NetID, {Cyan("clear")}, {DarkYellow("back")}, {Green("help")} or {DarkRed("exit")}:");
             string userMenuText = Console.ReadLine().ToLower().Trim();
 
             switch (userMenuText)
@@ -110,7 +110,9 @@ class Menus
                     HTTP.OpenURL("https://emailarizona.sharepoint.com/:x:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/Customer%20List%20by%20Core%20Support%20Team.xlsx?d=w086768426f3745cda79987cc374d1ed5&csf=1&web=1&e=SbhIsJ");
                     ColoredConsole.WriteLine($"{Red("Opening")} Customer List by Core Support Team");
                     break;
-
+                case "help":
+                    HiddenMenu();
+                    break;
             }
         }
     }
@@ -145,5 +147,14 @@ class Menus
                     break;
             }
         }
+    }
+    static void HiddenMenu()
+    {
+       
+        ColoredConsole.WriteLine($"Unlisted functions and options:");
+        ColoredConsole.WriteLine($"\"{Cyan("-cl")}\": {DarkYellow("Customer List")} - Pulls up Desktop Support Customer list Sharepoint document.");
+        ColoredConsole.WriteLine($"\"{Cyan("-fr")}\": {DarkYellow("File Repository")} - Opens Department specific repository after a search shows one is available.");
+        ColoredConsole.WriteLine($"\"{Cyan("-reload")}\": {DarkYellow("Reloads")} csv file in the event that data isn't updating or loading properly.");
+
     }
 }
