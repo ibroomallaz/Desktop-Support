@@ -18,8 +18,7 @@ public class Version
             HttpClient client = new HttpClient();
             using HttpResponseMessage response = await client.GetAsync("https://arizona.box.com/shared/static/5o9izr016qh0ywr8hsdk2f7vkijdl0xv.txt");
             response.EnsureSuccessStatusCode();
-            string responseBody = await response.Content.ReadAsStringAsync();
-            string checkedVersion = responseBody;
+            string checkedVersion = await response.Content.ReadAsStringAsync();
             if (checkedVersion != Application.ProductVersion & BetaCheck() == false)
             {
                 var result = MessageBox.Show($"Please update to Version {checkedVersion}. Current version: {Application.ProductVersion}.", "Desktop Support App: Alert", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
