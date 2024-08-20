@@ -24,10 +24,12 @@ public class DSTools
             {
                 case "1":
                     tlcMenu = false;
+                    Console.Clear();
                     OnboardMenu();
                     break;
                 case "2":
                     tlcMenu = false;
+                    Console.Clear();
                     MIMCheck.MIMCheckMenu();
                     break;
                 case "back":

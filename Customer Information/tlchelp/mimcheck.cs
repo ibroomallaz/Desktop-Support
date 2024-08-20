@@ -16,14 +16,17 @@ public class MIMCheck
             {
                 case "1":
                     mimCheckMenu = false;
+                    Console.Clear();
                     ExpectedMIMMenu();
                     break;
                 case "2":
                     mimCheckMenu = false;
+                    Console.Clear();
                     CurrentMIMMenu();
                     break;
                 case "3":
                     mimCheckMenu = false;
+                    Console.Clear();
                     ListMIMMenu();
                     break;
                 case "exit":
@@ -176,6 +179,7 @@ public class MIMCheck
         bool currentMIMMenu = true;
         while (currentMIMMenu)
         {
+            ColoredConsole.WriteLine($"Check current MIM groups:");
             ColoredConsole.WriteLine($"Enter {DarkGreen("Netid")}, {DarkYellow("Back")}, {Cyan("Clear")}, or {DarkRed("Exit")}:");
             string currentMIMMenuAnswer = Console.ReadLine().ToLower().Trim();
             switch (currentMIMMenuAnswer)
