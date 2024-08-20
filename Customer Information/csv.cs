@@ -4,7 +4,7 @@ using System.Security.Cryptography.X509Certificates;
 using static Colors.Net.StringStaticMethods;
 class CSV
 {
-    public static List<Dictionary<string, string>> _entries;
+    public static List<Dictionary<string, string>>? _entries;
 
     //Download CSV from box
     //TODO: Impliment way to swap from prod csv to test csv
