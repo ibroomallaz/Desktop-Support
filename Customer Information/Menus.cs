@@ -34,6 +34,7 @@ class Menus
                     AboutMenu();
                     break;
                 case "5":
+                case "quit":
                     showMenu = false;
                     break;
                 case "4":
