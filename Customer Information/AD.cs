@@ -8,6 +8,8 @@ class AD
     //Stack used for filerepo functionality
     public static Stack<string> adDeptStack = new Stack<string>();
     //TODO: further testing for speed on VPN. Connect to specific DCs etc.
+    //global AD variable
+    static readonly string domainPath = "LDAP://DC=bluecat,DC=arizona,DC=edu";
     public static void ADUser(string netid)
     {
         try
@@ -63,7 +65,6 @@ class AD
     //TODO: test for methods without looping through
     public static void ADComputer(string hostname)
     {
-        string domainPath = "LDAP://DC=bluecat,DC=arizona,DC=edu";
         string searchFilter = $"(&(objectCategory=computer)(cn={hostname}))";
         try
         {
@@ -193,6 +194,40 @@ class AD
         catch (Exception ex)
         {
             Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+    //function to pull AD user from EmplID or StudentID
+    public static void ADUserFromNumber(string userNumber)
+    {
+        using (DirectoryEntry entry = new DirectoryEntry(domainPath))
+        {
+            using (DirectorySearcher searcher = new DirectorySearcher(entry))
+            {
+
+                searcher.Filter = $"(&(objectClass=user)(employeeID={userNumber}))";
+                searcher.PropertiesToLoad.Add("displayName");
+                searcher.PropertiesToLoad.Add("employeeID");
+
+                try
+                {
+                    SearchResult result = searcher.FindOne();
+
+                    if (result != null)
+                    {
+                        string  displayName = result.Properties["displayName"].ToString(); //does not properly list expected data
+                        ColoredConsole.WriteLine(displayName);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Employee/StudentID not found.");
+                    }
+                    
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
+            }
         }
     }
 }

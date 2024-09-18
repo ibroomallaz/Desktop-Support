@@ -50,6 +50,11 @@ public class DSTools
                     Console.Clear();
                     ColoredConsole.WriteLine($"{Red("Opening")} Customer List by Core Support Team");
                     break;
+                case "4":
+                    Console.Clear();
+                    tlcMenu = false;
+                    UserLookupByNumber();
+                    break;
             }
 
         }
@@ -99,5 +104,59 @@ public class DSTools
         }
     }
 
+    static void  UserLookupByNumber()
+    {
+        Console.Clear();
+        bool userLBN = true;
+        while (userLBN)
+        {
+            ColoredConsole.WriteLine($"User Information: Enter Employee or StudentID, {Cyan("clear")}, {DarkYellow("back")}, {Green("help")} or {DarkRed("exit")}:");
+            string userLBNText = Console.ReadLine().ToLower().Trim();
 
+            switch (userLBNText)
+            {
+                case "clear":
+                    Console.Clear();
+                    break;
+                case "back":
+                    Console.Clear();
+                    userLBN = false;
+                    Menus.MainMenu();
+                    break;
+                case "exit":
+                    userLBN = false;
+                    break;
+                case "":
+                    break;
+                default:
+                    Console.WriteLine();
+                    AD.ADUserFromNumber(userLBNText);
+                    Console.WriteLine();
+                    break;
+                case "-reload":
+                    try
+                    {
+                        CSV.GetCSV();
+                        CSV._entries.Clear();
+                        CSV.CSVMain();
+                        Console.WriteLine("Reloaded data.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error: {ex}. Data not reloaded properly. Please restart app.");
+                    }
+                    break;
+                case "-fr":
+                    if (AD.adDeptStack.Peek() != null)
+                    {
+                        CSV.FREntry(AD.adDeptStack.Peek());
+                    }
+                    break;
+                case "-cl":
+                    HTTP.OpenURL("https://emailarizona.sharepoint.com/:x:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/Customer%20List%20by%20Core%20Support%20Team.xlsx?d=w086768426f3745cda79987cc374d1ed5&csf=1&web=1&e=SbhIsJ");
+                    ColoredConsole.WriteLine($"{Red("Opening")} Customer List by Core Support Team");
+                    break;
+            }
+        }
+    }
 }
