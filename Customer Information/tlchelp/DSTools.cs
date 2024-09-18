@@ -17,6 +17,7 @@ public class DSTools
             ColoredConsole.WriteLine($"({Green("1")}) Computer Onboarding");
             ColoredConsole.WriteLine($"({DarkYellow("2")}) MIM Group Check");
             ColoredConsole.WriteLine($"({Cyan("3")}) Open Customer List by Core Support Team");
+            ColoredConsole.WriteLine($"({Magenta("4")}) NetID lookup from Employee/Student ID number");
             ColoredConsole.WriteLine($"At any time: type '{Red("exit")}' to go back to main menu");
             string tlcMenuAnswer = Console.ReadLine().ToLower().Trim();
 

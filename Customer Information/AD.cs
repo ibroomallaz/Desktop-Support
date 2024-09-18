@@ -214,8 +214,7 @@ class AD
 
                     if (result != null)
                     {
-                        string  displayName = result.Properties["displayName"].ToString(); //does not properly list expected data
-                        ColoredConsole.WriteLine(displayName);
+                        ColoredConsole.WriteLine(result.Properties["displayName"][0].ToString());
                     }
                     else
                     {
