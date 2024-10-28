@@ -94,7 +94,10 @@ class AD
                     string description = computer.Properties["description"].Value.ToString();
                     ColoredConsole.WriteLine($"{Cyan("Description:")} " + description.Red());
                 }
-
+                if (computer.Properties["OperatingSystem"].Value != null)
+                {
+                    ColoredConsole.WriteLine($"{Cyan("Operating System:")} " + computer.Properties["OperatingSystem"].Value.ToString());
+                }
             }
             else
             {

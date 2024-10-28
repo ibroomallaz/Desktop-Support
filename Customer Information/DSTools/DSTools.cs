@@ -1,7 +1,7 @@
 ﻿using Colors.Net;
 using static Colors.Net.StringStaticMethods;
 
-public class DSTools
+public partial class DSTools
 
 {
 
@@ -14,7 +14,7 @@ public class DSTools
             //more to be added later if thought of
             Console.WriteLine("Desktop Support Tools Menu:");
             Console.WriteLine("Select option:");
-            ColoredConsole.WriteLine($"({Green("1")}) Computer Onboarding");
+            ColoredConsole.WriteLine($"({Green("1")}) Quick Links");
             ColoredConsole.WriteLine($"({DarkYellow("2")}) MIM Group Check");
             ColoredConsole.WriteLine($"({Cyan("3")}) Open Customer List by Core Support Team");
             ColoredConsole.WriteLine($"({Magenta("4")}) NetID lookup from Employee/Student ID number");
@@ -26,7 +26,7 @@ public class DSTools
                 case "1":
                     tlcMenu = false;
                     Console.Clear();
-                    OnboardMenu();
+                    QuickLinks.QLMain();
                     break;
                 case "2":
                     tlcMenu = false;
@@ -60,7 +60,8 @@ public class DSTools
 
         }
     }
-
+    
+    //retiring for now but keeping code in place
     public static void OnboardMenu()
     {
         bool onboardMenu = true;

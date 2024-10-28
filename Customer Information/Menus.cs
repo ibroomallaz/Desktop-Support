@@ -109,7 +109,11 @@ class Menus
                     break;
                 case "-cl":
                     HTTP.OpenURL("https://emailarizona.sharepoint.com/:x:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/Customer%20List%20by%20Core%20Support%20Team.xlsx?d=w086768426f3745cda79987cc374d1ed5&csf=1&web=1&e=SbhIsJ");
-                    ColoredConsole.WriteLine($"{Red("Opening")} Customer List by Core Support Team");
+                    ColoredConsole.WriteLine($"{Green("Opening")} Customer List by Core Support Team");
+                    break;
+                case "-ps":
+                    HTTP.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/DST%20TS-Phone%20Coverage.docx?d=w080a9cc0f66c4a9baa10e7f9eeed418f&csf=1&web=1&e=Mre5jG");
+                    ColoredConsole.WriteLine($"{Green("Opening")} Desktop Support Phone Schedule");
                     break;
                 case "help":
                     HiddenMenu();
@@ -156,6 +160,7 @@ class Menus
         ColoredConsole.WriteLine($"\"{Cyan("-cl")}\": {DarkYellow("Customer List")} - Pulls up Desktop Support Customer list Sharepoint document.");
         ColoredConsole.WriteLine($"\"{Cyan("-fr")}\": {DarkYellow("File Repository")} - Opens Department specific repository after a search shows one is available.");
         ColoredConsole.WriteLine($"\"{Cyan("-reload")}\": {DarkYellow("Reloads")} csv file in the event that data isn't updating or loading properly.");
+        ColoredConsole.WriteLine($"\"{Cyan("-ps")}\": {DarkYellow("Phone Schedule")} - Opens the Desktop Support Phone schedule.");
 
     }
 }

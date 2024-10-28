@@ -9,6 +9,8 @@ class Program
         //Download CSV and load information into memory
         CSV.GetCSV();
         CSV.CSVMain();
+        //Download JSON for quicklink data
+        QuickLinks.GetJson();
         //Run Version check and initial processes
         Version.VersionCheck();
         ColoredConsole.WriteLine($"UITS Desktop Support App ({Red("ver.")} {Application.ProductVersion.Cyan()})");

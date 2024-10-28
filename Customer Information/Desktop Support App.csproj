@@ -11,7 +11,7 @@
     <UseWindowsForms>True</UseWindowsForms>
     <SignAssembly>False</SignAssembly>
     <RepositoryUrl>https://github.com/ibroomallaz/Desktop-Support</RepositoryUrl>
-    <Version>2.4.3</Version>
+    <Version>2.5.0-beta</Version>
 	  <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 	  <ApplicationIcon>img\PXL_20240721_211727559.ico</ApplicationIcon>
 	  <PackageIcon>PXL_20240504_214657726.jpg</PackageIcon>
@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="DSTools\quicklink.json" />
     <None Remove="img\PXL_20231117_134624953.ico" />
     <None Remove="img\PXL_20231117_134624953.jpg" />
   </ItemGroup>
@@ -33,7 +34,7 @@
   <ItemGroup>
     <PackageReference Include="Colors.Net" Version="1.1.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.DirectoryServices" Version="8.0.0" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="8.0.0" />
   </ItemGroup>
