@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/ibroomallaz/Desktop-Support</RepositoryUrl>
     <Version>2.5.0-beta</Version>
 	  <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-	  <ApplicationIcon>img\PXL_20240721_211727559.ico</ApplicationIcon>
+	  <ApplicationIcon>img\PXL_20241024_050658671.MP.ico</ApplicationIcon>
 	  <PackageIcon>PXL_20240504_214657726.jpg</PackageIcon>
   </PropertyGroup>
 
@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="img\PXL_20240721_211727559.ico" />
+    <Content Include="img\PXL_20241024_050658671.MP.ico" />
   </ItemGroup>
 
   <ItemGroup>

@@ -108,7 +108,7 @@ public static void PrintQL(Links quicklinks)
         bool quickLinksMenu = true;
         while (quickLinksMenu)
         {
-        Console.WriteLine("Desktop Support Quick Links.");
+        Console.WriteLine("Desktop Support Quick Links:");
         ColoredConsole.WriteLine($"At any time: type '{DarkYellow("back")}' to move back one menu, '{Cyan("clear")}' to clear the text, '{Red("exit")}' to go back to main menu");
         PrintQL(quicklinks);
             Console.WriteLine();
@@ -120,7 +120,9 @@ public static void PrintQL(Links quicklinks)
                     int num;
                     if (int.TryParse(quickLinksAnswer, out num))
                     {
+                        Console.Clear();
                         quicklinks.OpenURL(num);
+                        Console.WriteLine();
                     }
                     break;
                 case "back":
