@@ -1,4 +1,5 @@
 ﻿using Colors.Net;
+using Colors.Net.StringColorExtensions;
 using static Colors.Net.StringStaticMethods;
 
 class Menus
@@ -8,6 +9,7 @@ class Menus
         bool showMenu = true;
         while (showMenu)
         {
+            ColoredConsole.WriteLine($"UITS Desktop Support App ({Red("ver.")} {Application.ProductVersion.Cyan()})\n");
             Console.WriteLine("Choose an option:");
             ColoredConsole.WriteLine($"({Green("1")}) User Info:");
             ColoredConsole.WriteLine($"({DarkYellow("2")}) Computer Info:");
