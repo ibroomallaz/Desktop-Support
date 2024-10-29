@@ -108,8 +108,9 @@ public static void PrintQL(Links quicklinks)
         bool quickLinksMenu = true;
         while (quickLinksMenu)
         {
-        Console.WriteLine("Desktop Support Quick Links:");
-        ColoredConsole.WriteLine($"At any time: type '{DarkYellow("back")}' to move back one menu, '{Cyan("clear")}' to clear the text, '{Red("exit")}' to go back to main menu");
+        Console.WriteLine("Desktop Support Quick Links:\n");
+        ColoredConsole.WriteLine($"Open the desired like by typing in the coresponding number and hitting enter.");
+        ColoredConsole.WriteLine($"At any time: type '{DarkYellow("back")}' to move back one menu, '{Cyan("clear")}' to clear the text, '{Red("exit")}' to go back to main menu\n");
         PrintQL(quicklinks);
             Console.WriteLine();
             string quickLinksAnswer = Console.ReadLine().ToLower().Trim();

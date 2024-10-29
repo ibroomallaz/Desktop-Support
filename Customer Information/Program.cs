@@ -13,7 +13,7 @@ class Program
         QuickLinks.GetJson();
         //Run Version check and initial processes
         Version.VersionCheck();
-        ColoredConsole.WriteLine($"UITS Desktop Support App ({Red("ver.")} {Application.ProductVersion.Cyan()})");
+        ColoredConsole.WriteLine($"UITS Desktop Support App ({Red("ver.")} {Application.ProductVersion.Cyan()})\n");
         Menus.MainMenu();
     }
 }

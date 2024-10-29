@@ -10,7 +10,11 @@ public class MIMCheck
         bool mimCheckMenu = true;
         while (mimCheckMenu)
         {
-            ColoredConsole.WriteLine($"MIM Group Checking options:\n ({Green("1")}) Check if NetID is in expected MIM group.\n ({DarkYellow("2")}) Report individual's current MIM Groups.\n ({Magenta("3")}) Check current members of Dept MIM group.\n ({DarkRed("4")}) Exit");
+            ColoredConsole.WriteLine($"MIM Group Checking options:\n");
+            ColoredConsole.WriteLine($"({Green("1")}) Check if NetID is in expected MIM group.");
+            ColoredConsole.WriteLine($"({DarkYellow("2")}) Report individual's current MIM Groups.");
+            ColoredConsole.WriteLine($"({Magenta("3")}) Check current members of Dept MIM group.");
+            ColoredConsole.WriteLine($"({DarkRed("4")}) Exit back to Main Menu");
             string mimCheckMenuAnswer = Console.ReadLine().Trim().ToLower();
             switch (mimCheckMenuAnswer)
             {
@@ -34,6 +38,11 @@ public class MIMCheck
                     mimCheckMenu = false;
                     Console.Clear();
                     Menus.MainMenu();
+                    break;
+                case "back":
+                    Console.Clear();
+                    mimCheckMenu = false;
+                    DSTools.DSToolsMenu();
                     break;
                 default:
                     break;
