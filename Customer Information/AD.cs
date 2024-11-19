@@ -8,13 +8,14 @@ class AD
     //Stack used for filerepo functionality
     public static Stack<string> adDeptStack = new Stack<string>();
     //TODO: further testing for speed on VPN. Connect to specific DCs etc.
-    //global AD variable
-    static readonly string domainPath = "LDAP://DC=bluecat,DC=arizona,DC=edu";
+    //global AD variables
+    static readonly string domainPath = "bluecat.arizona.edu";
+    static readonly string domainPathLDAP = "LDAP://DC=bluecat,DC=arizona,DC=edu";
     public static void ADUser(string netid)
     {
         try
         {
-            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain))
+            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, domainPath))
             {
                 UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
                 if (userPrincipal != null)
@@ -68,7 +69,7 @@ class AD
         string searchFilter = $"(&(objectCategory=computer)(cn={hostname}))";
         try
         {
-            DirectoryEntry entry = new DirectoryEntry(domainPath);
+            DirectoryEntry entry = new DirectoryEntry(domainPathLDAP);
             DirectorySearcher searcher = new DirectorySearcher(entry);
             searcher.Filter = searchFilter;
             SearchResult result = searcher.FindOne();
@@ -116,7 +117,7 @@ class AD
         try
         {
 
-            using (PrincipalContext ctx = new PrincipalContext(ContextType.Domain))
+            using (PrincipalContext ctx = new PrincipalContext(ContextType.Domain, domainPath))
             {
                 using (GroupPrincipal grp = GroupPrincipal.FindByIdentity(ctx, IdentityType.Name, groupName))
                 {
@@ -149,7 +150,7 @@ class AD
     }
     public static bool ADGroupExistsCheck(string groupName)
     {
-        using (PrincipalContext AD = new PrincipalContext(ContextType.Domain))
+        using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, domainPath))
         {
             GroupPrincipal groupPrincipal = GroupPrincipal.FindByIdentity(AD, groupName);
             if (groupPrincipal != null)
@@ -168,7 +169,7 @@ class AD
     {
         try
         {
-            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain))
+            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, domainPath))
             {
                 UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
                 if (userPrincipal != null)
@@ -202,7 +203,7 @@ class AD
     //function to pull AD user from EmplID or StudentID
     public static void ADUserFromNumber(string userNumber)
     {
-        using (DirectoryEntry entry = new DirectoryEntry(domainPath))
+        using (DirectoryEntry entry = new DirectoryEntry(domainPathLDAP))
         {
             using (DirectorySearcher searcher = new DirectorySearcher(entry))
             {
