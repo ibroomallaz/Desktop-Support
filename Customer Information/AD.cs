@@ -99,17 +99,46 @@ class AD
                 {
                     ColoredConsole.WriteLine($"{Cyan("Operating System:")} " + computer.Properties["OperatingSystem"].Value.ToString());
                 }
+                ColoredConsole.Write($"{Cyan("Hybrid Join Group:")}");
+                if (ADComputerHybridGroupCheck(computer))
+                {
+                    ColoredConsole.Write($"{Green(" Yes")}\n");
+                }
+                else
+                {
+                    ColoredConsole.Write($"{Red(" No")}\n");
+                }
             }
             else
             {
                 Console.WriteLine("No Device found.");
             }
+            
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error occurred: {ex.Message}");
         }
     }
+    //Check AD to see if computer object is in UA-MEMHybridDevices group
+    static bool ADComputerHybridGroupCheck(DirectoryEntry computer)
+    {
+        var memberOf = computer.Properties["memberOf"];
+        if (memberOf != null)
+        {
+            // Loop through the list of groups the computer is a member of
+            foreach (var group in memberOf)
+            {
+                if (group.ToString().Contains("UA-MEMHybridDevices", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+    
     //TODO: test for methods that don't involve foreach loops to improve speed/efficiency
     public static List<string> ADGroupMembers(string groupName)
     {

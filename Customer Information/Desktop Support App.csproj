@@ -11,7 +11,7 @@
     <UseWindowsForms>True</UseWindowsForms>
     <SignAssembly>False</SignAssembly>
     <RepositoryUrl>https://github.com/ibroomallaz/Desktop-Support</RepositoryUrl>
-    <Version>2.5.1</Version>
+    <Version>2.5.2</Version>
 	  <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 	  <ApplicationIcon>img\PXL_20241024_050658671.MP.ico</ApplicationIcon>
 	  <PackageIcon>PXL_20240504_214657726.jpg</PackageIcon>
