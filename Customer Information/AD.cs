@@ -54,15 +54,7 @@ class AD
                     }
                     if (license != null) //new add for Licensing check
                     {
-                        ColoredConsole.Write($"{Cyan("O365 Licensing: ")}");
-                        string[]licenseArray =license.Split('(',')');
-                        for (int i = 0; i < licenseArray.Length; i++)
-                        {
-                            if (licenseArray[i].Contains("365"))
-                                {
-                                ColoredConsole.Write(licenseArray[i].Red() + " ");
-                            }
-                        }
+                        ADUserLicCheck(license);
                     }
                 }
                 else
@@ -77,6 +69,49 @@ class AD
             Console.WriteLine($"Error: {ex.Message}");
         }
     }
+    //Function to print licensing check from attribute15
+    static void ADUserLicCheck(string license)
+    {
+        ColoredConsole.Write($"{Cyan("O365 Licensing: ")}");
+
+        if (license.Contains("m365EMPA5"))
+        {
+            ColoredConsole.Write($"{Red("Employee A5")} ");
+            return;
+        }
+        if (license.Contains("m365EMPA3"))
+        {
+            ColoredConsole.Write($"{Red("Employee A3")} ");
+            return;
+        }
+        if (license.Contains("o365STUWA3"))
+        {
+            ColoredConsole.Write($"{Red("Student Worker A3")} ");
+            return;
+        }
+        if (license.Contains("o365STUA3"))
+        {
+            ColoredConsole.Write($"{Red("Student A3")} ");
+            return;
+        }
+        if (license.Contains("m365EMPA1"))
+        {
+            ColoredConsole.Write($"{Red("Employee A1")} ");
+            return;
+        }
+        else
+        {
+            string[] licenseArray = license.Split('(', ')');
+            for (int i = 0; i < licenseArray.Length; i++)
+            {
+                if (licenseArray[i].Contains("365"))
+                {
+                    ColoredConsole.Write(licenseArray[i].Red() + " ");
+                }
+            }
+        }
+    }
+
     //TODO: test for methods without looping through
     public static void ADComputer(string hostname)
     {
@@ -127,7 +162,7 @@ class AD
             {
                 Console.WriteLine("No Device found.");
             }
-            
+
         }
         catch (Exception ex)
         {
@@ -152,7 +187,7 @@ class AD
 
         return false;
     }
-    
+
     //TODO: test for methods that don't involve foreach loops to improve speed/efficiency
     public static List<string> ADGroupMembers(string groupName)
     {
@@ -267,7 +302,7 @@ class AD
                     {
                         Console.WriteLine("Employee/StudentID not found.");
                     }
-                    
+
                 }
                 catch (Exception ex)
                 {
