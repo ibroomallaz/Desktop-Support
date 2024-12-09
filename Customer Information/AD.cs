@@ -27,6 +27,7 @@ class AD
                     string eduAffiliation = dirEntry.Properties["eduPersonPrimaryAffiliation"].Value.ToString();
                     ColoredConsole.WriteLine($"{displayName}");
                     ColoredConsole.WriteLine($"{Cyan("Affiliation:")} {eduAffiliation.Red()}");
+                    string license = dirEntry.Properties["extensionattribute15"].Value.ToString();
                     //Filter to find specific Division MIM group
                     using (DirectorySearcher searcher = new DirectorySearcher(AD.ConnectedServer))
                     {
@@ -51,11 +52,24 @@ class AD
                     {
                         Console.WriteLine("Not a part of a Department");
                     }
+                    if (license != null) //new add for Licensing check
+                    {
+                        ColoredConsole.Write($"{Cyan("O365 Licensing: ")}");
+                        string[]licenseArray =license.Split('(',')');
+                        for (int i = 0; i < licenseArray.Length; i++)
+                        {
+                            if (licenseArray[i].Contains("365"))
+                                {
+                                ColoredConsole.Write(licenseArray[i].Red() + " ");
+                            }
+                        }
+                    }
                 }
                 else
                 {
                     Console.WriteLine($"User {netid} not found.");
                 }
+                Console.WriteLine(); //seperating line at end
             }
         }
         catch (Exception ex)

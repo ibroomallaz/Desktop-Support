@@ -85,7 +85,6 @@ class CSV
                 }
                 PrintFileRepoStatus(entry);
                 PrintNotes(entry);
-                Console.WriteLine();
                 found = true;
             }
         }
