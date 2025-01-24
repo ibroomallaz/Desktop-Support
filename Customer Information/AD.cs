@@ -74,27 +74,27 @@ class AD
     {
         ColoredConsole.Write($"{Cyan("O365 Licensing: ")}");
 
-        if (license.Contains("m365EMPA5"))
+        if (license.Contains("365EMPA5"))
         {
             ColoredConsole.Write($"{Red("Employee A5")} ");
             return;
         }
-        if (license.Contains("m365EMPA3"))
+        if (license.Contains("365EMPA3"))
         {
             ColoredConsole.Write($"{Red("Employee A3")} ");
             return;
         }
-        if (license.Contains("o365STUWA3"))
+        if (license.Contains("365STUWA3"))
         {
             ColoredConsole.Write($"{Red("Student Worker A3")} ");
             return;
         }
-        if (license.Contains("o365STUA3"))
+        if (license.Contains("365STUA3"))
         {
             ColoredConsole.Write($"{Red("Student A3")} ");
             return;
         }
-        if (license.Contains("m365EMPA1"))
+        if (license.Contains("365EMPA1"))
         {
             ColoredConsole.Write($"{Red("Employee A1")} ");
             return;
