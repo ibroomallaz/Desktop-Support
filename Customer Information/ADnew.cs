@@ -22,18 +22,18 @@ class ADUserInfo
         this.Name = netid;
         try
         {
-            Dictionary<string, string> GetADUserResult = new Dictionary<string, string>();
+            
             using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, domainPath))
             {
                 UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
                 if (userPrincipal != null)
                 {
-                    GetADUserResult.Add("Name", netid);
+                
                     DirectoryEntry dirEntry = (DirectoryEntry)userPrincipal.GetUnderlyingObject();
-                    GetADUserResult.Add("Department", dirEntry.Properties["Department"].Value.ToString());
-                    GetADUserResult.Add("DisplayName", userPrincipal.DisplayName);
-                    GetADUserResult.Add("EduAffiliation", dirEntry.Properties["eduPersonPrimaryAffiliation"].Value.ToString());
-                    GetADUserResult.Add("License", dirEntry.Properties["extensionattribute15"].Value.ToString());
+                   this.Department = dirEntry.Properties["Department"].Value.ToString();
+                   this.DisplayName =  userPrincipal.DisplayName;
+                    this.EduAffiliation = dirEntry.Properties["eduPersonPrimaryAffiliation"].Value.ToString();
+                    this.License = dirEntry.Properties["extensionattribute15"].Value.ToString();
                     //Filter to find specific Division MIM group
                     using (DirectorySearcher searcher = new DirectorySearcher(AD.ConnectedServer))
                     {
@@ -42,7 +42,7 @@ class ADUserInfo
                         if (result != null)
                         {
                             string groupName = result.Properties["cn"][0].ToString();
-                            GetADUserResult.Add("Division", groupName.Remove(4));
+                            this.Division = groupName.Remove(4);
                         }
                     }
                 }
@@ -53,10 +53,6 @@ class ADUserInfo
                 }
 
             }
-            this.Department = GetADUserResult["Department"];
-            this.License = GetADUserResult["License"];
-            this.EduAffiliation = GetADUserResult["EduAffiliation"];
-            this.Division = GetADUserResult["Divison"];
         }
         catch (Exception ex)
         {
@@ -66,65 +62,83 @@ class ADUserInfo
 
 
     }
- /*   Commenting out while messing with code
-  *   
-  *   public Dictionary<string, string> GetADUser(string netid)
-    {
 
+   
+    }
+    public class ADComputer
+	{
+       
+        static readonly string domainPath = "bluecat.arizona.edu";
+        static readonly string domainPathLDAP = "LDAP://DC=bluecat,DC=arizona,DC=edu";
+    public string name { get; set; }
+		private string? DistinguishedName { get; set; }
+		public string? OUs {  get; set; }
+		public string? Description { get; set; }
+        public bool? HybridGroup { get; set; }
+        public string? OperatingSystem { get; set; }
+        public string? Ex { get; set; }
+        
+        public ADComputer(string hostname)
+             {
+              string searchFilter = $"(&(objectCategory=computer)(cn={hostname}))";
+        this.name = hostname;
         try
         {
-            Dictionary<string, string> GetADUserResult = new Dictionary<string, string>();
-            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, domainPath))
+            DirectoryEntry entry = new DirectoryEntry(domainPathLDAP);
+            DirectorySearcher searcher = new DirectorySearcher(entry);
+            searcher.Filter = searchFilter;
+            SearchResult result = searcher.FindOne();
+            if (result != null)
             {
-                UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
-                if (userPrincipal != null)
+                DirectoryEntry computer = result.GetDirectoryEntry();
+                string distinguishedName = computer.Properties["distinguishedName"].Value.ToString();
+                string[] dnParts = distinguishedName.Split(',');
+                string ous = "";
+                // Loop through the DN parts and find the OUs
+                foreach (string dnPart in dnParts)
                 {
-                    GetADUserResult.Add("Name", netid);
-                    DirectoryEntry dirEntry = (DirectoryEntry)userPrincipal.GetUnderlyingObject();
-                    GetADUserResult.Add("Department", dirEntry.Properties["Department"].Value.ToString());
-                    GetADUserResult.Add("DisplayName", userPrincipal.DisplayName);
-                    GetADUserResult.Add("EduAffiliation", dirEntry.Properties["eduPersonPrimaryAffiliation"].Value.ToString());
-                    GetADUserResult.Add("License", dirEntry.Properties["extensionattribute15"].Value.ToString());
-                    //Filter to find specific Division MIM group
-                    using (DirectorySearcher searcher = new DirectorySearcher(AD.ConnectedServer))
+                    if (dnPart.StartsWith("OU=", StringComparison.OrdinalIgnoreCase))
                     {
-                        searcher.Filter = $"(&(objectCategory=group)(member={userPrincipal.DistinguishedName})(cn=*MIM-DivisionRollup*))";
-                        SearchResult result = searcher.FindOne();
-                        if (result != null)
-                        {
-                            string groupName = result.Properties["cn"][0].ToString();
-                            GetADUserResult.Add("Division", groupName.Remove(4));
-                        }
+                        if (!string.IsNullOrEmpty(ous))
+                            ous += ", ";
+                            ous += dnPart;
+                            this.OUs = ous;
                     }
+                }
+                if (computer.Properties["Description"].Value != null)
+                {
+                    this.Description = computer.Properties["description"].Value.ToString();
+                    
+                }
+                if (computer.Properties["OperatingSystem"].Value != null)
+                {
+                   this.OperatingSystem = computer.Properties["OperatingSystem"].Value.ToString();
+                }
+                ColoredConsole.Write($"{Cyan("Hybrid Join Group:")}");
+                if (ADComputerHybridGroupCheck(computer))
+                {
+                    ColoredConsole.Write($"{Green(" Yes")}\n");
                 }
                 else
                 {
-
-                    throw new ArgumentException($"User {netid} not found.");
+                    ColoredConsole.Write($"{Red(" No")}\n");
                 }
-
+            }
+            else
+            {
+                throw new ArgumentException($"Computer name {hostname} not found.");
             }
 
-            return GetADUserResult;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error: {ex.Message}");
+            this.Ex = ex.ToString();
         }
- */
     }
-}
-    public class ADComputer(string name, string distinguishedName, string description)
-	{
-		public string name { get; set; }
-		private string distinguishedName { get; set; }
-		public string ous {  get; set; }
-		public string description { get; set; }
-
-
     }
 	public class ADGroup
 	{
-		public bool exists { get; set; }
+		public bool exists { get; set; }   
+
 	}
 
