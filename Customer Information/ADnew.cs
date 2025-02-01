@@ -73,9 +73,27 @@ class ADUserInfo
 		private string? DistinguishedName { get; set; }
 		public string? OUs {  get; set; }
 		public string? Description { get; set; }
-        public bool? HybridGroup { get; set; }
+        public bool? IsHybridGroupMember { get; set; }
+        public bool HybridGroup(DirectoryEntry computer) 
+        {
+        var memberOf = computer.Properties["memberOf"];
+        if (memberOf != null)
+        {
+            // Loop through the list of groups the computer is a member of
+            foreach (var group in memberOf)
+            {
+                if (group.ToString().Contains("UA-MEMHybridDevices", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return false;
+    }
         public string? OperatingSystem { get; set; }
         public string? Ex { get; set; }
+
         
         public ADComputer(string hostname)
              {
@@ -100,34 +118,26 @@ class ADUserInfo
                     {
                         if (!string.IsNullOrEmpty(ous))
                             ous += ", ";
-                            ous += dnPart;
-                            this.OUs = ous;
+                        ous += dnPart;
+                        this.OUs = ous;
                     }
                 }
                 if (computer.Properties["Description"].Value != null)
                 {
                     this.Description = computer.Properties["description"].Value.ToString();
-                    
+
                 }
                 if (computer.Properties["OperatingSystem"].Value != null)
                 {
-                   this.OperatingSystem = computer.Properties["OperatingSystem"].Value.ToString();
+                    this.OperatingSystem = computer.Properties["OperatingSystem"].Value.ToString();
                 }
-                ColoredConsole.Write($"{Cyan("Hybrid Join Group:")}");
-                if (ADComputerHybridGroupCheck(computer))
-                {
-                    ColoredConsole.Write($"{Green(" Yes")}\n");
-                }
+                
                 else
                 {
-                    ColoredConsole.Write($"{Red(" No")}\n");
+                    throw new ArgumentException($"Computer name {hostname} not found.");
                 }
+                this.IsHybridGroupMember = HybridGroup(computer);
             }
-            else
-            {
-                throw new ArgumentException($"Computer name {hostname} not found.");
-            }
-
         }
         catch (Exception ex)
         {
