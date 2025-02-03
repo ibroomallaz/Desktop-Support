@@ -14,6 +14,7 @@ class ADUserInfo
     public string? License { get; set; }
     public string? Division { get; set; }
     public string? Ex { get; set; }
+    public bool Exists { get; set; }
     public static string UserFromNumber (string userNumber)
     {
         using (DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP))
@@ -59,7 +60,7 @@ class ADUserInfo
                 UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
                 if (userPrincipal != null)
                 {
-                
+                    this.Exists = true;
                     DirectoryEntry dirEntry = (DirectoryEntry)userPrincipal.GetUnderlyingObject();
                    this.Department = dirEntry.Properties["Department"].Value.ToString();
                    this.DisplayName =  userPrincipal.DisplayName;
@@ -80,7 +81,7 @@ class ADUserInfo
                 else
                 {
 
-                    throw new ArgumentException($"User {netid} not found.");
+                    this.Exists = false;
                 }
 
             }
@@ -92,9 +93,46 @@ class ADUserInfo
 
 
     }
+    public List<string> ADMIMGroupCheck(string netid) //Under user due to using UserPrincipal check
+    {
+        List<string> mimGroups = new List<string>();
+        try
+        {
+            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, Globals.g_domainPath))
+            {
+                UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
+                if (userPrincipal != null)
+                {
+                    this.Exists = true;
+                    var groups = userPrincipal.GetGroups().ToArray();
+                    if (groups != null)
+                    {
+                        Console.WriteLine("Current MIM Groups:");
+                        //TODO: check on filter method instead of foreach loop
+                        foreach (var group in groups)
+                        {
+                            if (group.Name.Contains("MIM"))
+                            {
+                                mimGroups.Add(group.Name);
+                            }
 
-   
+                        }
+                        return mimGroups;
+                    }
+                }
+                if (userPrincipal == null)
+                {
+                    this.Exists = false;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
     }
+
+}
     public class ADComputer
 	{
     public string name { get; set; }
@@ -102,7 +140,7 @@ class ADUserInfo
 		public string? OUs {  get; set; }
 		public string? Description { get; set; }
         public bool? IsHybridGroupMember { get; set; }
-        public bool HybridGroup(DirectoryEntry computer) 
+        private bool _HybridGroup(DirectoryEntry computer) 
         {
         var memberOf = computer.Properties["memberOf"];
         if (memberOf != null)
@@ -164,7 +202,7 @@ class ADUserInfo
                 {
                     throw new ArgumentException($"Computer name {hostname} not found.");
                 }
-                this.IsHybridGroupMember = HybridGroup(computer);
+                this.IsHybridGroupMember = _HybridGroup(computer);
             }
         }
         catch (Exception ex)
@@ -175,49 +213,19 @@ class ADUserInfo
     }
 	public class ADGroup
 	{
-		public bool exists { get; set; }
-    public static void ADMIMGroupCheck(string netid)
+		public bool Exists { get; set; }
+        public ADGroup(string groupname)
     {
-        try
-        {
-            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, domainPath))
-            {
-                UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
-                if (userPrincipal != null)
-                {
-                    var groups = userPrincipal.GetGroups().ToArray();
-                    if (groups != null)
-                    {
-                        Console.WriteLine("Current MIM Groups:");
-                        //TODO: check on filter method instead of foreach loop
-                        foreach (var group in groups)
-                        {
-                            if (group.Name.Contains("MIM"))
-                            {
-                                Console.WriteLine(group.Name);
-                            }
-
-                        }
-                    }
-                }
-                if (userPrincipal == null)
-                {
-                    Console.WriteLine($"NetID {netid} does not exist.");
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
-        }
+        this.Exists = _ADGroupExistsCheck(groupname);
     }
-    public static List<string> ADGroupMembers(string groupName)
+   
+    public List<string> ADGroupMembers(string groupName)
     {
         List<string> groupMembers = new List<string>();
         try
         {
 
-            using (PrincipalContext ctx = new PrincipalContext(ContextType.Domain, domainPath))
+            using (PrincipalContext ctx = new PrincipalContext(ContextType.Domain, Globals.g_domainPath))
             {
                 using (GroupPrincipal grp = GroupPrincipal.FindByIdentity(ctx, IdentityType.Name, groupName))
                 {
@@ -248,19 +256,16 @@ class ADUserInfo
 
         return groupMembers;
     }
-    public static bool ADGroupExistsCheck(string groupName)
+    private static bool _ADGroupExistsCheck(string groupName)
     {
-        using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, domainPath))
+        using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, Globals.g_domainPath))
         {
             GroupPrincipal groupPrincipal = GroupPrincipal.FindByIdentity(AD, groupName);
             if (groupPrincipal != null)
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+                return false;            
         }
 
     }
