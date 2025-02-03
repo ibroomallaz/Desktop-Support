@@ -1,7 +1,9 @@
 ﻿using Colors.Net;
 using Colors.Net.StringColorExtensions;
+using System.ComponentModel;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using static Colors.Net.StringStaticMethods;
 
@@ -15,7 +17,7 @@ class ADUserInfo
     public string? Division { get; set; }
     public string? Ex { get; set; }
     public bool Exists { get; set; }
-    public static string UserFromNumber (string userNumber)
+    public static string UserFromNumber(string userNumber)
     {
         using (DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP))
         {
@@ -36,13 +38,13 @@ class ADUserInfo
                     }
                     else
                     {
-                       return "Employee/StudentID not found.";
+                        return "Employee/StudentID not found.";
                     }
 
                 }
                 catch (Exception ex)
                 {
-                   return ex.Message;
+                    return ex.Message;
                 }
             }
         }
@@ -54,7 +56,7 @@ class ADUserInfo
         this.Name = netid;
         try
         {
-            
+
             using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, Globals.g_domainPath))
             {
                 UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
@@ -62,10 +64,10 @@ class ADUserInfo
                 {
                     this.Exists = true;
                     DirectoryEntry dirEntry = (DirectoryEntry)userPrincipal.GetUnderlyingObject();
-                   this.Department = dirEntry.Properties["Department"].Value.ToString();
-                   this.DisplayName =  userPrincipal.DisplayName;
+                    this.Department = dirEntry.Properties["Department"].Value.ToString();
+                    this.DisplayName = userPrincipal.DisplayName;
                     this.EduAffiliation = dirEntry.Properties["eduPersonPrimaryAffiliation"].Value.ToString();
-                    this.License = dirEntry.Properties["extensionattribute15"].Value.ToString();
+                    this.License = _ADUserLicCheck(dirEntry.Properties["extensionattribute15"].Value.ToString());
                     //Filter to find specific Division MIM group
                     using (DirectorySearcher searcher = new DirectorySearcher(AD.ConnectedServer))
                     {
@@ -93,55 +95,91 @@ class ADUserInfo
 
 
     }
-    public List<string> ADMIMGroupCheck(string netid) //Under user due to using UserPrincipal check
+    public List<string>? ADMIMGroupCheck(string netid) 
+{
+    List<string> mimGroups = new List<string>();
+    try
     {
-        List<string> mimGroups = new List<string>();
-        try
+        using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, Globals.g_domainPath))
         {
-            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, Globals.g_domainPath))
+            UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
+            if (userPrincipal != null)
             {
-                UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
-                if (userPrincipal != null)
-                {
-                    this.Exists = true;
-                    var groups = userPrincipal.GetGroups().ToArray();
-                    if (groups != null)
-                    {
-                        Console.WriteLine("Current MIM Groups:");
-                        //TODO: check on filter method instead of foreach loop
-                        foreach (var group in groups)
-                        {
-                            if (group.Name.Contains("MIM"))
-                            {
-                                mimGroups.Add(group.Name);
-                            }
+                this.Exists = true;
+                mimGroups = userPrincipal.GetGroups()?
+                                       .Where(group => group.Name.Contains("MIM"))
+                                       .Select(group => group.Name)
+                                       .ToList() ?? new List<string>();
 
-                        }
-                        return mimGroups;
-                    }
-                }
-                if (userPrincipal == null)
-                {
-                    this.Exists = false;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
+                return mimGroups;
+            }  
+            this.Exists = false;
         }
     }
+    catch (Exception ex)
+    {
+        this.Ex = ex.ToString();
+    }
+    return null;
+}
+    private string _ADUserLicCheck(string license)
+    {
+        string p = "([om]{1}\\d{3})([A-Z]+)([AE]\\d{1})";
+        Match match = Regex.Match(license, p);
+
+        string group1 = "", group2 = "", group3 = "";
+
+        if (match.Success)
+        {
+            group1 = match.Groups[1].Value;
+            group2 = match.Groups[2].Value;
+            group3 = match.Groups[3].Value;
+        }
+        else
+        {
+            string[] la = license.Split('(', ')'); // Fixed typo
+            foreach (string l in la)
+            {
+                if (l.Contains("365"))
+                {
+                    return l + " (Unknown License Type)"; // Return the found license info
+                }
+            }
+            return "No valid O365 license found"; // Return if nothing relevant is found
+        }
+
+        string res = "";
+        switch (group2.ToLower())
+        {
+            case "stuw":
+                res = "Student Worker";
+                break;
+            case "emp":
+                res = "Employee";
+                break;
+            case "stu":
+                res = "Student";
+                break;
+            default:
+                res = "Unknown";
+                break;
+        }
+
+        return $"{res} {group3}"; // Return the formatted license type
+    }
+
+
 
 }
-    public class ADComputer
-	{
+public class ADComputer
+{
     public string name { get; set; }
-		private string? DistinguishedName { get; set; }
-		public string? OUs {  get; set; }
-		public string? Description { get; set; }
-        public bool? IsHybridGroupMember { get; set; }
-        private bool _HybridGroup(DirectoryEntry computer) 
-        {
+    private string? DistinguishedName { get; set; }
+    public string? OUs { get; set; }
+    public string? Description { get; set; }
+    public bool? IsHybridGroupMember { get; set; }
+    private bool _HybridGroup(DirectoryEntry computer)
+    {
         var memberOf = computer.Properties["memberOf"];
         if (memberOf != null)
         {
@@ -157,13 +195,13 @@ class ADUserInfo
         }
         return false;
     }
-        public string? OperatingSystem { get; set; }
-        public string? Ex { get; set; }
+    public string? OperatingSystem { get; set; }
+    public string? Ex { get; set; }
 
-        
-        public ADComputer(string hostname)
-             {
-              string searchFilter = $"(&(objectCategory=computer)(cn={hostname}))";
+
+    public ADComputer(string hostname)
+    {
+        string searchFilter = $"(&(objectCategory=computer)(cn={hostname}))";
         this.name = hostname;
         try
         {
@@ -197,7 +235,7 @@ class ADUserInfo
                 {
                     this.OperatingSystem = computer.Properties["OperatingSystem"].Value.ToString();
                 }
-                
+
                 else
                 {
                     throw new ArgumentException($"Computer name {hostname} not found.");
@@ -210,15 +248,15 @@ class ADUserInfo
             this.Ex = ex.ToString();
         }
     }
-    }
-	public class ADGroup
-	{
-		public bool Exists { get; set; }
-        public ADGroup(string groupname)
+}
+public class ADGroup
+{
+    public bool Exists { get; set; }
+    public ADGroup(string groupname)
     {
         this.Exists = _ADGroupExistsCheck(groupname);
     }
-   
+
     public List<string> ADGroupMembers(string groupName)
     {
         List<string> groupMembers = new List<string>();
@@ -265,7 +303,7 @@ class ADUserInfo
             {
                 return true;
             }
-                return false;            
+            return false;
         }
 
     }
