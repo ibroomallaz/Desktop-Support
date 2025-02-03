@@ -16,7 +16,7 @@ public class Version
         try
         {
             HttpClient client = new HttpClient();
-            using HttpResponseMessage response = await client.GetAsync("https://arizona.box.com/shared/static/5o9izr016qh0ywr8hsdk2f7vkijdl0xv.txt");
+            using HttpResponseMessage response = await client.GetAsync(Globals.g_versionTxt);
             response.EnsureSuccessStatusCode();
             string checkedVersion = await response.Content.ReadAsStringAsync();
             if (checkedVersion != Application.ProductVersion & BetaCheck() == false)
@@ -24,7 +24,7 @@ public class Version
                 var result = MessageBox.Show($"Please update to Version {checkedVersion}. Current version: {Application.ProductVersion}.", "Desktop Support App: Alert", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
                 if (result == DialogResult.OK)
                 {
-                    HTTP.OpenURL("https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/ProjectHome.aspx");
+                    HTTP.OpenURL(Globals.g_sharepointHome);
                 }
             }
         }
