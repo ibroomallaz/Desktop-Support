@@ -178,6 +178,8 @@ public class ADComputer
     public string? OUs { get; set; }
     public string? Description { get; set; }
     public bool? IsHybridGroupMember { get; set; }
+    public string? OperatingSystem { get; set; }
+    public string? Ex { get; set; }
     private bool _HybridGroup(DirectoryEntry computer)
     {
         var memberOf = computer.Properties["memberOf"];
@@ -195,8 +197,6 @@ public class ADComputer
         }
         return false;
     }
-    public string? OperatingSystem { get; set; }
-    public string? Ex { get; set; }
 
 
     public ADComputer(string hostname)
@@ -233,7 +233,7 @@ public class ADComputer
                 }
                 if (computer.Properties["OperatingSystem"].Value != null)
                 {
-                    this.OperatingSystem = computer.Properties["OperatingSystem"].Value.ToString();
+                    this.OperatingSystem = computer.Properties[nameof(OperatingSystem)].Value.ToString();
                 }
 
                 else
@@ -277,7 +277,7 @@ public class ADGroup
                     }
                     else
                     {
-                        Console.WriteLine($"No group {groupName} exists");
+                        throw new ArgumentException($"No group {groupName} exists");
                     }
                 }
             }
