@@ -137,15 +137,15 @@ class ADUserInfo
         }
         else
         {
-            string[] la = license.Split('(', ')'); // Fixed typo
+            string[] la = license.Split('(', ')');
             foreach (string l in la)
             {
                 if (l.Contains("365"))
                 {
-                    return l + " (Unknown License Type)"; // Return the found license info
+                    return l + " (Unknown License Type)"; 
                 }
             }
-            return "No valid O365 license found"; // Return if nothing relevant is found
+            return "No valid O365 license found"; 
         }
 
         string res = "";
@@ -165,7 +165,7 @@ class ADUserInfo
                 break;
         }
 
-        return $"{res} {group3}"; // Return the formatted license type
+        return $"{res} {group3}";
     }
 
 
