@@ -7,8 +7,6 @@ using static Colors.Net.StringStaticMethods;
 
 class ADUserInfo
 {
-    static readonly string domainPath = "bluecat.arizona.edu";
-    static readonly string domainPathLDAP = "LDAP://DC=bluecat,DC=arizona,DC=edu";
     public string Name { get; set; }
     public string? Department { get; set; }
     public string? DisplayName { get; set; }
@@ -16,6 +14,39 @@ class ADUserInfo
     public string? License { get; set; }
     public string? Division { get; set; }
     public string? Ex { get; set; }
+    public static string UserFromNumber (string userNumber)
+    {
+        using (DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP))
+        {
+            using (DirectorySearcher searcher = new DirectorySearcher(entry))
+            {
+
+                searcher.Filter = $"(&(objectClass=user)(employeeID={userNumber}))";
+                searcher.PropertiesToLoad.Add("displayName");
+                searcher.PropertiesToLoad.Add("employeeID");
+
+                try
+                {
+                    SearchResult result = searcher.FindOne();
+
+                    if (result != null)
+                    {
+                        return result.Properties["displayName"][0].ToString();
+                    }
+                    else
+                    {
+                       return "Employee/StudentID not found.";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                   return ex.Message;
+                }
+            }
+        }
+    }
+
     public ADUserInfo(string netid)
 
     {
@@ -23,7 +54,7 @@ class ADUserInfo
         try
         {
             
-            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, domainPath))
+            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, Globals.g_domainPath))
             {
                 UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
                 if (userPrincipal != null)
@@ -66,9 +97,6 @@ class ADUserInfo
     }
     public class ADComputer
 	{
-       
-        static readonly string domainPath = "bluecat.arizona.edu";
-        static readonly string domainPathLDAP = "LDAP://DC=bluecat,DC=arizona,DC=edu";
     public string name { get; set; }
 		private string? DistinguishedName { get; set; }
 		public string? OUs {  get; set; }
@@ -101,7 +129,7 @@ class ADUserInfo
         this.name = hostname;
         try
         {
-            DirectoryEntry entry = new DirectoryEntry(domainPathLDAP);
+            DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP);
             DirectorySearcher searcher = new DirectorySearcher(entry);
             searcher.Filter = searchFilter;
             SearchResult result = searcher.FindOne();
@@ -147,7 +175,94 @@ class ADUserInfo
     }
 	public class ADGroup
 	{
-		public bool exists { get; set; }   
+		public bool exists { get; set; }
+    public static void ADMIMGroupCheck(string netid)
+    {
+        try
+        {
+            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, domainPath))
+            {
+                UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
+                if (userPrincipal != null)
+                {
+                    var groups = userPrincipal.GetGroups().ToArray();
+                    if (groups != null)
+                    {
+                        Console.WriteLine("Current MIM Groups:");
+                        //TODO: check on filter method instead of foreach loop
+                        foreach (var group in groups)
+                        {
+                            if (group.Name.Contains("MIM"))
+                            {
+                                Console.WriteLine(group.Name);
+                            }
 
-	}
+                        }
+                    }
+                }
+                if (userPrincipal == null)
+                {
+                    Console.WriteLine($"NetID {netid} does not exist.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+    public static List<string> ADGroupMembers(string groupName)
+    {
+        List<string> groupMembers = new List<string>();
+        try
+        {
+
+            using (PrincipalContext ctx = new PrincipalContext(ContextType.Domain, domainPath))
+            {
+                using (GroupPrincipal grp = GroupPrincipal.FindByIdentity(ctx, IdentityType.Name, groupName))
+                {
+                    if (grp != null)
+                    {
+                        foreach (Principal p in grp.GetMembers())
+                        {
+                            groupMembers.Add(p.Name);
+                            groupMembers.Sort();
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"No group {groupName} exists");
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+
+        if (groupMembers.Count == 0)
+        {
+            groupMembers.Add("No group members exist.");
+        }
+
+        return groupMembers;
+    }
+    public static bool ADGroupExistsCheck(string groupName)
+    {
+        using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, domainPath))
+        {
+            GroupPrincipal groupPrincipal = GroupPrincipal.FindByIdentity(AD, groupName);
+            if (groupPrincipal != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+    }
+}
 
