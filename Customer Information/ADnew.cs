@@ -30,11 +30,11 @@ class ADUserInfo
 
                 try
                 {
-                    SearchResult result = searcher.FindOne();
+                    SearchResult? result = searcher.FindOne();
 
                     if (result != null)
                     {
-                        return result.Properties["displayName"][0].ToString();
+                        return result?.Properties["displayName"][0].ToString() ?? "Unknown";
                     }
                     else
                     {
@@ -64,19 +64,19 @@ class ADUserInfo
                 {
                     this.Exists = true;
                     DirectoryEntry dirEntry = (DirectoryEntry)userPrincipal.GetUnderlyingObject();
-                    this.Department = dirEntry.Properties["Department"].Value.ToString();
-                    this.DisplayName = userPrincipal.DisplayName;
-                    this.EduAffiliation = dirEntry.Properties["eduPersonPrimaryAffiliation"].Value.ToString();
-                    this.License = _ADUserLicCheck(dirEntry.Properties["extensionattribute15"].Value.ToString());
+                    this.Department = dirEntry.Properties[nameof(Department)].Value?.ToString() ?? "None";
+                    this.DisplayName = userPrincipal.DisplayName ?? "Unknown";
+                    this.EduAffiliation = dirEntry.Properties["eduPersonPrimaryAffiliation"]?.Value?.ToString() ?? "Unknown";
+                    this.License = _ADUserLicCheck(dirEntry.Properties["extensionattribute15"]?.Value?.ToString() ?? "Unlicensed");
                     //Filter to find specific Division MIM group
                     using (DirectorySearcher searcher = new DirectorySearcher(AD.ConnectedServer))
                     {
                         searcher.Filter = $"(&(objectCategory=group)(member={userPrincipal.DistinguishedName})(cn=*MIM-DivisionRollup*))";
-                        SearchResult result = searcher.FindOne();
-                        if (result != null)
+                        SearchResult? result = searcher.FindOne();
+                        if (result?.Properties["cn"]?.Count > 0)
                         {
-                            string groupName = result.Properties["cn"][0].ToString();
-                            this.Division = groupName.Remove(4);
+                            string? groupName = result.Properties["cn"][0]?.ToString();
+                            this.Division = groupName?.Length >= 4 ? groupName.Substring(0, 4) : "N/A";
                         }
                     }
                 }
@@ -226,12 +226,12 @@ public class ADComputer
                         this.OUs = ous;
                     }
                 }
-                if (computer.Properties["Description"].Value != null)
+                if (computer.Properties[nameof(Description)].Value != null)
                 {
                     this.Description = computer.Properties["description"].Value.ToString();
 
                 }
-                if (computer.Properties["OperatingSystem"].Value != null)
+                if (computer.Properties[nameof(OperatingSystem)].Value != null)
                 {
                     this.OperatingSystem = computer.Properties[nameof(OperatingSystem)].Value.ToString();
                 }

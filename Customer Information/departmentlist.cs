@@ -54,7 +54,7 @@ public class DepartmentList
 
 public class Department
 {
-    public string Number { get; set; }
+    public required string Number { get; set; }
     public bool SupportKnown { get; set; }
     public bool SplitSupport { get; set; }
     public Team? Team1 { get; set; }
@@ -65,12 +65,12 @@ public class Department
 
 public class Team
 {
-    public string Name { get; set; }
+    public required string Name { get; set; }
     public bool ServiceNow { get; set; }
 }
 
 public class Filerepo
 {
     public bool Exists { get; set; }
-    public string Location { get; set; }
+    public string? Location { get; set; }
 }
