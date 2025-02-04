@@ -208,12 +208,12 @@ public class ADComputer
             DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP);
             DirectorySearcher searcher = new DirectorySearcher(entry);
             searcher.Filter = searchFilter;
-            SearchResult result = searcher.FindOne();
+            SearchResult? result = searcher.FindOne();
             if (result != null)
             {
                 DirectoryEntry computer = result.GetDirectoryEntry();
-                string distinguishedName = computer.Properties["distinguishedName"].Value.ToString();
-                string[] dnParts = distinguishedName.Split(',');
+                string? distinguishedName = computer.Properties["distinguishedName"].Value?.ToString() ?? null;
+                string[]? dnParts = distinguishedName.Split(',');
                 string ous = "";
                 // Loop through the DN parts and find the OUs
                 foreach (string dnPart in dnParts)
@@ -228,12 +228,12 @@ public class ADComputer
                 }
                 if (computer.Properties[nameof(Description)].Value != null)
                 {
-                    this.Description = computer.Properties["description"].Value.ToString();
+                    this.Description = computer.Properties["description"].Value?.ToString() ?? null;
 
                 }
                 if (computer.Properties[nameof(OperatingSystem)].Value != null)
                 {
-                    this.OperatingSystem = computer.Properties[nameof(OperatingSystem)].Value.ToString();
+                    this.OperatingSystem = computer.Properties[nameof(OperatingSystem)].Value?.ToString() ?? "Unknown";
                 }
 
                 else

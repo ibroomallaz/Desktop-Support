@@ -23,9 +23,8 @@ public class DepartmentList
             Console.WriteLine($"The process failed: {e}");
         }
 
-        string fileName = Path.Combine(path, "departments.json");
 
-        await HTTP.DownloadFile(Globals.g_DepartmentJSONURL, fileName);
+        await HTTP.DownloadFile(Globals.g_DepartmentJSONURL, Globals.g_DepartmentJSONPath);
       
     }
 
@@ -59,7 +58,7 @@ public class Department
     public bool SplitSupport { get; set; }
     public Team? Team1 { get; set; }
     public Team? Team2 { get; set; }
-    public Filerepo? Filerepo { get; set; }
+    public FileRepo? Filerepo { get; set; }
     public string? Notes { get; set; }
 }
 
@@ -69,7 +68,7 @@ public class Team
     public bool ServiceNow { get; set; }
 }
 
-public class Filerepo
+public class FileRepo
 {
     public bool Exists { get; set; }
     public string? Location { get; set; }
