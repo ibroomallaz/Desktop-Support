@@ -28,7 +28,7 @@ public class DepartmentList
       
     }
 
-    public static async Task<Department?> ReadJson()
+    public static async Task<IDepartment?> ReadJson()
     {
         if (!File.Exists(Globals.g_DepartmentJSONPath))
         {
@@ -50,8 +50,17 @@ public class DepartmentList
         }
     }
 }
-
-public class Department
+public interface IDepartment
+{
+    string Number { get; }
+    bool SupportKnown { get; }
+    bool SplitSupport { get; }
+    Team? Team1 { get; }
+    Team? Team2 { get; }
+    FileRepo? Filerepo { get; }
+    string? Notes { get; }
+}
+public class Department : IDepartment
 {
     public required string Number { get; set; }
     public bool SupportKnown { get; set; }
