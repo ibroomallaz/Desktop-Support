@@ -8,7 +8,7 @@ public class DepartmentList
 {
     public string? Exception { get; set; }
 
-    public async Task GetInfo(string path)
+    public static async Task GetInfo(string path)
     {
         try
         {
@@ -19,7 +19,7 @@ public class DepartmentList
         }
         catch (Exception e)
         {
-            this.Exception = e.ToString();
+            //this.Exception = e.ToString();
             Console.WriteLine($"The process failed: {e}");
         }
 
@@ -28,7 +28,7 @@ public class DepartmentList
       
     }
 
-    public async Task<Department?> ReadJson()
+    public static async Task<Department?> ReadJson()
     {
         if (!File.Exists(Globals.g_DepartmentJSONPath))
         {
@@ -45,7 +45,7 @@ public class DepartmentList
         }
         catch (Exception e)
         {
-            this.Exception = e.ToString();
+             Console.WriteLine(e.ToString());
             return null;
         }
     }

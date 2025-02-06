@@ -64,7 +64,7 @@ class ADUserInfo
                 {
                     this.Exists = true;
                     DirectoryEntry dirEntry = (DirectoryEntry)userPrincipal.GetUnderlyingObject();
-                    this.Department = dirEntry.Properties[nameof(Department)].Value?.ToString() ?? "None";
+                    this.Department = dirEntry.Properties[nameof(Department)]?.Value?.ToString() ?? "None";
                     this.DisplayName = userPrincipal.DisplayName ?? "Unknown";
                     this.EduAffiliation = dirEntry.Properties["eduPersonPrimaryAffiliation"]?.Value?.ToString() ?? "Unknown";
                     this.License = _ADUserLicCheck(dirEntry.Properties["extensionattribute15"]?.Value?.ToString() ?? "Unlicensed");
