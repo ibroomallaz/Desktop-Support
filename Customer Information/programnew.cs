@@ -4,10 +4,10 @@
     {
         try
         {
-            //Download departmental data
-            await DepartmentList.GetInfo(Globals.g_DepartmentJSONURL);
-            //initiate department object to store departmental data
-            Department departments = await DepartmentList.ReadJson();
+            //Download departmental data, parse JSON and cache into memory for later
+            IDepartmentService departmentService = new DepartmentService();
+            await departmentService.PrecacheDataAsync();
+
             //Download JSON for quicklink data
             await QuickLinks.GetJson();
             //Run Version check and initial processes

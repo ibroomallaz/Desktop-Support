@@ -12,8 +12,11 @@ public interface IDepartmentService
     Task<string?> GetNotesAsync(string departmentNumber);
     Task<bool> HasFileRepoAsync(string departmentNumber);
     Task<FileRepo?> GetFileRepoAsync(string departmentNumber);
+    Task PrecacheDataAsync();
 }
-public class DepartmentService : IDepartmentService
+
+//Main service to grab department info via DI
+public class DepartmentService : IDepartmentService  
 {
     private List<IDepartment>? _departments;
     private readonly SemaphoreSlim _lock = new(1, 1); //Thread lock
@@ -22,7 +25,10 @@ public class DepartmentService : IDepartmentService
     {
         _ = LoadDepartmentsAsync();
     }
-
+    public async Task PrecacheDataAsync()
+    {
+        await EnsureDataLoaded();
+    }
     public async Task<IDepartment?> GetDepartmentAsync(string departmentNumber)
     {
         await EnsureDataLoaded();

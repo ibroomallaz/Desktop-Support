@@ -1,0 +1,12 @@
+{
+    "Version":[
+        {
+            "Core": "2.5.2",
+            "Pre-release":
+            [{
+                "Exists": true,
+                "Version": "3.0.0-alpha"
+        }]
+        }
+    ]
+}
