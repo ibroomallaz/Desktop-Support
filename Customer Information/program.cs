@@ -5,8 +5,7 @@
         try
         {
             //Download departmental data, parse JSON and cache into memory for later
-            IDepartmentService departmentService = new DepartmentService();
-            await departmentService.PrecacheDataAsync();
+            await Globals.DepartmentService.PrecacheDataAsync();
             //Download JSON for quicklink data
             await QuickLinks.GetJson();
             //Run Version check and initial processes

@@ -1,5 +1,6 @@
 ﻿using Colors.Net;
 using Colors.Net.StringColorExtensions;
+using Microsoft.Extensions.DependencyInjection;
 using static Colors.Net.StringStaticMethods;
 
 class Menus
@@ -61,7 +62,7 @@ class Menus
         Console.Clear();
         MainMenu();
     }
-    public static void UserInfoMenu()
+    public static async void UserInfoMenu()
     {
         Console.Clear();
         bool userMenu = true;
@@ -86,7 +87,15 @@ class Menus
                 case "":
                     break;
                 default:
-                    
+                    ADUserInfo ADUser = new ADUserInfo(userMenuText);
+                    if (ADUser.Exists)
+                    {
+                        ADUserInfo.PrintADUserInfo(ADUser);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{userMenuText} is not a Valid NetID");
+                    }
 
                     break;
                 case "-reload":

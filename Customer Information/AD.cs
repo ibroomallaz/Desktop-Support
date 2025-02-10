@@ -6,11 +6,12 @@ using System.DirectoryServices.AccountManagement;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using static Colors.Net.StringStaticMethods;
-
-class ADUserInfo
+using Microsoft.Extensions.DependencyInjection;
+public class ADUserInfo
 {
     public string Name { get; set; }
-    public string? Department { get; set; }
+    public string? DepartmentName { get; set; }
+    public string? DepartmentNumber { get; set; }
     public string? DisplayName { get; set; }
     public string? EduAffiliation { get; set; }
     public string? License { get; set; }
@@ -50,6 +51,7 @@ class ADUserInfo
         }
     }
 
+
     public ADUserInfo(string netid)
 
     {
@@ -64,7 +66,8 @@ class ADUserInfo
                 {
                     this.Exists = true;
                     DirectoryEntry dirEntry = (DirectoryEntry)userPrincipal.GetUnderlyingObject();
-                    this.Department = dirEntry.Properties[nameof(Department)]?.Value?.ToString() ?? "None";
+                    this.DepartmentName = dirEntry.Properties[nameof(Department)]?.Value?.ToString() ?? "None";
+                    this.DepartmentNumber = this.DepartmentName.Substring(0, 4);
                     this.DisplayName = userPrincipal.DisplayName ?? "Unknown";
                     this.EduAffiliation = dirEntry.Properties["eduPersonPrimaryAffiliation"]?.Value?.ToString() ?? "Unknown";
                     this.License = _ADUserLicCheck(dirEntry.Properties["extensionattribute15"]?.Value?.ToString() ?? "Unlicensed");
@@ -167,10 +170,87 @@ class ADUserInfo
 
         return $"{res} {group3}";
     }
+    public static async void PrintADUserInfo(ADUserInfo ADUser)
+    {
+        // Print basic AD user info.
+        ColoredConsole.WriteLine(ADUser.DisplayName.DarkYellow());
+
+        if (ADUser.Division != null)
+        {
+            ColoredConsole.Write($"{Cyan("Division: ")}");
+            ColoredConsole.WriteLine(ADUser.Division.Red());
+        }
+
+        if (ADUser.DepartmentName != null)
+        {
+            ColoredConsole.Write($"{Cyan("Department: ")}");
+            ColoredConsole.WriteLine(ADUser.DepartmentName.Red());
+        }
+
+        ColoredConsole.Write($"{Cyan("O365 Licensing: ")}");
+        ColoredConsole.WriteLine(ADUser.License.Red());
+
+        // If a department is specified, retrieve additional department info from the cache.
+        if (!string.IsNullOrEmpty(ADUser.DepartmentNumber))
+        {
+            // Retrieve the department using DepartmentNumber instead of DepartmentName.
+            var department = await Globals.DepartmentService.GetDepartmentAsync(ADUser.DepartmentNumber);
+
+            if (department != null)
+            {
+                ColoredConsole.WriteLine(Cyan("=== Additional Department Info ==="));
+
+                // Print department notes if available.
+                if (!string.IsNullOrEmpty(department.Notes))
+                {
+                    ColoredConsole.Write($"{Cyan("Notes: ")}");
+                    ColoredConsole.WriteLine(department.Notes.Red());
+                }
+
+                // Retrieve and print team names using DepartmentNumber.
+                var teamNames = await Globals.DepartmentService.GetTeamNamesAsync(ADUser.DepartmentNumber);
+                if (teamNames.Count > 0)
+                {
+                    ColoredConsole.Write($"{Cyan("Teams: ")}");
+                    ColoredConsole.WriteLine(string.Join(", ", teamNames).Red());
+                }
+                else
+                {
+                    ColoredConsole.WriteLine(Cyan("Teams: ") + "None".Red());
+                }
+
+                // Check for and print file repository details.
+                bool hasRepo = await Globals.DepartmentService.HasFileRepoAsync(ADUser.DepartmentNumber);
+                if (hasRepo)
+                {
+                    var fileRepo = await Globals.DepartmentService.GetFileRepoAsync(ADUser.DepartmentNumber);
+                    if (fileRepo != null)
+                    {
+                        ColoredConsole.Write($"{Cyan("File Repository: ")}");
+                        ColoredConsole.WriteLine(fileRepo.Location.Red());
+                    }
+                    else
+                    {
+                        ColoredConsole.WriteLine(Cyan("File Repository: ") + "Details unavailable".Red());
+                    }
+                }
+                else
+                {
+                    ColoredConsole.WriteLine(Cyan("File Repository: ") + "None".Red());
+                }
+            }
+            else
+            {
+                ColoredConsole.WriteLine("Department information not found in cache.".Red());
+            }
+        }
+    }
+
 
 
 
 }
+
 public class ADComputer
 {
     public string name { get; set; }
