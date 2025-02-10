@@ -86,17 +86,13 @@ class Menus
                 case "":
                     break;
                 default:
-                    Console.WriteLine();
-   //                 AD.ADUser(userMenuText);
-                    Console.WriteLine();
+                    
+
                     break;
                 case "-reload":
                     try
                     {
-                        CSV.GetCSV();
-                        CSV._entries.Clear();
-                        CSV.CSVMain();
-                        Console.WriteLine("Reloaded data.");
+
                     }
                     catch (Exception ex)
                     {
