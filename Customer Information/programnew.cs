@@ -1,6 +1,6 @@
-﻿class ProgramNew
+﻿class Program
 {
-    public async static void NewMain()
+    public async static void Main()
     {
         try
         {

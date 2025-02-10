@@ -1,176 +1,186 @@
 ﻿using Colors.Net;
 using Colors.Net.StringColorExtensions;
+using System.ComponentModel;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using static Colors.Net.StringStaticMethods;
-class AD
+
+class ADUserInfo
 {
-    //Stack used for filerepo functionality
-    public static Stack<string> adDeptStack = new Stack<string>();
-    //TODO: further testing for speed on VPN. Connect to specific DCs etc.
-    //global AD variables
-    static readonly string domainPath = "bluecat.arizona.edu";
-    static readonly string domainPathLDAP = "LDAP://DC=bluecat,DC=arizona,DC=edu";
-    public static void ADUser(string netid)
+    public string Name { get; set; }
+    public string? Department { get; set; }
+    public string? DisplayName { get; set; }
+    public string? EduAffiliation { get; set; }
+    public string? License { get; set; }
+    public string? Division { get; set; }
+    public string? Ex { get; set; }
+    public bool Exists { get; set; }
+    public static string UserFromNumber(string userNumber)
     {
+        using (DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP))
+        {
+            using (DirectorySearcher searcher = new DirectorySearcher(entry))
+            {
+
+                searcher.Filter = $"(&(objectClass=user)(employeeID={userNumber}))";
+                searcher.PropertiesToLoad.Add("displayName");
+                searcher.PropertiesToLoad.Add("employeeID");
+
+                try
+                {
+                    SearchResult? result = searcher.FindOne();
+
+                    if (result != null)
+                    {
+                        return result?.Properties["displayName"][0].ToString() ?? "Unknown";
+                    }
+                    else
+                    {
+                        return "Employee/StudentID not found.";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    return ex.Message;
+                }
+            }
+        }
+    }
+
+    public ADUserInfo(string netid)
+
+    {
+        this.Name = netid;
         try
         {
-            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, domainPath))
+
+            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, Globals.g_domainPath))
             {
                 UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
                 if (userPrincipal != null)
                 {
-                    adDeptStack.Clear(); //Clear stack of File repo functionality; Placed under ADUser function to account for typos
+                    this.Exists = true;
                     DirectoryEntry dirEntry = (DirectoryEntry)userPrincipal.GetUnderlyingObject();
-                    string department = dirEntry.Properties["Department"].Value.ToString();
-                    var displayName = userPrincipal.DisplayName.DarkYellow();
-                    string eduAffiliation = dirEntry.Properties["eduPersonPrimaryAffiliation"].Value.ToString();
-                    ColoredConsole.WriteLine($"{displayName}");
-                    ColoredConsole.WriteLine($"{Cyan("Affiliation:")} {eduAffiliation.Red()}");
-                    string license = dirEntry.Properties["extensionattribute15"].Value.ToString();
+                    this.Department = dirEntry.Properties[nameof(Department)]?.Value?.ToString() ?? "None";
+                    this.DisplayName = userPrincipal.DisplayName ?? "Unknown";
+                    this.EduAffiliation = dirEntry.Properties["eduPersonPrimaryAffiliation"]?.Value?.ToString() ?? "Unknown";
+                    this.License = _ADUserLicCheck(dirEntry.Properties["extensionattribute15"]?.Value?.ToString() ?? "Unlicensed");
                     //Filter to find specific Division MIM group
                     using (DirectorySearcher searcher = new DirectorySearcher(AD.ConnectedServer))
                     {
                         searcher.Filter = $"(&(objectCategory=group)(member={userPrincipal.DistinguishedName})(cn=*MIM-DivisionRollup*))";
-                        SearchResult result = searcher.FindOne();
-                        if (result != null)
+                        SearchResult? result = searcher.FindOne();
+                        if (result?.Properties["cn"]?.Count > 0)
                         {
-                            string groupName = result.Properties["cn"][0].ToString();
-                            var division = groupName.Remove(4);
-                            ColoredConsole.WriteLine($"{Cyan("Division: ")}" + division.Red());
+                            string? groupName = result.Properties["cn"][0]?.ToString();
+                            this.Division = groupName?.Length >= 4 ? groupName.Substring(0, 4) : "N/A";
                         }
-                    }
-
-                    if (department != null)
-                    {
-                        ColoredConsole.WriteLine($"{Cyan("Department:")} {department.Red()}");
-                        CSV.PrintDepartmentInfo(department.Remove(4));
-                        //for filerepo
-                        adDeptStack.Push(department.Remove(4));
-                    }
-                    if (department == null)
-                    {
-                        Console.WriteLine("Not a part of a Department");
-                    }
-                    if (license != null) //new add for Licensing check
-                    {
-                        ADUserLicCheck(license);
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"User {netid} not found.");
+
+                    this.Exists = false;
                 }
-                Console.WriteLine(); //seperating line at end
+
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error: {ex.Message}");
+            this.Ex = ex.ToString();
+        }
+
+
+    }
+    public List<string>? ADMIMGroupCheck(string netid) 
+{
+    List<string> mimGroups = new List<string>();
+    try
+    {
+        using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, Globals.g_domainPath))
+        {
+            UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
+            if (userPrincipal != null)
+            {
+                this.Exists = true;
+                mimGroups = userPrincipal.GetGroups()?
+                                       .Where(group => group.Name.Contains("MIM"))
+                                       .Select(group => group.Name)
+                                       .ToList() ?? new List<string>();
+
+                return mimGroups;
+            }  
+            this.Exists = false;
         }
     }
-    //Function to print licensing check from attribute15
-    static void ADUserLicCheck(string license)
+    catch (Exception ex)
     {
-        ColoredConsole.Write($"{Cyan("O365 Licensing: ")}");
+        this.Ex = ex.ToString();
+    }
+    return null;
+}
+    private string _ADUserLicCheck(string license)
+    {
+        string p = "([om]{1}\\d{3})([A-Z]+)([AE]\\d{1})";
+        Match match = Regex.Match(license, p);
 
-        if (license.Contains("365EMPA5"))
+        string group1 = "", group2 = "", group3 = "";
+
+        if (match.Success)
         {
-            ColoredConsole.Write($"{Red("Employee A5")} ");
-            return;
-        }
-        if (license.Contains("365EMPA3"))
-        {
-            ColoredConsole.Write($"{Red("Employee A3")} ");
-            return;
-        }
-        if (license.Contains("365STUWA3"))
-        {
-            ColoredConsole.Write($"{Red("Student Worker A3")} ");
-            return;
-        }
-        if (license.Contains("365STUA3"))
-        {
-            ColoredConsole.Write($"{Red("Student A3")} ");
-            return;
-        }
-        if (license.Contains("365EMPA1"))
-        {
-            ColoredConsole.Write($"{Red("Employee A1")} ");
-            return;
+            group1 = match.Groups[1].Value;
+            group2 = match.Groups[2].Value;
+            group3 = match.Groups[3].Value;
         }
         else
         {
-            string[] licenseArray = license.Split('(', ')');
-            for (int i = 0; i < licenseArray.Length; i++)
+            string[] la = license.Split('(', ')');
+            foreach (string l in la)
             {
-                if (licenseArray[i].Contains("365"))
+                if (l.Contains("365"))
                 {
-                    ColoredConsole.Write(licenseArray[i].Red() + " ");
+                    return l + " (Unknown License Type)"; 
                 }
             }
+            return "No valid O365 license found"; 
         }
+
+        string res = "";
+        switch (group2.ToLower())
+        {
+            case "stuw":
+                res = "Student Worker";
+                break;
+            case "emp":
+                res = "Employee";
+                break;
+            case "stu":
+                res = "Student";
+                break;
+            default:
+                res = "Unknown";
+                break;
+        }
+
+        return $"{res} {group3}";
     }
 
-    //TODO: test for methods without looping through
-    public static void ADComputer(string hostname)
-    {
-        string searchFilter = $"(&(objectCategory=computer)(cn={hostname}))";
-        try
-        {
-            DirectoryEntry entry = new DirectoryEntry(domainPathLDAP);
-            DirectorySearcher searcher = new DirectorySearcher(entry);
-            searcher.Filter = searchFilter;
-            SearchResult result = searcher.FindOne();
-            if (result != null)
-            {
-                DirectoryEntry computer = result.GetDirectoryEntry();
-                string distinguishedName = computer.Properties["distinguishedName"].Value.ToString();
-                string[] dnParts = distinguishedName.Split(',');
-                string ous = "";
-                // Loop through the DN parts and find the OUs
-                foreach (string dnPart in dnParts)
-                {
-                    if (dnPart.StartsWith("OU=", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (!string.IsNullOrEmpty(ous))
-                            ous += ", ";
-                        ous += dnPart;
-                    }
-                }
-                ColoredConsole.WriteLine($"{Cyan("Location:")} " + ous.Red());
-                if (computer.Properties["description"].Value != null)
-                {
-                    string description = computer.Properties["description"].Value.ToString();
-                    ColoredConsole.WriteLine($"{Cyan("Description:")} " + description.Red());
-                }
-                if (computer.Properties["OperatingSystem"].Value != null)
-                {
-                    ColoredConsole.WriteLine($"{Cyan("Operating System:")} " + computer.Properties["OperatingSystem"].Value.ToString());
-                }
-                ColoredConsole.Write($"{Cyan("Hybrid Join Group:")}");
-                if (ADComputerHybridGroupCheck(computer))
-                {
-                    ColoredConsole.Write($"{Green(" Yes")}\n");
-                }
-                else
-                {
-                    ColoredConsole.Write($"{Red(" No")}\n");
-                }
-            }
-            else
-            {
-                Console.WriteLine("No Device found.");
-            }
 
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error occurred: {ex.Message}");
-        }
-    }
-    //Check AD to see if computer object is in UA-MEMHybridDevices group
-    static bool ADComputerHybridGroupCheck(DirectoryEntry computer)
+
+}
+public class ADComputer
+{
+    public string name { get; set; }
+    private string? DistinguishedName { get; set; }
+    public string? OUs { get; set; }
+    public string? Description { get; set; }
+    public bool? IsHybridGroupMember { get; set; }
+    public string? OperatingSystem { get; set; }
+    public string? Ex { get; set; }
+    private bool _HybridGroup(DirectoryEntry computer)
     {
         var memberOf = computer.Properties["memberOf"];
         if (memberOf != null)
@@ -183,19 +193,77 @@ class AD
                     return true;
                 }
             }
+            return false;
         }
-
         return false;
     }
 
-    //TODO: test for methods that don't involve foreach loops to improve speed/efficiency
-    public static List<string> ADGroupMembers(string groupName)
+
+    public ADComputer(string hostname)
+    {
+        string searchFilter = $"(&(objectCategory=computer)(cn={hostname}))";
+        this.name = hostname;
+        try
+        {
+            DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP);
+            DirectorySearcher searcher = new DirectorySearcher(entry);
+            searcher.Filter = searchFilter;
+            SearchResult? result = searcher.FindOne();
+            if (result != null)
+            {
+                DirectoryEntry computer = result.GetDirectoryEntry();
+                string? distinguishedName = computer.Properties["distinguishedName"].Value?.ToString() ?? null;
+                string[]? dnParts = distinguishedName.Split(',');
+                string ous = "";
+                // Loop through the DN parts and find the OUs
+                foreach (string dnPart in dnParts)
+                {
+                    if (dnPart.StartsWith("OU=", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!string.IsNullOrEmpty(ous))
+                            ous += ", ";
+                        ous += dnPart;
+                        this.OUs = ous;
+                    }
+                }
+                if (computer.Properties[nameof(Description)].Value != null)
+                {
+                    this.Description = computer.Properties["description"].Value?.ToString() ?? null;
+
+                }
+                if (computer.Properties[nameof(OperatingSystem)].Value != null)
+                {
+                    this.OperatingSystem = computer.Properties[nameof(OperatingSystem)].Value?.ToString() ?? "Unknown";
+                }
+
+                else
+                {
+                    throw new ArgumentException($"Computer name {hostname} not found.");
+                }
+                this.IsHybridGroupMember = _HybridGroup(computer);
+            }
+        }
+        catch (Exception ex)
+        {
+            this.Ex = ex.ToString();
+        }
+    }
+}
+public class ADGroup
+{
+    public bool Exists { get; set; }
+    public ADGroup(string groupname)
+    {
+        this.Exists = _ADGroupExistsCheck(groupname);
+    }
+
+    public List<string> ADGroupMembers(string groupName)
     {
         List<string> groupMembers = new List<string>();
         try
         {
 
-            using (PrincipalContext ctx = new PrincipalContext(ContextType.Domain, domainPath))
+            using (PrincipalContext ctx = new PrincipalContext(ContextType.Domain, Globals.g_domainPath))
             {
                 using (GroupPrincipal grp = GroupPrincipal.FindByIdentity(ctx, IdentityType.Name, groupName))
                 {
@@ -209,7 +277,7 @@ class AD
                     }
                     else
                     {
-                        Console.WriteLine($"No group {groupName} exists");
+                        throw new ArgumentException($"No group {groupName} exists");
                     }
                 }
             }
@@ -226,89 +294,18 @@ class AD
 
         return groupMembers;
     }
-    public static bool ADGroupExistsCheck(string groupName)
+    private static bool _ADGroupExistsCheck(string groupName)
     {
-        using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, domainPath))
+        using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, Globals.g_domainPath))
         {
             GroupPrincipal groupPrincipal = GroupPrincipal.FindByIdentity(AD, groupName);
             if (groupPrincipal != null)
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
 
-    }
-
-    public static void ADMIMGroupCheck(string netid)
-    {
-        try
-        {
-            using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, domainPath))
-            {
-                UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
-                if (userPrincipal != null)
-                {
-                    var groups = userPrincipal.GetGroups().ToArray();
-                    if (groups != null)
-                    {
-                        Console.WriteLine("Current MIM Groups:");
-                        //TODO: check on filter method instead of foreach loop
-                        foreach (var group in groups)
-                        {
-                            if (group.Name.Contains("MIM"))
-                            {
-                                Console.WriteLine(group.Name);
-                            }
-
-                        }
-                    }
-                }
-                if (userPrincipal == null)
-                {
-                    Console.WriteLine($"NetID {netid} does not exist.");
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
-        }
-    }
-    //function to pull AD user from EmplID or StudentID
-    public static void ADUserFromNumber(string userNumber)
-    {
-        using (DirectoryEntry entry = new DirectoryEntry(domainPathLDAP))
-        {
-            using (DirectorySearcher searcher = new DirectorySearcher(entry))
-            {
-
-                searcher.Filter = $"(&(objectClass=user)(employeeID={userNumber}))";
-                searcher.PropertiesToLoad.Add("displayName");
-                searcher.PropertiesToLoad.Add("employeeID");
-
-                try
-                {
-                    SearchResult result = searcher.FindOne();
-
-                    if (result != null)
-                    {
-                        ColoredConsole.WriteLine(result.Properties["displayName"][0].ToString());
-                    }
-                    else
-                    {
-                        Console.WriteLine("Employee/StudentID not found.");
-                    }
-
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error: {ex.Message}");
-                }
-            }
-        }
     }
 }
+
