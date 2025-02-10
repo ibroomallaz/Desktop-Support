@@ -11,7 +11,7 @@ public class Globals
     public static string g_SavePath = Environment.GetEnvironmentVariable("LocalAppData") + @"\Desktop_Support_App\";
     public const string g_versionTxt = "https://arizona.box.com/shared/static/5o9izr016qh0ywr8hsdk2f7vkijdl0xv.txt";
     public const string g_sharepointHome = "https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/ProjectHome.aspx";
-    public const string g_DepartmentJSONURL = "";
+    public const string g_DepartmentJSONURL = "https://arizona.box.com/shared/static/j3w4j5gdhhden2dheuthu2sdhunp2oxl.json";
     public static string g_DepartmentJSONPath = g_SavePath + "departments.json";
     public const string g_versionJSON = "https://arizona.box.com/shared/static/ccfzlvn1gtfdjxv8n9c63uo68fqckp7n.json";
 }
