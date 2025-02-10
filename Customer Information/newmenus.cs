@@ -23,12 +23,12 @@ public class NewMenus
                 case "1":
                 case "user":
                     showMenu = false;
-                    UserInfoMenu();
+  //                  UserInfoMenu();
                     break;
                 case "2":
                 case "computer":
                     showMenu = false;
-                    ComputerInfoMenu();
+//                    ComputerInfoMenu();
                     break;
                 case "3":
                 case "about":

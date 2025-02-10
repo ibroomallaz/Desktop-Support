@@ -73,7 +73,7 @@ public class MIMCheck
                 case "clear":
                     Console.Clear();
                     break;
-                default:
+  /*              default:
                     string dept = "UA-MIM-0" + listMIMMenuAnswer;
                     bool deptCheck = AD.ADGroupExistsCheck(dept);
                     if (!deptCheck)
@@ -95,7 +95,7 @@ public class MIMCheck
                         groupMembersSorted.Clear();
                     }
 
-                    break;
+                    break; */
             }
         }
     }
@@ -126,11 +126,11 @@ public class MIMCheck
                     break;
                 default:
                     string expectedDept = "UA-MIM-0" + expectedMIMMenuAnswer;
-                    bool expectedDeptCheck = AD.ADGroupExistsCheck(expectedDept);
+  /*                  bool expectedDeptCheck = AD.ADGroupExistsCheck(expectedDept);
                     if (!expectedDeptCheck)
                     {
                         ColoredConsole.WriteLine($"Expected MIM Group {DarkGreen(expectedDept)} does not exist.");
-                    }
+                    } 
                     else
                     {
                         bool expectedDeptL2 = true;
@@ -141,7 +141,7 @@ public class MIMCheck
                             switch (netid)
                             {
                                 default:
-                                    List<string> groupMembers = AD.ADGroupMembers(expectedDept);
+                                   /* List<string> groupMembers = AD.ADGroupMembers(expectedDept);
                                     if (!netid.Contains(","))
                                     {
                                         if (groupMembers.Contains(netid))
@@ -173,12 +173,12 @@ public class MIMCheck
                                     }
                                     expectedDeptL2 = false;
                                     break;
-                                case "":
+                                case "": 
                                     break;
-
+                                  
                             }
                         }
-                    }
+                    } */
                     break;
             }
         }
@@ -209,7 +209,7 @@ public class MIMCheck
                     Console.Clear();
                     break;
                 default:
-                    AD.ADMIMGroupCheck(currentMIMMenuAnswer);
+                //    AD.ADMIMGroupCheck(currentMIMMenuAnswer);
                     break;
             }
 

@@ -1,6 +1,6 @@
 ﻿class Program
 {
-    public async static void Main()
+    public static async Task Main()
     {
         try
         {

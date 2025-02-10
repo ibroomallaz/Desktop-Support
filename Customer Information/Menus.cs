@@ -87,7 +87,7 @@ class Menus
                     break;
                 default:
                     Console.WriteLine();
-                    AD.ADUser(userMenuText);
+   //                 AD.ADUser(userMenuText);
                     Console.WriteLine();
                     break;
                 case "-reload":
@@ -103,12 +103,12 @@ class Menus
                         Console.WriteLine($"Error: {ex}. Data not reloaded properly. Please restart app.");
                     }
                     break;
-                case "-fr":
+ /*               case "-fr":
                     if (AD.adDeptStack.Peek() != null)
                     {
                         CSV.FREntry(AD.adDeptStack.Peek());
                     }
-                    break;
+                    break; */
                 case "-cl":
                     HTTP.OpenURL("https://emailarizona.sharepoint.com/:x:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/Customer%20List%20by%20Core%20Support%20Team.xlsx?d=w086768426f3745cda79987cc374d1ed5&csf=1&web=1&e=SbhIsJ");
                     ColoredConsole.WriteLine($"{Green("Opening")} Customer List by Core Support Team");
@@ -149,7 +149,7 @@ class Menus
                     break;
                 default:
                     Console.WriteLine();
-                    AD.ADComputer(computerMenuText);
+ //                   AD.ADComputer(computerMenuText);
                     Console.WriteLine();
                     break;
             }

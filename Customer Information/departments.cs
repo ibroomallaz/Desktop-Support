@@ -60,7 +60,7 @@ public interface IDepartmentService
 public class DepartmentService : IDepartmentService
 {
     private List<IDepartment>? _departments;
-    private readonly SemaphoreSlim _lock = new(1, 1);
+    private readonly SemaphoreSlim _lock = new(1, 1);  //Thread lock
 
     public DepartmentService()
     {

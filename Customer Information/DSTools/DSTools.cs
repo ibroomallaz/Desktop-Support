@@ -72,14 +72,14 @@ public partial class DSTools
                 case "win":
                 case "w":
                     onboardMenu = false;
-                    WinOnboard.WinOnboardMenu();
+  //                  WinOnboard.WinOnboardMenu();
                     break;
                 case "2":
                 case "mac":
                 case "macos":
                 case "m":
                     onboardMenu = false;
-                    MacOnboard.MacOnboardMenu();
+    //                MacOnboard.MacOnboardMenu();
                     break;
                 case "back":
                     onboardMenu = false;
@@ -126,7 +126,7 @@ public partial class DSTools
                     break;
                 default:
                     Console.WriteLine();
-                    AD.ADUserFromNumber(userLBNText);
+//                    AD.ADUserFromNumber(userLBNText);
                     Console.WriteLine();
                     break;
 
