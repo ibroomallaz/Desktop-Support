@@ -1,12 +1,15 @@
 {
-    "Version":[
-        {
-            "Core": "2.5.2",
-            "Pre-release":
-            [{
-                "Exists": true,
-                "Version": "3.0.0-alpha"
-        }]
+    "Version": {
+        "Current": {
+            "version": "2.5.2",
+            "location": "",
+            "changelog": ""
+        },
+        "PreRelease": {
+            "exists": true,
+            "version": "3.0.0-alpha",
+            "location": "",
+            "changelog": ""
         }
-    ]
+    }
 }

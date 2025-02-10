@@ -11,7 +11,7 @@
             //Download JSON for quicklink data
             await QuickLinks.GetJson();
             //Run Version check and initial processes
-            await Version.VersionCheck();
+            await VersionChecker.VersionCheck();
             Menus.MainMenu();
         }
         catch (Exception ex)

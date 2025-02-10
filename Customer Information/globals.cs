@@ -13,4 +13,5 @@ public class Globals
     public const string g_sharepointHome = "https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/ProjectHome.aspx";
     public const string g_DepartmentJSONURL = "";
     public const string g_DepartmentJSONPath = "";
+    public const string g_versionJSON = "";
 }

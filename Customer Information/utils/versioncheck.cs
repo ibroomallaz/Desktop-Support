@@ -1,4 +1,4 @@
-public class Version
+public class VersionOld
 {
     static bool BetaCheck()
     {
