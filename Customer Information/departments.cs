@@ -1,8 +1,50 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+
+
+public class DepartmentListWrapper
+{
+    public List<Department>? DepartmentList { get; set; }
+}
+
+public interface IDepartment
+{
+    string Number { get; }
+    bool SupportKnown { get; }
+    bool SplitSupport { get; }
+    List<Team>? Teams { get; }
+    List<FileRepo>? FileRepos { get; }
+    string? Notes { get; }
+}
+
+public class Department : IDepartment
+{
+    public string Number { get; set; } = string.Empty;
+    public bool SupportKnown { get; set; }
+    public bool SplitSupport { get; set; }
+    public List<Team>? Teams { get; set; }
+    [JsonProperty("FileRepo")]
+    public List<FileRepo>? FileRepos { get; set; }
+    public string? Notes { get; set; }
+}
+
+public class Team
+{
+    public string Name { get; set; } = string.Empty;
+    public bool ServiceNow { get; set; }
+}
+
+public class FileRepo
+{
+    public bool Exists { get; set; }
+    public string? Location { get; set; }
+}
+
 
 public interface IDepartmentService
 {
@@ -15,20 +57,21 @@ public interface IDepartmentService
     Task PrecacheDataAsync();
 }
 
-//Main service to grab department info via DI
-public class DepartmentService : IDepartmentService  
+public class DepartmentService : IDepartmentService
 {
     private List<IDepartment>? _departments;
-    private readonly SemaphoreSlim _lock = new(1, 1); //Thread lock
+    private readonly SemaphoreSlim _lock = new(1, 1);
 
-    public DepartmentService() //load into memory
+    public DepartmentService()
     {
         _ = LoadDepartmentsAsync();
     }
+
     public async Task PrecacheDataAsync()
     {
         await EnsureDataLoaded();
     }
+
     public async Task<IDepartment?> GetDepartmentAsync(string departmentNumber)
     {
         await EnsureDataLoaded();
@@ -44,30 +87,22 @@ public class DepartmentService : IDepartmentService
     public async Task<bool> HasFileRepoAsync(string departmentNumber)
     {
         var department = await GetDepartmentAsync(departmentNumber);
-        return department?.Filerepo?.Exists ?? false;
+        return department?.FileRepos?.Any(fr => fr.Exists) ?? false;
     }
 
     public async Task<FileRepo?> GetFileRepoAsync(string departmentNumber)
     {
         var department = await GetDepartmentAsync(departmentNumber);
-        return department?.Filerepo?.Exists == true ? department.Filerepo : null;
-    }
-
-    public async Task<bool> IsDepartmentSplitAsync(string departmentNumber)
-    {
-        var department = await GetDepartmentAsync(departmentNumber);
-        return department?.SplitSupport ?? false;
+        return department?.FileRepos?.FirstOrDefault(fr => fr.Exists);
     }
 
     public async Task<string?> GetTeamNameAsync(string departmentNumber, int teamNumber)
     {
         var department = await GetDepartmentAsync(departmentNumber);
-        return teamNumber switch
-        {
-            1 => department?.Team1?.Name,
-            2 => department?.Team2?.Name,
-            _ => null
-        };
+        // Return the name of the (teamNumber - 1)th team if available
+        if (department?.Teams != null && department.Teams.Count >= teamNumber)
+            return department.Teams[teamNumber - 1].Name;
+        return null;
     }
 
     public async Task<bool?> IsSupportKnownAsync(string departmentNumber)
@@ -92,8 +127,9 @@ public class DepartmentService : IDepartmentService
             using StreamReader reader = new(Globals.g_DepartmentJSONPath);
             string json = await reader.ReadToEndAsync();
 
-            _departments = JsonConvert.DeserializeObject<List<Department>>(json)?
-                .Select(d => (IDepartment)d) // Ensure correct casting
+            var wrapper = JsonConvert.DeserializeObject<DepartmentListWrapper>(json);
+            _departments = wrapper?.DepartmentList?
+                .Select(d => (IDepartment)d)
                 .ToList() ?? new List<IDepartment>();
 
             Console.WriteLine($"Loaded {_departments.Count} departments into memory.");
@@ -134,40 +170,4 @@ public class DepartmentService : IDepartmentService
             Console.WriteLine($"Error downloading department data: {e}");
         }
     }
-}
-
-
-
-
-public interface IDepartment
-{
-    string Number { get; }
-    bool SupportKnown { get; }
-    bool SplitSupport { get; }
-    Team? Team1 { get; }
-    Team? Team2 { get; }
-    FileRepo? Filerepo { get; }
-    string? Notes { get; }
-}
-public class Department : IDepartment
-{
-    public required string Number { get; set; }
-    public bool SupportKnown { get; set; }
-    public bool SplitSupport { get; set; }
-    public Team? Team1 { get; set; }
-    public Team? Team2 { get; set; }
-    public FileRepo? Filerepo { get; set; }
-    public string? Notes { get; set; }
-}
-
-public class Team
-{
-    public required string Name { get; set; }
-    public bool ServiceNow { get; set; }
-}
-
-public class FileRepo
-{
-    public bool Exists { get; set; }
-    public string? Location { get; set; }
 }

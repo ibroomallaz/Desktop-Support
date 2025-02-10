@@ -2,14 +2,14 @@
     "Version": {
         "Current": {
             "version": "2.5.2",
-            "location": "",
-            "changelog": ""
+            "location": "https://emailarizona.sharepoint.com/:u:/r/sites/TLC-desktopsupportapp/Shared%20Documents/General/Current%20Release/Desktop%20Support%20App%202-5-2.exe?csf=1&web=1&e=OfoEfy",
+            "changelog": "Bug fixes and performance improvements."
         },
         "PreRelease": {
             "exists": true,
             "version": "3.0.0-alpha",
             "location": "",
-            "changelog": ""
+            "changelog": "Refactor."
         }
     }
 }
