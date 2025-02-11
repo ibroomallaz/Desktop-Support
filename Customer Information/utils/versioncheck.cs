@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
@@ -16,9 +17,8 @@ public class VersionChecker
     {
         try
         {
-            Console.WriteLine("Checking Version...");
             HttpClient client = new HttpClient();
-            using HttpResponseMessage response = await client.GetAsync(Globals.g_versionJSON);
+            using HttpResponseMessage response = await client.GetAsync(Globals.g_versionTxt);
             response.EnsureSuccessStatusCode();
 
             string json = await response.Content.ReadAsStringAsync();
@@ -50,11 +50,11 @@ public class VersionChecker
         bool isBetaUpdateAvailable = versionInfo.PreRelease.Exists && IsNewerVersion(installedVersion, versionInfo.PreRelease.Version);
         bool isBetaHigherThanStable = IsNewerVersion(versionInfo.Current.Version, versionInfo.PreRelease.Version);
 
+        // Notify about stable update (applies to all users)
         if (isStableUpdateAvailable && !isBetaUser)
         {
             PromptUpdate("Update Available", versionInfo.Current.Version, installedVersion, versionInfo.Current.Location, versionInfo.Current.Changelog, false);
         }
-
 
         if (isBetaUser)
         {
@@ -73,7 +73,7 @@ public class VersionChecker
 
     private static void PromptUpdate(string title, string newVersion, string installedVersion, string? location, string? changelog, bool isBeta)
     {
-        location ??= Globals.g_sharepointHome; // Fallback URL
+        location ??= Globals.g_sharepointHome; // Fallback URL in case location is missing
         changelog ??= "No details provided.";
 
         var result = MessageBox.Show(
@@ -85,7 +85,7 @@ public class VersionChecker
 
         if (result == DialogResult.OK)
         {
-            HTTP.OpenURL(location);
+            HTTP.OpenURL(location); // Open the correct download URL
         }
     }
 
@@ -94,9 +94,51 @@ public class VersionChecker
         if (string.IsNullOrEmpty(newVersion)) return false; // No new version available
         if (string.IsNullOrEmpty(currentVersion)) return true; // If current is null, assume update is available
 
-        return Version.TryParse(currentVersion, out var current) &&
-               Version.TryParse(newVersion, out var latest) &&
-               latest > current;
+        // Check if either version has an alpha/beta suffix
+        bool currentIsBeta = currentVersion.Contains("alpha") || currentVersion.Contains("beta");
+        bool newIsBeta = newVersion.Contains("alpha") || newVersion.Contains("beta");
+
+        if (!currentIsBeta && !newIsBeta)
+        {
+            // Normal version comparison
+            return Version.TryParse(currentVersion, out var current) &&
+                   Version.TryParse(newVersion, out var latest) &&
+                   latest > current;
+        }
+
+        // Extract base version and beta number
+        (string baseCurrent, int currentBetaNumber) = ExtractBetaVersion(currentVersion);
+        (string baseNew, int newBetaNumber) = ExtractBetaVersion(newVersion);
+
+        // Compare base versions first
+        if (Version.TryParse(baseCurrent, out var currentBase) && Version.TryParse(baseNew, out var newBase))
+        {
+            if (newBase > currentBase) return true; // Newer major/minor version wins
+            if (newBase < currentBase) return false; // Older version is not an update
+        }
+
+        // Compare beta numbers
+        return newBetaNumber > currentBetaNumber;
+    }
+
+    private static (string baseVersion, int betaNumber) ExtractBetaVersion(string version)
+    {
+        // Regex to extract base version and beta/alpha suffix number
+        var match = Regex.Match(version, @"^(?<base>\d+\.\d+\.\d+)(?:-(?<label>alpha|beta)(?<number>\d+)?)?$");
+
+        if (match.Success)
+        {
+            string baseVersion = match.Groups["base"].Value;
+            string label = match.Groups["label"].Value;
+            string number = match.Groups["number"].Value;
+
+            // If no number is found, assume 1
+            int betaNumber = string.IsNullOrEmpty(number) ? 1 : int.Parse(number);
+
+            return (baseVersion, betaNumber);
+        }
+
+        return (version, 1); // Default fallback
     }
 }
 
@@ -107,7 +149,7 @@ public class CurrentVersion
     public string? Version { get; set; }
 
     [JsonProperty("location", NullValueHandling = NullValueHandling.Ignore)]
-    public string? Location { get; set; }
+    public string? Location { get; set; } // URL for downloading the new stable version
 
     [JsonProperty("changelog", NullValueHandling = NullValueHandling.Ignore)]
     public string? Changelog { get; set; }
@@ -122,7 +164,7 @@ public class PreReleaseVersion
     public string? Version { get; set; }
 
     [JsonProperty("location", NullValueHandling = NullValueHandling.Ignore)]
-    public string? Location { get; set; }
+    public string? Location { get; set; } // URL for downloading the new beta version
 
     [JsonProperty("changelog", NullValueHandling = NullValueHandling.Ignore)]
     public string? Changelog { get; set; }
