@@ -125,7 +125,7 @@ public class ADUserInfo
     }
     return null;
 }
-    private string _ADUserLicCheck(string license)
+    private string _ADUserLicCheck(string license)   //Thanks to Danton
     {
         string p = "([om]{1}\\d{3})([A-Z]+)([AE]\\d{1})";
         Match match = Regex.Match(license, p);
@@ -172,7 +172,6 @@ public class ADUserInfo
     }
     public static async void PrintADUserInfo(ADUserInfo ADUser)
     {
-        // Print basic AD user info.
         ColoredConsole.WriteLine(ADUser.DisplayName.DarkYellow());
 
         if (ADUser.Division != null)
@@ -193,13 +192,11 @@ public class ADUserInfo
         // If a department is specified, retrieve additional department info from the cache.
         if (!string.IsNullOrEmpty(ADUser.DepartmentNumber))
         {
-            // Retrieve the department using DepartmentNumber instead of DepartmentName.
+           
             var department = await Globals.DepartmentService.GetDepartmentAsync(ADUser.DepartmentNumber);
 
             if (department != null)
             {
-                ColoredConsole.WriteLine(Cyan("=== Additional Department Info ==="));
-
                 // Print department notes if available.
                 if (!string.IsNullOrEmpty(department.Notes))
                 {
@@ -219,7 +216,6 @@ public class ADUserInfo
                     ColoredConsole.WriteLine(Cyan("Teams: ") + "None".Red());
                 }
 
-                // Check for and print file repository details.
                 bool hasRepo = await Globals.DepartmentService.HasFileRepoAsync(ADUser.DepartmentNumber);
                 if (hasRepo)
                 {

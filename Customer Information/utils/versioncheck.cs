@@ -17,8 +17,9 @@ public class VersionChecker
     {
         try
         {
+            Console.WriteLine("Checking Version...");
             HttpClient client = new HttpClient();
-            using HttpResponseMessage response = await client.GetAsync(Globals.g_versionTxt);
+            using HttpResponseMessage response = await client.GetAsync(Globals.g_versionJSON);
             response.EnsureSuccessStatusCode();
 
             string json = await response.Content.ReadAsStringAsync();

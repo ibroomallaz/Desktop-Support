@@ -7,9 +7,9 @@
         },
         "PreRelease": {
             "exists": true,
-            "version": "3.0.0-alpha",
+            "version": "3.0.0-alpha2",
             "location": "",
-            "changelog": "Refactor."
+            "changelog": "Testing"
         }
     }
 }
