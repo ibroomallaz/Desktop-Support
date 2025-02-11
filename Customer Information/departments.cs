@@ -57,7 +57,6 @@ public interface IDepartmentService
     Task<bool> HasFileRepoAsync(string departmentNumber);
     Task<FileRepo?> GetFileRepoAsync(string departmentNumber);
     Task PrecacheDataAsync();
-    Task PrintDepartmentAsync(string departmentNumber);
 }
 
 
@@ -169,53 +168,4 @@ public class DepartmentService : IDepartmentService
             await LoadDepartmentsAsync();
         }
     }
-
-    public async Task PrintDepartmentAsync(string departmentNumber)
-    {
-        await EnsureDataLoaded();  // Ensure the department data is loaded first.
-
-        var dept = await GetDepartmentAsync(departmentNumber);
-        if (dept == null)
-        {
-            Console.WriteLine($"Department {departmentNumber} not found.");
-            return;
-        }
-        if (dept.Teams != null && dept.Teams.Any())
-        {
-            int index = 1;
-            foreach (var team in dept.Teams)
-            {
-                Console.WriteLine($"  Team {index}: {team.Name} (ServiceNow: {team.ServiceNow})");
-                index++;
-            }
-        }
-        else
-        {
-            Console.WriteLine("  No team information available.");
-        }
-
-        if (dept.FileRepos != null && dept.FileRepos.Any(fr => fr.Exists))
-        {
-            foreach (var repo in dept.FileRepos)
-            {
-                if (repo.Exists)
-                {
-                    Console.WriteLine($"  File Repo Location: {repo.Location}");
-                }
-            }
-        }
-        else
-        {
-            Console.WriteLine("  No file repository available.");
-        }
-
-        if (!string.IsNullOrEmpty(dept.Notes))
-        {
-            Console.WriteLine($"  Notes: {dept.Notes}");
-        }
-
-        Console.WriteLine(new string('-', 40));
-    }
-
-
 }
