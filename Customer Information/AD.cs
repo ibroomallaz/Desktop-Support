@@ -172,15 +172,20 @@ public class ADUserInfo
     }
     public static async void PrintADUserInfo(ADUserInfo ADUser)
     {
+        Console.WriteLine(); // For asthetics
         ColoredConsole.WriteLine(ADUser.DisplayName.DarkYellow());
-
-        if (ADUser.Division != null)
+        if (!string.IsNullOrEmpty(ADUser.EduAffiliation))
+        {
+            ColoredConsole.Write($"{Cyan("Affiliation: ")}");
+            ColoredConsole.WriteLine(ADUser.EduAffiliation.Red());
+        }
+        if (!string.IsNullOrEmpty(ADUser.Division))
         {
             ColoredConsole.Write($"{Cyan("Division: ")}");
             ColoredConsole.WriteLine(ADUser.Division.Red());
         }
 
-        if (ADUser.DepartmentName != null)
+        if (!string.IsNullOrEmpty(ADUser.DepartmentName))
         {
             ColoredConsole.Write($"{Cyan("Department: ")}");
             ColoredConsole.WriteLine(ADUser.DepartmentName.Red());
@@ -189,33 +194,33 @@ public class ADUserInfo
         ColoredConsole.Write($"{Cyan("O365 Licensing: ")}");
         ColoredConsole.WriteLine(ADUser.License.Red());
 
-        // If a department is specified, retrieve additional department info from the cache.
+        // Use DepartmentNumber to search in the cached department data.
         if (!string.IsNullOrEmpty(ADUser.DepartmentNumber))
         {
-           
             var department = await Globals.DepartmentService.GetDepartmentAsync(ADUser.DepartmentNumber);
 
             if (department != null)
             {
-                // Print department notes if available.
-                if (!string.IsNullOrEmpty(department.Notes))
+                if (department.Teams != null && department.Teams.Any())
                 {
-                    ColoredConsole.Write($"{Cyan("Notes: ")}");
-                    ColoredConsole.WriteLine(department.Notes.Red());
-                }
-
-                // Retrieve and print team names using DepartmentNumber.
-                var teamNames = await Globals.DepartmentService.GetTeamNamesAsync(ADUser.DepartmentNumber);
-                if (teamNames.Count > 0)
-                {
-                    ColoredConsole.Write($"{Cyan("Teams: ")}");
-                    ColoredConsole.WriteLine(string.Join(", ", teamNames).Red());
+                    var serviceNowTeams = department.Teams.Where(t => t.ServiceNow).ToList();
+                    if (serviceNowTeams.Any())
+                    {
+                        ColoredConsole.Write($"{Cyan("Service Now Team: ")}");
+                        ColoredConsole.WriteLine(string.Join(", ", serviceNowTeams.Select(t => t.Name)).Red());
+                    }
+                    else
+                    {
+                        ColoredConsole.Write($"{Cyan("Support Team: ")}");
+                        ColoredConsole.WriteLine(string.Join(", ", department.Teams.Select(t => t.Name)).Red());
+                    }
                 }
                 else
                 {
                     ColoredConsole.WriteLine(Cyan("Teams: ") + "None".Red());
                 }
 
+                // Check for and print file repository details.
                 bool hasRepo = await Globals.DepartmentService.HasFileRepoAsync(ADUser.DepartmentNumber);
                 if (hasRepo)
                 {
@@ -230,9 +235,10 @@ public class ADUserInfo
                         ColoredConsole.WriteLine(Cyan("File Repository: ") + "Details unavailable".Red());
                     }
                 }
-                else
+                if (!string.IsNullOrEmpty(department.Notes))
                 {
-                    ColoredConsole.WriteLine(Cyan("File Repository: ") + "None".Red());
+                    ColoredConsole.Write($"{Cyan("Notes: ")}");
+                    ColoredConsole.WriteLine(department.Notes.Red());
                 }
             }
             else
@@ -240,7 +246,9 @@ public class ADUserInfo
                 ColoredConsole.WriteLine("Department information not found in cache.".Red());
             }
         }
+        Console.WriteLine(); //Asthetics again
     }
+
 
 
 
