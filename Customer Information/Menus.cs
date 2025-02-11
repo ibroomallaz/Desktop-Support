@@ -5,7 +5,7 @@ using static Colors.Net.StringStaticMethods;
 
 class Menus
 {
-    public static void MainMenu()
+    public static async Task MainMenu()
     {
         bool showMenu = true;
         while (showMenu)
@@ -24,7 +24,7 @@ class Menus
                 case "1":
                 case "user":
                     showMenu = false;
-                    UserInfoMenu();
+                    await UserInfoMenu();
                     break;
                 case "2":
                 case "computer":
@@ -34,7 +34,7 @@ class Menus
                 case "3":
                 case "about":
                     showMenu = false;
-                    AboutMenu();
+                    await AboutMenu();
                     break;
                 case "5":
                 case "quit":
@@ -54,15 +54,15 @@ class Menus
             }
         }
     }
-    public static void AboutMenu()
+    public static async Task AboutMenu()
     {
         Console.Clear();
         ColoredConsole.WriteLine($"UITS Desktop Support App \n {Red("Version")} {Application.ProductVersion} \n Developed by Isaac {Cyan("Broomall")} ({Green("i")}{Cyan("broomall")})\n Press {DarkYellow("Enter")} to go back.");
         Console.ReadLine();
         Console.Clear();
-        MainMenu();
+        await MainMenu();
     }
-    public static async void UserInfoMenu()
+    public static async Task UserInfoMenu()
     {
         Console.Clear();
         bool userMenu = true;
@@ -79,12 +79,33 @@ class Menus
                 case "back":
                     Console.Clear();
                     userMenu = false;
-                    MainMenu();
+                    await MainMenu();
                     break;
                 case "exit":
                     userMenu = false;
                     break;
                 case "":
+                    break;
+                case "-reload":
+                    try
+                    {
+                        await Globals.DepartmentService.ReloadDataAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error: {ex}. Data not reloaded properly. Please restart app.");
+                    }
+                    break;
+                case "-cl":
+                    HTTP.OpenURL("https://emailarizona.sharepoint.com/:x:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/Customer%20List%20by%20Core%20Support%20Team.xlsx?d=w086768426f3745cda79987cc374d1ed5&csf=1&web=1&e=SbhIsJ");
+                    ColoredConsole.WriteLine($"{Green("Opening")} Customer List by Core Support Team");
+                    break;
+                case "-ps":
+                    HTTP.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/DST%20TS-Phone%20Coverage.docx?d=w080a9cc0f66c4a9baa10e7f9eeed418f&csf=1&web=1&e=Mre5jG");
+                    ColoredConsole.WriteLine($"{Green("Opening")} Desktop Support Phone Schedule");
+                    break;
+                case "help":
+                    HiddenMenu();
                     break;
                 default:
                     ADUserInfo ADUser = new ADUserInfo(userMenuText);
@@ -97,33 +118,6 @@ class Menus
                         Console.WriteLine($"{userMenuText} is not a Valid NetID");
                     }
 
-                    break;
-                case "-reload":
-                    try
-                    {
-
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error: {ex}. Data not reloaded properly. Please restart app.");
-                    }
-                    break;
- /*               case "-fr":
-                    if (AD.adDeptStack.Peek() != null)
-                    {
-                        CSV.FREntry(AD.adDeptStack.Peek());
-                    }
-                    break; */
-                case "-cl":
-                    HTTP.OpenURL("https://emailarizona.sharepoint.com/:x:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/Customer%20List%20by%20Core%20Support%20Team.xlsx?d=w086768426f3745cda79987cc374d1ed5&csf=1&web=1&e=SbhIsJ");
-                    ColoredConsole.WriteLine($"{Green("Opening")} Customer List by Core Support Team");
-                    break;
-                case "-ps":
-                    HTTP.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/DST%20TS-Phone%20Coverage.docx?d=w080a9cc0f66c4a9baa10e7f9eeed418f&csf=1&web=1&e=Mre5jG");
-                    ColoredConsole.WriteLine($"{Green("Opening")} Desktop Support Phone Schedule");
-                    break;
-                case "help":
-                    HiddenMenu();
                     break;
             }
         }

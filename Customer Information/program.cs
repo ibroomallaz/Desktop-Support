@@ -11,7 +11,7 @@
             //Run Version check and initial processes
             await VersionChecker.VersionCheck();
             Console.Clear();
-            Menus.MainMenu();
+            await Menus.MainMenu();
         }
         catch (Exception ex)
         {

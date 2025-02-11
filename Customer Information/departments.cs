@@ -22,6 +22,7 @@ public interface IDepartment
     List<FileRepo>? FileRepos { get; }
     string? Notes { get; }
 
+
 }
 
 public class Department : IDepartment
@@ -57,6 +58,7 @@ public interface IDepartmentService
     Task<bool> HasFileRepoAsync(string departmentNumber);
     Task<FileRepo?> GetFileRepoAsync(string departmentNumber);
     Task PrecacheDataAsync();
+    Task ReloadDataAsync();
 }
 
 
@@ -137,11 +139,23 @@ public class DepartmentService : IDepartmentService
         await _lock.WaitAsync();
         try
         {
-            if (_departments != null) return; // Already loaded
-            using HttpClient client = new HttpClient();
-            
-            string json = await client.GetStringAsync(Globals.g_DepartmentJSONURL);
+            if (_departments != null)
+                return; // Already loaded
 
+            await LoadDepartmentsInternalAsync();
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    private async Task LoadDepartmentsInternalAsync()   //Load data without sempahor, helps prevent issues on -reaload command
+    {
+        try
+        {
+            using HttpClient client = new HttpClient();
+            string json = await client.GetStringAsync(Globals.g_DepartmentJSONURL);
 
             var wrapper = JsonConvert.DeserializeObject<DepartmentListWrapper>(json);
             _departments = wrapper?.DepartmentList?
@@ -155,10 +169,6 @@ public class DepartmentService : IDepartmentService
             Console.WriteLine($"Failed to load department data: {e}");
             _departments = new List<IDepartment>();
         }
-        finally
-        {
-            _lock.Release();
-        }
     }
 
     private async Task EnsureDataLoaded()
@@ -168,4 +178,20 @@ public class DepartmentService : IDepartmentService
             await LoadDepartmentsAsync();
         }
     }
+    public async Task ReloadDataAsync()
+    {
+        await _lock.WaitAsync();
+        try
+        {
+            // Clear the current cache
+            _departments = null;
+            await LoadDepartmentsInternalAsync();
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+
 }
