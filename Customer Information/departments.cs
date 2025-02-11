@@ -113,11 +113,8 @@ public class DepartmentService : IDepartmentService
         // If the department is split (i.e. supports two teams), then return at most two names.
         if (department.SplitSupport)
         {
-            // If there is at least one team, add the first team's name.
             if (department.Teams.Count >= 1)
                 teamNames.Add(department.Teams[0].Name);
-
-            // If there is a second team, add it.
             if (department.Teams.Count >= 2)
                 teamNames.Add(department.Teams[1].Name);
         }
@@ -183,17 +180,6 @@ public class DepartmentService : IDepartmentService
             Console.WriteLine($"Department {departmentNumber} not found.");
             return;
         }
-
-        // Debug: check if dept details are being printed
-        Console.WriteLine($"Printing details for department {dept.Number}");
-
-        Console.WriteLine($"Department: {dept.Number}");
-        Console.WriteLine($"  Support Known: {dept.SupportKnown}");
-        Console.WriteLine($"  Split Support: {dept.SplitSupport}");
-
-        // Debug output for team count
-        Console.WriteLine($"  Teams count: {dept.Teams?.Count ?? 0}");
-
         if (dept.Teams != null && dept.Teams.Any())
         {
             int index = 1;
