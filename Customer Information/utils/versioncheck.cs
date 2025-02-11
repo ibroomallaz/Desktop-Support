@@ -107,15 +107,13 @@ public class VersionChecker
                    latest > current;
         }
 
-        // Extract base version and beta number
         (string baseCurrent, int currentBetaNumber) = ExtractBetaVersion(currentVersion);
         (string baseNew, int newBetaNumber) = ExtractBetaVersion(newVersion);
 
-        // Compare base versions first
         if (Version.TryParse(baseCurrent, out var currentBase) && Version.TryParse(baseNew, out var newBase))
         {
-            if (newBase > currentBase) return true; // Newer major/minor version wins
-            if (newBase < currentBase) return false; // Older version is not an update
+            if (newBase > currentBase) return true;
+            if (newBase < currentBase) return false; 
         }
 
         // Compare beta numbers
@@ -150,7 +148,7 @@ public class CurrentVersion
     public string? Version { get; set; }
 
     [JsonProperty("location", NullValueHandling = NullValueHandling.Ignore)]
-    public string? Location { get; set; } // URL for downloading the new stable version
+    public string? Location { get; set; } 
 
     [JsonProperty("changelog", NullValueHandling = NullValueHandling.Ignore)]
     public string? Changelog { get; set; }
@@ -165,7 +163,7 @@ public class PreReleaseVersion
     public string? Version { get; set; }
 
     [JsonProperty("location", NullValueHandling = NullValueHandling.Ignore)]
-    public string? Location { get; set; } // URL for downloading the new beta version
+    public string? Location { get; set; }
 
     [JsonProperty("changelog", NullValueHandling = NullValueHandling.Ignore)]
     public string? Changelog { get; set; }
