@@ -82,13 +82,12 @@ public class MIMCheck
                             Console.WriteLine(member);
                         }
                     }
-
                     break;
             }
         }
     }
 
-    public static void CurrentMIMMenu()
+    public static async void CurrentMIMMenu()
     {
         bool currentMIMMenu = true;
         while (currentMIMMenu)
@@ -106,7 +105,7 @@ public class MIMCheck
                 case "exit":
                     currentMIMMenu = false;
                     Console.Clear();
-                    Menus.MainMenu();
+                    await Menus.MainMenu();
                     break;
                 case "":
                     break;
@@ -114,7 +113,30 @@ public class MIMCheck
                     Console.Clear();
                     break;
                 default:
-                //    AD.ADMIMGroupCheck(currentMIMMenuAnswer);
+                    ADUserInfo user = new ADUserInfo(currentMIMMenuAnswer);
+                    user.GetADMIMGroups(currentMIMMenuAnswer);
+                    bool mimExists = user.MimGroupExists ?? false;
+                    Console.WriteLine();
+                    if (!user.Exists)
+                    {
+                        Console.WriteLine($"{currentMIMMenuAnswer} is not a Valid NetID");
+                        Console.WriteLine();
+                        break;
+                    }
+                    if (user.Exists && mimExists)
+                    {
+                        Console.WriteLine(); //Asthetics
+                        foreach (var group in user.MimGroupsList)
+                        {
+                            Console.WriteLine(group);
+                        }
+
+                    }
+                    else
+                    {
+                        Console.WriteLine($"No valid MIM groups found for {currentMIMMenuAnswer}");
+                    }
+                    Console.WriteLine();
                     break;
             }
 

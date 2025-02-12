@@ -18,6 +18,8 @@ public class ADUserInfo
     public string? Division { get; set; }
     public string? Ex { get; set; }
     public bool Exists { get; set; }
+    public bool? MimGroupExists { get; set; }
+    public List<string>? MimGroupsList {  get; set; } 
     public static string UserFromNumber(string userNumber)
     {
         using (DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP))
@@ -98,7 +100,7 @@ public class ADUserInfo
 
 
     }
-    public List<string>? ADMIMGroupCheck(string netid) 
+    public List<string>? GetADMIMGroups(string netid) 
 {
     List<string> mimGroups = new List<string>();
     try
@@ -108,15 +110,17 @@ public class ADUserInfo
             UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
             if (userPrincipal != null)
             {
-                this.Exists = true;
                 mimGroups = userPrincipal.GetGroups()?
                                        .Where(group => group.Name.Contains("MIM"))
                                        .Select(group => group.Name)
                                        .ToList() ?? new List<string>();
-
+                this.MimGroupsList = mimGroups;
+                if (mimGroups.Count > 0)
+                    { this.MimGroupExists = true; }
+                else { this.MimGroupExists = false; }
                 return mimGroups;
-            }  
-            this.Exists = false;
+            }
+            return mimGroups;
         }
     }
     catch (Exception ex)
