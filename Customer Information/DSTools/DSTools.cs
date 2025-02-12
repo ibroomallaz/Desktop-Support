@@ -25,7 +25,7 @@ public partial class DSTools
                 case "1":
                     tlcMenu = false;
                     Console.Clear();
-                    await QuickLinks.QLMain();
+                    await QuickLinks.QLMainMenu();
                     break;
                 case "2":
                     tlcMenu = false;

@@ -12,7 +12,7 @@ public class QuickLinks
     private static Links cachedLinks = null;
     private static readonly HttpClient client = new HttpClient();
 
-    public static async Task<Links> GetLinksAsync()
+    public static async Task<Links> GetQuickLinksDataAsync()
     {
         if (cachedLinks == null)
         {
@@ -38,10 +38,7 @@ public class QuickLinks
         return cachedLinks;
     }
 
-
-    /// Forces a reload of the quick links data from the web.
-
-    public static async Task ReloadLinksAsync()
+    public static async Task ReloadQuickLinksDataAsync()
     {
         using (HttpClient client = new HttpClient())
         {
@@ -100,14 +97,12 @@ public class QuickLinks
         }
     }
 
-    /// Main quick links menu. This method retrieves the cached data (or downloads it if needed)
 
-
-    public static async Task QLMain()
+    public static async Task QLMainMenu()
     {
         
         Console.Clear();
-        Links quicklinks = await GetLinksAsync();
+        Links quicklinks = await GetQuickLinksDataAsync();
         bool quickLinksMenu = true;
 
         while (quickLinksMenu)
@@ -124,18 +119,18 @@ public class QuickLinks
             {
                 case "back":
                     quickLinksMenu = false;
-                    DSTools.DSToolsMenu();
+                    await DSTools.DSToolsMenu();
                     break;
                 case "exit":
                     quickLinksMenu = false;
                     Console.Clear();
-                    Menus.MainMenu();
+                    await Menus.MainMenu();
                     break;
                 case "clear":
                     Console.Clear();
                     break;
                 case "-reload":
-                   await ReloadLinksAsync();
+                   await ReloadQuickLinksDataAsync();
                     quicklinks = cachedLinks;
                     break;
                 default:

@@ -198,7 +198,6 @@ public class ADUserInfo
         ColoredConsole.Write($"{Cyan("O365 Licensing: ")}");
         ColoredConsole.WriteLine(ADUser.License.Red());
 
-        // Use DepartmentNumber to search in the cached department data.
         if (!string.IsNullOrEmpty(ADUser.DepartmentNumber))
         {
             var department = await Globals.DepartmentService.GetDepartmentAsync(ADUser.DepartmentNumber);
@@ -274,7 +273,6 @@ public class ADComputer
         var memberOf = computer.Properties["memberOf"];
         if (memberOf != null)
         {
-            // Loop through the list of groups the computer is a member of
             foreach (var group in memberOf)
             {
                 if (group.ToString().Contains("UA-MEMHybridDevices", StringComparison.OrdinalIgnoreCase))

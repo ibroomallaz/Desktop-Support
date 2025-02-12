@@ -139,7 +139,7 @@ class Menus
                 case "back":
                     Console.Clear();
                     computerMenu = false;
-                    MainMenu();
+                    await MainMenu();
                     break;
                 case "exit":
                     computerMenu = false;
@@ -166,7 +166,6 @@ class Menus
        
         ColoredConsole.WriteLine($"Unlisted functions and options:");
         ColoredConsole.WriteLine($"\"{Cyan("-cl")}\": {DarkYellow("Customer List")} - Pulls up Desktop Support Customer list Sharepoint document.");
-        ColoredConsole.WriteLine($"\"{Cyan("-fr")}\": {DarkYellow("File Repository")} - Opens Department specific repository after a search shows one is available.");
         ColoredConsole.WriteLine($"\"{Cyan("-reload")}\": {DarkYellow("Reloads")} csv file in the event that data isn't updating or loading properly.");
         ColoredConsole.WriteLine($"\"{Cyan("-ps")}\": {DarkYellow("Phone Schedule")} - Opens the Desktop Support Phone schedule.");
 

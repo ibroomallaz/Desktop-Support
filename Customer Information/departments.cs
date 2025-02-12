@@ -57,7 +57,7 @@ public interface IDepartmentService
     Task<string?> GetNotesAsync(string departmentNumber);
     Task<bool> HasFileRepoAsync(string departmentNumber);
     Task<FileRepo?> GetFileRepoAsync(string departmentNumber);
-    Task PrecacheDataAsync();
+    Task PreCacheDataAsync();
     Task ReloadDataAsync();
 }
 
@@ -73,7 +73,7 @@ public class DepartmentService : IDepartmentService
         _ = LoadDepartmentsAsync();
     }
 
-    public async Task PrecacheDataAsync()
+    public async Task PreCacheDataAsync()
     {
         await EnsureDataLoaded();
     }
@@ -107,11 +107,9 @@ public class DepartmentService : IDepartmentService
         var department = await GetDepartmentAsync(departmentNumber);
         List<string> teamNames = new();
 
-        // If the department or its team list is null or empty, return the empty list.
         if (department == null || department.Teams == null || !department.Teams.Any())
             return teamNames;
 
-        // If the department is split (i.e. supports two teams), then return at most two names.
         if (department.SplitSupport)
         {
             if (department.Teams.Count >= 1)
@@ -121,7 +119,6 @@ public class DepartmentService : IDepartmentService
         }
         else
         {
-            // For non‑split departments, just return the first team’s name.
             teamNames.Add(department.Teams[0].Name);
         }
 
@@ -183,7 +180,6 @@ public class DepartmentService : IDepartmentService
         await _lock.WaitAsync();
         try
         {
-            // Clear the current cache
             _departments = null;
             await LoadDepartmentsInternalAsync();
         }
