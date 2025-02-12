@@ -264,6 +264,7 @@ public class ADComputer
     public bool? IsHybridGroupMember { get; set; }
     public string? OperatingSystem { get; set; }
     public string? Ex { get; set; }
+    public bool Exists { get; set; }
     private bool _HybridGroup(DirectoryEntry computer)
     {
         var memberOf = computer.Properties["memberOf"];
@@ -295,6 +296,7 @@ public class ADComputer
             SearchResult? result = searcher.FindOne();
             if (result != null)
             {
+                this.Exists = true;
                 DirectoryEntry computer = result.GetDirectoryEntry();
                 string? distinguishedName = computer.Properties["distinguishedName"].Value?.ToString() ?? null;
                 string[]? dnParts = distinguishedName.Split(',');
@@ -322,6 +324,7 @@ public class ADComputer
 
                 else
                 {
+                    this.Exists = false;
                     throw new ArgumentException($"Computer name {hostname} not found.");
                 }
                 this.IsHybridGroupMember = _HybridGroup(computer);
@@ -330,6 +333,26 @@ public class ADComputer
         catch (Exception ex)
         {
             this.Ex = ex.ToString();
+        }
+    }
+    public static async Task PrintADComputerInfo(ADComputer computer)
+    {
+
+        ColoredConsole.Write($"{Cyan("Location: ")}");
+        ColoredConsole.WriteLine(computer.OUs.Red());
+        if (!string.IsNullOrEmpty(computer.Description))
+        {
+            ColoredConsole.Write($"{Cyan("Description: ")}");
+            ColoredConsole.WriteLine(computer.Description.Red());
+        }
+        if (!string.IsNullOrEmpty(computer.OperatingSystem))
+        {
+            ColoredConsole.Write($"{Cyan("Operating System: ")}");
+            ColoredConsole.WriteLine(computer.OperatingSystem.Red());
+        }
+        if (computer.IsHybridGroupMember)
+        {
+
         }
     }
 }

@@ -122,7 +122,7 @@ class Menus
             }
         }
     }
-    public static void ComputerInfoMenu()
+    public static async Task ComputerInfoMenu()
     {
         Console.Clear();
         bool computerMenu = true;
@@ -147,9 +147,16 @@ class Menus
                 case "":
                     break;
                 default:
-                    Console.WriteLine();
- //                   AD.ADComputer(computerMenuText);
-                    Console.WriteLine();
+                    ADComputer ADComputer = new ADComputer(computerMenuText);
+                    if (ADComputer.Exists)
+                    {
+                        await ADComputer.PrintADComputerInfo(ADComputer);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{computerMenuText} is not in BlueCat.");
+                    }
+
                     break;
             }
         }
