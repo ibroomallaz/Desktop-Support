@@ -5,7 +5,7 @@ public partial class DSTools
 
 {
 
-    public static async void DSToolsMenu()
+    public static async Task DSToolsMenu()
     {
         bool tlcMenu = true;
         Console.Clear();
@@ -25,7 +25,7 @@ public partial class DSTools
                 case "1":
                     tlcMenu = false;
                     Console.Clear();
-                    QuickLinks.QLMain();
+                    await QuickLinks.QLMain();
                     break;
                 case "2":
                     tlcMenu = false;

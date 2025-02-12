@@ -8,8 +8,8 @@
         "PreRelease": {
             "exists": true,
             "version": "3.0.0-alpha2",
-            "location": "",
-            "changelog": "Testing"
+            "location": "https://emailarizona.sharepoint.com/:u:/r/sites/TLC-desktopsupportapp/Shared%20Documents/General/Beta%20Release/Desktop%20Support%20App%203-0-0-alpha-2-fd.exe?csf=1&web=1&e=fsKL8Z",
+            "changelog": "AD Group search renenabled"
         }
     }
 }

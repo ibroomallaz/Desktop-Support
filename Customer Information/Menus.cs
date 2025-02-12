@@ -29,7 +29,7 @@ class Menus
                 case "2":
                 case "computer":
                     showMenu = false;
-                    ComputerInfoMenu();
+                    await ComputerInfoMenu();
                     break;
                 case "3":
                 case "about":
@@ -42,7 +42,7 @@ class Menus
                     break;
                 case "4":
                     showMenu = false;
-                    DSTools.DSToolsMenu();
+                    await DSTools.DSToolsMenu();
                     break;
                 case "clear":
                     Console.Clear();
