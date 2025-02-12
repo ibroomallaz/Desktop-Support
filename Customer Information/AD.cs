@@ -366,9 +366,12 @@ public class ADComputer
 public class ADGroup
 {
     public bool Exists { get; set; }
+    public List<string>? GroupMembers { get; set; }
+    public int? MemberCount { get; set; }
     public ADGroup(string groupname)
     {
         this.Exists = _ADGroupExistsCheck(groupname);
+        this.GroupMembers = ADGroupMembers(groupname);
     }
 
     public List<string> ADGroupMembers(string groupName)
@@ -388,6 +391,7 @@ public class ADGroup
                             groupMembers.Add(p.Name);
                             groupMembers.Sort();
                         }
+                        this.MemberCount = groupMembers.Count;
                     }
                     else
                     {

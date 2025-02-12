@@ -5,7 +5,7 @@ public partial class DSTools
 
 {
 
-    public static void DSToolsMenu()
+    public static async void DSToolsMenu()
     {
         bool tlcMenu = true;
         Console.Clear();
@@ -36,7 +36,7 @@ public partial class DSTools
                 case "exit":
                     tlcMenu = false;
                     Console.Clear();
-                    Menus.MainMenu();
+                    await Menus.MainMenu();
                     break;
                 default:
                     tlcMenu = true;
@@ -56,7 +56,7 @@ public partial class DSTools
     
  
 
-    static void  UserLookupByNumber()
+    static async void  UserLookupByNumber()
     {
         Console.Clear();
         bool userLBN = true;
@@ -77,7 +77,7 @@ public partial class DSTools
                     break;
                 case "exit":
                     userLBN = false;
-                    Menus.MainMenu();
+                    await Menus.MainMenu();
                     break;
                 case "":
                     break;
