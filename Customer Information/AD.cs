@@ -261,7 +261,7 @@ public class ADComputer
     private string? DistinguishedName { get; set; }
     public string? OUs { get; set; }
     public string? Description { get; set; }
-    public bool? IsHybridGroupMember { get; set; }
+    public bool IsHybridGroupMember { get; set; }
     public string? OperatingSystem { get; set; }
     public string? Ex { get; set; }
     public bool Exists { get; set; }
@@ -338,6 +338,7 @@ public class ADComputer
     public static async Task PrintADComputerInfo(ADComputer computer)
     {
 
+        Console.WriteLine();
         ColoredConsole.Write($"{Cyan("Location: ")}");
         ColoredConsole.WriteLine(computer.OUs.Red());
         if (!string.IsNullOrEmpty(computer.Description))
@@ -350,10 +351,16 @@ public class ADComputer
             ColoredConsole.Write($"{Cyan("Operating System: ")}");
             ColoredConsole.WriteLine(computer.OperatingSystem.Red());
         }
+        ColoredConsole.Write($"{Cyan("Hybrid Join Group: ")}");
         if (computer.IsHybridGroupMember)
         {
-
+            ColoredConsole.WriteLine($"{Green("Yes")}");
         }
+        else
+        {
+            ColoredConsole.WriteLine($"{Red("No")}");
+        }
+        Console.WriteLine();
     }
 }
 public class ADGroup
