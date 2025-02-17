@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/ibroomallaz/Desktop-Support</RepositoryUrl>
     <Version>3.0.0-Beta</Version>
 	  <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-	  <ApplicationIcon>lilyface.ico</ApplicationIcon>
+	  <ApplicationIcon>img\lilyface.ico</ApplicationIcon>
 	  <PackageIcon>PXL_20240504_214657726.jpg</PackageIcon>
   </PropertyGroup>
 
@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="lilyface.ico" />
+    <Content Include="img\lilyface.ico" />
   </ItemGroup>
 
   <ItemGroup>
