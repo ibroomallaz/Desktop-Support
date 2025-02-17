@@ -166,7 +166,7 @@ class Menus
        
         ColoredConsole.WriteLine($"Unlisted functions and options:");
         ColoredConsole.WriteLine($"\"{Cyan("-cl")}\": {DarkYellow("Customer List")} - Pulls up Desktop Support Customer list Sharepoint document.");
-        ColoredConsole.WriteLine($"\"{Cyan("-reload")}\": {DarkYellow("Reloads")} csv file in the event that data isn't updating or loading properly.");
+        ColoredConsole.WriteLine($"\"{Cyan("-reload")}\": {DarkYellow("Reloads")} departmental data in the event that data isn't updating or loading properly.");
         ColoredConsole.WriteLine($"\"{Cyan("-ps")}\": {DarkYellow("Phone Schedule")} - Opens the Desktop Support Phone schedule.");
 
     }
