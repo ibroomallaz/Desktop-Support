@@ -25,7 +25,7 @@ public class MIMCheck
                 case "2":
                     mimCheckMenu = false;
                     Console.Clear();
-                    ListMIMMenu();
+                    await ListMIMMenu();
                     break;
                 case "exit":
                 case "3":
@@ -36,7 +36,7 @@ public class MIMCheck
                 case "back":
                     Console.Clear();
                     mimCheckMenu = false;
-                    DSTools.DSToolsMenu();
+                    await DSTools.DSToolsMenu();
                     break;
                 default:
                     break;

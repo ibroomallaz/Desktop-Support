@@ -47,7 +47,7 @@ public partial class DSTools
                 case "3":
                     Console.Clear();
                     tlcMenu = false;
-                    UserLookupByNumber();
+                    await UserLookupByNumber();
                     break;
             }
 
@@ -56,7 +56,7 @@ public partial class DSTools
     
  
 
-    static async void  UserLookupByNumber()
+    static async Task  UserLookupByNumber()
     {
         Console.Clear();
         bool userLBN = true;
@@ -73,7 +73,7 @@ public partial class DSTools
                 case "back":
                     Console.Clear();
                     userLBN = false;
-                    DSTools.DSToolsMenu();
+                    await DSTools.DSToolsMenu();
                     break;
                 case "exit":
                     userLBN = false;
