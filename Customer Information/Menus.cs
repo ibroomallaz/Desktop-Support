@@ -1,10 +1,11 @@
 ﻿using Colors.Net;
 using Colors.Net.StringColorExtensions;
+using Microsoft.Extensions.DependencyInjection;
 using static Colors.Net.StringStaticMethods;
 
 class Menus
 {
-    public static void MainMenu()
+    public static async Task MainMenu()
     {
         bool showMenu = true;
         while (showMenu)
@@ -23,17 +24,17 @@ class Menus
                 case "1":
                 case "user":
                     showMenu = false;
-                    UserInfoMenu();
+                    await UserInfoMenu();
                     break;
                 case "2":
                 case "computer":
                     showMenu = false;
-                    ComputerInfoMenu();
+                    await ComputerInfoMenu();
                     break;
                 case "3":
                 case "about":
                     showMenu = false;
-                    AboutMenu();
+                    await AboutMenu();
                     break;
                 case "5":
                 case "quit":
@@ -41,7 +42,7 @@ class Menus
                     break;
                 case "4":
                     showMenu = false;
-                    DSTools.DSToolsMenu();
+                    await DSTools.DSToolsMenu();
                     break;
                 case "clear":
                     Console.Clear();
@@ -53,15 +54,15 @@ class Menus
             }
         }
     }
-    public static void AboutMenu()
+    public static async Task AboutMenu()
     {
         Console.Clear();
         ColoredConsole.WriteLine($"UITS Desktop Support App \n {Red("Version")} {Application.ProductVersion} \n Developed by Isaac {Cyan("Broomall")} ({Green("i")}{Cyan("broomall")})\n Press {DarkYellow("Enter")} to go back.");
         Console.ReadLine();
         Console.Clear();
-        MainMenu();
+        await MainMenu();
     }
-    public static void UserInfoMenu()
+    public static async Task UserInfoMenu()
     {
         Console.Clear();
         bool userMenu = true;
@@ -78,35 +79,21 @@ class Menus
                 case "back":
                     Console.Clear();
                     userMenu = false;
-                    MainMenu();
+                    await MainMenu();
                     break;
                 case "exit":
                     userMenu = false;
                     break;
                 case "":
                     break;
-                default:
-                    Console.WriteLine();
-                    AD.ADUser(userMenuText);
-                    Console.WriteLine();
-                    break;
                 case "-reload":
                     try
                     {
-                        CSV.GetCSV();
-                        CSV._entries.Clear();
-                        CSV.CSVMain();
-                        Console.WriteLine("Reloaded data.");
+                        await Globals.DepartmentService.ReloadDataAsync();
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Error: {ex}. Data not reloaded properly. Please restart app.");
-                    }
-                    break;
-                case "-fr":
-                    if (AD.adDeptStack.Peek() != null)
-                    {
-                        CSV.FREntry(AD.adDeptStack.Peek());
                     }
                     break;
                 case "-cl":
@@ -120,10 +107,22 @@ class Menus
                 case "help":
                     HiddenMenu();
                     break;
+                default:
+                    ADUserInfo ADUser = new ADUserInfo(userMenuText);
+                    if (ADUser.Exists)
+                    {
+                        ADUserInfo.PrintADUserInfo(ADUser);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{userMenuText} is not a Valid NetID");
+                    }
+
+                    break;
             }
         }
     }
-    public static void ComputerInfoMenu()
+    public static async Task ComputerInfoMenu()
     {
         Console.Clear();
         bool computerMenu = true;
@@ -140,7 +139,7 @@ class Menus
                 case "back":
                     Console.Clear();
                     computerMenu = false;
-                    MainMenu();
+                    await MainMenu();
                     break;
                 case "exit":
                     computerMenu = false;
@@ -148,9 +147,16 @@ class Menus
                 case "":
                     break;
                 default:
-                    Console.WriteLine();
-                    AD.ADComputer(computerMenuText);
-                    Console.WriteLine();
+                    ADComputer ADComputer = new ADComputer(computerMenuText);
+                    if (ADComputer.Exists)
+                    {
+                        await ADComputer.PrintADComputerInfo(ADComputer);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{computerMenuText} is not in BlueCat.");
+                    }
+
                     break;
             }
         }
@@ -160,7 +166,6 @@ class Menus
        
         ColoredConsole.WriteLine($"Unlisted functions and options:");
         ColoredConsole.WriteLine($"\"{Cyan("-cl")}\": {DarkYellow("Customer List")} - Pulls up Desktop Support Customer list Sharepoint document.");
-        ColoredConsole.WriteLine($"\"{Cyan("-fr")}\": {DarkYellow("File Repository")} - Opens Department specific repository after a search shows one is available.");
         ColoredConsole.WriteLine($"\"{Cyan("-reload")}\": {DarkYellow("Reloads")} csv file in the event that data isn't updating or loading properly.");
         ColoredConsole.WriteLine($"\"{Cyan("-ps")}\": {DarkYellow("Phone Schedule")} - Opens the Desktop Support Phone schedule.");
 
