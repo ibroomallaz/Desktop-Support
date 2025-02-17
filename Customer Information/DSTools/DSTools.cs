@@ -83,7 +83,7 @@ public partial class DSTools
                     break;
                 default:
                     Console.WriteLine();
-//                    AD.ADUserFromNumber(userLBNText);
+                    await ADUserInfo.UserFromNumber(userLBNText);
                     Console.WriteLine();
                     break;
 

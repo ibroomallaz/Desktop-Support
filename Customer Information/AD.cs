@@ -20,7 +20,7 @@ public class ADUserInfo
     public bool Exists { get; set; }
     public bool? MimGroupExists { get; set; }
     public List<string>? MimGroupsList {  get; set; } 
-    public static string UserFromNumber(string userNumber)
+    public static async Task UserFromNumber(string userNumber)
     {
         using (DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP))
         {
@@ -37,17 +37,17 @@ public class ADUserInfo
 
                     if (result != null)
                     {
-                        return result?.Properties["displayName"][0].ToString() ?? "Unknown";
+                         Console.WriteLine(result?.Properties["displayName"][0].ToString() ?? "Unknown");
                     }
                     else
                     {
-                        return "Employee/StudentID not found.";
+                        Console.WriteLine("Employee/StudentID not found.");
                     }
 
                 }
                 catch (Exception ex)
                 {
-                    return ex.Message;
+                    Console.WriteLine(ex.Message);
                 }
             }
         }

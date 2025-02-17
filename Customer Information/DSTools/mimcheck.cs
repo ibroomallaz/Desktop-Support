@@ -46,7 +46,7 @@ public class MIMCheck
 
     }
 
-    public static void ListMIMMenu()
+    public static async Task ListMIMMenu()
     {
         bool listMIMMEnu = true;
         while (listMIMMEnu)
@@ -62,7 +62,7 @@ public class MIMCheck
                 case "exit":
                     listMIMMEnu = false;
                     Console.Clear();
-                    Menus.MainMenu();
+                    await Menus.MainMenu();
                     break;
                 case "clear":
                     Console.Clear();
