@@ -92,53 +92,55 @@ public class VersionChecker
 
     private static bool IsNewerVersion(string? currentVersion, string? newVersion)
     {
-        if (string.IsNullOrEmpty(newVersion)) return false; // No new version available
-        if (string.IsNullOrEmpty(currentVersion)) return true; // If current is null, assume update is available
+        if (string.IsNullOrEmpty(newVersion)) return false; 
+        if (string.IsNullOrEmpty(currentVersion)) return true; 
 
-        // Check if either version has an alpha/beta suffix
-        bool currentIsBeta = currentVersion.Contains("alpha") || currentVersion.Contains("beta");
-        bool newIsBeta = newVersion.Contains("alpha") || newVersion.Contains("beta");
+        bool currentIsPreRelease = currentVersion.Contains("alpha") || currentVersion.Contains("beta");
+        bool newIsPreRelease = newVersion.Contains("alpha") || newVersion.Contains("beta");
 
-        if (!currentIsBeta && !newIsBeta)
+        if (!currentIsPreRelease && !newIsPreRelease)
         {
-            // Normal version comparison
             return Version.TryParse(currentVersion, out var current) &&
                    Version.TryParse(newVersion, out var latest) &&
                    latest > current;
         }
 
-        (string baseCurrent, int currentBetaNumber) = ExtractBetaVersion(currentVersion);
-        (string baseNew, int newBetaNumber) = ExtractBetaVersion(newVersion);
+        var (baseCurrent, labelCurrent, currentBetaNumber) = ExtractBetaVersion(currentVersion);
+        var (baseNew, labelNew, newBetaNumber) = ExtractBetaVersion(newVersion);
 
         if (Version.TryParse(baseCurrent, out var currentBase) && Version.TryParse(baseNew, out var newBase))
         {
-            if (newBase > currentBase) return true;
-            if (newBase < currentBase) return false; 
+            if (newBase > currentBase)
+                return true;
+            if (newBase < currentBase)
+                return false;
         }
 
-        // Compare beta numbers
+        if (string.Equals(labelCurrent, "alpha", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(labelNew, "beta", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        // If both versions have the same label or no special ordering is required, compare the beta numbers.
         return newBetaNumber > currentBetaNumber;
     }
 
-    private static (string baseVersion, int betaNumber) ExtractBetaVersion(string version)
-    {
-        // Regex to extract base version and beta/alpha suffix number
-        var match = Regex.Match(version, @"^(?<base>\d+\.\d+\.\d+)(?:-(?<label>alpha|beta)(?<number>\d+)?)?$");
 
+    private static (string baseVersion, string? label, int betaNumber) ExtractBetaVersion(string version)
+    {
+        var match = Regex.Match(version, @"^(?<base>\d+\.\d+\.\d+)(?:-(?<label>alpha|beta)(?<number>\d+)?)?$");
         if (match.Success)
         {
             string baseVersion = match.Groups["base"].Value;
-            string label = match.Groups["label"].Value;
+            string? label = match.Groups["label"].Success ? match.Groups["label"].Value : null;
             string number = match.Groups["number"].Value;
-
-            // If no number is found, assume 1
             int betaNumber = string.IsNullOrEmpty(number) ? 1 : int.Parse(number);
-
-            return (baseVersion, betaNumber);
+            return (baseVersion, label, betaNumber);
         }
-
-        return (version, 1); // Default fallback
+        return (version, null, 1); // Fallback if regex fails
     }
+
 }
 
 // JSON Classes
