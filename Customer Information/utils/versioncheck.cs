@@ -65,7 +65,7 @@ public class VersionChecker
             if (isBetaUpdateAvailable)
             {
                 // Only update beta if a new beta version exists
-                PromptUpdate("Beta Update Available", versionInfo.PreRelease.Version, installedVersion, versionInfo.PreRelease.Location, versionInfo.PreRelease.Changelog, true);
+                PromptUpdate("PreRelease Update Available", versionInfo.PreRelease.Version, installedVersion, versionInfo.PreRelease.Location, versionInfo.PreRelease.Changelog, true);
             }
             else if (!isBetaHigherThanStable && isStableUpdateAvailable)
             {
@@ -133,7 +133,7 @@ public class VersionChecker
 
     private static (string baseVersion, string? label, int betaNumber) ExtractBetaVersion(string version)
     {
-        var match = Regex.Match(version, @"^(?<base>\d+\.\d+\.\d+)(?:-(?<label>alpha|beta)(?<number>\d+)?)?$");
+        var match = Regex.Match(version, @"^(?<base>\d+\.\d+\.\d+)(?:-(?<label>alpha|beta)(?<number>\d+)?)?$", RegexOptions.IgnoreCase);
         if (match.Success)
         {
             string baseVersion = match.Groups["base"].Value;
