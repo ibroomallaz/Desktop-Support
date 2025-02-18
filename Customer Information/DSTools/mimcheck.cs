@@ -5,7 +5,7 @@ using static Colors.Net.StringStaticMethods;
 
 public class MIMCheck
 {
-    public static async void MIMCheckMenu()
+    public static async Task MIMCheckMenu()
     {
         bool mimCheckMenu = true;
         while (mimCheckMenu)
@@ -87,7 +87,7 @@ public class MIMCheck
         }
     }
 
-    public static async void CurrentMIMMenu()
+    public static async Task CurrentMIMMenu()
     {
         bool currentMIMMenu = true;
         while (currentMIMMenu)

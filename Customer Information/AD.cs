@@ -174,7 +174,7 @@ public class ADUserInfo
 
         return $"{res} {group3}";
     }
-    public static async void PrintADUserInfo(ADUserInfo ADUser)
+    public static async Task PrintADUserInfo(ADUserInfo ADUser)
     {
         Console.WriteLine(); // For asthetics
         ColoredConsole.WriteLine(ADUser.DisplayName.DarkYellow());
