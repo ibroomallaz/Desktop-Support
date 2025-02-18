@@ -111,7 +111,7 @@ class Menus
                     ADUserInfo ADUser = new ADUserInfo(userMenuText);
                     if (ADUser.Exists)
                     {
-                        ADUserInfo.PrintADUserInfo(ADUser);
+                        await ADUserInfo.PrintADUserInfo(ADUser);
                     }
                     else
                     {

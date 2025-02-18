@@ -30,7 +30,7 @@ public partial class DSTools
                 case "2":
                     tlcMenu = false;
                     Console.Clear();
-                    MIMCheck.MIMCheckMenu();
+                    await MIMCheck.MIMCheckMenu();
                     break;
                 case "back":
                 case "exit":

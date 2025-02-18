@@ -20,7 +20,7 @@ public class MIMCheck
                 case "1":
                     mimCheckMenu = false;
                     Console.Clear();
-                    CurrentMIMMenu();
+                    await CurrentMIMMenu();
                     break;
                 case "2":
                     mimCheckMenu = false;
@@ -57,7 +57,7 @@ public class MIMCheck
             {
                 case "back":
                     listMIMMEnu = false;
-                    MIMCheckMenu();
+                    await MIMCheckMenu();
                     break;
                 case "exit":
                     listMIMMEnu = false;
@@ -100,7 +100,7 @@ public class MIMCheck
                 case "back":
                     currentMIMMenu = false;
                     Console.Clear();
-                    MIMCheckMenu();
+                    await MIMCheckMenu();
                     break;
                 case "exit":
                     currentMIMMenu = false;
