@@ -47,13 +47,16 @@ public class VersionChecker
         string installedVersion = Application.ProductVersion;
         bool isBetaUser = BetaCheck();
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         bool isStableUpdateAvailable = IsNewerVersion(installedVersion, versionInfo.Current.Version);
         bool isBetaUpdateAvailable = versionInfo.PreRelease.Exists && IsNewerVersion(installedVersion, versionInfo.PreRelease.Version);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         bool isBetaHigherThanStable = IsNewerVersion(versionInfo.Current.Version, versionInfo.PreRelease.Version);
 
         // Notify about stable update (applies to all users)
         if (isStableUpdateAvailable && !isBetaUser)
         {
+#pragma warning disable CS8604 // Possible null reference argument.
             PromptUpdate("Update Available", versionInfo.Current.Version, installedVersion, versionInfo.Current.Location, versionInfo.Current.Changelog, false);
         }
 
@@ -68,6 +71,7 @@ public class VersionChecker
             {
                 // If beta version is not higher than stable and stable is newer or equal, update to stable
                 PromptUpdate("Stable Update Recommended", versionInfo.Current.Version, installedVersion, versionInfo.Current.Location, versionInfo.Current.Changelog, false);
+#pragma warning restore CS8604 // Possible null reference argument.
             }
         }
     }
@@ -174,14 +178,14 @@ public class PreReleaseVersion
 public class VersionInfo
 {
     [JsonProperty("Current")]
-    public CurrentVersion Current { get; set; }
+    public CurrentVersion? Current { get; set; }
 
     [JsonProperty("PreRelease")]
-    public PreReleaseVersion PreRelease { get; set; }
+    public PreReleaseVersion? PreRelease { get; set; }
 }
 
 public class Root
 {
     [JsonProperty("Version")]
-    public VersionInfo Version { get; set; }
+    public VersionInfo? Version { get; set; }
 }

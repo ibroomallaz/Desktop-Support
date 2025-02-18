@@ -60,7 +60,8 @@ public partial class DSTools
                     }
                     else
                     {
-                        Console.WriteLine("Please Choose a valid option\n");
+                        Console.Clear();
+                        ColoredConsole.WriteLine($"{Red("Please enter a valid option")}\n");
                     }
                     break;
             }

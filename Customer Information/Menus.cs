@@ -57,7 +57,7 @@ class Menus
                     break;
                 default:
                     Console.Clear();
-                    ColoredConsole.WriteLine($"{Red("Please enter a valid input")}\n");
+                    ColoredConsole.WriteLine($"{Red("Please enter a valid option")}\n");
                     break;
 
 

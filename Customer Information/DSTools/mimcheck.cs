@@ -14,7 +14,13 @@ public class MIMCheck
             ColoredConsole.WriteLine($"({Green("1")}) Report individual's current MIM Groups.");
             ColoredConsole.WriteLine($"({DarkYellow("2")}) Check current members of Dept MIM group.");
             ColoredConsole.WriteLine($"({DarkRed("3")}) Exit back to Main Menu");
-            string mimCheckMenuAnswer = Console.ReadLine().Trim().ToLower();
+            string? input = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                Console.Clear();
+                continue;
+            }
+            string mimCheckMenuAnswer = input.Trim().ToLower();
             switch (mimCheckMenuAnswer)
             {
                 case "1":
@@ -39,6 +45,8 @@ public class MIMCheck
                     await DSTools.DSToolsMenu();
                     break;
                 default:
+                    Console.Clear();
+                    ColoredConsole.WriteLine($"{Red("Please enter a valid option")}\n");
                     break;
 
             }
@@ -52,7 +60,9 @@ public class MIMCheck
         while (listMIMMEnu)
         {
             ColoredConsole.WriteLine($"Input Deparmtnet Number MIM group you wish to check, {DarkYellow("back")}, {Cyan("clear")}, or {DarkRed("exit")}:");
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             string listMIMMenuAnswer = Console.ReadLine().ToLower().Trim();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             switch (listMIMMenuAnswer)
             {
                 case "back":
@@ -77,10 +87,12 @@ public class MIMCheck
                     else
                     {                      
                         Console.WriteLine("Total group members: " + group.MemberCount);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                         foreach (var member in group.GroupMembers)
                         {
                             Console.WriteLine(member);
                         }
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                     }
                     break;
             }
@@ -94,7 +106,9 @@ public class MIMCheck
         {
             ColoredConsole.WriteLine($"Check current MIM groups:");
             ColoredConsole.WriteLine($"Enter {DarkGreen("Netid")}, {DarkYellow("Back")}, {Cyan("Clear")}, or {DarkRed("Exit")}:");
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             string currentMIMMenuAnswer = Console.ReadLine().ToLower().Trim();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             switch (currentMIMMenuAnswer)
             {
                 case "back":
@@ -126,10 +140,12 @@ public class MIMCheck
                     if (user.Exists && mimExists)
                     {
                         Console.WriteLine(); //Asthetics
+#pragma warning disable CS8602 // Dereference of a possibly null reference. Will not be null here
                         foreach (var group in user.MimGroupsList)
                         {
                             Console.WriteLine(group);
                         }
+#pragma warning restore CS8602
 
                     }
                     else
