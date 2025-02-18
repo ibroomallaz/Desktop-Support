@@ -105,7 +105,7 @@ class Menus
                     ColoredConsole.WriteLine($"{Green("Opening")} Desktop Support Phone Schedule");
                     break;
                 case "help":
-                    HiddenMenu();
+                    await HiddenMenu();
                     break;
                 default:
                     ADUserInfo ADUser = new ADUserInfo(userMenuText);
@@ -161,7 +161,7 @@ class Menus
             }
         }
     }
-    static void HiddenMenu()
+    static async Task HiddenMenu()
     {
        
         ColoredConsole.WriteLine($"Unlisted functions and options:");
