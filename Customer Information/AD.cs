@@ -20,7 +20,7 @@ public class ADUserInfo
     public bool Exists { get; set; }
     public bool? MimGroupExists { get; set; }
     public List<string>? MimGroupsList {  get; set; } 
-    public static async Task UserFromNumber(string userNumber)
+    public static Task UserFromNumber(string userNumber)
     {
         using (DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP))
         {
@@ -51,6 +51,7 @@ public class ADUserInfo
                 }
             }
         }
+        return Task.CompletedTask;
     }
 
 
@@ -275,10 +276,12 @@ public class ADComputer
         {
             foreach (var group in memberOf)
             {
+#pragma warning disable CS8602 // Dereference of a possibly null reference. Shutup complier, group won't be null if memberof isn't null
                 if (group.ToString().Contains("UA-MEMHybridDevices", StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
+#pragma warning restore CS8602
             }
             return false;
         }
@@ -292,44 +295,50 @@ public class ADComputer
         this.name = hostname;
         try
         {
-            DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP);
-            DirectorySearcher searcher = new DirectorySearcher(entry);
-            searcher.Filter = searchFilter;
-            SearchResult? result = searcher.FindOne();
-            if (result != null)
+            using (DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP))
+            using (DirectorySearcher searcher = new DirectorySearcher(entry))
             {
-                this.Exists = true;
-                DirectoryEntry computer = result.GetDirectoryEntry();
-                string? distinguishedName = computer.Properties["distinguishedName"].Value?.ToString() ?? null;
-                string[]? dnParts = distinguishedName.Split(',');
-                string ous = "";
-                // Loop through the DN parts and find the OUs
-                foreach (string dnPart in dnParts)
+                searcher.Filter = searchFilter;
+                SearchResult? result = searcher.FindOne();
+                if (result != null)
                 {
-                    if (dnPart.StartsWith("OU=", StringComparison.OrdinalIgnoreCase))
+                    this.Exists = true;
+                    using (DirectoryEntry computer = result.GetDirectoryEntry())
                     {
-                        if (!string.IsNullOrEmpty(ous))
-                            ous += ", ";
-                        ous += dnPart;
-                        this.OUs = ous;
+                        string? distinguishedName = computer.Properties["distinguishedName"].Value?.ToString();
+#pragma warning disable CS8602 // Dereference of a possibly null reference. DN will not be null if computer exists in AD
+                        string[]? dnParts = distinguishedName.Split(',');
+#pragma warning restore CS8602
+                        string ous = "";
+                        // Loop through the DN parts and find the OUs
+                        foreach (string dnPart in dnParts)
+                        {
+                            if (dnPart.StartsWith("OU=", StringComparison.OrdinalIgnoreCase))
+                            {
+                                if (!string.IsNullOrEmpty(ous))
+                                    ous += ", ";
+                                ous += dnPart;
+                                this.OUs = ous;
+                            }
+                        }
+                        if (computer.Properties[nameof(Description)].Value != null)
+                        {
+                            this.Description = computer.Properties["description"].Value?.ToString() ?? null;
+
+                        }
+                        if (computer.Properties[nameof(OperatingSystem)].Value != null)
+                        {
+                            this.OperatingSystem = computer.Properties[nameof(OperatingSystem)].Value?.ToString() ?? "Unknown";
+                        }
+
+                        else
+                        {
+                            this.Exists = false;
+                            throw new ArgumentException($"Computer name {hostname} not found.");
+                        }
+                        this.IsHybridGroupMember = _HybridGroup(computer);
                     }
                 }
-                if (computer.Properties[nameof(Description)].Value != null)
-                {
-                    this.Description = computer.Properties["description"].Value?.ToString() ?? null;
-
-                }
-                if (computer.Properties[nameof(OperatingSystem)].Value != null)
-                {
-                    this.OperatingSystem = computer.Properties[nameof(OperatingSystem)].Value?.ToString() ?? "Unknown";
-                }
-
-                else
-                {
-                    this.Exists = false;
-                    throw new ArgumentException($"Computer name {hostname} not found.");
-                }
-                this.IsHybridGroupMember = _HybridGroup(computer);
             }
         }
         catch (Exception ex)
@@ -337,7 +346,7 @@ public class ADComputer
             this.Ex = ex.ToString();
         }
     }
-    public static async Task PrintADComputerInfo(ADComputer computer)
+    public static  Task PrintADComputerInfo(ADComputer computer)
     {
 
         Console.WriteLine();
@@ -363,6 +372,7 @@ public class ADComputer
             ColoredConsole.WriteLine($"{Red("No")}");
         }
         Console.WriteLine();
+        return Task.CompletedTask;
     }
 }
 public class ADGroup

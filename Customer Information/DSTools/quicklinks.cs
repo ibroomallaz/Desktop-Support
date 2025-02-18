@@ -9,10 +9,10 @@ using static Colors.Net.StringStaticMethods;
 public class QuickLinks
 {
     // In-memory cache for the deserialized quick links
-    private static Links cachedLinks = null;
+    private static Links? cachedLinks = null;
     private static readonly HttpClient client = new HttpClient();
 
-    public static async Task<Links> GetQuickLinksDataAsync()
+    public static async Task<Links?> GetQuickLinksDataAsync()
     {
         if (cachedLinks == null)
         {
@@ -57,7 +57,7 @@ public class QuickLinks
 
     public class Links
     {
-        public Link[] QL { get; set; }
+        public Link[] QL { get; set; } = Array.Empty<Link>();
 
         public void OpenURL(int num)
         {
@@ -77,24 +77,26 @@ public class QuickLinks
 
     public class Link
     {
-        public string Name { get; set; }
-        public string Number { get; set; }
-        public string Description { get; set; }
-        public string URL { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Number { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string URL { get; set; } = string.Empty;
     }
 
-    public static async Task PrintQL(Links quicklinks)
+
+    public static Task PrintQL(Links? quicklinks)
     {
         if (quicklinks?.QL == null || quicklinks.QL.Length == 0)
         {
-            Console.WriteLine("No links found.");
-            return;
+            Console.WriteLine("No links found. Please Reload");
+            return Task.CompletedTask;
         }
 
         foreach (var link in quicklinks.QL)
         {
             ColoredConsole.WriteLine($"({link.Number.Red()}) {link.Name.Cyan()}: {link.Description}");
         }
+        return Task.CompletedTask;
     }
 
 
@@ -102,7 +104,7 @@ public class QuickLinks
     {
         
         Console.Clear();
-        Links quicklinks = await GetQuickLinksDataAsync();
+        Links? quicklinks = await GetQuickLinksDataAsync();
         bool quickLinksMenu = true;
 
         while (quickLinksMenu)
@@ -113,7 +115,10 @@ public class QuickLinks
             await PrintQL(quicklinks);
             Console.WriteLine();
 
-            string quickLinksAnswer = Console.ReadLine().ToLower().Trim();
+            string? input = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(input))
+                continue;
+            string quickLinksAnswer = input.ToLower().Trim();
 
             switch (quickLinksAnswer)
             {
@@ -136,9 +141,17 @@ public class QuickLinks
                 default:
                     if (int.TryParse(quickLinksAnswer, out int num))
                     {
-                        Console.Clear();
-                        quicklinks.OpenURL(num);
-                        Console.WriteLine();
+                        if (quicklinks != null)
+                        {
+                            Console.Clear();
+                            quicklinks.OpenURL(num);
+                            Console.WriteLine();
+                        }
+                        else
+                        {
+                            Console.WriteLine("Quicklinks data is unavailable. Please Reload");
+                        }
+                        
                     }
                     break;
             }

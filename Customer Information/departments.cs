@@ -66,7 +66,6 @@ public class DepartmentService : IDepartmentService
 {
     private List<IDepartment>? _departments;
     private readonly SemaphoreSlim _lock = new(1, 1);  //Thread lock
-    private readonly HttpClient _httpClient;
 
     public DepartmentService()
     {

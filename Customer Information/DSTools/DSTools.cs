@@ -18,7 +18,13 @@ public partial class DSTools
             ColoredConsole.WriteLine($"({DarkYellow("2")}) MIM Group Check");
             ColoredConsole.WriteLine($"({Cyan("3")}) NetID lookup from Employee/Student ID number\n");
             ColoredConsole.WriteLine($"At any time: type '{Red("exit")}' to go back to main menu");
-            string tlcMenuAnswer = Console.ReadLine().ToLower().Trim();
+            string? input = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                continue;
+            }
+            string tlcMenuAnswer = input.ToLower().Trim();
+
 
             switch (tlcMenuAnswer)
             {
@@ -63,7 +69,12 @@ public partial class DSTools
         while (userLBN)
         {
             ColoredConsole.WriteLine($"User Information: Enter Employee or StudentID, {Cyan("clear")}, {DarkYellow("back")}, {Green("help")} or {DarkRed("exit")}:");
-            string userLBNText = Console.ReadLine().ToLower().Trim();
+            string? input = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                continue;
+            }
+            string userLBNText = input.ToLower().Trim();
 
             switch (userLBNText)
             {
