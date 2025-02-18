@@ -18,8 +18,16 @@ class Menus
             ColoredConsole.WriteLine($"({Magenta("4")}) Desktop Support Tools:");
             ColoredConsole.WriteLine($"({DarkRed("5")}) Quit");
             Console.Write("\r\nSelect an option: ");
-
-            switch (Console.ReadLine().Trim().ToLower())
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            string input = Console.ReadLine();
+#pragma warning restore CS8600
+            if (string.IsNullOrEmpty(input))
+            {
+                Console.Clear();
+                continue;
+            }
+            string menuInput = input.Trim().ToLower(); 
+            switch (menuInput)
             {
                 case "1":
                 case "user":
@@ -48,6 +56,8 @@ class Menus
                     Console.Clear();
                     break;
                 default:
+                    Console.Clear();
+                    ColoredConsole.WriteLine($"{Red("Please enter a valid input")}\n");
                     break;
 
 
@@ -69,7 +79,9 @@ class Menus
         while (userMenu)
         {
             ColoredConsole.WriteLine($"User Information: Enter NetID, {Cyan("clear")}, {DarkYellow("back")}, {Green("help")} or {DarkRed("exit")}:");
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             string userMenuText = Console.ReadLine().ToLower().Trim();
+#pragma warning restore CS8602
 
             switch (userMenuText)
             {
@@ -83,8 +95,6 @@ class Menus
                     break;
                 case "exit":
                     userMenu = false;
-                    break;
-                case "":
                     break;
                 case "-reload":
                     try
@@ -129,7 +139,9 @@ class Menus
         while (computerMenu)
         {
             ColoredConsole.WriteLine($"Computer Information: Enter Hostname, {Cyan("clear")}, {DarkYellow("back")}, or {DarkRed("exit")}:");
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             string computerMenuText = Console.ReadLine().ToLower().Trim();
+#pragma warning restore CS8602
 
             switch (computerMenuText)
             {

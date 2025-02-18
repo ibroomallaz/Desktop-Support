@@ -7,9 +7,9 @@ public partial class DSTools
 
     public static async Task DSToolsMenu()
     {
-        bool tlcMenu = true;
+        bool dstoolsMenu = true;
         Console.Clear();
-        while (tlcMenu)
+        while (dstoolsMenu)
         {
             //more to be added later if thought of
             Console.WriteLine("Desktop Support Tools Menu:\n");
@@ -21,39 +21,47 @@ public partial class DSTools
             string? input = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(input))
             {
+                Console.Clear();
                 continue;
             }
-            string tlcMenuAnswer = input.ToLower().Trim();
+            string dstoolsMenuAnswer = input.ToLower().Trim() ?? string.Empty;
 
 
-            switch (tlcMenuAnswer)
+            switch (dstoolsMenuAnswer)
             {
                 case "1":
-                    tlcMenu = false;
+                    dstoolsMenu = false;
                     Console.Clear();
                     await QuickLinks.QLMainMenu();
                     break;
                 case "2":
-                    tlcMenu = false;
+                    dstoolsMenu = false;
                     Console.Clear();
                     await MIMCheck.MIMCheckMenu();
                     break;
                 case "back":
                 case "exit":
-                    tlcMenu = false;
+                    dstoolsMenu = false;
                     Console.Clear();
                     await Menus.MainMenu();
-                    break;
-                default:
-                    tlcMenu = true;
                     break;
                 case "clear":
                     Console.Clear();
                     break;
                 case "3":
                     Console.Clear();
-                    tlcMenu = false;
+                    dstoolsMenu = false;
                     await UserLookupByNumber();
+                    break;
+                default:
+                    if (string.IsNullOrWhiteSpace(dstoolsMenuAnswer))
+                    {
+                        //Do nothing, or whatever, I'm not your mom
+                    }
+                    else
+                    {
+                        Console.WriteLine("Please Choose a valid option\n");
+                    }
                     break;
             }
 
