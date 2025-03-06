@@ -166,7 +166,7 @@ class Menus
                     }
                     else
                     {
-                        Console.WriteLine($"{computerMenuText} is not in BlueCat.");
+                        ColoredConsole.WriteLine($"{DarkYellow(computerMenuText)} is {DarkRed("not")} in BlueCat.");  //Print computer failure
                     }
 
                     break;

@@ -7,9 +7,9 @@
         },
         "PreRelease": {
             "exists": true,
-            "version": "3.0.0-Beta2",
-            "location": "https://emailarizona.sharepoint.com/:u:/r/sites/TLC-desktopsupportapp/Shared%20Documents/General/Beta%20Release/Desktop%20Support%20App%203-0-0-beta2.exe?csf=1&web=1&e=A0fUeg",
-            "changelog": "Menu adjustments and minor code changes"
+            "version": "3.0.0",
+            "location": "https://emailarizona.sharepoint.com/:u:/r/sites/TLC-desktopsupportapp/Shared%20Documents/General/Current%20Release/Desktop%20Support%20App%203-0-0.exe?csf=1&web=1&e=aRXs3o",
+            "changelog": "Version 3 full release"
         }
     }
 }
