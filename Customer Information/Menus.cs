@@ -125,7 +125,7 @@ class Menus
                     }
                     else
                     {
-                        Console.WriteLine($"{userMenuText} is not a Valid NetID");
+                        ColoredConsole.WriteLine($"{DarkYellow(userMenuText)} is {DarkRed("not")} a Valid NetID");  //User failure message
                     }
 
                     break;
