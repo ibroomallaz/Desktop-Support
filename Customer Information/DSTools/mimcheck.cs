@@ -82,7 +82,7 @@ public class MIMCheck
                     ADGroup group = new ADGroup(dept);
                     if (!group.Exists)
                     {
-                        ColoredConsole.WriteLine($"MIM Group {DarkGreen(dept)} does not exist.");
+                        ColoredConsole.WriteLine($"MIM Group {DarkYellow(dept)} does {DarkRed("not")} exist.");
                     }
                     else
                     {                      
@@ -133,7 +133,7 @@ public class MIMCheck
                     Console.WriteLine();
                     if (!user.Exists)
                     {
-                        Console.WriteLine($"{currentMIMMenuAnswer} is not a Valid NetID");
+                        ColoredConsole.WriteLine($"{DarkYellow(currentMIMMenuAnswer)} is {DarkRed("not")} a Valid NetID");  //General Failure message
                         Console.WriteLine();
                         break;
                     }
@@ -150,7 +150,7 @@ public class MIMCheck
                     }
                     else
                     {
-                        Console.WriteLine($"No valid MIM groups found for {currentMIMMenuAnswer}");
+                        ColoredConsole.WriteLine($"{DarkRed("No")} valid MIM groups found for {DarkYellow(currentMIMMenuAnswer)}");
                     }
                     Console.WriteLine();
                     break;
