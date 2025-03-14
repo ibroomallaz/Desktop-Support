@@ -11,7 +11,7 @@
     <UseWindowsForms>True</UseWindowsForms>
     <SignAssembly>False</SignAssembly>
     <RepositoryUrl>https://github.com/ibroomallaz/Desktop-Support</RepositoryUrl>
-    <Version>3.0.1</Version>
+    <Version>3.0.2</Version>
 	  <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 	  <ApplicationIcon>img\lilyface.ico</ApplicationIcon>
 	  <PackageIcon>PXL_20240504_214657726.jpg</PackageIcon>
