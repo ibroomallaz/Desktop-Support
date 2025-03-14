@@ -85,8 +85,8 @@ public class MIMCheck
                         ColoredConsole.WriteLine($"MIM Group {DarkYellow(dept)} does {DarkRed("not")} exist.");
                     }
                     else
-                    {                      
-                        Console.WriteLine("Total group members: " + group.MemberCount);
+                    {
+                        ColoredConsole.WriteLine($"\nTotal group members: " + DarkGreen(group.MemberCount.ToString()));
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                         foreach (var member in group.GroupMembers)
                         {

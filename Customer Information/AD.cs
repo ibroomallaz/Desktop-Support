@@ -377,65 +377,54 @@ public class ADComputer
 }
 public class ADGroup
 {
-    public bool Exists { get; set; }
-    public List<string>? GroupMembers { get; set; }
-    public int? MemberCount { get; set; }
-    public ADGroup(string groupname)
+    public bool Exists { get; private set; }
+    public List<string>? GroupMembers { get; private set; }
+    public int? MemberCount { get; private set; }
+
+    public ADGroup(string groupName)
     {
-        this.Exists = _ADGroupExistsCheck(groupname);
-        this.GroupMembers = ADGroupMembers(groupname);
+        GroupSearch(groupName);
     }
 
-    public List<string> ADGroupMembers(string groupName)
+    private void GroupSearch(string groupName)
     {
-        List<string> groupMembers = new List<string>();
         try
         {
-
             using (PrincipalContext ctx = new PrincipalContext(ContextType.Domain, Globals.g_domainPath))
+            using (GroupPrincipal grp = GroupPrincipal.FindByIdentity(ctx, IdentityType.Name, groupName))
             {
-                using (GroupPrincipal grp = GroupPrincipal.FindByIdentity(ctx, IdentityType.Name, groupName))
+                if (grp != null)
                 {
-                    if (grp != null)
+                    Exists = true;
+                    GroupMembers = grp.GetMembers()
+                                      .Select(p => p.Name)
+                                      .Where(name => !string.IsNullOrEmpty(name))
+                                      .ToList();
+
+                    GroupMembers.Sort();
+                    MemberCount = GroupMembers.Count;
+
+                    if (MemberCount == 0)
                     {
-                        foreach (Principal p in grp.GetMembers())
-                        {
-                            groupMembers.Add(p.Name);
-                            groupMembers.Sort();
-                        }
-                        this.MemberCount = groupMembers.Count;
+                        GroupMembers.Add("No group members exist.");
                     }
-                    else
-                    {
-                        throw new ArgumentException($"No group {groupName} exists");
-                    }
+                }
+                else
+                {
+                    Exists = false;
+                    GroupMembers = new List<string> { "Group does not exist." };
+                    MemberCount = 0;
                 }
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error: {ex.Message}");
+            Exists = false;
+            GroupMembers = new List<string> { $"Error retrieving group: {ex.Message}" };
+            MemberCount = 0;
         }
-
-        if (groupMembers.Count == 0)
-        {
-            groupMembers.Add("No group members exist.");
-        }
-
-        return groupMembers;
-    }
-    private static bool _ADGroupExistsCheck(string groupName)
-    {
-        using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, Globals.g_domainPath))
-        {
-            GroupPrincipal groupPrincipal = GroupPrincipal.FindByIdentity(AD, groupName);
-            if (groupPrincipal != null)
-            {
-                return true;
-            }
-            return false;
-        }
-
     }
 }
+
+
 
