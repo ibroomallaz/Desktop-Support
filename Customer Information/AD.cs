@@ -331,14 +331,14 @@ public class ADComputer
                             this.OperatingSystem = computer.Properties[nameof(OperatingSystem)].Value?.ToString() ?? "Unknown";
                         }
 
+                        this.IsHybridGroupMember = _HybridGroup(computer);
+                    }
+                }
                         else
                         {
                             this.Exists = false;
                             throw new ArgumentException($"Computer name {hostname} not found.");
                         }
-                        this.IsHybridGroupMember = _HybridGroup(computer);
-                    }
-                }
             }
         }
         catch (Exception ex)
