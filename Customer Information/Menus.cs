@@ -123,10 +123,15 @@ class Menus
                     {
                         await ADUserInfo.PrintADUserInfo(ADUser);
                     }
+                    else if (!string.IsNullOrWhiteSpace(ADUser.ErrorMessage))
+                    {
+                        ColoredConsole.WriteLine($"{Red("Error")}: {ADUser.ErrorMessage}\n");
+                    }
                     else
                     {
-                        ColoredConsole.WriteLine($"{DarkYellow(userMenuText)} is {DarkRed("not")} a Valid NetID");  //User failure message
+                        ColoredConsole.WriteLine($"{DarkYellow(userMenuText)} is {DarkRed("not")} a Valid NetID\n");
                     }
+
 
                     break;
             }
@@ -166,7 +171,7 @@ class Menus
                     }
                     else
                     {
-                        ColoredConsole.WriteLine($"{DarkYellow(computerMenuText)} is {DarkRed("not")} in BlueCat.");  //Print computer failure
+                        ColoredConsole.WriteLine($"{DarkYellow(computerMenuText)} is {DarkRed("not")} in BlueCat.\n");  //Print computer failure
                     }
 
                     break;

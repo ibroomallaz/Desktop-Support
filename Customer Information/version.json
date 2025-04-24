@@ -1,10 +1,10 @@
 {
     "Version": {
-        "Current": {
-            "version": "3.0.1",
-            "location": "hhttps://emailarizona.sharepoint.com/:u:/r/sites/TLC-desktopsupportapp/Shared%20Documents/General/Current%20Release/Desktop%20Support%20App%203-0-1.exe?csf=1&web=1&e=5jMq81",
-            "changelog": "UI Color changes for further ease of use. Optimized group lookup efficiency"
-        },
+      "Current": {
+        "version": "3.0.2",
+        "location": "https://emailarizona.sharepoint.com/:u:/r/sites/TLC-desktopsupportapp/Shared%20Documents/General/Current%20Release/Desktop%20Support%20App%203-0-2.exe?csf=1&web=1&e=pWLRiw",
+        "changelog": "Bug Fix: Fixed Computer lookup issue when AD entry had no Description or OS Version"
+      },
         "PreRelease": {
             "exists": false,
             "version": "3.0.0",
