@@ -17,7 +17,6 @@ public class ADUserInfo
     public string? EduAffiliation { get; set; }
     public string? License { get; set; }
     public string? Division { get; set; }
-    public string? Ex { get; set; }
     public string? ErrorMessage { get; set; }
     public bool Exists { get; set; }
     public bool? MimGroupExists { get; set; }
@@ -87,8 +86,7 @@ public class ADUserInfo
         }
         catch (Exception ex)
         {
-            this.ErrorMessage = $"Unexpected error during AD lookup: {ex.Message}";
-            this.Ex = ex.ToString();
+            this.ErrorMessage = $"Unexpected error during AD lookup: {ex}";
             this.Exists = false;
         }
     }
@@ -115,7 +113,7 @@ public class ADUserInfo
         }
         catch (Exception ex)
         {
-            this.Ex = ex.ToString();
+            this.ErrorMessage = $"Error retrieving MIM groups: {ex}";
         }
         return null;
     }
@@ -234,7 +232,6 @@ public class ADComputer
     public string? Description { get; set; }
     public bool IsHybridGroupMember { get; set; }
     public string? OperatingSystem { get; set; }
-    public string? Ex { get; set; }
     public string? ErrorMessage { get; set; }
     public bool Exists { get; set; }
 
@@ -269,7 +266,7 @@ public class ADComputer
                 else
                 {
                     this.Exists = false;
-                    throw new ArgumentException($"Computer name {hostname} not found.");
+                    this.ErrorMessage = $"Computer name {hostname} not found.";
                 }
             }
         }
@@ -280,8 +277,7 @@ public class ADComputer
         }
         catch (Exception ex)
         {
-            this.Ex = ex.ToString();
-            this.ErrorMessage = $"Unexpected error during AD computer lookup: {ex.Message}";
+            this.ErrorMessage = $"Unexpected error during AD computer lookup: {ex}";
             this.Exists = false;
         }
     }
@@ -298,7 +294,6 @@ public class ADComputer
         }
         return false;
     }
-
 
     public static Task PrintADComputerInfo(ADComputer computer)
     {
@@ -377,7 +372,7 @@ public class ADGroup
         catch (Exception ex)
         {
             Exists = false;
-            ErrorMessage = $"Error retrieving group: {ex.Message}";
+            ErrorMessage = $"Error retrieving group: {ex}";
             GroupMembers = new List<string> { ErrorMessage };
             MemberCount = 0;
         }
