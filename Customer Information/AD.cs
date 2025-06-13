@@ -21,7 +21,7 @@ public class ADUserInfo
     public bool Exists { get; set; }
     public bool? MimGroupExists { get; set; }
     public List<string>? MimGroupsList { get; set; }
-    public bool? Enabled {  get; set; }
+    public bool? Enabled { get; set; }
 
     public static Task UserFromNumber(string userNumber)
     {
@@ -58,7 +58,10 @@ public class ADUserInfo
                     this.Exists = true;
                     DirectoryEntry dirEntry = (DirectoryEntry)userPrincipal.GetUnderlyingObject();
                     this.DepartmentName = dirEntry.Properties[nameof(Department)]?.Value?.ToString() ?? "None";
-                    this.DepartmentNumber = this.DepartmentName.Substring(0, 4);
+                    this.DepartmentNumber =
+                    !string.IsNullOrEmpty(this.DepartmentName) && this.DepartmentName.Length >= 4
+                        ? this.DepartmentName.Substring(0, 4)
+                        : null;
                     this.DisplayName = userPrincipal.DisplayName ?? "Unknown";
                     this.EduAffiliation = dirEntry.Properties["eduPersonPrimaryAffiliation"]?.Value?.ToString() ?? "Unknown";
                     this.License = _ADUserLicCheck(dirEntry.Properties["extensionattribute15"]?.Value?.ToString() ?? "Unlicensed");
@@ -172,7 +175,7 @@ public class ADUserInfo
         if (ADUser.Enabled == false)
         {
             ColoredConsole.Write($"{Cyan("Enabled: ")}");
-            ColoredConsole.WriteLine($"{Red("NO")}");
+            ColoredConsole.WriteLine($"{Red("False")}");
         }
 
         ColoredConsole.Write($"{Cyan("O365 Licensing: ")}");
