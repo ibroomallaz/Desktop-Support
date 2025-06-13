@@ -21,6 +21,7 @@ public class ADUserInfo
     public bool Exists { get; set; }
     public bool? MimGroupExists { get; set; }
     public List<string>? MimGroupsList { get; set; }
+    public bool? Enabled {  get; set; }
 
     public static Task UserFromNumber(string userNumber)
     {
@@ -61,7 +62,7 @@ public class ADUserInfo
                     this.DisplayName = userPrincipal.DisplayName ?? "Unknown";
                     this.EduAffiliation = dirEntry.Properties["eduPersonPrimaryAffiliation"]?.Value?.ToString() ?? "Unknown";
                     this.License = _ADUserLicCheck(dirEntry.Properties["extensionattribute15"]?.Value?.ToString() ?? "Unlicensed");
-
+                    this.Enabled = userPrincipal.Enabled ?? false;
                     using (DirectorySearcher searcher = new DirectorySearcher(AD.ConnectedServer))
                     {
                         searcher.Filter = $"(&(objectCategory=group)(member={userPrincipal.DistinguishedName})(cn=*MIM-DivisionRollup*))";
@@ -168,6 +169,11 @@ public class ADUserInfo
             ColoredConsole.Write($"{Cyan("Department: ")}");
             ColoredConsole.WriteLine(ADUser.DepartmentName.Red());
         }
+        if (ADUser.Enabled == false)
+        {
+            ColoredConsole.Write($"{Cyan("Enabled: ")}");
+            ColoredConsole.WriteLine($"{Red("NO")}");
+        }
 
         ColoredConsole.Write($"{Cyan("O365 Licensing: ")}");
         ColoredConsole.WriteLine(ADUser.License.Red());
@@ -234,6 +240,7 @@ public class ADComputer
     public string? OperatingSystem { get; set; }
     public string? ErrorMessage { get; set; }
     public bool Exists { get; set; }
+    public bool? Enabled { get; set; }
 
     public ADComputer(string hostname)
     {
@@ -261,6 +268,16 @@ public class ADComputer
                         this.Description = computer.Properties["description"]?.Value?.ToString();
                         this.OperatingSystem = computer.Properties["operatingSystem"]?.Value?.ToString() ?? "Unknown";
                         this.IsHybridGroupMember = _HybridGroup(computer);
+                        object? enabledObj = computer.Properties["userAccountControl"]?.Value;
+                        if (enabledObj is int uac)
+                        {
+                            // Bit 2 (0x2) disabled: https://learn.microsoft.com/en-us/troubleshoot/windows-server/identity/useraccountcontrol-manipulate-account-properties
+                            this.Enabled = (uac & 0x2) == 0;
+                        }
+                        else
+                        {
+                            this.Enabled = false;
+                        }
                     }
                 }
                 else
@@ -312,6 +329,12 @@ public class ADComputer
             ColoredConsole.Write($"{Cyan("Operating System: ")}");
             ColoredConsole.WriteLine(computer.OperatingSystem.Red());
         }
+        if (computer.Enabled == false)
+        {
+            ColoredConsole.Write($"{Cyan("Enabled: ")}");
+            ColoredConsole.WriteLine($"{Red("False")}");
+        }
+
 
         ColoredConsole.Write($"{Cyan("Hybrid Join Group: ")}");
         ColoredConsole.WriteLine(computer.IsHybridGroupMember ? Green("Yes") : Red("No"));
