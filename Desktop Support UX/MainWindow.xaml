@@ -14,7 +14,7 @@
 
         <Grid HorizontalAlignment="Center" Margin="0,52,0,635" Width="272">
             <Label FontFamily="Comic Sans MS" Content="Enter User Info" HorizontalAlignment="Center" Width="162" FontSize="20" Margin="0,10,0,0"/>
-            <TextBlock FontFamily="Comic Sans MS" x:Name="textPlaceholder" FontWeight="Light"  VerticalAlignment="Bottom" HorizontalAlignment="Left" TextWrapping="Wrap" Text="NetID" Width="175" Height="27" FontSize="15" Background="White" Margin="5,0,0,0"/>
+            <TextBlock FontFamily="Comic Sans MS" x:Name="textPlaceholder" FontWeight="ExtraLight"  VerticalAlignment="Bottom" HorizontalAlignment="Left" TextWrapping="Wrap" Text="NetID" Width="175" Height="27" FontSize="13" Background="White" Margin="5,0,0,0"/>
             <TextBox FontFamily="Comic Sans MS" x:Name="txtInput" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="28"  TextWrapping="Wrap" Width="177" Background="Transparent" TextChanged="txtInput_TextChanged"/>
             <Button FontFamily="Comic Sans MS" Content="Search" HorizontalAlignment="Right" Height="28" VerticalAlignment="Bottom" Width="92" Click="Button_Click"/>
         </Grid>
@@ -32,18 +32,19 @@
 
         <Grid HorizontalAlignment="Center" Margin="0,180,0,514" Width="272" >
             <Label FontFamily="Comic Sans MS" Content="Computer Info" HorizontalAlignment="Center" Height="37" VerticalAlignment="Top" Width="149" FontSize="20"/>
-            <TextBlock FontFamily="Comic Sans MS" Background="White" x:Name="textPlaceholderComputer" FontWeight="Light" VerticalAlignment="Bottom" HorizontalAlignment="Left" Grid.Row="1" TextWrapping="Wrap" Text="Computer Name" Width="175" Height="27" FontSize="15" Margin="5,0,0,0"/>
+            <TextBlock FontFamily="Comic Sans MS" Background="White" x:Name="textPlaceholderComputer" FontWeight="ExtraLight" VerticalAlignment="Bottom" HorizontalAlignment="Left" Grid.Row="1" TextWrapping="Wrap" Text="Computer Name" Width="175" Height="27" FontSize="15" Margin="5,0,0,0"/>
             <TextBox FontFamily="Comic Sans MS" x:Name="txtInputComputer" HorizontalAlignment="Left" Height="28" TextWrapping="Wrap"  VerticalAlignment="Bottom" Width="177" Background="Transparent" TextChanged="txtInput_TextChangedComputer"/>
             <Button FontFamily="Comic Sans MS" Content="Search" HorizontalAlignment="Right" Height="28" VerticalAlignment="Bottom" Width="92" Click="Button_Click_2"/>
         </Grid>
 
-        <Grid VerticalAlignment="Top" HorizontalAlignment="Center" Height="439" Width="460" Margin="0,257,0,0" Background="Black" >
-            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="0,0,0,0">
-                <TextBlock x:Name="outputGrid" Text=""  FontSize="14" Foreground="WhiteSmoke" Padding="5,5,5,5" FontFamily="Comic Sans MS" Height="430"/>
+        <Grid VerticalAlignment="Bottom" HorizontalAlignment="Center" Height="435" Width="460" Margin="0,0,0,65">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <TextBox IsReadOnly="True" x:Name="outputGrid" Text=""  FontSize="14" Background="Black" Foreground="WhiteSmoke" Padding="5,5,5,5" FontFamily="Comic Sans MS"/>
             </ScrollViewer>
         </Grid>
 
-        <Grid Margin="20,704,20,10" RenderTransformOrigin="0.49,8.045">
+
+        <Grid Margin="20,709,20,10" RenderTransformOrigin="0.49,8.045">
             <Button FontFamily="Comic Sans MS" Content="Quick Links" HorizontalAlignment="Left" Height="37" VerticalAlignment="Top" Width="130"/>
             <Button FontFamily="Comic Sans MS" Content="About" HorizontalAlignment="Right" Height="37" VerticalAlignment="Top" Width="128" RenderTransformOrigin="0.518,2.383" Click="Button_Click_1"/>
         </Grid>

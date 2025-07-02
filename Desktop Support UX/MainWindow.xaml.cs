@@ -85,7 +85,7 @@ namespace Desktop_Support_UX
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show($"UITS Desktop Support App \n" + "Version [pending feature]\n" + "Developed by Isaac Broomall (ibroomall)", "About");
+            MessageBox.Show($"UITS Desktop Support App \n" + "Version 3.0.4\n" + "Developed by Isaac Broomall (ibroomall)", "About");
         }
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
@@ -138,7 +138,7 @@ namespace Desktop_Support_UX
         {
             if (netIDButton.IsChecked == true)
             {
-                textPlaceholder.Text = "NetID";
+                textPlaceholder.Text = "User Info";
             }
         }
 
@@ -154,7 +154,7 @@ namespace Desktop_Support_UX
         {
             if (checkMIMButton.IsChecked == true)
             {
-                textPlaceholder.Text = "Dept MIM Group";
+                textPlaceholder.Text = "Input Dept Number";
             }
         }
 
@@ -162,7 +162,7 @@ namespace Desktop_Support_UX
         {
             if (reportMIMButton.IsChecked == true)
             {
-                textPlaceholder.Text = "Current MIM Group";
+                textPlaceholder.Text = "Enter NetID";
             }
         }
 
@@ -175,7 +175,7 @@ namespace Desktop_Support_UX
             DepartmentService deptService = new DepartmentService();
 
 
-            outputText += ADUser.DisplayName + "\n";
+            outputText += "\n" + ADUser.DisplayName + "\n";
             if (ADUser.Exists)
             {
                 if (!string.IsNullOrEmpty(ADUser.EduAffiliation))
@@ -328,7 +328,8 @@ namespace Desktop_Support_UX
                 {
                     outputText += group.ToString() + "\n";
                 }
-                outputGrid.Text = outputText + "-----------------------------------------------------------------------------\n";
+                outputText += "-----------------------------------------------------------------------------\n";
+                outputGrid.Text = outputText;
 #pragma warning restore CS8602
 
             }
