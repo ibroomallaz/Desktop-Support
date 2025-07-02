@@ -14,7 +14,7 @@
 
         <Grid HorizontalAlignment="Center" Margin="0,52,0,635" Width="272">
             <Label FontFamily="Comic Sans MS" Content="Enter User Info" HorizontalAlignment="Center" Width="162" FontSize="20" Margin="0,10,0,0"/>
-            <TextBlock FontFamily="Comic Sans MS" x:Name="textPlaceholder" FontWeight="Light"  VerticalAlignment="Bottom" HorizontalAlignment="Left" TextWrapping="Wrap" Text="NetID" Width="175" Height="27" FontSize="15" Background="White"/>
+            <TextBlock FontFamily="Comic Sans MS" x:Name="textPlaceholder" FontWeight="Light"  VerticalAlignment="Bottom" HorizontalAlignment="Left" TextWrapping="Wrap" Text="NetID" Width="175" Height="27" FontSize="15" Background="White" Margin="5,0,0,0"/>
             <TextBox FontFamily="Comic Sans MS" x:Name="txtInput" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="28"  TextWrapping="Wrap" Width="177" Background="Transparent" TextChanged="txtInput_TextChanged"/>
             <Button FontFamily="Comic Sans MS" Content="Search" HorizontalAlignment="Right" Height="28" VerticalAlignment="Bottom" Width="92" Click="Button_Click"/>
         </Grid>
@@ -24,15 +24,15 @@
                 <ColumnDefinition Width="250*"/>
                 <ColumnDefinition Width="251*"/>
             </Grid.ColumnDefinitions>
-            <RadioButton FontFamily="Comic Sans MS" HorizontalAlignment="Left" VerticalAlignment="Top" Content="NetID" FontSize="13" GroupName="userInfoChoices" IsChecked="True" Margin="46,0,0,0" Width="60"/>
-            <RadioButton FontFamily="Comic Sans MS" HorizontalAlignment="Left" VerticalAlignment="Top" Content="Check current members of Dept MIM Group" FontSize="13" GroupName="userInfoChoices" IsChecked="False" Margin="146,0,0,0" Width="294" Grid.ColumnSpan="2"/>
-            <RadioButton FontFamily="Comic Sans MS" HorizontalAlignment="Left" VerticalAlignment="Bottom" Content="EmployeeID/StudentID" FontSize="13" GroupName="userInfoChoices" IsChecked="False" Margin="16,0,0,0" Width="166"/>
-            <RadioButton FontFamily="Comic Sans MS" HorizontalAlignment="Left" VerticalAlignment="Bottom" Content="Report Individual's current MIM Groups" FontSize="13" GroupName="userInfoChoices" IsChecked="False" Margin="195,0,0,0" Width="267" Grid.ColumnSpan="2"/>
+            <RadioButton FontFamily="Comic Sans MS" x:Name="netIDButton" HorizontalAlignment="Left" VerticalAlignment="Top" Content="NetID" FontSize="13" GroupName="userInfoChoices" IsChecked="True" Margin="46,0,0,0" Width="60" Checked="RadioButton_Checked"/>
+            <RadioButton FontFamily="Comic Sans MS" x:Name="checkMIMButton" HorizontalAlignment="Left" VerticalAlignment="Top" Content="Check current members of Dept MIM Group" FontSize="13" GroupName="userInfoChoices" IsChecked="False" Margin="146,0,0,0" Width="294" Grid.ColumnSpan="2" Checked="checkMIMButton_Checked_1"/>
+            <RadioButton FontFamily="Comic Sans MS" x:Name="justIDButton" HorizontalAlignment="Left" VerticalAlignment="Bottom" Content="EmployeeID/StudentID" FontSize="13" GroupName="userInfoChoices" IsChecked="False" Margin="16,0,0,0" Width="166" Checked="checkMIMButton_Checked"/>
+            <RadioButton FontFamily="Comic Sans MS" x:Name="reportMIMButton" HorizontalAlignment="Left" VerticalAlignment="Bottom" Content="Report Individual's current MIM Groups" FontSize="13" GroupName="userInfoChoices" IsChecked="False" Margin="195,0,0,0" Width="267" Grid.ColumnSpan="2" Checked="reportMIMButton_Checked"/>
         </Grid>
 
         <Grid HorizontalAlignment="Center" Margin="0,180,0,514" Width="272" >
             <Label FontFamily="Comic Sans MS" Content="Computer Info" HorizontalAlignment="Center" Height="37" VerticalAlignment="Top" Width="149" FontSize="20"/>
-            <TextBlock FontFamily="Comic Sans MS" Background="White" x:Name="textPlaceholderComputer" FontWeight="Light" VerticalAlignment="Bottom" HorizontalAlignment="Left" Grid.Row="1" TextWrapping="Wrap" Text="Computer Name" Width="175" Height="27" FontSize="15"/>
+            <TextBlock FontFamily="Comic Sans MS" Background="White" x:Name="textPlaceholderComputer" FontWeight="Light" VerticalAlignment="Bottom" HorizontalAlignment="Left" Grid.Row="1" TextWrapping="Wrap" Text="Computer Name" Width="175" Height="27" FontSize="15" Margin="5,0,0,0"/>
             <TextBox FontFamily="Comic Sans MS" x:Name="txtInputComputer" HorizontalAlignment="Left" Height="28" TextWrapping="Wrap"  VerticalAlignment="Bottom" Width="177" Background="Transparent" TextChanged="txtInput_TextChangedComputer"/>
             <Button FontFamily="Comic Sans MS" Content="Search" HorizontalAlignment="Right" Height="28" VerticalAlignment="Bottom" Width="92" Click="Button_Click_2"/>
         </Grid>
