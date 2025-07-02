@@ -1,0 +1,47 @@
+﻿<Window x:Class="Desktop_Support_UX.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Desktop_Support_UX"
+        mc:Ignorable="d"
+        Title="Desktop Support App" Height="600" Width="500"  ResizeMode="CanMinimize">
+
+    <Grid RenderTransformOrigin="0.5,0.5">
+        <Grid.Background>
+            <ImageBrush Stretch="Uniform">
+                <ImageBrush.RelativeTransform>
+                    <TransformGroup>
+                        <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="0.7" ScaleY="0.7"/>
+                        <SkewTransform CenterX="0.5" CenterY="0.5" AngleY="0"/>
+                        <RotateTransform CenterX="0.5" CenterY="0.5"/>
+                        <TranslateTransform X="0" Y="-0.2"/>
+                    </TransformGroup>
+                </ImageBrush.RelativeTransform>
+            </ImageBrush>
+        </Grid.Background>
+        <Label Content="Desktop Support App" HorizontalAlignment="Center" VerticalAlignment="Top" Height="47" Width="300" FontSize="30"/>
+
+        <Label Content="Enter User Info" HorizontalAlignment="Center" Margin="0,50,0,0" VerticalAlignment="Top" Height="34" Width="150" FontSize="20"/>
+        <TextBlock x:Name="textPlaceholder" FontWeight="Light"  HorizontalAlignment="Center" Margin="0,85,105,0" TextWrapping="Wrap" Text="NetID" VerticalAlignment="Top" Width="175" Height="27" FontSize="15" Panel.ZIndex="-1" Background="White"/>
+        <TextBox x:Name="txtInput" HorizontalAlignment="Center" Height="28" Margin="0,85,105,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="177" Background="Transparent" TextChanged="txtInput_TextChanged"/>
+        <Button Content="Search" HorizontalAlignment="Center" Height="28" Margin="200,85,30,0" VerticalAlignment="Top" Width="92" Click="Button_Click"/>
+
+        <Label Content="Computer Info" HorizontalAlignment="Center" Height="36" Margin="0,120,0,0" VerticalAlignment="Top" Width="147" FontSize="20"/>
+        <TextBlock Background="White" x:Name="textPlaceholderComputer" FontWeight="Light"  HorizontalAlignment="Center" Margin="0,155,105,0" Grid.Row="1" TextWrapping="Wrap" Text="Computer Name" VerticalAlignment="Top" Width="175" Height="27" FontSize="15"/>
+        <TextBox x:Name="txtInputComputer" HorizontalAlignment="Center" Height="28" Margin="0,155,105,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="177" Background="Transparent" TextChanged="txtInput_TextChangedComputer"/>
+        <Button Content="Search" HorizontalAlignment="Center" Height="28" Margin="200,155,30,0" VerticalAlignment="Top" Width="92" Click="Button_Click_2"/>
+
+
+        <Button Content="Desktop Support Tools" HorizontalAlignment="Center" Height="37" Margin="0,200,150,0" VerticalAlignment="Top" Width="130"/>
+        <Button Content="About" HorizontalAlignment="Center" Height="37" Margin="135,200,0,0" VerticalAlignment="Top" Width="130" RenderTransformOrigin="0.518,2.383" Click="Button_Click_1"/>
+
+
+        <Grid VerticalAlignment="Bottom" HorizontalAlignment="Center" Height="280" Width="460" Margin="0,0,0,10" Background="Black" >
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <TextBlock x:Name="outputGrid" Text=""  FontSize="14" Foreground="WhiteSmoke" Padding="5,5,5,5" FontFamily="Comic Sans MS"/>
+            </ScrollViewer>
+        </Grid>
+        <TextBlock HorizontalAlignment="Left" Height="17" TextAlignment="Center" TextWrapping="Wrap" Text="ver 3.0.4" VerticalAlignment="Top" Width="58" Margin="5,0,0,0"/>
+    </Grid>
+</Window>
