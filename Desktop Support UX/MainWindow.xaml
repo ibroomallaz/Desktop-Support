@@ -5,26 +5,26 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Desktop_Support_UX"
         mc:Ignorable="d"
-        Title="Desktop Support App" x:Name="MainWindowGrid" Height="700" Width="625" ResizeMode="CanMinimize">
+        Title="Desktop Support App" x:Name="MainWindowGrid" Height="690" Width="625" ResizeMode="CanMinimize">
     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-        <Grid HorizontalAlignment="Center" Height="820" Width="590">
+        <Grid HorizontalAlignment="Center" Height="900" Width="590">
 
             <Label HorizontalContentAlignment="Center" FontFamily="Comic Sans MS" Content="Desktop Support App" HorizontalAlignment="Left" VerticalAlignment="Top" Height="72" Width="586" FontSize="40" Margin="12,32,0,0"/>
 
-            <Label x:Name="inputLabel" HorizontalContentAlignment="Center" FontFamily="Comic Sans MS" Content="Enter User Info" HorizontalAlignment="Center" FontSize="18" Margin="0,109,0,679" Width="600"/>
+            <Label x:Name="inputLabel" HorizontalContentAlignment="Center" FontFamily="Comic Sans MS" Content="Enter User Info" HorizontalAlignment="Center" FontSize="18" Margin="0,104,0,764" Width="600"/>
 
-            <Grid HorizontalAlignment="Center" Margin="0,141,0,650" Width="272">
+            <Grid HorizontalAlignment="Center" Margin="0,136,0,727" Width="272">
                 <TextBlock FontFamily="Comic Sans MS" x:Name="textPlaceholder" FontWeight="ExtraLight"  VerticalAlignment="Bottom" HorizontalAlignment="Left" TextWrapping="Wrap" Text="NetID" Width="175" Height="27" FontSize="12" Background="White" Margin="5,0,0,0"/>
                 <TextBox FontFamily="Comic Sans MS" x:Name="txtInput" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="28"  TextWrapping="Wrap" Width="177" Background="Transparent" TextChanged="txtInput_TextChanged"/>
                 <Button FontFamily="Comic Sans MS" Content="Search" HorizontalAlignment="Right" Height="28" VerticalAlignment="Bottom" Width="92" Click="Button_Click"/>
             </Grid>
 
-            <Grid HorizontalAlignment="Center" Margin="0,175,0,595" Width="566">
-                <RadioButton FontFamily="Comic Sans MS" x:Name="netIDButton" HorizontalAlignment="Left" VerticalAlignment="Top" Content="NetID" FontSize="13" GroupName="userInfoChoices" IsChecked="True" Margin="102,0,0,0" Width="63" Checked="RadioButton_Checked"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="checkMIMButton" HorizontalAlignment="Left" VerticalAlignment="Bottom" Content="Check current members of Dept MIM Group" FontSize="13" GroupName="userInfoChoices" IsChecked="False" Width="306" Checked="checkMIMButton_Checked_1"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="justIDButton" HorizontalAlignment="Center" VerticalAlignment="Top" Content="EmployeeID/StudentID" FontSize="13" GroupName="userInfoChoices" IsChecked="False" Margin="0,0,0,0" Width="166" Checked="checkMIMButton_Checked"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="reportMIMButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Content="Report Individual's current MIM Groups" FontSize="13" GroupName="userInfoChoices" IsChecked="False" Width="268" Checked="reportMIMButton_Checked"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="computerInfoButton" HorizontalAlignment="Right" VerticalAlignment="Top" Content="Computer info" FontSize="13" GroupName="userInfoChoices" IsChecked="False" Width="109" Checked="computerInfoButton_Checked" Margin="0,0,54,0"/>
+            <Grid HorizontalAlignment="Center" Margin="0,178,0,675" Width="590">
+                <RadioButton FontFamily="Comic Sans MS" x:Name="netIDButton" HorizontalAlignment="Left" VerticalAlignment="Top" Content="NetID" FontSize="14" GroupName="userInfoChoices" IsChecked="True" Width="76" Checked="RadioButton_Checked" Margin="34,0,0,0"/>
+                <RadioButton FontFamily="Comic Sans MS" x:Name="checkMIMButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Content="Check current members of Dept MIM Group" FontSize="14" GroupName="userInfoChoices" IsChecked="False" Width="308" Checked="checkMIMButton_Checked_1" Margin="0,0,33,0"/>
+                <RadioButton FontFamily="Comic Sans MS" x:Name="justIDButton" HorizontalAlignment="Left" VerticalAlignment="Bottom" Content="EmployeeID/StudentID" FontSize="14" GroupName="userInfoChoices" IsChecked="False" Width="215" Checked="checkMIMButton_Checked" Margin="34,0,0,0"/>
+                <RadioButton FontFamily="Comic Sans MS" x:Name="reportMIMButton" HorizontalAlignment="Center" VerticalAlignment="Top" Content="Report Individual's current MIM Groups" FontSize="14" GroupName="userInfoChoices" IsChecked="False" Width="292" Checked="reportMIMButton_Checked"/>
+                <RadioButton FontFamily="Comic Sans MS" x:Name="computerInfoButton" HorizontalAlignment="Right" VerticalAlignment="Top" Content="Computer info" FontSize="14" GroupName="userInfoChoices" IsChecked="False" Width="144" Checked="computerInfoButton_Checked"/>
             </Grid>
 
             <!--
@@ -43,24 +43,69 @@
             </Grid>
 
 
-            <Grid Margin="12,0,12,788">
+            <Grid Margin="12,0,12,868">
                 <!-- <Button FontFamily="Comic Sans MS" Content="Quick Links" HorizontalAlignment="Left" Height="37" VerticalAlignment="Top" Width="130" Click="Button_Click_3"/>-->
                 <Button FontFamily="Comic Sans MS" Content="About" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="110"  Click="Button_Click_1"/>
                 <TextBlock FontFamily="Comic Sans MS" HorizontalAlignment="Right" Height="17" TextAlignment="Center" TextWrapping="Wrap" Text="ver 3.0.4" VerticalAlignment="Top" Width="58"/>
             </Grid>
 
 
-            <Grid  Width="530" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,600,0,0" Height="247">
-                <Button FontFamily="Comic Sans MS" Content="Quick Link Search" FontSize="15" HorizontalAlignment="Center" Height="30" VerticalAlignment="Top" Width="144"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="linkOne" HorizontalAlignment="Center" Content="Phone Schedule: Desktop Support Phone Schedule" FontSize="15" GroupName="quickLinksGroup" IsChecked="false" Width="530" Margin="0,35,0,120"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="linkTwo" HorizontalAlignment="Center"  Content="Customer List: Desktop Support Customer list by Core Team" FontSize="15" GroupName="quickLinksGroup" IsChecked="false" Width="530" Margin="0,56,0,105"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="linkThree" HorizontalAlignment="Center"  Content="Service Now KB: UITS Service Now Knowledge Base" FontSize="15" GroupName="quickLinksGroup" IsChecked="false" Width="530" Margin="0,77,0,90"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="linkFour" HorizontalAlignment="Center"  Content="Splunk: Enterprise network search tool" FontSize="15" GroupName="quickLinksGroup" IsChecked="false" Width="530" Margin="0,97,0,75"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="linkFive" HorizontalAlignment="Center" Content="Device Registration Portal: MAB registration portal" FontSize="15" GroupName="quickLinksGroup" IsChecked="false" Width="530" Margin="0,117,0,60"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="linkSix" HorizontalAlignment="Center"  Content="Nimbus: UITS Technology Support Tool" FontSize="15" GroupName="quickLinksGroup" IsChecked="false" Width="530" Margin="0,137,0,45"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="linkSeven" HorizontalAlignment="Center"  Content="Hardware Portal: Desktop Support Hardware portal and pricing" FontSize="15" GroupName="quickLinksGroup" IsChecked="false" Width="530" Margin="0,157,0,30"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="linkEight" HorizontalAlignment="Center"  Content="Interactive Floorplans: University of Arizona interactive floor plan maps" FontSize="15" GroupName="quickLinksGroup" IsChecked="false" Width="530" Margin="0,177,0,15"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="linkNine" HorizontalAlignment="Center"  Content="DST Intune Resources: Desktop Support Windows Intune Resources" FontSize="15" GroupName="quickLinksGroup" IsChecked="false" Width="530" Margin="0,197,0,0" Height="21" VerticalAlignment="Top"/>
+            <Grid  Width="530" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,600,0,0" Height="260" >
+                <Label Content="Quick Links" HorizontalAlignment="Center" HorizontalContentAlignment="Center" FontSize="25" Width="530" Margin="0,-6,0,225" FontFamily="Comic Sans MS" />
+
+                <TextBlock Margin="0,35,0,200" HorizontalAlignment="Left" FontSize="18" FontFamily="Comic Sans MS">
+                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate" >
+                        Phone Schedule: Desktop Support Phone Schedule
+                    </Hyperlink>
+                </TextBlock>
+
+                <TextBlock Margin="0,60,0,0" HorizontalAlignment="Left" FontSize="18" FontFamily="Comic Sans MS">
+                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_1">
+                        Customer List: Desktop Support Customer list by Core Team
+                    </Hyperlink>
+                </TextBlock>
+
+                <TextBlock Margin="0,85,0,0" HorizontalAlignment="Left" FontSize="18" FontFamily="Comic Sans MS">
+                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_2">
+                        Service Now KB: UITS Service Now Knowledge Base
+                    </Hyperlink>
+                </TextBlock>
+
+                <TextBlock Margin="0,110,0,0" HorizontalAlignment="Left" FontSize="18" FontFamily="Comic Sans MS">
+                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_3">
+                        Splunk: Enterprise network search tool
+                    </Hyperlink>
+                </TextBlock>
+
+                <TextBlock Margin="0,135,0,0" HorizontalAlignment="Left" FontSize="18" FontFamily="Comic Sans MS">
+                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_4">
+                        Device Registration Portal: MAB registration portal
+                    </Hyperlink>
+                </TextBlock>
+
+                <TextBlock Margin="0,160,0,0" HorizontalAlignment="Left" FontSize="18" FontFamily="Comic Sans MS">
+                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_5">
+                        Nimbus: UITS Technology Support Tool
+                    </Hyperlink>
+                </TextBlock>
+
+                <TextBlock Margin="0,185,0,0" HorizontalAlignment="Left" FontSize="18" FontFamily="Comic Sans MS">
+                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_6">
+                        Hardware Portal: Desktop Support Hardware portal and pricing
+                    </Hyperlink>
+                </TextBlock>
+
+                <TextBlock Margin="0,210,0,0" HorizontalAlignment="Left" FontSize="18" FontFamily="Comic Sans MS">
+                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_7">
+                        Interactive Floorplans: University of Arizona interactive floor plan maps
+                    </Hyperlink>
+                </TextBlock>
+
+                <TextBlock Margin="0,235,0,0" HorizontalAlignment="Left" FontSize="18" FontFamily="Comic Sans MS">
+                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_8">
+                        DST Intune Resources: Desktop Support Windows Intune Resources
+                    </Hyperlink>
+                </TextBlock>
             </Grid>
         </Grid>
     </ScrollViewer>

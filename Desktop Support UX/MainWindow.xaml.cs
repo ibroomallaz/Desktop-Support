@@ -13,6 +13,7 @@ using System.Windows.Forms.PropertyGridInternal;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using static QuickLinks;
@@ -335,62 +336,167 @@ namespace Desktop_Support_UX
 
         }
 
-        //public async Task Button_Click_2(object sender, RoutedEventArgs e)
-        //{
-        //    outputGrid.Text = "MADE IT";
-        //    QuickLinks.Links links = new();
-        //    Links? quickLinks = await QuickLinks.GetQuickLinksDataAsync();
-        //    //var l = await QuickLinks.GetQuickLinksDataAsync();
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            System.Diagnostics.Process.Start(e.Uri.ToString());
+        }
 
+        private void Hyperlink_RequestNavigate_1(object sender, RequestNavigateEventArgs e)
+        {
 
-        //    if (linkOne.IsChecked == true)
-        //    {
-        //        if (quickLinks != null)
-        //        {
-        //            quickLinks.OpenURL(1);
-        //        }
-        //        else
-        //        {
-        //            MessageBox.Show("Quicklinks data is unavailable. Please Reload", "ERROR");
-        //        }
-        //    }
-        //    else if (linkTwo.IsChecked == true)
-        //    {
-        //        links.OpenURL(2);
-        //    }
-        //    else if (linkThree.IsChecked == true)
-        //    {
-        //        links.OpenURL(3);
-        //    }
-        //    else if (linkFour.IsChecked == true)
-        //    {
-        //        links.OpenURL(4);
-        //    }
-        //    else if (linkFive.IsChecked == true)
-        //    {
-        //        links.OpenURL(5);
-        //    }
-        //    else if (linkSix.IsChecked == true)
-        //    {
-        //        links.OpenURL(6);
-        //    }
-        //    else if (linkSeven.IsChecked == true)
-        //    {
-        //        links.OpenURL(7);
-        //    }
-        //    else if (linkEight.IsChecked == true)
-        //    {
-        //        links.OpenURL(8);
-        //    }
-        //    else if (linkNine.IsChecked == true)
-        //    {
-        //        links.OpenURL(9);
-        //    }
-        //    else
-        //    {
-        //        MessageBox.Show("Please select a link from the listing and try again to search", "ERROR");
-        //    }
-        //    return;
-        //}
+        }
+
+        private void Hyperlink_RequestNavigate_2(object sender, RequestNavigateEventArgs e)
+        {
+
+        }
+
+        private void Hyperlink_RequestNavigate_3(object sender, RequestNavigateEventArgs e)
+        {
+
+        }
+
+        private void Hyperlink_RequestNavigate_4(object sender, RequestNavigateEventArgs e)
+        {
+
+        }
+
+        private void Hyperlink_RequestNavigate_5(object sender, RequestNavigateEventArgs e)
+        {
+
+        }
+
+        private void Hyperlink_RequestNavigate_6(object sender, RequestNavigateEventArgs e)
+        {
+
+        }
+
+        private void Hyperlink_RequestNavigate_7(object sender, RequestNavigateEventArgs e)
+        {
+
+        }
+
+        private void Hyperlink_RequestNavigate_8(object sender, RequestNavigateEventArgs e)
+        {
+
+        }
+        // public void Button_Click_2(object sender, RoutedEventArgs e)
+        // {
+        //     handleQuickLinks();
+        // }
+
+        //public async Task handleQuickLinks()
+        // {
+        //     QuickLinks l = new QuickLinks();
+        //     QuickLinks.Links? quickLinks = await QuickLinks.GetQuickLinksDataAsync();
+        //     //.GetQuickLinksDataAsync();
+        //     //var l = await QuickLinks.GetQuickLinksDataAsync();
+
+        //     if (linkOne.IsChecked == true)
+        //     {
+        //         if (quickLinks != null)
+        //         {
+        //             HTTP.OpenURL(quickLinks.QL[0].URL);
+        //         }
+        //         else
+        //         {
+        //             MessageBox.Show("Quicklinks data is unavailable. Please Reload", "ERROR");
+        //         }
+        //     }
+        //     else if (linkTwo.IsChecked == true)
+        //     {
+        //         if (quickLinks != null)
+        //         {
+        //             HTTP.OpenURL(quickLinks.QL[1].URL);
+        //         }
+        //         else
+        //         {
+        //             MessageBox.Show("Quicklinks data is unavailable. Please Reload", "ERROR");
+        //         }
+        //     }
+        //     else if (linkThree.IsChecked == true)
+        //     {
+        //         if (quickLinks != null)
+        //         {
+        //             HTTP.OpenURL(quickLinks.QL[2].URL);
+        //         }
+        //         else
+        //         {
+        //             MessageBox.Show("Quicklinks data is unavailable. Please Reload", "ERROR");
+        //         }
+        //     }
+        //     else if (linkFour.IsChecked == true)
+        //     {
+        //         if (quickLinks != null)
+        //         {
+        //             HTTP.OpenURL(quickLinks.QL[3].URL);
+        //         }
+        //         else
+        //         {
+        //             MessageBox.Show("Quicklinks data is unavailable. Please Reload", "ERROR");
+        //         }
+        //     }
+        //     else if (linkFive.IsChecked == true)
+        //     {
+        //         if (quickLinks != null)
+        //         {
+        //             HTTP.OpenURL(quickLinks.QL[4].URL);
+        //         }
+        //         else
+        //         {
+        //             MessageBox.Show("Quicklinks data is unavailable. Please Reload", "ERROR");
+        //         }
+        //     }
+        //     else if (linkSix.IsChecked == true)
+        //     {
+        //         if (quickLinks != null)
+        //         {
+        //             HTTP.OpenURL(quickLinks.QL[5].URL);
+        //         }
+        //         else
+        //         {
+        //             MessageBox.Show("Quicklinks data is unavailable. Please Reload", "ERROR");
+        //         }
+        //     }
+        //     else if (linkSeven.IsChecked == true)
+        //     {
+        //         if (quickLinks != null)
+        //         {
+        //             HTTP.OpenURL(quickLinks.QL[6].URL);
+        //         }
+        //         else
+        //         {
+        //             MessageBox.Show("Quicklinks data is unavailable. Please Reload", "ERROR");
+        //         }
+        //     }
+        //     else if (linkEight.IsChecked == true)
+        //     {
+        //         if (quickLinks != null)
+        //         {
+        //             HTTP.OpenURL(quickLinks.QL[7].URL);
+        //         }
+        //         else
+        //         {
+        //             MessageBox.Show("Quicklinks data is unavailable. Please Reload", "ERROR");
+        //         }
+        //     }
+        //     else if (linkNine.IsChecked == true)
+        //     {
+        //         if (quickLinks != null)
+        //         {
+        //             HTTP.OpenURL(quickLinks.QL[8].URL);
+        //         }
+        //         else
+        //         {
+        //             MessageBox.Show("Quicklinks data is unavailable. Please Reload", "ERROR");
+        //         }
+        //     }
+        //     else
+        //     {
+        //         MessageBox.Show("Please select a link from the listing and try again to search", "ERROR");
+        //     }
+        //     return;
+
+        // }
     }
 }
