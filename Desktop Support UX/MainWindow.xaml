@@ -27,15 +27,6 @@
                 <RadioButton FontFamily="Comic Sans MS" x:Name="computerInfoButton" HorizontalAlignment="Right" VerticalAlignment="Top" Content="Computer info" FontSize="14" GroupName="userInfoChoices" IsChecked="False" Width="144" Checked="computerInfoButton_Checked"/>
             </Grid>
 
-            <!--
-        <Grid HorizontalAlignment="Right" Margin="0,87,0,646" Width="272" >
-            <Label FontFamily="Comic Sans MS" Content="Computer Info" HorizontalAlignment="Center" Height="37" VerticalAlignment="Top" Width="149" FontSize="20"/>
-            <TextBlock FontFamily="Comic Sans MS" Background="White" x:Name="textPlaceholderComputer" FontWeight="ExtraLight" VerticalAlignment="Bottom" HorizontalAlignment="Left" Grid.Row="1" TextWrapping="Wrap" Text="Computer Name" Width="175" Height="27" FontSize="15" Margin="5,0,0,0"/>
-            <TextBox FontFamily="Comic Sans MS" x:Name="txtInputComputer" HorizontalAlignment="Left" Height="28" TextWrapping="Wrap"  VerticalAlignment="Bottom" Width="177" Background="Transparent" TextChanged="txtInput_TextChangedComputer"/>
-            <Button FontFamily="Comic Sans MS" Content="Search" HorizontalAlignment="Right" Height="28" VerticalAlignment="Bottom" Width="92" Click="Button_Click_2"/>
-        </Grid>
-        -->
-
             <Grid VerticalAlignment="Top" HorizontalAlignment="Center" Height="365" Width="525" Margin="0,230,0,0">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <TextBox IsReadOnly="True" x:Name="outputGrid" Text=""  FontSize="14" Background="Black" Foreground="WhiteSmoke" Padding="5,5,5,5" FontFamily="Comic Sans MS"/>
@@ -44,7 +35,6 @@
 
 
             <Grid Margin="12,0,12,868">
-                <!-- <Button FontFamily="Comic Sans MS" Content="Quick Links" HorizontalAlignment="Left" Height="37" VerticalAlignment="Top" Width="130" Click="Button_Click_3"/>-->
                 <Button FontFamily="Comic Sans MS" Content="About" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="110"  Click="Button_Click_1"/>
                 <TextBlock FontFamily="Comic Sans MS" HorizontalAlignment="Right" Height="17" TextAlignment="Center" TextWrapping="Wrap" Text="ver 3.0.4" VerticalAlignment="Top" Width="58"/>
             </Grid>
