@@ -2,6 +2,7 @@
 using Colors.Net.StringColorExtensions;
 using Microsoft.VisualBasic.ApplicationServices;
 using Microsoft.VisualBasic.Devices;
+using System;
 using System.DirectoryServices;
 using System.Text;
 using System.Windows;
@@ -14,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static QuickLinks;
 
 namespace Desktop_Support_UX
 {
@@ -23,7 +25,6 @@ namespace Desktop_Support_UX
     /// </summary>
     public partial class MainWindow : Window
     {
-
         String outputText = "";
         public MainWindow()
         {
@@ -39,18 +40,6 @@ namespace Desktop_Support_UX
             else
             {
                 textPlaceholder.Visibility = Visibility.Hidden;
-            }
-        }
-
-        private void txtInput_TextChangedComputer(object sender, TextChangedEventArgs e)
-        {
-            if (string.IsNullOrEmpty(txtInputComputer.Text))
-            {
-                textPlaceholderComputer.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                textPlaceholderComputer.Visibility = Visibility.Hidden;
             }
         }
 
@@ -75,12 +64,15 @@ namespace Desktop_Support_UX
             {
                 handleCheckMIMButton(userMenuText);
             }
+            else if (computerInfoButton.IsChecked == true)
+            {
+                handleComputerInfo(userMenuText);
+            }
             else
             {
                 handleReportMIMButton(userMenuText);
             }
             window.Close();
-
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
@@ -88,14 +80,8 @@ namespace Desktop_Support_UX
             MessageBox.Show($"UITS Desktop Support App \n" + "Version 3.0.4\n" + "Developed by Isaac Broomall (ibroomall)", "About");
         }
 
-        private void Button_Click_2(object sender, RoutedEventArgs e)
+        private void handleComputerInfo(String computerMenuText)
         {
-            String computerMenuText = txtInputComputer.Text.Trim();
-            Window window = new Window();
-            window.Title = "Searching for " + computerMenuText;
-            window.Height = 25;
-            window.Width = 400;
-            window.Show();
             ADComputer ADComputer = new ADComputer(computerMenuText);
             String outputText = "";
             if (ADComputer.Exists)
@@ -127,17 +113,16 @@ namespace Desktop_Support_UX
             {
                 outputText += computerMenuText + " is not in BlueCat.\n";
             }
-
-            window.Close();
             outputText += "-----------------------------------------------------------------------------\n";
             outputGrid.Text = outputText;
-            txtInputComputer.Clear();
+            txtInput.Clear();
         }
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
             if (netIDButton.IsChecked == true)
             {
+                inputLabel.Content = "User Information: Enter NetID";
                 textPlaceholder.Text = "User Info";
             }
         }
@@ -146,6 +131,7 @@ namespace Desktop_Support_UX
         {
             if (justIDButton.IsChecked == true)
             {
+                inputLabel.Content = "User Information: Enter Employee or StudentID";
                 textPlaceholder.Text = "Employee/StudentID";
             }
         }
@@ -154,7 +140,17 @@ namespace Desktop_Support_UX
         {
             if (checkMIMButton.IsChecked == true)
             {
+                inputLabel.Content = "Input Department Number MIM group you wish to check";
                 textPlaceholder.Text = "Input Dept Number";
+            }
+        }
+
+        private void computerInfoButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (computerInfoButton.IsChecked == true)
+            {
+                inputLabel.Content = "Computer Information: Enter Hostname";
+                textPlaceholder.Text = "Input Computer Info";
             }
         }
 
@@ -162,11 +158,12 @@ namespace Desktop_Support_UX
         {
             if (reportMIMButton.IsChecked == true)
             {
+                inputLabel.Content = "Check current MIM groups";
                 textPlaceholder.Text = "Enter NetID";
             }
         }
 
-        public void handleUserInfo(String userMenuText)
+        public async Task handleUserInfo(String userMenuText)
         {
             ADUserInfo ADUser = new ADUserInfo(userMenuText);
             FileRepo repoText = new FileRepo();
@@ -196,53 +193,49 @@ namespace Desktop_Support_UX
                 }
                 outputText += "O365 Licensing: " + ADUser.License + "\n";
 
-                //if (!string.IsNullOrEmpty(ADUser.DepartmentNumber))
-                //{
-                //    outputText += "MADE IT\n";
-                //    var department = deptService.GetDepartmentAsync(ADUser.DepartmentNumber);
+                if (!string.IsNullOrEmpty(ADUser.DepartmentNumber))
+                {
+                    var department = await Globals.DepartmentService.GetDepartmentAsync(ADUser.DepartmentNumber);
 
-                //    if (department != null)
-                //    {
-                //        var serviceNowTeams = department.Teams?.Where(t => t.ServiceNow).ToList();
-                //        if (serviceNowTeams?.Any() == true)
-                //        {
+                    if (department != null)
+                    {
+                        var serviceNowTeams = department.Teams?.Where(t => t.ServiceNow).ToList();
+                        if (serviceNowTeams?.Any() == true)
+                        {
 
-                //            outputText += "Service Now Team: " + string.Join(", ", serviceNowTeams.Select(t => t.Name)) + "\n";
-                //        }
-                //        else if (deptText.Teams?.Any() == true)
-                //        {
-                //            outputText += "Support Team: " + string.Join(", ", deptText.Teams.Select(t => t.Name)) + "\n";
-                //        }
-                //        else
-                //        {
-                //            outputText += "Teams: None\n";
-                //        }
+                            outputText += "Service Now Team: " + string.Join(", ", serviceNowTeams.Select(t => t.Name)) + "\n";
+                        }
+                        else if (deptText.Teams?.Any() == true)
+                        {
+                            outputText += "Support Team: " + string.Join(", ", deptText.Teams.Select(t => t.Name)) + "\n";
+                        }
+                        else
+                        {
+                            outputText += "Teams: None\n";
+                        }
 
-                //        if (deptService.HasFileRepoAsync(ADUser.DepartmentNumber))
-                //        {
-                //            var fileRepo = Globals.DepartmentService.GetFileRepoAsync(ADUser.DepartmentNumber);
-                //            if (fileRepo != null)
-                //            {
-                //                ColoredConsole.Write($"{Cyan("File Repository: ")}");
-                //                ColoredConsole.WriteLine(fileRepo.Location.Red());
-                //            }
-                //            else
-                //            {
-                //                ColoredConsole.WriteLine(Cyan("File Repository: ") + "Details unavailable".Red());
-                //            }
-                //        }
-
-
-                //    }
-                //    if (!string.IsNullOrEmpty(deptText.Notes))
-                //    {
-                //        outputText += "Notes: " + deptText.Notes + "\n";
-                //    }
-                //}
-                //else
-                //{
-                //    outputText += "Department information not found in cache.\n";
-                //}
+                        if (await deptService.HasFileRepoAsync(ADUser.DepartmentNumber))
+                        {
+                            var fileRepo = await Globals.DepartmentService.GetFileRepoAsync(ADUser.DepartmentNumber);
+                            if (fileRepo != null)
+                            {
+                                outputText += "File Repository: " + fileRepo.Location + "\n";
+                            }
+                            else
+                            {
+                                outputText += "File Repository: Details unavailable\n";
+                            }
+                        }
+                    }
+                    if (!string.IsNullOrEmpty(deptText.Notes))
+                    {
+                        outputText += "Notes: " + deptText.Notes + "\n";
+                    }
+                }
+                else
+                {
+                    outputText += "Department information not found in cache.\n";
+                }
             }
             else if (!string.IsNullOrWhiteSpace(ADUser.ErrorMessage))
             {
@@ -252,10 +245,9 @@ namespace Desktop_Support_UX
             {
                 outputText += userMenuText + " is not a Valid NetID\n";
             }
-            //window.Close();
+
             outputText += "-----------------------------------------------------------------------------\n";
             outputGrid.Text = outputText;
-            txtInput.Clear();
         }
 
         public void handleJustIDButton(String userMenuText)
@@ -271,17 +263,18 @@ namespace Desktop_Support_UX
                 try
                 {
                     SearchResult? result = searcher.FindOne();
-                    outputText += result != null ? result.Properties["displayName"][0].ToString() + 
+                    outputText += result != null ? result.Properties["displayName"][0].ToString() +
                         "\n-----------------------------------------------------------------------------\n" ?? "Unknown" : "Employee/StudentID not found." +
                         "\n-----------------------------------------------------------------------------\n";
                     outputGrid.Text = outputText;
                 }
                 catch (Exception ex)
                 {
-                    outputText += ex.Message.ToString();
-                    outputGrid.Text = outputText + "\n-----------------------------------------------------------------------------\n";
+                    outputText += ex.Message.ToString() + "\n-----------------------------------------------------------------------------\n";
+                    outputGrid.Text = outputText;
                 }
             }
+            txtInput.Clear();
         }
 
         public void handleCheckMIMButton(String userMenuText)
@@ -290,7 +283,7 @@ namespace Desktop_Support_UX
             ADGroup group = new ADGroup(dept);
             if (!group.Exists)
             {
-                outputText+="MIM Group " + dept + " does not exist.\n" + "-----------------------------------------------------------------------------\n";
+                outputText += "\nMIM Group " + dept + " does not exist.\n" + "-----------------------------------------------------------------------------\n";
                 outputGrid.Text = outputText;
                 //ColoredConsole.WriteLine($"MIM Group {DarkYellow(dept)} does {DarkRed("not")} exist.");
             }
@@ -300,12 +293,13 @@ namespace Desktop_Support_UX
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                 foreach (var member in group.GroupMembers)
                 {
-                    outputText += member.ToString()+"\n";
+                    outputText += member.ToString() + "\n";
                 }
                 outputText += "-----------------------------------------------------------------------------\n";
                 outputGrid.Text = outputText;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             }
+            txtInput.Clear();
         }
 
         public void handleReportMIMButton(String userMenuText)
@@ -316,7 +310,7 @@ namespace Desktop_Support_UX
             Console.WriteLine();
             if (!user.Exists)
             {
-                outputText+=userMenuText + " is not a Valid NetID\n";
+                outputText += "\n" + userMenuText + " is not a Valid NetID" + "\n-----------------------------------------------------------------------------\n";
                 outputGrid.Text = outputText;
                 return;
             }
@@ -335,10 +329,68 @@ namespace Desktop_Support_UX
             }
             else
             {
-                outputText+="No valid MIM groups found for " + userMenuText + "\n-----------------------------------------------------------------------------\n";
+                outputText += "No valid MIM groups found for " + userMenuText + "\n-----------------------------------------------------------------------------\n";
                 outputGrid.Text = outputText;
             }
 
         }
+
+        //public async Task Button_Click_2(object sender, RoutedEventArgs e)
+        //{
+        //    outputGrid.Text = "MADE IT";
+        //    QuickLinks.Links links = new();
+        //    Links? quickLinks = await QuickLinks.GetQuickLinksDataAsync();
+        //    //var l = await QuickLinks.GetQuickLinksDataAsync();
+
+
+        //    if (linkOne.IsChecked == true)
+        //    {
+        //        if (quickLinks != null)
+        //        {
+        //            quickLinks.OpenURL(1);
+        //        }
+        //        else
+        //        {
+        //            MessageBox.Show("Quicklinks data is unavailable. Please Reload", "ERROR");
+        //        }
+        //    }
+        //    else if (linkTwo.IsChecked == true)
+        //    {
+        //        links.OpenURL(2);
+        //    }
+        //    else if (linkThree.IsChecked == true)
+        //    {
+        //        links.OpenURL(3);
+        //    }
+        //    else if (linkFour.IsChecked == true)
+        //    {
+        //        links.OpenURL(4);
+        //    }
+        //    else if (linkFive.IsChecked == true)
+        //    {
+        //        links.OpenURL(5);
+        //    }
+        //    else if (linkSix.IsChecked == true)
+        //    {
+        //        links.OpenURL(6);
+        //    }
+        //    else if (linkSeven.IsChecked == true)
+        //    {
+        //        links.OpenURL(7);
+        //    }
+        //    else if (linkEight.IsChecked == true)
+        //    {
+        //        links.OpenURL(8);
+        //    }
+        //    else if (linkNine.IsChecked == true)
+        //    {
+        //        links.OpenURL(9);
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show("Please select a link from the listing and try again to search", "ERROR");
+        //    }
+        //    return;
+        //}
     }
 }
