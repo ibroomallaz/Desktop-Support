@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         ResizeMode="CanResize"
         Title="Desktop Support App" x:Name="MainWindowGrid" Height="685" Width="685" Icon="/lilyface.jpg">
-    <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" Background="#FFCECECE">
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Background="#FFCECECE">
         <Grid Height="900" Width="650" >
 
             <Grid Margin="10,232,592,281" Background="White" />
