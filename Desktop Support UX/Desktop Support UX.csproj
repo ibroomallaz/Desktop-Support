@@ -11,8 +11,6 @@
 
   <ItemGroup>
     <None Remove="lilyface.jpg" />
-    <None Remove="UA Background 2.jpg" />
-    <None Remove="UA Background.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,8 +19,6 @@
 
   <ItemGroup>
     <Resource Include="lilyface.jpg" />
-    <Resource Include="UA Background 2.jpg" />
-    <Resource Include="UA Background.png" />
   </ItemGroup>
 
 </Project>
