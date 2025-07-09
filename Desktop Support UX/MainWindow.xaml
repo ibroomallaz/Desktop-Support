@@ -89,61 +89,16 @@
                         <GradientStop Color="White"/>
                     </LinearGradientBrush>
                 </Grid.Background>
-                <Label Content="Quick Links" HorizontalAlignment="Center" HorizontalContentAlignment="Center" FontSize="25" Width="530" Margin="0,-6,0,225" FontFamily="Comic Sans MS" />
-
-                <TextBlock Margin="0,35,0,200" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS" Width="366">
-                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate" >
-                        Phone Schedule: Desktop Support Phone Schedule
-                    </Hyperlink>
-                </TextBlock>
-
-                <TextBlock Margin="0,60,0,0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS">
-                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_1">
-                        Customer List: Desktop Support Customer list by Core Team
-                    </Hyperlink>
-                </TextBlock>
-
-                <TextBlock Margin="0,85,0,0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS">
-                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_2">
-                        Service Now KB: UITS Service Now Knowledge Base
-                    </Hyperlink>
-                </TextBlock>
-
-                <TextBlock Margin="0,110,0,0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS">
-                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_3">
-                        Splunk: Enterprise network search tool
-                    </Hyperlink>
-                </TextBlock>
-
-                <TextBlock Margin="0,135,0,0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS">
-                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_4">
-                        Device Registration Portal: MAB registration portal
-                    </Hyperlink>
-                </TextBlock>
-
-                <TextBlock Margin="0,160,0,0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS">
-                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_5">
-                        Nimbus: UITS Technology Support Tool
-                    </Hyperlink>
-                </TextBlock>
-
-                <TextBlock Margin="0,185,0,0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS">
-                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_6">
-                        Hardware Portal: Desktop Support Hardware portal and pricing
-                    </Hyperlink>
-                </TextBlock>
-
-                <TextBlock Margin="0,210,0,0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS">
-                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_7">
-                        Interactive Floorplans: University of Arizona interactive floor plan maps
-                    </Hyperlink>
-                </TextBlock>
-
-                <TextBlock Margin="0,235,0,0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS">
-                    <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_8">
-                        DST Intune Resources: Desktop Support Windows Intune Resources
-                    </Hyperlink>
-                </TextBlock>
+                <Label Content="Quick Links" HorizontalAlignment="Center" HorizontalContentAlignment="Center" FontSize="25" Width="530" Margin="0,0,0,225" FontFamily="Comic Sans MS" />
+                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS" Foreground="CornflowerBlue" Content="Phone Schedule: Desktop Support Phone Schedule" Margin="0,46,0,203" Background="Transparent" Width="382" Click="Button_Click_3" ></Button>
+                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS" Foreground="CornflowerBlue" Content="Customer List: Desktop Support Customer list by Core Team" Margin="0,68,0,176" Background="Transparent" Width="446" Click="Button_Click_4" ></Button>
+                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS" Foreground="CornflowerBlue" Content="Service Now KB: UITS Service Now Knowledge Base" Margin="0,95,0,149" Background="Transparent" Width="398" Click="Button_Click_5" ></Button>
+                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS" Foreground="CornflowerBlue" Content="Splunk: Enterprise network search tool" Margin="0,122,0,124" Background="Transparent" Width="290" Click="Button_Click_6" ></Button>
+                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS" Foreground="CornflowerBlue" Content="Device Registration Portal: MAB registration portal" Margin="0,147,0,99" Background="Transparent" Width="382" Click="Button_Click_7" ></Button>
+                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS" Foreground="CornflowerBlue" Content="Nimbus: UITS Technology Support Tool" Margin="0,172,0,74" Background="Transparent" Width="306" Click="Button_Click_8" ></Button>
+                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS" Foreground="CornflowerBlue" Content="Hardware Portal: Desktop Support Hardware portal and pricing" Margin="0,197,0,49" Background="Transparent" Width="474" Click="Button_Click_9" ></Button>
+                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS" Foreground="CornflowerBlue" Content="Interactive Floorplans: University of Arizona interactive floor plan maps" Margin="0,222,0,25" Background="Transparent" Width="530" Click="Button_Click_10" ></Button>
+                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS" Foreground="CornflowerBlue" Content="DST Intune Resources: Desktop Support Windows Intune Resources" Margin="0,246,0,0" Background="Transparent" Width="514" Click="Button_Click_11" ></Button>
             </Grid>
         </Grid>
     </ScrollViewer>

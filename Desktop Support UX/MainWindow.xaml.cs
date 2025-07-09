@@ -2,8 +2,10 @@
 using Colors.Net.StringColorExtensions;
 using Microsoft.VisualBasic.ApplicationServices;
 using Microsoft.VisualBasic.Devices;
+using Newtonsoft.Json;
 using System;
 using System.DirectoryServices;
+using System.Net.Http;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -78,7 +80,8 @@ namespace Desktop_Support_UX
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show($"UITS Desktop Support App \n" + "Version 3.0.4\n" + "Developed by Isaac Broomall (ibroomall)", "About");
+            
+            MessageBox.Show($"UITS Desktop Support App \n" + "Version 3.0.4\n" + "Developed by Isaac Broomall (ibroomall)\n" + "User Interface developed by JJ (jjvelasquez) :D", "About");
         }
 
         private void handleComputerInfo(String computerMenuText)
@@ -338,57 +341,86 @@ namespace Desktop_Support_UX
 
         }
 
-
-
-        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
-        {
-            System.Diagnostics.Process.Start(e.Uri.ToString());
-        }
-
-        private void Hyperlink_RequestNavigate_1(object sender, RequestNavigateEventArgs e)
-        {
-
-        }
-
-        private void Hyperlink_RequestNavigate_2(object sender, RequestNavigateEventArgs e)
-        {
-
-        }
-
-        private void Hyperlink_RequestNavigate_3(object sender, RequestNavigateEventArgs e)
-        {
-
-        }
-
-        private void Hyperlink_RequestNavigate_4(object sender, RequestNavigateEventArgs e)
-        {
-
-        }
-
-        private void Hyperlink_RequestNavigate_5(object sender, RequestNavigateEventArgs e)
-        {
-
-        }
-
-        private void Hyperlink_RequestNavigate_6(object sender, RequestNavigateEventArgs e)
-        {
-
-        }
-
-        private void Hyperlink_RequestNavigate_7(object sender, RequestNavigateEventArgs e)
-        {
-
-        }
-
-        private void Hyperlink_RequestNavigate_8(object sender, RequestNavigateEventArgs e)
-        {
-
-        }
+        private static Links? cachedLinks = null;
+        private static readonly HttpClient client = new HttpClient();
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
             outputText = "";
             outputGrid.Text = outputText;
+        }
+
+        private void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+            handleLinkOpening(0);
+        }
+
+        private void Button_Click_4(object sender, RoutedEventArgs e)
+        {
+            handleLinkOpening(1);
+        }
+        private void Button_Click_5(object sender, RoutedEventArgs e)
+        {
+            handleLinkOpening(2);
+        }
+
+        private void Button_Click_6(object sender, RoutedEventArgs e)
+        {
+            handleLinkOpening(3);
+        }
+
+        private void Button_Click_7(object sender, RoutedEventArgs e)
+        {
+            handleLinkOpening(4);
+        }
+
+        private void Button_Click_8(object sender, RoutedEventArgs e)
+        {
+            handleLinkOpening(5);
+        }
+
+
+        private void Button_Click_9(object sender, RoutedEventArgs e)
+        {
+            handleLinkOpening(6);
+        }
+
+        private void Button_Click_10(object sender, RoutedEventArgs e)
+        {
+            handleLinkOpening(7);
+        }
+
+        private void Button_Click_11(object sender, RoutedEventArgs e)
+        {
+            handleLinkOpening(8);
+        }
+
+        public async Task handleLinkOpening(int LinkNumber)
+        {
+            if (cachedLinks == null)
+            {
+                try
+                {
+                    Console.WriteLine("Downloading Quicklinks data...");
+                    string json = await client.GetStringAsync(Globals.g_QuickLinksURL);
+                    cachedLinks = JsonConvert.DeserializeObject<Links>(json);
+                    if (cachedLinks == null || cachedLinks.QL == null)
+                    {
+                        MessageBox.Show($"Deserialization resulted in null or invalid data.", "Error");
+                        return;
+                    }
+                    String urlString = cachedLinks.QL[LinkNumber].URL;
+                    HTTP.OpenURL(urlString);
+                    cachedLinks = null;
+                }
+
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error retrieving or deserializing JSON: " + ex, "Error");
+
+                }
+            }
+
         }
 
 
