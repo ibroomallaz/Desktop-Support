@@ -335,6 +335,8 @@ namespace Desktop_Support_UX
 
         }
 
+
+
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
             System.Diagnostics.Process.Start(e.Uri.ToString());
@@ -378,6 +380,12 @@ namespace Desktop_Support_UX
         private void Hyperlink_RequestNavigate_8(object sender, RequestNavigateEventArgs e)
         {
 
+        }
+
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            outputText = "";
+            outputGrid.Text = outputText;
         }
     }
 }
