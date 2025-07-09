@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Desktop_Support_UX"
         mc:Ignorable="d"
-        Title="Desktop Support App" x:Name="MainWindowGrid" Height="685" Width="685" ResizeMode="CanMinimize" Icon="/lilyface.jpg">
+        ResizeMode="CanResize"
+        Title="Desktop Support App" x:Name="MainWindowGrid" Height="685" Width="685" Icon="/lilyface.jpg">
     <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" Background="#FFCECECE">
         <Grid Height="900" Width="650" >
 

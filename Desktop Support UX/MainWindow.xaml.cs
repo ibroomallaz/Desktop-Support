@@ -1,31 +1,13 @@
-﻿using Colors.Net;
-using Colors.Net.StringColorExtensions;
-using Microsoft.VisualBasic.ApplicationServices;
-using Microsoft.VisualBasic.Devices;
-using Newtonsoft.Json;
-using System;
+﻿using Newtonsoft.Json;
 using System.DirectoryServices;
 using System.Net.Http;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Forms.PropertyGridInternal;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using static QuickLinks;
 
 namespace Desktop_Support_UX
 {
-    //IDepartment teams = new IDepartment();
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
+
     public partial class MainWindow : Window
     {
         String outputText = "";
@@ -57,7 +39,7 @@ namespace Desktop_Support_UX
 
             if (netIDButton.IsChecked == true)
             {
-                handleUserInfo(userMenuText);
+                _ = handleUserInfo(userMenuText);
             }
             else if (justIDButton.IsChecked == true)
             {
@@ -80,7 +62,7 @@ namespace Desktop_Support_UX
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            
+
             MessageBox.Show($"UITS Desktop Support App \n" + "Version 3.0.4\n" + "Developed by Isaac Broomall (ibroomall)\n" + "User Interface developed by JJ (jjvelasquez) :D", "About");
         }
 
@@ -124,50 +106,45 @@ namespace Desktop_Support_UX
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
-            if (netIDButton.IsChecked == true)
-            {
-                inputLabel.Content = "User Information: Enter NetID";
-                textPlaceholder.Text = "User Info";
-            }
+
+            inputLabel.Content = "User Information: Enter NetID";
+            textPlaceholder.Text = "User Info";
+
         }
 
         private void checkMIMButton_Checked(object sender, RoutedEventArgs e)
         {
-            if (justIDButton.IsChecked == true)
-            {
-                inputLabel.Content = "User Information: Enter Employee or StudentID";
-                textPlaceholder.Text = "Employee/StudentID";
-            }
+
+            inputLabel.Content = "User Information: Enter Employee or StudentID";
+            textPlaceholder.Text = "Employee/StudentID";
+
             txtInput.Clear();
         }
 
         private void checkMIMButton_Checked_1(object sender, RoutedEventArgs e)
         {
-            if (checkMIMButton.IsChecked == true)
-            {
-                inputLabel.Content = "Input Department Number MIM group you wish to check";
-                textPlaceholder.Text = "Input Dept Number";
-            }
+
+            inputLabel.Content = "Input Department Number MIM group you wish to check";
+            textPlaceholder.Text = "Input Dept Number";
+
             txtInput.Clear();
         }
 
         private void computerInfoButton_Checked(object sender, RoutedEventArgs e)
         {
-            if (computerInfoButton.IsChecked == true)
-            {
-                inputLabel.Content = "Computer Information: Enter Hostname";
-                textPlaceholder.Text = "Input Computer Info";
-            }
+
+            inputLabel.Content = "Computer Information: Enter Hostname";
+            textPlaceholder.Text = "Input Computer Info";
+
             txtInput.Clear();
         }
 
         private void reportMIMButton_Checked(object sender, RoutedEventArgs e)
         {
-            if (reportMIMButton.IsChecked == true)
-            {
-                inputLabel.Content = "Check current MIM groups";
-                textPlaceholder.Text = "Enter NetID";
-            }
+
+            inputLabel.Content = "Check current MIM groups";
+            textPlaceholder.Text = "Enter NetID";
+
         }
 
         public async Task handleUserInfo(String userMenuText)
@@ -352,47 +329,47 @@ namespace Desktop_Support_UX
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            handleLinkOpening(0);
+            _ = handleLinkOpening(0);
         }
 
         private void Button_Click_4(object sender, RoutedEventArgs e)
         {
-            handleLinkOpening(1);
+            _ = handleLinkOpening(1);
         }
         private void Button_Click_5(object sender, RoutedEventArgs e)
         {
-            handleLinkOpening(2);
+            _ = handleLinkOpening(2);
         }
 
         private void Button_Click_6(object sender, RoutedEventArgs e)
         {
-            handleLinkOpening(3);
+            _ = handleLinkOpening(3);
         }
 
         private void Button_Click_7(object sender, RoutedEventArgs e)
         {
-            handleLinkOpening(4);
+            _ = handleLinkOpening(4);
         }
 
         private void Button_Click_8(object sender, RoutedEventArgs e)
         {
-            handleLinkOpening(5);
+            _ = handleLinkOpening(5);
         }
 
 
         private void Button_Click_9(object sender, RoutedEventArgs e)
         {
-            handleLinkOpening(6);
+            _ = handleLinkOpening(6);
         }
 
         private void Button_Click_10(object sender, RoutedEventArgs e)
         {
-            handleLinkOpening(7);
+            _ = handleLinkOpening(7);
         }
 
         private void Button_Click_11(object sender, RoutedEventArgs e)
         {
-            handleLinkOpening(8);
+            _ = handleLinkOpening(8);
         }
 
         public async Task handleLinkOpening(int LinkNumber)
