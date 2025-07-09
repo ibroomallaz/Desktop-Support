@@ -23,8 +23,6 @@
                 </Label.Background>
             </Label>
 
-
-
             <Grid HorizontalAlignment="Center" Margin="0,109,0,727" Width="566">
                 <Label  x:Name="inputLabel" Foreground="Black" HorizontalContentAlignment="Center" FontFamily="Comic Sans MS" Content="Enter User Info" HorizontalAlignment="Center" FontSize="18"  Width="565">
                     <Label.Background>
@@ -61,11 +59,9 @@
                 <RadioButton FontFamily="Comic Sans MS" x:Name="computerInfoButton" HorizontalAlignment="Right" VerticalAlignment="Top" Content="Computer info" FontSize="14" GroupName="userInfoChoices" IsChecked="False" Width="119" Checked="computerInfoButton_Checked" Margin="0,5,74,0" Height="19"/>
             </Grid>
 
-
             <Grid Margin="58,232,58,640" Background="Black" >
                 <Button FontFamily="Comic Sans MS" FontSize="15" Content="Clear" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Center" Height="28" Width="90" Click="Button_Click_2" Margin="444,0,0,0"></Button>
             </Grid>
-
 
             <Grid VerticalAlignment="Top" HorizontalAlignment="Center" Height="359" Width="534" Margin="0,260,0,0" Background="Black">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" BorderThickness="5" Background="Black">
@@ -73,14 +69,10 @@
                 </ScrollViewer>
             </Grid>
 
-
-
             <Grid Margin="12,0,12,868">
                 <Button FontSize="15" FontFamily="Comic Sans MS" Content="About" HorizontalAlignment="Left" VerticalAlignment="Center" Height="23" Width="61"  Click="Button_Click_1" Margin="-1,0,0,0"/>
                 <TextBlock  FontFamily="Comic Sans MS" HorizontalAlignment="Right" Height="17" TextAlignment="Center" TextWrapping="Wrap" Text="ver 3.0.4" VerticalAlignment="Top" Width="58"/>
             </Grid>
-
-
 
             <Grid  Width="630" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,619,0,0" Height="271">
                 <Grid.Background>
@@ -91,15 +83,11 @@
                     </LinearGradientBrush>
                 </Grid.Background>
                 <Label Content="Quick Links" HorizontalAlignment="Center" HorizontalContentAlignment="Center" FontSize="25" Width="530" Margin="0,0,0,225" FontFamily="Comic Sans MS" />
-
-
                 <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS" Foreground="CornflowerBlue" Margin="0,46,0,203" Background="Transparent" Width="382" Click="Button_Click_3" >
                     <Button.Content>
                         <TextBlock Text="Phone Schedule: Desktop Support Phone Schedule" TextDecorations="Underline"/>
                     </Button.Content>
                 </Button>
-                
-                
                 <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS" Foreground="CornflowerBlue" Margin="0,73,0,176" Background="Transparent" Width="446" Click="Button_Click_4" >
                     <Button.Content>
                         <TextBlock Text="Customer List: Desktop Support Customer list by Core Team" TextDecorations="Underline"/>

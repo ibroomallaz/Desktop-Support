@@ -7,7 +7,6 @@ using static QuickLinks;
 
 namespace Desktop_Support_UX
 {
-
     public partial class MainWindow : Window
     {
         String outputText = "";
@@ -28,80 +27,11 @@ namespace Desktop_Support_UX
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            String userMenuText = txtInput.Text.Trim();
-            Window window = new Window();
-            window.Title = "Searching for " + userMenuText;
-            window.Height = 25;
-            window.Width = 400;
-            window.Show();
-
-            if (netIDButton.IsChecked == true)
-            {
-                _ = handleUserInfo(userMenuText);
-            }
-            else if (justIDButton.IsChecked == true)
-            {
-                handleJustIDButton(userMenuText);
-            }
-            else if (checkMIMButton.IsChecked == true)
-            {
-                handleCheckMIMButton(userMenuText);
-            }
-            else if (computerInfoButton.IsChecked == true)
-            {
-                handleComputerInfo(userMenuText);
-            }
-            else
-            {
-                handleReportMIMButton(userMenuText);
-            }
-            window.Close();
-        }
-
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
 
-            MessageBox.Show($"UITS Desktop Support App \n" + "Version 3.0.4\n" + "Developed by Isaac Broomall (ibroomall)\n" + "User Interface developed by JJ (jjvelasquez) :D", "About");
-        }
-
-        private void handleComputerInfo(String computerMenuText)
-        {
-            ADComputer ADComputer = new ADComputer(computerMenuText);
-            String outputText = "";
-            if (ADComputer.Exists)
-            {
-                outputText += "Location: " + ADComputer.OUs + "\n";
-                if (!string.IsNullOrEmpty(ADComputer.Description))
-                {
-                    outputText += "Description: " + ADComputer.Description + "\n";
-                }
-                if (!string.IsNullOrEmpty(ADComputer.OperatingSystem))
-                {
-                    outputText += "Operating System: " + ADComputer.OperatingSystem + "\n";
-                }
-                if (ADComputer.Enabled == false)
-                {
-                    outputText += "Enabled: False\n";
-                }
-                outputText += "Hybrid Join Group: ";
-                if (ADComputer.IsHybridGroupMember)
-                {
-                    outputText += "Yes\n";
-                }
-                else
-                {
-                    outputText += "No\n";
-                }
-            }
-            else
-            {
-                outputText += computerMenuText + " is not in BlueCat.\n";
-            }
-            outputText += "-----------------------------------------------------------------------------\n";
-            outputGrid.Text = outputText;
-            txtInput.Clear();
+            MessageBox.Show($"UITS Desktop Support App \n" + "Version 3.0.4\n" + "Developed by Isaac Broomall (ibroomall)\n"
+                + "User Interface developed by JJ (jjvelasquez) :D", "About");
         }
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
@@ -147,6 +77,44 @@ namespace Desktop_Support_UX
 
         }
 
+        private void handleComputerInfo(String computerMenuText)
+        {
+            ADComputer ADComputer = new ADComputer(computerMenuText);
+            String outputText = "";
+            if (ADComputer.Exists)
+            {
+                outputText += "Location: " + ADComputer.OUs + "\n";
+                if (!string.IsNullOrEmpty(ADComputer.Description))
+                {
+                    outputText += "Description: " + ADComputer.Description + "\n";
+                }
+                if (!string.IsNullOrEmpty(ADComputer.OperatingSystem))
+                {
+                    outputText += "Operating System: " + ADComputer.OperatingSystem + "\n";
+                }
+                if (ADComputer.Enabled == false)
+                {
+                    outputText += "Enabled: False\n";
+                }
+                outputText += "Hybrid Join Group: ";
+                if (ADComputer.IsHybridGroupMember)
+                {
+                    outputText += "Yes\n";
+                }
+                else
+                {
+                    outputText += "No\n";
+                }
+            }
+            else
+            {
+                outputText += computerMenuText + " is not in BlueCat.\n";
+            }
+            outputText += "-----------------------------------------------------------------------------\n";
+            outputGrid.Text = outputText;
+            txtInput.Clear();
+        }
+
         public async Task handleUserInfo(String userMenuText)
         {
             ADUserInfo ADUser = new ADUserInfo(userMenuText);
@@ -154,9 +122,8 @@ namespace Desktop_Support_UX
             Team teamText = new Team();
             Department deptText = new Department();
             DepartmentService deptService = new DepartmentService();
-
-
             outputText += "\n" + ADUser.DisplayName + "\n";
+
             if (ADUser.Exists)
             {
                 if (!string.IsNullOrEmpty(ADUser.EduAffiliation))
@@ -233,17 +200,14 @@ namespace Desktop_Support_UX
             outputText += "-----------------------------------------------------------------------------\n";
             outputGrid.Text = outputText;
         }
-
         public void handleJustIDButton(String userMenuText)
         {
-
             using (DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP))
             using (DirectorySearcher searcher = new DirectorySearcher(entry))
             {
                 searcher.Filter = $"(&(objectClass=user)(employeeID={userMenuText}))";
                 searcher.PropertiesToLoad.Add("displayName");
                 searcher.PropertiesToLoad.Add("employeeID");
-
                 try
                 {
                     SearchResult? result = searcher.FindOne();
@@ -308,14 +272,12 @@ namespace Desktop_Support_UX
                 outputText += "-----------------------------------------------------------------------------\n";
                 outputGrid.Text = outputText;
 #pragma warning restore CS8602
-
             }
             else
             {
                 outputText += "No valid MIM groups found for " + userMenuText + "\n-----------------------------------------------------------------------------\n";
                 outputGrid.Text = outputText;
             }
-
         }
 
         private static Links? cachedLinks = null;
@@ -390,16 +352,45 @@ namespace Desktop_Support_UX
                     HTTP.OpenURL(urlString);
                     cachedLinks = null;
                 }
-
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Error retrieving or deserializing JSON: " + ex, "Error");
-
                 }
             }
 
         }
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            String userMenuText = txtInput.Text.Trim();
+            Window window = new Window();
+            window.Title = "Searching for " + userMenuText + " ...";
+            window.Height = 25;
+            window.Width = 400;
+            window.Show();
 
+            if (netIDButton.IsChecked == true)
+            {
+                _ = handleUserInfo(userMenuText);
+            }
+            else if (justIDButton.IsChecked == true)
+            {
+                handleJustIDButton(userMenuText);
+            }
+            else if (checkMIMButton.IsChecked == true)
+            {
+                handleCheckMIMButton(userMenuText);
+            }
+            else if (computerInfoButton.IsChecked == true)
+            {
+                handleComputerInfo(userMenuText);
+            }
+            else
+            {
+                handleReportMIMButton(userMenuText);
+            }
+
+            window.Close();
+        }
 
     }
 }
