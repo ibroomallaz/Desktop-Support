@@ -5,36 +5,69 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Desktop_Support_UX"
         mc:Ignorable="d"
-        Title="Desktop Support App" x:Name="MainWindowGrid" Height="690" Width="635" ResizeMode="CanMinimize">
-    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-        <Grid HorizontalAlignment="Center" Height="900" Width="590">
+        Title="Desktop Support App" x:Name="MainWindowGrid" Height="685" Width="685" ResizeMode="CanMinimize" Icon="/lilyface.jpg">
+    <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" Background="#FFCECECE">
+        <Grid Height="900" Width="650" >
 
-            <Label HorizontalContentAlignment="Center" FontFamily="Comic Sans MS" Content="Desktop Support App" HorizontalAlignment="Left" VerticalAlignment="Top" Height="72" Width="586" FontSize="40" Margin="12,32,0,0"/>
+            <Grid Margin="10,232,592,281" Background="White" />
+            <Grid Margin="592,232,10,281" Background="White"/>
 
-            <Label x:Name="inputLabel" HorizontalContentAlignment="Center" FontFamily="Comic Sans MS" Content="Enter User Info" HorizontalAlignment="Center" FontSize="18" Margin="0,104,0,764" Width="600"/>
+            <Label Foreground="Black" HorizontalContentAlignment="Center" FontFamily="Comic Sans MS" Content="Desktop Support App" HorizontalAlignment="Center" VerticalAlignment="Top" Height="77" Width="566" FontSize="40" Margin="0,32,0,0">
+                <Label.Background>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#FFCECECE" Offset="1"/>
+                        <GradientStop Color="White" Offset="0"/>
+                        <GradientStop Color="White" Offset="0.618"/>
+                    </RadialGradientBrush>
+                </Label.Background>
+            </Label>
 
-            <Grid HorizontalAlignment="Center" Margin="0,136,0,727" Width="272">
-                <TextBlock FontFamily="Comic Sans MS" x:Name="textPlaceholder" FontWeight="ExtraLight"  VerticalAlignment="Bottom" HorizontalAlignment="Left" TextWrapping="Wrap" Text="NetID" Width="175" Height="27" FontSize="12" Background="White" Margin="5,0,0,0"/>
-                <TextBox FontFamily="Comic Sans MS" x:Name="txtInput" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="28"  TextWrapping="Wrap" Width="177" Background="Transparent" TextChanged="txtInput_TextChanged"/>
-                <Button FontFamily="Comic Sans MS" Content="Search" FontSize="17" VerticalContentAlignment="Center" HorizontalAlignment="Right" Height="28" VerticalAlignment="Bottom" Width="92" Click="Button_Click"/>
+
+
+            <Grid HorizontalAlignment="Center" Margin="0,109,0,727" Width="566">
+                <Label  x:Name="inputLabel" Foreground="Black" HorizontalContentAlignment="Center" FontFamily="Comic Sans MS" Content="Enter User Info" HorizontalAlignment="Center" FontSize="18"  Width="565">
+                    <Label.Background>
+                        <RadialGradientBrush>
+                            <GradientStop Color="#FFCECECE" Offset="1"/>
+                            <GradientStop Color="White" Offset="0.681"/>
+                            <GradientStop Color="White" Offset="0"/>
+                        </RadialGradientBrush>
+                    </Label.Background>
+                </Label>
+                <TextBox  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Comic Sans MS" x:Name="textPlaceholder" FontWeight="ExtraLight"  VerticalAlignment="Bottom" HorizontalAlignment="Left" TextWrapping="Wrap" Text="NetID" Width="167" Height="25" FontSize="12" Background="White" Margin="140,0,0,7"/>
+                <TextBox  FontFamily="Comic Sans MS" x:Name="txtInput" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="25"  TextWrapping="Wrap" Width="167" Background="Transparent" TextChanged="txtInput_TextChanged" Margin="140,0,0,7"/>
+                <Button  FontFamily="Comic Sans MS" Content="Search" FontSize="15"  HorizontalAlignment="Right" Height="25" VerticalAlignment="Bottom" Width="91" Click="Button_Click" Margin="0,0,160,7"/>
             </Grid>
 
-            <Grid HorizontalAlignment="Center" Margin="0,178,0,673" Width="570">
-                <RadioButton FontFamily="Comic Sans MS" x:Name="netIDButton" HorizontalAlignment="Left" VerticalAlignment="Top" Content="NetID" FontSize="14" GroupName="userInfoChoices" IsChecked="True" Width="76" Checked="RadioButton_Checked" Margin="70,0,0,0"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="checkMIMButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Content="Check current members of Dept MIM Group" FontSize="13" GroupName="userInfoChoices" IsChecked="False" Width="291" Checked="checkMIMButton_Checked_1"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="justIDButton" HorizontalAlignment="Center" VerticalAlignment="Top" Content="EmployeeID/StudentID" FontSize="14" GroupName="userInfoChoices" IsChecked="False" Width="180" Checked="checkMIMButton_Checked"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="reportMIMButton" HorizontalAlignment="Left" VerticalAlignment="Bottom" Content="Report Individual's current MIM Groups" FontSize="13" GroupName="userInfoChoices" IsChecked="False" Width="292" Checked="reportMIMButton_Checked"/>
-                <RadioButton FontFamily="Comic Sans MS" x:Name="computerInfoButton" HorizontalAlignment="Right" VerticalAlignment="Top" Content="Computer info" FontSize="14" GroupName="userInfoChoices" IsChecked="False" Width="117" Checked="computerInfoButton_Checked" Margin="0,0,31,0"/>
+            <Grid HorizontalAlignment="Center" Margin="0,173,0,668" Width="630">
+                <Grid.Background>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="White" Offset="1"/>
+                        <GradientStop Color="White" Offset="1"/>
+                        <GradientStop Color="#FFDEDEDE"/>
+                        <GradientStop Color="#FFCECECE"/>
+                        <GradientStop Color="#FFCECECE"/>
+                        <GradientStop Color="#FFE0E0E0"/>
+                        <GradientStop Color="#FFCECECE"/>
+                        <GradientStop Color="#FFCECECE"/>
+                        <GradientStop Color="#FFCECECE"/>
+                    </LinearGradientBrush>
+                </Grid.Background>
+                <RadioButton FontFamily="Comic Sans MS" x:Name="netIDButton" HorizontalAlignment="Left" VerticalAlignment="Top" Content="NetID" FontSize="14" GroupName="userInfoChoices" IsChecked="True" Width="75" Checked="RadioButton_Checked" Margin="101,5,0,0" Height="19"/>
+                <RadioButton FontFamily="Comic Sans MS" x:Name="checkMIMButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Content="Check current members of Dept MIM Group" FontSize="13" GroupName="userInfoChoices" IsChecked="False" Width="315" Checked="checkMIMButton_Checked_1" Height="30"/>
+                <RadioButton FontFamily="Comic Sans MS" x:Name="justIDButton" HorizontalAlignment="Center" VerticalAlignment="Top" Content="EmployeeID/StudentID" FontSize="14" GroupName="userInfoChoices" IsChecked="False" Width="180" Checked="checkMIMButton_Checked" Height="19" Margin="0,5,0,0"/>
+                <RadioButton FontFamily="Comic Sans MS" x:Name="reportMIMButton" HorizontalAlignment="Left" VerticalAlignment="Bottom" Content="Report Individual's current MIM Groups" FontSize="13" GroupName="userInfoChoices" IsChecked="False" Width="285" Checked="reportMIMButton_Checked" Height="29" Margin="25,0,0,0"/>
+                <RadioButton FontFamily="Comic Sans MS" x:Name="computerInfoButton" HorizontalAlignment="Right" VerticalAlignment="Top" Content="Computer info" FontSize="14" GroupName="userInfoChoices" IsChecked="False" Width="119" Checked="computerInfoButton_Checked" Margin="0,5,74,0" Height="19"/>
             </Grid>
 
 
-            <Grid Margin="12,232,12,640" Background="Black" >
-                <Button FontFamily="Comic Sans MS" FontSize="15" Content="Clear" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Center" Height="23" Width="90" Click="Button_Click_2" Margin="474,0,0,0"></Button>
+            <Grid Margin="58,232,58,640" Background="Black" >
+                <Button FontFamily="Comic Sans MS" FontSize="15" Content="Clear" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Center" Height="28" Width="90" Click="Button_Click_2" Margin="444,0,0,0"></Button>
             </Grid>
 
 
-            <Grid VerticalAlignment="Top" HorizontalAlignment="Center" Height="340" Width="566" Margin="0,260,0,0" Background="Black">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" BorderThickness="5">
+            <Grid VerticalAlignment="Top" HorizontalAlignment="Center" Height="359" Width="534" Margin="0,260,0,0" Background="Black">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" BorderThickness="5" Background="Black">
                     <TextBox BorderThickness="0" IsReadOnly="True" x:Name="outputGrid" Text=""  FontSize="14" Background="Black" Foreground="WhiteSmoke" Padding="5,5,5,5" FontFamily="Comic Sans MS"/>
                 </ScrollViewer>
             </Grid>
@@ -42,63 +75,71 @@
 
 
             <Grid Margin="12,0,12,868">
-                <Button FontSize="15" FontFamily="Comic Sans MS" Content="About" HorizontalAlignment="Left" VerticalAlignment="Center" Height="30" Width="64"  Click="Button_Click_1"/>
-                <TextBlock FontFamily="Comic Sans MS" HorizontalAlignment="Right" Height="17" TextAlignment="Center" TextWrapping="Wrap" Text="ver 3.0.4" VerticalAlignment="Top" Width="58"/>
+                <Button FontSize="15" FontFamily="Comic Sans MS" Content="About" HorizontalAlignment="Left" VerticalAlignment="Center" Height="23" Width="61"  Click="Button_Click_1" Margin="-1,0,0,0"/>
+                <TextBlock  FontFamily="Comic Sans MS" HorizontalAlignment="Right" Height="17" TextAlignment="Center" TextWrapping="Wrap" Text="ver 3.0.4" VerticalAlignment="Top" Width="58"/>
             </Grid>
 
 
-            <Grid  Width="530" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,600,0,0" Height="260" >
+
+            <Grid  Width="630" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,619,0,0" Height="271">
+                <Grid.Background>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#FFCECECE" Offset="1"/>
+                        <GradientStop Color="White" Offset="0"/>
+                        <GradientStop Color="White"/>
+                    </LinearGradientBrush>
+                </Grid.Background>
                 <Label Content="Quick Links" HorizontalAlignment="Center" HorizontalContentAlignment="Center" FontSize="25" Width="530" Margin="0,-6,0,225" FontFamily="Comic Sans MS" />
 
-                <TextBlock Margin="0,35,0,200" HorizontalAlignment="Left" FontSize="15.5" FontFamily="Comic Sans MS">
+                <TextBlock Margin="0,35,0,200" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS" Width="366">
                     <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate" >
                         Phone Schedule: Desktop Support Phone Schedule
                     </Hyperlink>
                 </TextBlock>
 
-                <TextBlock Margin="0,60,0,0" HorizontalAlignment="Left" FontSize="15.5" FontFamily="Comic Sans MS">
+                <TextBlock Margin="0,60,0,0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS">
                     <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_1">
                         Customer List: Desktop Support Customer list by Core Team
                     </Hyperlink>
                 </TextBlock>
 
-                <TextBlock Margin="0,85,0,0" HorizontalAlignment="Left" FontSize="15.5" FontFamily="Comic Sans MS">
+                <TextBlock Margin="0,85,0,0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS">
                     <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_2">
                         Service Now KB: UITS Service Now Knowledge Base
                     </Hyperlink>
                 </TextBlock>
 
-                <TextBlock Margin="0,110,0,0" HorizontalAlignment="Left" FontSize="15.5" FontFamily="Comic Sans MS">
+                <TextBlock Margin="0,110,0,0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS">
                     <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_3">
                         Splunk: Enterprise network search tool
                     </Hyperlink>
                 </TextBlock>
 
-                <TextBlock Margin="0,135,0,0" HorizontalAlignment="Left" FontSize="15.5" FontFamily="Comic Sans MS">
+                <TextBlock Margin="0,135,0,0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS">
                     <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_4">
                         Device Registration Portal: MAB registration portal
                     </Hyperlink>
                 </TextBlock>
 
-                <TextBlock Margin="0,160,0,0" HorizontalAlignment="Left" FontSize="15.5" FontFamily="Comic Sans MS">
+                <TextBlock Margin="0,160,0,0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS">
                     <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_5">
                         Nimbus: UITS Technology Support Tool
                     </Hyperlink>
                 </TextBlock>
 
-                <TextBlock Margin="0,185,0,0" HorizontalAlignment="Left" FontSize="15.5" FontFamily="Comic Sans MS">
+                <TextBlock Margin="0,185,0,0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS">
                     <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_6">
                         Hardware Portal: Desktop Support Hardware portal and pricing
                     </Hyperlink>
                 </TextBlock>
 
-                <TextBlock Margin="0,210,0,0" HorizontalAlignment="Left" FontSize="15.5" FontFamily="Comic Sans MS">
+                <TextBlock Margin="0,210,0,0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS">
                     <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_7">
                         Interactive Floorplans: University of Arizona interactive floor plan maps
                     </Hyperlink>
                 </TextBlock>
 
-                <TextBlock Margin="0,235,0,0" HorizontalAlignment="Left" FontSize="15.5" FontFamily="Comic Sans MS">
+                <TextBlock Margin="0,235,0,0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Comic Sans MS">
                     <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate_8">
                         DST Intune Resources: Desktop Support Windows Intune Resources
                     </Hyperlink>

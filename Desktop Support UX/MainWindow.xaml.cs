@@ -135,6 +135,7 @@ namespace Desktop_Support_UX
                 inputLabel.Content = "User Information: Enter Employee or StudentID";
                 textPlaceholder.Text = "Employee/StudentID";
             }
+            txtInput.Clear();
         }
 
         private void checkMIMButton_Checked_1(object sender, RoutedEventArgs e)
@@ -144,6 +145,7 @@ namespace Desktop_Support_UX
                 inputLabel.Content = "Input Department Number MIM group you wish to check";
                 textPlaceholder.Text = "Input Dept Number";
             }
+            txtInput.Clear();
         }
 
         private void computerInfoButton_Checked(object sender, RoutedEventArgs e)
@@ -153,6 +155,7 @@ namespace Desktop_Support_UX
                 inputLabel.Content = "Computer Information: Enter Hostname";
                 textPlaceholder.Text = "Input Computer Info";
             }
+            txtInput.Clear();
         }
 
         private void reportMIMButton_Checked(object sender, RoutedEventArgs e)
@@ -387,5 +390,7 @@ namespace Desktop_Support_UX
             outputText = "";
             outputGrid.Text = outputText;
         }
+
+
     }
 }
