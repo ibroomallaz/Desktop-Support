@@ -9,10 +9,16 @@ namespace Desktop_Support_UX
 {
     public partial class MainWindow : Window
     {
+
+        private static Links? cachedLinks = null;
+        private static readonly HttpClient client = new HttpClient();
+
         String outputText = "";
         public MainWindow()
         {
+            _ = VersionChecker.VersionCheck();
             InitializeComponent();
+
         }
 
         private void txtInput_TextChanged(object sender, TextChangedEventArgs e)
@@ -279,9 +285,6 @@ namespace Desktop_Support_UX
                 outputGrid.Text = outputText;
             }
         }
-
-        private static Links? cachedLinks = null;
-        private static readonly HttpClient client = new HttpClient();
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
