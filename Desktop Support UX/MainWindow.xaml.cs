@@ -86,7 +86,7 @@ namespace Desktop_Support_UX
         private void handleComputerInfo(String computerMenuText)
         {
             ADComputer ADComputer = new ADComputer(computerMenuText);
-            String outputText = "";
+            outputText += computerMenuText + "\n\n";
             if (ADComputer.Exists)
             {
                 outputText += "Location: " + ADComputer.OUs + "\n";
@@ -114,7 +114,14 @@ namespace Desktop_Support_UX
             }
             else
             {
-                outputText += computerMenuText + " is not in BlueCat.\n";
+                if(computerMenuText == "")
+                {
+                    outputText += "[Blank]" + " is not in BlueCat.\n";
+                }
+                else
+                {
+                    outputText += computerMenuText + " is not in BlueCat.\n";
+                }                  
             }
             outputText += "-----------------------------------------------------------------------------\n";
             outputGrid.Text = outputText;
@@ -128,7 +135,7 @@ namespace Desktop_Support_UX
             Team teamText = new Team();
             Department deptText = new Department();
             DepartmentService deptService = new DepartmentService();
-            outputText += "\n" + ADUser.DisplayName + "\n";
+            outputText += userMenuText + "\n\n" + ADUser.DisplayName + "\n";
 
             if (ADUser.Exists)
             {
@@ -208,6 +215,7 @@ namespace Desktop_Support_UX
         }
         public void handleJustIDButton(String userMenuText)
         {
+            outputText += userMenuText + "\n\n";
             using (DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP))
             using (DirectorySearcher searcher = new DirectorySearcher(entry))
             {
@@ -216,7 +224,7 @@ namespace Desktop_Support_UX
                 searcher.PropertiesToLoad.Add("employeeID");
                 try
                 {
-                    SearchResult? result = searcher.FindOne();
+                    SearchResult? result = searcher.FindOne();                   
                     outputText += result != null ? result.Properties["displayName"][0].ToString() +
                         "\n-----------------------------------------------------------------------------\n" ?? "Unknown" : "Employee/StudentID not found." +
                         "\n-----------------------------------------------------------------------------\n";
@@ -235,14 +243,15 @@ namespace Desktop_Support_UX
         {
             string dept = "UA-MIM-0" + userMenuText;
             ADGroup group = new ADGroup(dept);
+            outputText += userMenuText + "\n\n";
             if (!group.Exists)
             {
-                outputText += "\nMIM Group " + dept + " does not exist.\n" + "-----------------------------------------------------------------------------\n";
+                outputText += "MIM Group " + dept + " does not exist.\n" + "-----------------------------------------------------------------------------\n";
                 outputGrid.Text = outputText;
             }
             else
             {
-                outputText += "\nTotal group members: " + group.MemberCount.ToString() + "\n";
+                outputText += "Total group members: " + group.MemberCount.ToString() + "\n";
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                 foreach (var member in group.GroupMembers)
                 {
@@ -260,16 +269,22 @@ namespace Desktop_Support_UX
             ADUserInfo user = new ADUserInfo(userMenuText);
             user.GetADMIMGroups(userMenuText);
             bool mimExists = user.MimGroupExists ?? false;
-            Console.WriteLine();
+            outputText += userMenuText + "\n\n";
             if (!user.Exists)
             {
-                outputText += "\n" + userMenuText + " is not a Valid NetID" + "\n-----------------------------------------------------------------------------\n";
+                if(userMenuText == "")
+                {
+                    outputText += "[Blank] is not a Valid NetID" + "\n-----------------------------------------------------------------------------\n";
+                }
+                else
+                {
+                    outputText += userMenuText + " is not a Valid NetID" + "\n-----------------------------------------------------------------------------\n";
+                }                    
                 outputGrid.Text = outputText;
                 return;
             }
             if (user.Exists && mimExists)
             {
-                outputText += "\n";
 #pragma warning disable CS8602 // Dereference of a possibly null reference. Will not be null here
                 foreach (var group in user.MimGroupsList)
                 {
