@@ -75,6 +75,11 @@ public class ADUserInfo
                             string? groupName = result.Properties["cn"][0]?.ToString();
                             this.Division = groupName?.Length >= 4 ? groupName.Substring(0, 4) : "N/A";
                         }
+                        else
+                        {
+                            //Clarify lack of MIM group for ease of support
+                            this.Division = "No Departmental MIM group";
+                        }
                     }
                 }
                 else
