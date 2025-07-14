@@ -402,10 +402,10 @@ namespace Desktop_Support_UX
             }                  
         }
 
-        private void ToggleButton1_Checked(object sender, RoutedEventArgs e)
+        private void ToggleButton1_Unchecked(object sender, RoutedEventArgs e)
         {
             RadialGradientBrush gradLabel1 = new RadialGradientBrush();
-            gradLabel1.GradientStops.Add(new GradientStop(Color.FromRgb(44,44,44), 1.0)); 
+            gradLabel1.GradientStops.Add(new GradientStop(Color.FromRgb(0,0,0), 1.0)); 
             gradLabel1.GradientStops.Add(new GradientStop(Color.FromRgb(102, 99, 98), 0.0));
             gradLabel1.GradientStops.Add(new GradientStop(Color.FromRgb(102, 99, 98), 0.618));
 
@@ -413,7 +413,7 @@ namespace Desktop_Support_UX
             Label1Background.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
 
             RadialGradientBrush gradLabel2 = new RadialGradientBrush();
-            gradLabel2.GradientStops.Add(new GradientStop(Color.FromRgb(44, 44, 44), 1.0));
+            gradLabel2.GradientStops.Add(new GradientStop(Color.FromRgb(0, 0, 0), 1.0));
             gradLabel2.GradientStops.Add(new GradientStop(Color.FromRgb(102, 99, 98), 0.681));
             gradLabel2.GradientStops.Add(new GradientStop(Color.FromRgb(102, 99, 98), 0.0));
 
@@ -424,7 +424,7 @@ namespace Desktop_Support_UX
             LinearGradientBrush gradLabel3 = new LinearGradientBrush();
             gradLabel3.StartPoint = new Point(0.5, 0);
             gradLabel3.EndPoint = new Point(0.5, 1);
-            gradLabel3.GradientStops.Add(new GradientStop(Color.FromRgb(44, 44, 44), 0.314));
+            gradLabel3.GradientStops.Add(new GradientStop(Color.FromRgb(0, 0, 0), 0.314));
             gradLabel3.GradientStops.Add(new GradientStop(Color.FromRgb(102, 99, 98), 1));
 
             mainScreen.Background = gradLabel3;
@@ -435,7 +435,7 @@ namespace Desktop_Support_UX
             txtInput.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
         }
 
-        private void ToggleButton1_Unchecked(object sender, RoutedEventArgs e)
+        private void ToggleButton1_Checked(object sender, RoutedEventArgs e)
         {
             RadialGradientBrush gradLabel1 = new RadialGradientBrush();
             gradLabel1.GradientStops.Add(new GradientStop(Color.FromRgb(206, 206, 206), 1.0));

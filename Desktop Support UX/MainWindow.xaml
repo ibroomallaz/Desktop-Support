@@ -11,26 +11,30 @@
     <Grid x:Name="mainScreen" Height="675">
         <Grid.Background>
             <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                <GradientStop Color="#FFCECECE" Offset="0.314"/>
-                <GradientStop Color="White" Offset="1"/>
+                <GradientStop Color="Black" Offset="0.314"/>
+                <GradientStop Color="#626366" Offset="1"/>
             </LinearGradientBrush>
         </Grid.Background>
 
         <Grid VerticalAlignment="Top" HorizontalAlignment="Center" Width="560">
-            <Label x:Name="DarkModeLabel" Content="Dark Mode" HorizontalAlignment="Left" VerticalAlignment="Top" />
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="27*"/>
+                <ColumnDefinition Width="113*"/>
+            </Grid.ColumnDefinitions>
+            <Label Foreground="White" x:Name="DarkModeLabel" Content="Dark Mode" HorizontalAlignment="Left" VerticalAlignment="Center" />
 
-            <ToggleButton HorizontalAlignment="Left" Margin="70,0" x:Name="ToggleButton1" Width="50" Height="20" Checked="ToggleButton1_Checked" Unchecked="ToggleButton1_Unchecked">
+            <ToggleButton HorizontalAlignment="Left" Margin="70,3,0,3" x:Name="ToggleButton1" Width="50" Height="20" Checked="ToggleButton1_Checked" Unchecked="ToggleButton1_Unchecked" Grid.ColumnSpan="2">
                 <ToggleButton.Template>
                     <ControlTemplate TargetType="ToggleButton">
                         <Border x:Name="ToggleButtonBorder" Background="Gray" BorderThickness="1" CornerRadius="10" Padding="1">
                             <Border x:Name="circleToggle" Background="White" Width="20" CornerRadius="20" HorizontalAlignment="Left"/>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="true">
+                            <Trigger Property="IsChecked" Value="false">
                                 <Setter TargetName="circleToggle" Property="HorizontalAlignment" Value="Right"/>
                                 <Setter TargetName="ToggleButtonBorder" Property="Background" Value="LightBlue"/>
                             </Trigger>
-                            <Trigger Property="IsChecked" Value="false">
+                            <Trigger Property="IsChecked" Value="true">
                                 <Setter TargetName="circleToggle" Property="HorizontalAlignment" Value="Left"/>
                                 <Setter TargetName="circleToggle" Property="Background" Value="Black"/>
                             </Trigger>
@@ -39,7 +43,7 @@
                 </ToggleButton.Template>
             </ToggleButton>
 
-            <ComboBox FontSize="14" x:Name="QuickLinks" Width="120" Height="25" VerticalAlignment="Center" HorizontalAlignment="Right" FontFamily="Consolas" >
+            <ComboBox FontSize="14" x:Name="QuickLinks" Width="120" Height="25" VerticalAlignment="Center" HorizontalAlignment="Left" FontFamily="Consolas" Grid.Column="1" Margin="332,0,0,0" >
                 <ComboBoxItem Content="Quick Links" IsSelected="true"/>
                 <ComboBoxItem Foreground="Blue" x:Name="PhoneLink" Content="Phone Schedule: Desktop Support Phone Schedule" Selected="Button_Click_3"/>
                 <ComboBoxItem Foreground="Blue" x:Name="CustomerLink" Content="Customer List: Desktop Support Customer list by Core Team" Selected="Button_Click_4"/>
@@ -53,28 +57,28 @@
             </ComboBox>
         </Grid>
 
-        <Label x:Name="Label1Background" VerticalContentAlignment="Center" Foreground="Black" HorizontalContentAlignment="Center" FontFamily="Consolas" Content="Desktop Support App" HorizontalAlignment="Center" VerticalAlignment="Top" Height="90" Width="580" FontSize="40" Margin="0,31,0,0">
+        <Label x:Name="Label1Background" VerticalContentAlignment="Center" Foreground="White" HorizontalContentAlignment="Center" FontFamily="Consolas" Content="Desktop Support App" HorizontalAlignment="Center" VerticalAlignment="Top" Height="90" Width="580" FontSize="40" Margin="0,31,0,0">
             <Label.Background>
-                <RadialGradientBrush x:Name="test">
-                    <GradientStop Color="#FFCECECE" Offset="1"/>
-                    <GradientStop Color="White" Offset="0"/>
-                    <GradientStop Color="White" Offset="0.618"/>
+                <RadialGradientBrush>
+                    <GradientStop Color="Black" Offset="1"/>
+                    <GradientStop Color="#626366" Offset="0"/>
+                    <GradientStop Color="#626366" Offset="0.618"/>
                 </RadialGradientBrush>
             </Label.Background>
         </Label>
 
         <Grid HorizontalAlignment="Center" Margin="0,121,0,484" Width="580">
-            <Label x:Name="inputLabel" Foreground="Black" HorizontalContentAlignment="Center" FontFamily="Consolas" Content="Enter User Info" HorizontalAlignment="Center" FontSize="18"  Width="580">
+            <Label x:Name="inputLabel" Foreground="White" HorizontalContentAlignment="Center" FontFamily="Consolas" Content="Enter User Info" HorizontalAlignment="Center" FontSize="18"  Width="580">
                 <Label.Background>
                     <RadialGradientBrush>
-                        <GradientStop Color="#FFCECECE" Offset="1"/>
-                        <GradientStop Color="White" Offset="0.681"/>
-                        <GradientStop Color="White" Offset="0"/>
+                        <GradientStop Color="Black" Offset="1"/>
+                        <GradientStop Color="#626366" Offset="0.681"/>
+                        <GradientStop Color="#626366" Offset="0"/>
                     </RadialGradientBrush>
                 </Label.Background>
             </Label>
-            <TextBox HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Consolas" x:Name="textPlaceholder" FontWeight="ExtraLight"  VerticalAlignment="Bottom" HorizontalAlignment="Center" TextWrapping="Wrap" Text="" Width="180" Height="25" FontSize="12" Background="Transparent" Margin="110,0,0,15"/>
-            <TextBox FontFamily="Consolas" KeyDown="Button_Click" x:Name="txtInput" HorizontalAlignment="Center" VerticalAlignment="Bottom" Height="25" TextWrapping="Wrap" Width="180" Background="Transparent" TextChanged="txtInput_TextChanged" Margin="110,0,0,15"/>
+            <TextBox Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Consolas" x:Name="textPlaceholder" FontWeight="ExtraLight"  VerticalAlignment="Bottom" HorizontalAlignment="Center" TextWrapping="Wrap" Text="" Width="180" Height="25" FontSize="12" Background="Transparent" Margin="110,0,0,15"/>
+            <TextBox Foreground="White" FontFamily="Consolas" KeyDown="Button_Click" x:Name="txtInput" HorizontalAlignment="Center" VerticalAlignment="Bottom" Height="25" TextWrapping="Wrap" Width="180" Background="Transparent" TextChanged="txtInput_TextChanged" Margin="110,0,0,15"/>
             <ComboBox FontSize="13" x:Name="dropDownMenu" Width="195" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="55,0,0,15" FontFamily="Consolas">
                 <ComboBoxItem x:Name="netIDButton" IsSelected="true" Content="User Info" Selected="RadioButton_Checked"/>
                 <ComboBoxItem x:Name="computerInfoButton" Content="Computer Info" Selected="computerInfoButton_Checked"/>
@@ -86,9 +90,9 @@
         </Grid>
 
         <Grid Width="500" HorizontalAlignment="Center" Height="35" Margin="0,0,0,230" Background="Black" >
-            <Button FontSize="15" FontFamily="Consolas" Content="About" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center" Height="35" Width="60"  Click="Button_Click_1" Margin="440,0,0,0" />
+            <Button FontSize="15" FontFamily="Consolas" Content="About" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center" Height="29" Width="57"  Click="Button_Click_1" Margin="440,0,0,0" />
             <TextBlock Foreground="White" FontFamily="Consolas" HorizontalAlignment="Center" Height="22" TextAlignment="Center" TextWrapping="Wrap" Text="ver 3.0.4" VerticalAlignment="Center" Width="80"/>
-            <Button FontFamily="Consolas" FontSize="15" Content="Clear" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Center" Height="35" Width="60" Click="Button_Click_2"/>
+            <Button FontFamily="Consolas" FontSize="15" Content="Clear" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Center" Height="29" Width="57" Click="Button_Click_2" Margin="3,0,0,0"/>
         </Grid>
 
         <Grid VerticalAlignment="Top" HorizontalAlignment="Center" Height="420" Width="500" Margin="0,240,0,0">
