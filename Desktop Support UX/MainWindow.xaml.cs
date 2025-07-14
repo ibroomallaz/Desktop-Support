@@ -11,7 +11,6 @@ namespace Desktop_Support_UX
 {
     public partial class MainWindow : Window
     {
-
         private static Links? cachedLinks = null;
         private static readonly HttpClient client = new HttpClient();
         //private List<String> netIDHistory = new List<String>();
@@ -19,11 +18,8 @@ namespace Desktop_Support_UX
         String outputText = "";
         public MainWindow()
         {
-
-            //ADD DROP DOWN MENU FOR QUICK LINKS AND SEE IF IT CAN BE POPULATED DYNAMICALLY
             _ = VersionChecker.VersionCheck();
-            InitializeComponent();
-           
+            InitializeComponent();           
         }
 
         private void txtInput_TextChanged(object sender, TextChangedEventArgs e)
@@ -47,54 +43,41 @@ namespace Desktop_Support_UX
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
-
             inputLabel.Content = "User Information: Enter NetID";
-            textPlaceholder.Text = "User Info";
-
+            textPlaceholder.Text = "NetID...";
         }
 
         private void checkMIMButton_Checked(object sender, RoutedEventArgs e)
         {
-
             inputLabel.Content = "User Information: Enter Employee or StudentID";
-            textPlaceholder.Text = "Employee/StudentID";         
-
+            textPlaceholder.Text = "Employee/StudentID...";         
             txtInput.Clear();
-
         }
 
         private void checkMIMButton_Checked_1(object sender, RoutedEventArgs e)
         {
-
-            inputLabel.Content = "Input Department Number MIM group you wish to check";
-            textPlaceholder.Text = "Input Dept Number";
-
+            inputLabel.Content = "Check MIM Group: Enter Department Number";
+            textPlaceholder.Text = "Dept Number...";
             txtInput.Clear();
         }
 
         private void computerInfoButton_Checked(object sender, RoutedEventArgs e)
         {
-
             inputLabel.Content = "Computer Information: Enter Hostname";
-            textPlaceholder.Text = "Input Computer Info";
-
+            textPlaceholder.Text = "Computer Name...";
             txtInput.Clear();
         }
 
         private void reportMIMButton_Checked(object sender, RoutedEventArgs e)
         {
-
-            inputLabel.Content = "Check current MIM groups";
-            textPlaceholder.Text = "Enter NetID";
-
-            
+            inputLabel.Content = "Report Individual's MIM Group: Enter NetID";
+            textPlaceholder.Text = "NetID...";
         }
 
         private void handleComputerInfo(String computerMenuText)
         {
             ADComputer ADComputer = new ADComputer(computerMenuText);
             outputText += computerMenuText + "\n\n";
-
             if (ADComputer.Exists)
             {
                 outputText += "Location: " + ADComputer.OUs + "\n";
@@ -124,7 +107,6 @@ namespace Desktop_Support_UX
             {
                 outputText += computerMenuText + " is not in BlueCat.\n";
             }
-
             outputText += "-----------------------------------------------\n";
             outputGrid.Text = outputText;
             txtInput.Clear();
@@ -138,7 +120,6 @@ namespace Desktop_Support_UX
             Department deptText = new Department();
             DepartmentService deptService = new DepartmentService();
             outputText += userMenuText + "\n\n" + ADUser.DisplayName + "\n";
-
             if (ADUser.Exists)
             {
                 if (!string.IsNullOrEmpty(ADUser.EduAffiliation))
@@ -158,17 +139,14 @@ namespace Desktop_Support_UX
                     outputText += "Enabled: False" + "\n";
                 }
                 outputText += "O365 Licensing: " + ADUser.License + "\n";
-
                 if (!string.IsNullOrEmpty(ADUser.DepartmentNumber))
                 {
                     var department = await Globals.DepartmentService.GetDepartmentAsync(ADUser.DepartmentNumber);
-
                     if (department != null)
                     {
                         var serviceNowTeams = department.Teams?.Where(t => t.ServiceNow).ToList();
                         if (serviceNowTeams?.Any() == true)
                         {
-
                             outputText += "Service Now Team: " + string.Join(", ", serviceNowTeams.Select(t => t.Name)) + "\n";
                         }
                         else if (deptText.Teams?.Any() == true)
@@ -179,7 +157,6 @@ namespace Desktop_Support_UX
                         {
                             outputText += "Teams: None\n";
                         }
-
                         if (await deptService.HasFileRepoAsync(ADUser.DepartmentNumber))
                         {
                             var fileRepo = await Globals.DepartmentService.GetFileRepoAsync(ADUser.DepartmentNumber);
@@ -211,7 +188,6 @@ namespace Desktop_Support_UX
             {
                 outputText += userMenuText + " is not a Valid NetID\n";
             }
-
             outputText += "-----------------------------------------------\n";
             outputGrid.Text = outputText;            
         }
@@ -376,84 +352,132 @@ namespace Desktop_Support_UX
                 }
             }
         }
-        int num = 0;
-        private void Button_Click(object sender, KeyEventArgs e)
+                
+        private void handleSearch()
         {
-            
+            String userMenuText = txtInput.Text.Trim();
+            //PENDING: Adding history to populate input text to compensate the text input clear
+            //netIDHistory.Add(txtInput.Text.Trim());
+            //num = netIDHistory.Count;
+
+            //Prevents enter key spamming cause it is annoying and messes up printing
+            txtInput.Clear();
+
+            Window window = new Window();
+            window.Title = "Searching for " + userMenuText + " ...";
+            window.Height = 25;
+            window.Width = 400;
+            window.Show();
+            if (netIDButton.IsSelected == true)
+            {
+                _ = handleUserInfo(userMenuText);
+            }
+            else if (justIDButton.IsSelected == true)
+            {
+                handleJustIDButton(userMenuText);
+            }
+            else if (checkMIMButton.IsSelected == true)
+            {
+                handleCheckMIMButton(userMenuText);
+            }
+            else if (computerInfoButton.IsSelected == true)
+            {
+                handleComputerInfo(userMenuText);
+            }
+            else
+            {
+                handleReportMIMButton(userMenuText);
+            }
+            window.Close();
+            scrollbarName.ScrollToEnd();
+            //txtInput.Text = netIDHistory;
+        }
+
+        //int num = 0;
+        private void Button_Click(object sender, KeyEventArgs e)
+        {            
             if (e.Key == Key.Enter && txtInput.Text.Trim() != "")
-            {               
-                String userMenuText = txtInput.Text.Trim();
-
-                //Adding history to populate input text to compensate the text input clear
-                //netIDHistory.Add(txtInput.Text.Trim());
-                //num = netIDHistory.Count;
-
-                //Prevents enter key spamming cause it is annoying and messes up printing
-                txtInput.Clear();
-
-                Window window = new Window();
-                window.Title = "Searching for " + userMenuText + " ...";
-                window.Height = 25;
-                window.Width = 400;
-                window.Show();
-
-                if (netIDButton.IsSelected == true)
-                {
-                    _ = handleUserInfo(userMenuText);
-                }
-                else if (justIDButton.IsSelected == true)
-                {
-                    handleJustIDButton(userMenuText);
-                }
-                else if (checkMIMButton.IsSelected == true)
-                {
-                    handleCheckMIMButton(userMenuText);
-                }
-                else if (computerInfoButton.IsSelected == true)
-                {
-                    handleComputerInfo(userMenuText);
-                }
-                else
-                {
-                    handleReportMIMButton(userMenuText);
-                }                
-                window.Close();
-                scrollbarName.ScrollToEnd();
-                //txtInput.Text = netIDHistory;
+            {
+                handleSearch();
             }                  
-
-            //if(e.Key == Key.Up)
-            //{
-            //    if(num >= 0)
-            //    {
-            //        num = netIDHistory.Count - 1;
-            //        txtInput.Text = netIDHistory[num].ToString();
-            //        num--;
-            //    }
-
-            //}
         }
 
         private void ToggleButton1_Checked(object sender, RoutedEventArgs e)
         {
+            RadialGradientBrush gradLabel1 = new RadialGradientBrush();
+            gradLabel1.GradientStops.Add(new GradientStop(Color.FromRgb(44,44,44), 1.0)); 
+            gradLabel1.GradientStops.Add(new GradientStop(Color.FromRgb(102, 99, 98), 0.0));
+            gradLabel1.GradientStops.Add(new GradientStop(Color.FromRgb(102, 99, 98), 0.618));
 
-            //LeftTile.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2C2C2C"));
-            //RightTile.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2C2C2C"));
-            //mainScreen.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2C2C2C"));
-          
+            Label1Background.Background = gradLabel1;
+            Label1Background.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
 
+            RadialGradientBrush gradLabel2 = new RadialGradientBrush();
+            gradLabel2.GradientStops.Add(new GradientStop(Color.FromRgb(44, 44, 44), 1.0));
+            gradLabel2.GradientStops.Add(new GradientStop(Color.FromRgb(102, 99, 98), 0.681));
+            gradLabel2.GradientStops.Add(new GradientStop(Color.FromRgb(102, 99, 98), 0.0));
+
+            inputLabel.Background = gradLabel1;
+            inputLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+
+
+            LinearGradientBrush gradLabel3 = new LinearGradientBrush();
+            gradLabel3.StartPoint = new Point(0.5, 0);
+            gradLabel3.EndPoint = new Point(0.5, 1);
+            gradLabel3.GradientStops.Add(new GradientStop(Color.FromRgb(44, 44, 44), 0.314));
+            gradLabel3.GradientStops.Add(new GradientStop(Color.FromRgb(102, 99, 98), 1));
+
+            mainScreen.Background = gradLabel3;
+
+            DarkModeLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+            DarkModeLabel.Content = "Light Mode";
+            textPlaceholder.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+            txtInput.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
         }
 
         private void ToggleButton1_Unchecked(object sender, RoutedEventArgs e)
         {
-            //LeftTile.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFFF"));
-            //RightTile.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFFF"));
-            //mainScreen.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFCECECE"));
+            RadialGradientBrush gradLabel1 = new RadialGradientBrush();
+            gradLabel1.GradientStops.Add(new GradientStop(Color.FromRgb(206, 206, 206), 1.0));
+            gradLabel1.GradientStops.Add(new GradientStop(Color.FromRgb(255, 255, 255), 0.0));
+            gradLabel1.GradientStops.Add(new GradientStop(Color.FromRgb(255, 255, 255), 0.618));
+
+            Label1Background.Background = gradLabel1;
+            Label1Background.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+
+            RadialGradientBrush gradLabel2 = new RadialGradientBrush();
+            gradLabel2.GradientStops.Add(new GradientStop(Color.FromRgb(206, 206, 206), 1.0));
+            gradLabel2.GradientStops.Add(new GradientStop(Color.FromRgb(255, 255, 255), 0.681));
+            gradLabel2.GradientStops.Add(new GradientStop(Color.FromRgb(255, 255, 255), 0.0));
+
+            inputLabel.Background = gradLabel2;
+            inputLabel.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+
+            LinearGradientBrush gradLabel3 = new LinearGradientBrush();
+            gradLabel3.StartPoint = new Point(0.5, 0);
+            gradLabel3.EndPoint = new Point(0.5, 1);
+            gradLabel3.GradientStops.Add(new GradientStop(Color.FromRgb(206, 206, 206), 0.314));
+            gradLabel3.GradientStops.Add(new GradientStop(Color.FromRgb(255, 255, 255), 1));
+
+            mainScreen.Background = gradLabel3;
+
+            DarkModeLabel.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+            DarkModeLabel.Content = "Dark Mode";
+            textPlaceholder.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+            txtInput.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
         }
 
         private void outputGrid_TextChanged(object sender, TextChangedEventArgs e)
         {
             outputGrid.ScrollToEnd();
+        }
+
+        private void Button_Click_12(object sender, RoutedEventArgs e)
+        {
+            if (txtInput.Text.Trim() != "")
+            {
+                handleSearch();
+            }
         }
     }
 }
