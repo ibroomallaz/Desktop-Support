@@ -7,10 +7,15 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>lilyface.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="lilyface.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="lilyface.ico" />
   </ItemGroup>
 
   <ItemGroup>

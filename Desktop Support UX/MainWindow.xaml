@@ -6,127 +6,96 @@
         xmlns:local="clr-namespace:Desktop_Support_UX"
         mc:Ignorable="d"
         ResizeMode="CanMinimize"
-        Title="Desktop Support App" x:Name="MainWindowGrid" Height="685" Width="685" Icon="/lilyface.jpg">
+        Title="Desktop Support App" x:Name="MainWindowGrid" Height="710" Width="580" Icon="/lilyface.jpg">
 
-    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Background="#FFCECECE">
-        <Grid Height="900" Width="650" >
+    <Grid Height="675">
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="#FFCECECE" Offset="0.314"/>
+                <GradientStop Color="White" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
 
-            <Grid Margin="0,232,592,281" Background="White" />
-            <Grid Margin="592,232,0,281" Background="White"/>
+        <Grid VerticalAlignment="Top" HorizontalAlignment="Center" Width="560">
+            <Label x:Name="DarkModeLabel" Content="Dark Mode" HorizontalAlignment="Left" VerticalAlignment="Top" />
 
-            <Label VerticalContentAlignment="Center" Foreground="Black" HorizontalContentAlignment="Center" FontFamily="Consolas" Content="Desktop Support App" HorizontalAlignment="Center" VerticalAlignment="Top" Height="82" Width="650" FontSize="40" Margin="0,10,0,0">
+            <ToggleButton HorizontalAlignment="Left" Margin="70,0" x:Name="ToggleButton1" Width="50" Height="20" Checked="ToggleButton1_Checked" Unchecked="ToggleButton1_Unchecked">
+                <ToggleButton.Template>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="ToggleButtonBorder" Background="Gray" BorderThickness="1" CornerRadius="10" Padding="1">
+                            <Border x:Name="circleToggle" Background="White" Width="20" CornerRadius="20" HorizontalAlignment="Left"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter TargetName="circleToggle" Property="HorizontalAlignment" Value="Right"/>
+                                <Setter TargetName="ToggleButtonBorder" Property="Background" Value="LightBlue"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="false">
+                                <Setter TargetName="circleToggle" Property="HorizontalAlignment" Value="Left"/>
+                                <Setter TargetName="circleToggle" Property="Background" Value="Black"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </ToggleButton.Template>
+            </ToggleButton>
+
+            <ComboBox FontSize="14" x:Name="QuickLinks" Width="275" Height="25" VerticalAlignment="Center" HorizontalAlignment="Right" FontFamily="Consolas" >
+                <ComboBoxItem Content="Quick Links" IsSelected="true"/>
+                <ComboBoxItem x:Name="PhoneLink" Content="Phone Schedule: Desktop Support Phone Schedule" Selected="Button_Click_3"/>
+                <ComboBoxItem x:Name="CustomerLink" Content="Customer List: Desktop Support Customer list by Core Team" Selected="Button_Click_4"/>
+                <ComboBoxItem x:Name="SNKBLink" Content="Service Now KB: UITS Service Now Knowledge Base" Selected="Button_Click_5"/>
+                <ComboBoxItem x:Name="SplunkLink" Content="Splunk: Enterprise network search tool" Selected="Button_Click_6"/>
+                <ComboBoxItem x:Name="MabLink" Content="Device Registration Portal: MAB registration portal" Selected="Button_Click_7"/>
+                <ComboBoxItem x:Name="NimbusLink" Content="Nimbus: UITS Technology Support Tool" Selected="Button_Click_8"/>
+                <ComboBoxItem x:Name="HardwareLink" Content="Hardware Portal: Desktop Support Hardware portal and pricing" Selected="Button_Click_9"/>
+                <ComboBoxItem x:Name="FloorPlansLink" Content="Interactive Floorplans: University of Arizona interactive floor plan maps" Selected="Button_Click_10"/>
+                <ComboBoxItem x:Name="IntuneResourcesLink" Content="DST Intune Resources: Desktop Support Windows Intune Resources" Selected="Button_Click_11"/>
+            </ComboBox>
+
+        </Grid>
+
+        <Label x:Name="Label1Background" VerticalContentAlignment="Center" Foreground="Black" HorizontalContentAlignment="Center" FontFamily="Consolas" Content="Desktop Support App" HorizontalAlignment="Center" VerticalAlignment="Top" Height="90" Width="650" FontSize="40" Margin="0,31">
+            <Label.Background >
+                <RadialGradientBrush>
+                    <GradientStop x:Name="Label1Grad1" Color="#FFCECECE" Offset="1"/>
+                    <GradientStop x:Name="Label1Grad2" Color="White" Offset="0"/>
+                    <GradientStop x:Name="Label1Grad3" Color="White" Offset="0.618"/>
+                </RadialGradientBrush>
+            </Label.Background>
+        </Label>
+
+        <Grid HorizontalAlignment="Center" Margin="0,121,0,473" Width="650">
+            <Label  x:Name="inputLabel" Foreground="Black" HorizontalContentAlignment="Center" FontFamily="Consolas" Content="Enter User Info" HorizontalAlignment="Center" FontSize="18"  Width="650">
                 <Label.Background>
                     <RadialGradientBrush>
                         <GradientStop Color="#FFCECECE" Offset="1"/>
+                        <GradientStop Color="White" Offset="0.681"/>
                         <GradientStop Color="White" Offset="0"/>
-                        <GradientStop Color="White" Offset="0.618"/>
                     </RadialGradientBrush>
                 </Label.Background>
             </Label>
-
-            <Grid HorizontalAlignment="Center" Margin="0,97,0,737" Width="650">
-                <Label  x:Name="inputLabel" Foreground="Black" HorizontalContentAlignment="Center" FontFamily="Consolas" Content="Enter User Info" HorizontalAlignment="Center" FontSize="18"  Width="650">
-                    <Label.Background>
-                        <RadialGradientBrush>
-                            <GradientStop Color="#FFCECECE" Offset="1"/>
-                            <GradientStop Color="White" Offset="0.681"/>
-                            <GradientStop Color="White" Offset="0"/>
-                        </RadialGradientBrush>
-                    </Label.Background>
-                </Label>
-                <TextBox  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Consolas" x:Name="textPlaceholder" FontWeight="ExtraLight"  VerticalAlignment="Bottom" HorizontalAlignment="Left" TextWrapping="Wrap" Text="NetID" Width="167" Height="25" FontSize="12" Background="White" Margin="180,0,0,7"/>
-                <TextBox  FontFamily="Consolas" x:Name="txtInput" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="25"  TextWrapping="Wrap" Width="167" Background="Transparent" TextChanged="txtInput_TextChanged" Margin="180,0,0,7"/>
-                <Button  FontFamily="Consolas" Content="Search" FontSize="15"  HorizontalAlignment="Right" Height="25" VerticalAlignment="Bottom" Width="91" Click="Button_Click" Margin="0,0,205,7"/>
-            </Grid>
-
-            <Grid HorizontalAlignment="Center" Margin="0,163,0,668" Width="650">
-                <Grid.Background>
-                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                        <GradientStop Color="White" Offset="1"/>
-                        <GradientStop Color="White" Offset="1"/>
-                        <GradientStop Color="#FFDEDEDE"/>
-                        <GradientStop Color="#FFCECECE"/>
-                        <GradientStop Color="#FFCECECE"/>
-                        <GradientStop Color="#FFE0E0E0"/>
-                        <GradientStop Color="#FFCECECE"/>
-                        <GradientStop Color="#FFCECECE"/>
-                        <GradientStop Color="#FFCECECE"/>
-                    </LinearGradientBrush>
-                </Grid.Background>
-                <RadioButton FontFamily="Consolas" x:Name="netIDButton" HorizontalAlignment="Left" VerticalAlignment="Top" Content="NetID" FontSize="16" GroupName="userInfoChoices" IsChecked="True" Width="79" Checked="RadioButton_Checked" Height="24" Margin="30,0,0,0"/>
-                <RadioButton FontFamily="Consolas" x:Name="checkMIMButton" HorizontalAlignment="Center" VerticalAlignment="Top" Content="Check current members of Dept MIM Group" FontSize="16" GroupName="userInfoChoices" IsChecked="False" Width="363" Checked="checkMIMButton_Checked_1" Height="30" Margin="0,0,55,0"/>
-                <RadioButton FontFamily="Consolas" x:Name="justIDButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Content="EmployeeID/StudentID" FontSize="16" GroupName="userInfoChoices" IsChecked="False" Width="198" Checked="checkMIMButton_Checked" Height="29" Margin="0,0,40,0"/>
-                <RadioButton FontFamily="Consolas" x:Name="reportMIMButton" HorizontalAlignment="Left" VerticalAlignment="Bottom" Content="Report Individual's current MIM Groups" FontSize="16" GroupName="userInfoChoices" IsChecked="False" Width="357" Checked="reportMIMButton_Checked" Height="29" Margin="50,0,0,0"/>
-                <RadioButton FontFamily="Consolas" x:Name="computerInfoButton" HorizontalAlignment="Right" VerticalAlignment="Top" Content="Computer info" FontSize="16" GroupName="userInfoChoices" IsChecked="False" Width="135" Checked="computerInfoButton_Checked" Height="24" Margin="0,0,24,0"/>
-            </Grid>
-
-            <Grid Margin="58,232,58,634" Background="Black" >
-                <Button FontSize="15" FontFamily="Consolas" Content="About" HorizontalAlignment="Left" VerticalAlignment="Center" Height="22" Width="56"  Click="Button_Click_1" Margin="473,0,0,0"/>
-                <TextBlock Foreground="White" FontFamily="Consolas" HorizontalAlignment="Center" Height="22" TextAlignment="Center" TextWrapping="Wrap" Text="ver 3.0.4" VerticalAlignment="Center" Width="80"/>
-                <Button FontFamily="Consolas" FontSize="15" Content="Clear" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Center" Height="22" Width="56" Click="Button_Click_2" Margin="5,0,0,0"></Button>
-            </Grid>
-
-            <Grid VerticalAlignment="Top" HorizontalAlignment="Center" Height="359" Width="534" Margin="0,260,0,0" Background="Black">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" BorderThickness="5" Background="Black">
-                    <TextBox BorderThickness="0" IsReadOnly="True" x:Name="outputGrid" Text=""  FontSize="14" Background="Black" Foreground="WhiteSmoke" Padding="5,5,5,5" FontFamily="Consolas"/>
-                </ScrollViewer>
-            </Grid>
-
-            <Grid  Width="650" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,619,0,0" Height="271">
-                <Grid.Background>
-                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                        <GradientStop Color="#FFCECECE" Offset="1"/>
-                        <GradientStop Color="White" Offset="0"/>
-                        <GradientStop Color="White"/>
-                    </LinearGradientBrush>
-                </Grid.Background>
-                <Label Content="Quick Links" HorizontalAlignment="Center" HorizontalContentAlignment="Center" FontSize="23" Width="530" Margin="0,0,0,235" FontFamily="Consolas" />
-                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Consolas" Foreground="CornflowerBlue" Margin="0,36,0,208" Background="Transparent" Width="650" Click="Button_Click_3" >
-                    <Button.Content>
-                        <TextBlock Text="Phone Schedule: Desktop Support Phone Schedule" TextDecorations="Underline"/>
-                    </Button.Content>
-                </Button>
-                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Consolas" Foreground="CornflowerBlue" Margin="0,63,0,181" Background="Transparent" Width="650" Click="Button_Click_4" >
-                    <Button.Content>
-                        <TextBlock Text="Customer List: Desktop Support Customer list by Core Team" TextDecorations="Underline"/>
-                    </Button.Content>
-                </Button>
-                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Consolas" Foreground="CornflowerBlue" Margin="0,90,0,154" Background="Transparent" Width="650" Click="Button_Click_5" >
-                    <Button.Content>
-                        <TextBlock Text="Service Now KB: UITS Service Now Knowledge Base" TextDecorations="Underline"/>
-                    </Button.Content>
-                </Button>
-                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Consolas" Foreground="CornflowerBlue" Margin="0,117,0,129" Background="Transparent" Width="650" Click="Button_Click_6" >
-                    <Button.Content>
-                        <TextBlock Text="Splunk: Enterprise network search tool" TextDecorations="Underline"/>
-                    </Button.Content>
-                </Button>
-                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Consolas" Foreground="CornflowerBlue" Margin="0,142,0,104" Background="Transparent" Width="650" Click="Button_Click_7" >
-                    <Button.Content>
-                        <TextBlock Text="Device Registration Portal: MAB registration portal" TextDecorations="Underline" Height="22"/>
-                    </Button.Content>
-                </Button>
-                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Consolas" Foreground="CornflowerBlue" Margin="0,167,0,79" Background="Transparent" Width="650" Click="Button_Click_8" >
-                    <Button.Content>
-                        <TextBlock Text="Nimbus: UITS Technology Support Tool" TextDecorations="Underline" Height="22"/>
-                    </Button.Content>
-                </Button>
-                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Consolas" Foreground="CornflowerBlue" Margin="0,192,0,54" Background="Transparent" Width="650" Click="Button_Click_9" >
-                    <Button.Content>
-                        <TextBlock Text="Hardware Portal: Desktop Support Hardware portal and pricing" TextDecorations="Underline" Height="22"/>
-                    </Button.Content>
-                </Button>
-                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Consolas" Foreground="CornflowerBlue" Margin="0,217,0,30" Background="Transparent" Width="650" Click="Button_Click_10" >
-                    <Button.Content>
-                        <TextBlock Text="Interactive Floorplans: University of Arizona interactive floor plan maps" TextDecorations="Underline" Height="22"/>
-                    </Button.Content>
-                </Button>
-                <Button BorderThickness="0" HorizontalAlignment="Center" FontSize="15.5" FontFamily="Consolas" Foreground="CornflowerBlue" Margin="0,241,0,5" Background="Transparent" Width="650" Click="Button_Click_11" >
-                    <Button.Content>
-                        <TextBlock Text="DST Intune Resources: Desktop Support Windows Intune Resources" TextDecorations="Underline" Height="22"/>
-                    </Button.Content>
-                </Button>
-            </Grid>
+            <TextBox HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Consolas" x:Name="textPlaceholder" FontWeight="ExtraLight"  VerticalAlignment="Bottom" HorizontalAlignment="Center" TextWrapping="Wrap" Text="NetID" Width="180" Height="25" FontSize="12" Background="White" Margin="320,0,0,15"/>
+            <TextBox FontFamily="Consolas" KeyDown="Button_Click" x:Name="txtInput" HorizontalAlignment="Center" VerticalAlignment="Bottom" Height="25" TextWrapping="Wrap" Width="180" Background="Transparent" TextChanged="txtInput_TextChanged" Margin="320,0,0,15"/>
+            <ComboBox FontSize="13" x:Name="dropDownMenu" Width="309" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="75,0,0,15" FontFamily="Consolas">
+                <ComboBoxItem x:Name="netIDButton" Content="NetID" IsSelected="true" Selected="RadioButton_Checked"/>
+                <ComboBoxItem x:Name="computerInfoButton" Content="Computer Info" Selected="computerInfoButton_Checked"/>
+                <ComboBoxItem x:Name="checkMIMButton" Content="Check current members of Dept MIM Group" Selected="checkMIMButton_Checked_1"/>
+                <ComboBoxItem x:Name="reportMIMButton" Content="Report Individual's current MIM Groups" Selected="reportMIMButton_Checked"/>
+                <ComboBoxItem x:Name="justIDButton" Content="EmployeeID/StudentID" Selected="checkMIMButton_Checked"/>
+            </ComboBox>
         </Grid>
-    </ScrollViewer>
+
+        <Grid Width="500" HorizontalAlignment="Center" Height="35" Margin="0,0,0,230" Background="Black" >
+            <Button FontSize="15" FontFamily="Consolas" Content="About" HorizontalAlignment="Right" VerticalAlignment="Center" Height="25" Width="60"  Click="Button_Click_1" />
+            <TextBlock Foreground="White" FontFamily="Consolas" HorizontalAlignment="Center" Height="22" TextAlignment="Center" TextWrapping="Wrap" Text="ver 3.0.4" VerticalAlignment="Center" Width="80"/>
+            <Button FontFamily="Consolas" FontSize="15" Content="Clear" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Center" Height="25" Width="60" Click="Button_Click_2"/>
+        </Grid>
+
+        <Grid VerticalAlignment="Top" HorizontalAlignment="Center" Height="420" Width="500" Margin="0,240,0,0">
+            <ScrollViewer x:Name="scrollbarName" VerticalScrollBarVisibility="Auto" >
+                <TextBox TextChanged="outputGrid_TextChanged" BorderThickness="0" IsReadOnly="True" x:Name="outputGrid" Text=""  FontSize="14" Background="Black" Foreground="WhiteSmoke" Padding="5,10,5,10" FontFamily="Consolas" Height="420"/>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+
 </Window>

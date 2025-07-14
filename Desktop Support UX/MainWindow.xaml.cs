@@ -3,6 +3,8 @@ using System.DirectoryServices;
 using System.Net.Http;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using static QuickLinks;
 
 namespace Desktop_Support_UX
@@ -12,13 +14,16 @@ namespace Desktop_Support_UX
 
         private static Links? cachedLinks = null;
         private static readonly HttpClient client = new HttpClient();
+        //private List<String> netIDHistory = new List<String>();
 
         String outputText = "";
         public MainWindow()
         {
+
+            //ADD DROP DOWN MENU FOR QUICK LINKS AND SEE IF IT CAN BE POPULATED DYNAMICALLY
             _ = VersionChecker.VersionCheck();
             InitializeComponent();
-
+           
         }
 
         private void txtInput_TextChanged(object sender, TextChangedEventArgs e)
@@ -52,9 +57,10 @@ namespace Desktop_Support_UX
         {
 
             inputLabel.Content = "User Information: Enter Employee or StudentID";
-            textPlaceholder.Text = "Employee/StudentID";
+            textPlaceholder.Text = "Employee/StudentID";         
 
             txtInput.Clear();
+
         }
 
         private void checkMIMButton_Checked_1(object sender, RoutedEventArgs e)
@@ -81,12 +87,14 @@ namespace Desktop_Support_UX
             inputLabel.Content = "Check current MIM groups";
             textPlaceholder.Text = "Enter NetID";
 
+            
         }
 
         private void handleComputerInfo(String computerMenuText)
         {
             ADComputer ADComputer = new ADComputer(computerMenuText);
             outputText += computerMenuText + "\n\n";
+
             if (ADComputer.Exists)
             {
                 outputText += "Location: " + ADComputer.OUs + "\n";
@@ -114,16 +122,10 @@ namespace Desktop_Support_UX
             }
             else
             {
-                if(computerMenuText == "")
-                {
-                    outputText += "[Blank]" + " is not in BlueCat.\n";
-                }
-                else
-                {
-                    outputText += computerMenuText + " is not in BlueCat.\n";
-                }                  
+                outputText += computerMenuText + " is not in BlueCat.\n";
             }
-            outputText += "-----------------------------------------------------------------------------\n";
+
+            outputText += "-----------------------------------------------\n";
             outputGrid.Text = outputText;
             txtInput.Clear();
         }
@@ -210,8 +212,8 @@ namespace Desktop_Support_UX
                 outputText += userMenuText + " is not a Valid NetID\n";
             }
 
-            outputText += "-----------------------------------------------------------------------------\n";
-            outputGrid.Text = outputText;
+            outputText += "-----------------------------------------------\n";
+            outputGrid.Text = outputText;            
         }
         public void handleJustIDButton(String userMenuText)
         {
@@ -226,17 +228,16 @@ namespace Desktop_Support_UX
                 {
                     SearchResult? result = searcher.FindOne();                   
                     outputText += result != null ? result.Properties["displayName"][0].ToString() +
-                        "\n-----------------------------------------------------------------------------\n" ?? "Unknown" : "Employee/StudentID not found." +
-                        "\n-----------------------------------------------------------------------------\n";
+                        "\n-----------------------------------------------\n" ?? "Unknown" : "Employee/StudentID not found." +
+                        "\n-----------------------------------------------\n";
                     outputGrid.Text = outputText;
                 }
                 catch (Exception ex)
                 {
-                    outputText += ex.Message.ToString() + "\n-----------------------------------------------------------------------------\n";
+                    outputText += ex.Message.ToString() + "\n-----------------------------------------------\n";
                     outputGrid.Text = outputText;
                 }
             }
-            txtInput.Clear();
         }
 
         public void handleCheckMIMButton(String userMenuText)
@@ -246,7 +247,7 @@ namespace Desktop_Support_UX
             outputText += userMenuText + "\n\n";
             if (!group.Exists)
             {
-                outputText += "MIM Group " + dept + " does not exist.\n" + "-----------------------------------------------------------------------------\n";
+                outputText += "MIM Group " + dept + " does not exist.\n" + "-----------------------------------------------\n";
                 outputGrid.Text = outputText;
             }
             else
@@ -257,11 +258,10 @@ namespace Desktop_Support_UX
                 {
                     outputText += member.ToString() + "\n";
                 }
-                outputText += "-----------------------------------------------------------------------------\n";
+                outputText += "-----------------------------------------------\n";
                 outputGrid.Text = outputText;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             }
-            txtInput.Clear();
         }
 
         public void handleReportMIMButton(String userMenuText)
@@ -274,11 +274,11 @@ namespace Desktop_Support_UX
             {
                 if(userMenuText == "")
                 {
-                    outputText += "[Blank] is not a Valid NetID" + "\n-----------------------------------------------------------------------------\n";
+                    outputText += "[Blank] is not a Valid NetID" + "\n-----------------------------------------------\n";
                 }
                 else
                 {
-                    outputText += userMenuText + " is not a Valid NetID" + "\n-----------------------------------------------------------------------------\n";
+                    outputText += userMenuText + " is not a Valid NetID" + "\n-----------------------------------------------\n";
                 }                    
                 outputGrid.Text = outputText;
                 return;
@@ -290,13 +290,13 @@ namespace Desktop_Support_UX
                 {
                     outputText += group.ToString() + "\n";
                 }
-                outputText += "-----------------------------------------------------------------------------\n";
+                outputText += "-----------------------------------------------\n";
                 outputGrid.Text = outputText;
 #pragma warning restore CS8602
             }
             else
             {
-                outputText += "No valid MIM groups found for " + userMenuText + "\n-----------------------------------------------------------------------------\n";
+                outputText += "No valid MIM groups found for " + userMenuText + "\n-----------------------------------------------\n";
                 outputGrid.Text = outputText;
             }
         }
@@ -375,40 +375,85 @@ namespace Desktop_Support_UX
                     MessageBox.Show($"Error retrieving or deserializing JSON: " + ex, "Error");
                 }
             }
-
         }
-        private void Button_Click(object sender, RoutedEventArgs e)
+        int num = 0;
+        private void Button_Click(object sender, KeyEventArgs e)
         {
-            String userMenuText = txtInput.Text.Trim();
-            Window window = new Window();
-            window.Title = "Searching for " + userMenuText + " ...";
-            window.Height = 25;
-            window.Width = 400;
-            window.Show();
+            
+            if (e.Key == Key.Enter && txtInput.Text.Trim() != "")
+            {               
+                String userMenuText = txtInput.Text.Trim();
 
-            if (netIDButton.IsChecked == true)
-            {
-                _ = handleUserInfo(userMenuText);
-            }
-            else if (justIDButton.IsChecked == true)
-            {
-                handleJustIDButton(userMenuText);
-            }
-            else if (checkMIMButton.IsChecked == true)
-            {
-                handleCheckMIMButton(userMenuText);
-            }
-            else if (computerInfoButton.IsChecked == true)
-            {
-                handleComputerInfo(userMenuText);
-            }
-            else
-            {
-                handleReportMIMButton(userMenuText);
-            }
+                //Adding history to populate input text to compensate the text input clear
+                //netIDHistory.Add(txtInput.Text.Trim());
+                //num = netIDHistory.Count;
 
-            window.Close();
+                //Prevents enter key spamming cause it is annoying and messes up printing
+                txtInput.Clear();
+
+                Window window = new Window();
+                window.Title = "Searching for " + userMenuText + " ...";
+                window.Height = 25;
+                window.Width = 400;
+                window.Show();
+
+                if (netIDButton.IsSelected == true)
+                {
+                    _ = handleUserInfo(userMenuText);
+                }
+                else if (justIDButton.IsSelected == true)
+                {
+                    handleJustIDButton(userMenuText);
+                }
+                else if (checkMIMButton.IsSelected == true)
+                {
+                    handleCheckMIMButton(userMenuText);
+                }
+                else if (computerInfoButton.IsSelected == true)
+                {
+                    handleComputerInfo(userMenuText);
+                }
+                else
+                {
+                    handleReportMIMButton(userMenuText);
+                }                
+                window.Close();
+                scrollbarName.ScrollToEnd();
+                //txtInput.Text = netIDHistory;
+            }                  
+
+            //if(e.Key == Key.Up)
+            //{
+            //    if(num >= 0)
+            //    {
+            //        num = netIDHistory.Count - 1;
+            //        txtInput.Text = netIDHistory[num].ToString();
+            //        num--;
+            //    }
+
+            //}
         }
 
+        private void ToggleButton1_Checked(object sender, RoutedEventArgs e)
+        {
+
+            //LeftTile.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2C2C2C"));
+            //RightTile.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2C2C2C"));
+            //mainScreen.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2C2C2C"));
+          
+
+        }
+
+        private void ToggleButton1_Unchecked(object sender, RoutedEventArgs e)
+        {
+            //LeftTile.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFFF"));
+            //RightTile.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFFF"));
+            //mainScreen.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFCECECE"));
+        }
+
+        private void outputGrid_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            outputGrid.ScrollToEnd();
+        }
     }
 }
