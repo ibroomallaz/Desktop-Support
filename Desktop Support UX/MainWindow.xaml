@@ -91,7 +91,6 @@
 
         <Grid Width="500" HorizontalAlignment="Center" Height="35" Margin="0,0,0,230" Background="Black" >
             <Button FontSize="15" FontFamily="Consolas" Content="About" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalContentAlignment="Center" Height="29" Width="57"  Click="Button_Click_1" Margin="440,0,0,0" />
-            <TextBlock Foreground="White" FontFamily="Consolas" HorizontalAlignment="Center" Height="22" TextAlignment="Center" TextWrapping="Wrap" Text="ver 3.0.4" VerticalAlignment="Center" Width="80"/>
             <Button FontFamily="Consolas" FontSize="15" Content="Clear" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Center" Height="29" Width="57" Click="Button_Click_2" Margin="3,0,0,0"/>
         </Grid>
 

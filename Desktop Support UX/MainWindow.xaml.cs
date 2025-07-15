@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
+using System;
 using System.DirectoryServices;
 using System.Net.Http;
 using System.Windows;
@@ -19,6 +21,8 @@ namespace Desktop_Support_UX
         public MainWindow()
         {
             _ = VersionChecker.VersionCheck();
+
+            //ShowCurrentVersion.Text = version.Version;
             InitializeComponent();
         }
 
@@ -36,9 +40,38 @@ namespace Desktop_Support_UX
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
+            _ = showAboutMenu();
+        }
 
-            MessageBox.Show($"UITS Desktop Support App \n" + "Version 3.0.4\n" + "Developed by Isaac Broomall (ibroomall)\n"
-                + "User Interface developed by JJ (jjvelasquez) :D", "About");
+        private async Task showAboutMenu()
+        {
+            Window window = new Window();
+            window.Title = "Checking Version...";
+            window.Height = 25;
+            window.Width = 300;
+            window.Show();
+            try
+            {
+                HttpClient client = new HttpClient();
+                using HttpResponseMessage response = await client.GetAsync(Globals.g_versionJSON);
+                response.EnsureSuccessStatusCode();
+
+                string json = await response.Content.ReadAsStringAsync();
+                var versionData = JsonConvert.DeserializeObject<Root>(json);
+                window.Close();
+                if (versionData?.Version != null && versionData?.Version.Current != null)
+                {
+                    MessageBox.Show($"UITS Desktop Support App \nVersion " + versionData?.Version.Current.Version + "\n" + "Developed by Isaac Broomall (ibroomall)\n" + "User Interface developed by JJ (jjvelasquez) :D", "About");
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                MessageBox.Show("\nException Caught!\nMessage: " + e.Message, "Error");
+            }
+            catch (JsonException e)
+            {
+                MessageBox.Show("\nJSON Parsing Error!\nMessage: " + e.Message, "Error");
+            }
         }
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
@@ -115,7 +148,7 @@ namespace Desktop_Support_UX
         public async Task handleUserInfo(String userMenuText)
         {
             ADUserInfo ADUser = new ADUserInfo(userMenuText);
-          
+
             outputText += userMenuText + "\n\n" + ADUser.DisplayName + "\n";
             if (ADUser.Exists)
             {
@@ -177,7 +210,6 @@ namespace Desktop_Support_UX
                     }
 
                 }
-
             }
             else if (!string.IsNullOrWhiteSpace(ADUser.ErrorMessage))
             {
@@ -190,6 +222,7 @@ namespace Desktop_Support_UX
             outputText += "-----------------------------------------------\n";
             outputGrid.Text = outputText;
         }
+
         public void handleJustIDButton(String userMenuText)
         {
             outputText += userMenuText + "\n\n";
