@@ -21,7 +21,7 @@
                 <ColumnDefinition Width="27*"/>
                 <ColumnDefinition Width="113*"/>
             </Grid.ColumnDefinitions>
-            <Label Foreground="White" x:Name="DarkModeLabel" Content="Dark Mode" HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <Label Foreground="White" x:Name="DarkModeLabel" Content="Light Mode" HorizontalAlignment="Left" VerticalAlignment="Center" />
 
             <ToggleButton HorizontalAlignment="Left" Margin="70,3,0,3" x:Name="ToggleButton1" Width="50" Height="20" Checked="ToggleButton1_Checked" Unchecked="ToggleButton1_Unchecked" Grid.ColumnSpan="2">
                 <ToggleButton.Template>
@@ -45,15 +45,6 @@
 
             <ComboBox FontSize="14" x:Name="QuickLinks" Width="120" Height="25" VerticalAlignment="Center" HorizontalAlignment="Left" FontFamily="Consolas" Grid.Column="1" Margin="332,0,0,0" >
                 <ComboBoxItem Content="Quick Links" IsSelected="true"/>
-                <ComboBoxItem Foreground="Blue" x:Name="PhoneLink" Content="Phone Schedule: Desktop Support Phone Schedule" Selected="Button_Click_3"/>
-                <ComboBoxItem Foreground="Blue" x:Name="CustomerLink" Content="Customer List: Desktop Support Customer list by Core Team" Selected="Button_Click_4"/>
-                <ComboBoxItem Foreground="Blue" x:Name="SNKBLink" Content="Service Now KB: UITS Service Now Knowledge Base" Selected="Button_Click_5"/>
-                <ComboBoxItem Foreground="Blue" x:Name="SplunkLink" Content="Splunk: Enterprise network search tool" Selected="Button_Click_6"/>
-                <ComboBoxItem Foreground="Blue" x:Name="MabLink" Content="Device Registration Portal: MAB registration portal" Selected="Button_Click_7"/>
-                <ComboBoxItem Foreground="Blue" x:Name="NimbusLink" Content="Nimbus: UITS Technology Support Tool" Selected="Button_Click_8"/>
-                <ComboBoxItem Foreground="Blue" x:Name="HardwareLink" Content="Hardware Portal: Desktop Support Hardware portal and pricing" Selected="Button_Click_9"/>
-                <ComboBoxItem Foreground="Blue" x:Name="FloorPlansLink" Content="Interactive Floorplans: University of Arizona interactive floor plan maps" Selected="Button_Click_10"/>
-                <ComboBoxItem Foreground="Blue" x:Name="IntuneResourcesLink" Content="DST Intune Resources: Desktop Support Windows Intune Resources" Selected="Button_Click_11"/>
             </ComboBox>
         </Grid>
 

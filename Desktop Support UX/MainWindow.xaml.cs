@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
-using System;
+﻿using Newtonsoft.Json;
 using System.DirectoryServices;
 using System.Net.Http;
 using System.Windows;
@@ -21,8 +19,7 @@ namespace Desktop_Support_UX
         public MainWindow()
         {
             _ = VersionChecker.VersionCheck();
-
-            //ShowCurrentVersion.Text = version.Version;
+            _ = populateQuickLinks();
             InitializeComponent();
         }
 
@@ -61,7 +58,8 @@ namespace Desktop_Support_UX
                 window.Close();
                 if (versionData?.Version != null && versionData?.Version.Current != null)
                 {
-                    MessageBox.Show($"UITS Desktop Support App \nVersion " + versionData?.Version.Current.Version + "\n" + "Developed by Isaac Broomall (ibroomall)\n" + "User Interface developed by JJ (jjvelasquez) :D", "About");
+                    MessageBox.Show($"UITS Desktop Support App \nVersion " + versionData?.Version.Current.Version + "\n" 
+                        + "Developed by Isaac Broomall (ibroomall)\n" + "User Interface developed by JJ (jjvelasquez) :D", "About");
                 }
             }
             catch (HttpRequestException e)
@@ -96,7 +94,7 @@ namespace Desktop_Support_UX
 
         private void computerInfoButton_Checked(object sender, RoutedEventArgs e)
         {
-            inputLabel.Content = "Computer Information: Enter Hostname";
+            inputLabel.Content = "Computer Information: Enter Computer Name";
             textPlaceholder.Text = "[Computer Name]";
             txtInput.Clear();
         }
@@ -104,7 +102,7 @@ namespace Desktop_Support_UX
         private void reportMIMButton_Checked(object sender, RoutedEventArgs e)
         {
             inputLabel.Content = "Report Individual's MIM Group: Enter NetID";
-            textPlaceholder.Text = "NetID...";
+            textPlaceholder.Text = "[NetID]";
         }
 
         private void handleComputerInfo(String computerMenuText)
@@ -315,74 +313,9 @@ namespace Desktop_Support_UX
             outputGrid.Text = outputText;
         }
 
-        private void Button_Click_3(object sender, RoutedEventArgs e)
+        private void outputGrid_TextChanged(object sender, TextChangedEventArgs e)
         {
-            _ = handleLinkOpening(0);
-        }
-
-        private void Button_Click_4(object sender, RoutedEventArgs e)
-        {
-            _ = handleLinkOpening(1);
-        }
-        private void Button_Click_5(object sender, RoutedEventArgs e)
-        {
-            _ = handleLinkOpening(2);
-        }
-
-        private void Button_Click_6(object sender, RoutedEventArgs e)
-        {
-            _ = handleLinkOpening(3);
-        }
-
-        private void Button_Click_7(object sender, RoutedEventArgs e)
-        {
-            _ = handleLinkOpening(4);
-        }
-
-        private void Button_Click_8(object sender, RoutedEventArgs e)
-        {
-            _ = handleLinkOpening(5);
-        }
-
-
-        private void Button_Click_9(object sender, RoutedEventArgs e)
-        {
-            _ = handleLinkOpening(6);
-        }
-
-        private void Button_Click_10(object sender, RoutedEventArgs e)
-        {
-            _ = handleLinkOpening(7);
-        }
-
-        private void Button_Click_11(object sender, RoutedEventArgs e)
-        {
-            _ = handleLinkOpening(8);
-        }
-
-        public async Task handleLinkOpening(int LinkNumber)
-        {
-            if (cachedLinks == null)
-            {
-                try
-                {
-                    Console.WriteLine("Downloading Quicklinks data...");
-                    string json = await client.GetStringAsync(Globals.g_QuickLinksURL);
-                    cachedLinks = JsonConvert.DeserializeObject<Links>(json);
-                    if (cachedLinks == null || cachedLinks.QL == null)
-                    {
-                        MessageBox.Show($"Deserialization resulted in null or invalid data.", "Error");
-                        return;
-                    }
-                    String urlString = cachedLinks.QL[LinkNumber].URL;
-                    HTTP.OpenURL(urlString);
-                    cachedLinks = null;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error retrieving or deserializing JSON: " + ex, "Error");
-                }
-            }
+            outputGrid.ScrollToEnd();
         }
 
         private void handleSearch()
@@ -390,7 +323,7 @@ namespace Desktop_Support_UX
             String userMenuText = txtInput.Text.Trim();
             //PENDING: Adding history to populate input text to compensate the text input clear
             //netIDHistory.Add(txtInput.Text.Trim());
-            //num = netIDHistory.Count;
+            //num = netIDHistory.Count-1;
 
             //Prevents enter key spamming cause it is annoying and messes up printing
             txtInput.Clear();
@@ -422,13 +355,62 @@ namespace Desktop_Support_UX
             }
             window.Close();
             scrollbarName.ScrollToEnd();
-            //txtInput.Text = netIDHistory;
+        }
+
+        private async Task populateQuickLinks()
+        {
+            try
+            {
+                Console.WriteLine("Downloading Quicklinks data...");
+                string json = await client.GetStringAsync(Globals.g_QuickLinksURL);
+                cachedLinks = JsonConvert.DeserializeObject<Links>(json);
+                if (cachedLinks == null || cachedLinks.QL == null)
+                {
+                    MessageBox.Show($"Deserialization resulted in null or invalid data.", "Error");
+                    return;
+                }
+                for (int i = 0; i < (cachedLinks.QL.Length); i++)
+                {
+                    QuickLinks.Items.Add(cachedLinks.QL[i].Name + ": " + cachedLinks.QL[i].Description);
+
+                }
+                QuickLinks.SelectionChanged += handleLinkOpening;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error retrieving or deserializing JSON: " + ex, "Error");
+            }
+        }
+
+        private void handleLinkOpening(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox? comboBox = sender as ComboBox;
+            if (comboBox != null && comboBox.SelectedIndex != 0)
+            {
+                for (int i = 0; i < comboBox.Items.Count; i++)
+                {
+                    if (cachedLinks != null && comboBox.SelectedItem.Equals(cachedLinks.QL[i].Name + ": " + cachedLinks.QL[i].Description))
+                    {
+                        HTTP.OpenURL(cachedLinks.QL[i].URL);
+                        comboBox.SelectedIndex = 0;
+                        return;
+                    }
+                }
+            }
         }
 
         //int num = 0;
         private void Button_Click(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && txtInput.Text.Trim() != "")
+            {
+                handleSearch();
+            }
+        }
+
+        private void Button_Click_12(object sender, RoutedEventArgs e)
+        {
+            if (txtInput.Text.Trim() != "")
             {
                 handleSearch();
             }
@@ -497,19 +479,6 @@ namespace Desktop_Support_UX
             DarkModeLabel.Content = "Dark Mode";
             textPlaceholder.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
             txtInput.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
-        }
-
-        private void outputGrid_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            outputGrid.ScrollToEnd();
-        }
-
-        private void Button_Click_12(object sender, RoutedEventArgs e)
-        {
-            if (txtInput.Text.Trim() != "")
-            {
-                handleSearch();
-            }
         }
     }
 }
