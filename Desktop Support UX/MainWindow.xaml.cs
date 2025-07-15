@@ -19,7 +19,7 @@ namespace Desktop_Support_UX
         public MainWindow()
         {
             _ = VersionChecker.VersionCheck();
-            InitializeComponent();           
+            InitializeComponent();
         }
 
         private void txtInput_TextChanged(object sender, TextChangedEventArgs e)
@@ -44,27 +44,27 @@ namespace Desktop_Support_UX
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
             inputLabel.Content = "User Information: Enter NetID";
-            textPlaceholder.Text = "NetID...";
+            textPlaceholder.Text = "[NetID]";
         }
 
         private void checkMIMButton_Checked(object sender, RoutedEventArgs e)
         {
             inputLabel.Content = "User Information: Enter Employee or StudentID";
-            textPlaceholder.Text = "Employee/StudentID...";         
+            textPlaceholder.Text = "[Employee/StudentID]";
             txtInput.Clear();
         }
 
         private void checkMIMButton_Checked_1(object sender, RoutedEventArgs e)
         {
             inputLabel.Content = "Check MIM Group: Enter Department Number";
-            textPlaceholder.Text = "Dept Number...";
+            textPlaceholder.Text = "[Dept Number]";
             txtInput.Clear();
         }
 
         private void computerInfoButton_Checked(object sender, RoutedEventArgs e)
         {
             inputLabel.Content = "Computer Information: Enter Hostname";
-            textPlaceholder.Text = "Computer Name...";
+            textPlaceholder.Text = "[Computer Name]";
             txtInput.Clear();
         }
 
@@ -115,10 +115,7 @@ namespace Desktop_Support_UX
         public async Task handleUserInfo(String userMenuText)
         {
             ADUserInfo ADUser = new ADUserInfo(userMenuText);
-            FileRepo repoText = new FileRepo();
-            Team teamText = new Team();
-            Department deptText = new Department();
-            DepartmentService deptService = new DepartmentService();
+          
             outputText += userMenuText + "\n\n" + ADUser.DisplayName + "\n";
             if (ADUser.Exists)
             {
@@ -149,15 +146,15 @@ namespace Desktop_Support_UX
                         {
                             outputText += "Service Now Team: " + string.Join(", ", serviceNowTeams.Select(t => t.Name)) + "\n";
                         }
-                        else if (deptText.Teams?.Any() == true)
+                        else if (department.Teams?.Any() == true)
                         {
-                            outputText += "Support Team: " + string.Join(", ", deptText.Teams.Select(t => t.Name)) + "\n";
+                            outputText += "Support Team: " + string.Join(", ", department.Teams.Select(t => t.Name)) + "\n";
                         }
                         else
                         {
                             outputText += "Teams: None\n";
                         }
-                        if (await deptService.HasFileRepoAsync(ADUser.DepartmentNumber))
+                        if (await Globals.DepartmentService.HasFileRepoAsync(ADUser.DepartmentNumber))
                         {
                             var fileRepo = await Globals.DepartmentService.GetFileRepoAsync(ADUser.DepartmentNumber);
                             if (fileRepo != null)
@@ -169,16 +166,18 @@ namespace Desktop_Support_UX
                                 outputText += "File Repository: Details unavailable\n";
                             }
                         }
+                        if (!string.IsNullOrEmpty(department.Notes))
+                        {
+                            outputText += "Notes: " + department.Notes + "\n";
+                        }
                     }
-                    if (!string.IsNullOrEmpty(deptText.Notes))
+                    else
                     {
-                        outputText += "Notes: " + deptText.Notes + "\n";
+                        outputText += "Department information not found in cache.\n";
                     }
+
                 }
-                else
-                {
-                    outputText += "Department information not found in cache.\n";
-                }
+
             }
             else if (!string.IsNullOrWhiteSpace(ADUser.ErrorMessage))
             {
@@ -189,7 +188,7 @@ namespace Desktop_Support_UX
                 outputText += userMenuText + " is not a Valid NetID\n";
             }
             outputText += "-----------------------------------------------\n";
-            outputGrid.Text = outputText;            
+            outputGrid.Text = outputText;
         }
         public void handleJustIDButton(String userMenuText)
         {
@@ -202,7 +201,7 @@ namespace Desktop_Support_UX
                 searcher.PropertiesToLoad.Add("employeeID");
                 try
                 {
-                    SearchResult? result = searcher.FindOne();                   
+                    SearchResult? result = searcher.FindOne();
                     outputText += result != null ? result.Properties["displayName"][0].ToString() +
                         "\n-----------------------------------------------\n" ?? "Unknown" : "Employee/StudentID not found." +
                         "\n-----------------------------------------------\n";
@@ -248,14 +247,14 @@ namespace Desktop_Support_UX
             outputText += userMenuText + "\n\n";
             if (!user.Exists)
             {
-                if(userMenuText == "")
+                if (userMenuText == "")
                 {
                     outputText += "[Blank] is not a Valid NetID" + "\n-----------------------------------------------\n";
                 }
                 else
                 {
                     outputText += userMenuText + " is not a Valid NetID" + "\n-----------------------------------------------\n";
-                }                    
+                }
                 outputGrid.Text = outputText;
                 return;
             }
@@ -352,7 +351,7 @@ namespace Desktop_Support_UX
                 }
             }
         }
-                
+
         private void handleSearch()
         {
             String userMenuText = txtInput.Text.Trim();
@@ -395,17 +394,17 @@ namespace Desktop_Support_UX
 
         //int num = 0;
         private void Button_Click(object sender, KeyEventArgs e)
-        {            
+        {
             if (e.Key == Key.Enter && txtInput.Text.Trim() != "")
             {
                 handleSearch();
-            }                  
+            }
         }
 
         private void ToggleButton1_Unchecked(object sender, RoutedEventArgs e)
         {
             RadialGradientBrush gradLabel1 = new RadialGradientBrush();
-            gradLabel1.GradientStops.Add(new GradientStop(Color.FromRgb(0,0,0), 1.0)); 
+            gradLabel1.GradientStops.Add(new GradientStop(Color.FromRgb(0, 0, 0), 1.0));
             gradLabel1.GradientStops.Add(new GradientStop(Color.FromRgb(102, 99, 98), 0.0));
             gradLabel1.GradientStops.Add(new GradientStop(Color.FromRgb(102, 99, 98), 0.618));
 
@@ -417,7 +416,7 @@ namespace Desktop_Support_UX
             gradLabel2.GradientStops.Add(new GradientStop(Color.FromRgb(102, 99, 98), 0.681));
             gradLabel2.GradientStops.Add(new GradientStop(Color.FromRgb(102, 99, 98), 0.0));
 
-            inputLabel.Background = gradLabel1;
+            inputLabel.Background = gradLabel2;
             inputLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
 
 
