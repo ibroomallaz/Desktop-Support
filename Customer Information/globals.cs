@@ -3,6 +3,7 @@ using static System.Net.WebRequestMethods;
 
 public class Globals
 {
+    public static string g_AppVersion = Application.ProductVersion.ToLower();
     public static IDepartmentService DepartmentService { get; set; } = new DepartmentService();
     public const string g_domainPath = "bluecat.arizona.edu";
     public const string g_domainPathLDAP = "LDAP://DC=bluecat,DC=arizona,DC=edu";

@@ -10,7 +10,7 @@ class Menus
         bool showMenu = true;
         while (showMenu)
         {
-            ColoredConsole.WriteLine($"UITS Desktop Support App ({Red("ver.")} {Application.ProductVersion.Cyan()})\n");
+            ColoredConsole.WriteLine($"UITS Desktop Support App ({Red("ver.")} {Globals.g_AppVersion.Cyan()})\n");
             Console.WriteLine("Choose an option:");
             ColoredConsole.WriteLine($"({Green("1")}) User Info:");
             ColoredConsole.WriteLine($"({DarkYellow("2")}) Computer Info:");
