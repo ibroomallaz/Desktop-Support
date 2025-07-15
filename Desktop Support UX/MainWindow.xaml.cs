@@ -372,7 +372,6 @@ namespace Desktop_Support_UX
                 for (int i = 0; i < (cachedLinks.QL.Length); i++)
                 {
                     QuickLinks.Items.Add(cachedLinks.QL[i].Name + ": " + cachedLinks.QL[i].Description);
-
                 }
                 QuickLinks.SelectionChanged += handleLinkOpening;
             }
