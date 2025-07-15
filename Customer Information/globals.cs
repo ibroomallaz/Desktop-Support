@@ -1,7 +1,7 @@
 ﻿using System;
 using static System.Net.WebRequestMethods;
 
-public class Globals
+public partial class Globals
 {
     public static IDepartmentService DepartmentService { get; set; } = new DepartmentService();
     public const string g_domainPath = "bluecat.arizona.edu";
@@ -13,4 +13,5 @@ public class Globals
     public const string g_sharepointHome = "https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/ProjectHome.aspx";
     public const string g_DepartmentJSONURL = "https://arizona.box.com/shared/static/j3w4j5gdhhden2dheuthu2sdhunp2oxl.json";
     public const string g_versionJSON = "https://arizona.box.com/shared/static/ccfzlvn1gtfdjxv8n9c63uo68fqckp7n.json";
+  
 }

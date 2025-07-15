@@ -11,9 +11,9 @@ public static class Graph
     {
         var credential = new InteractiveBrowserCredential(new InteractiveBrowserCredentialOptions
         {
-            ClientId = "your-client-id",
+            ClientId = Globals.g_ClientID,
             RedirectUri = new Uri("http://localhost"),
-            TenantId = "your-tenant-id"
+            TenantId = Globals.g_TenantID
         });
 
         return new GraphServiceClient(credential);
@@ -33,4 +33,10 @@ public static class Graph
             return false;
         }
     }
+}
+public class EntraDevice
+{
+    public string Name { get; set; }
+    public bool? Exists { get; set; }
+    public List<string> Groups { get; set; } = new();
 }

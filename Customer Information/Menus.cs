@@ -1,6 +1,7 @@
 ﻿using Colors.Net;
 using Colors.Net.StringColorExtensions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Graph;
 using static Colors.Net.StringStaticMethods;
 
 class Menus
@@ -51,6 +52,10 @@ class Menus
                 case "4":
                     showMenu = false;
                     await DSTools.DSToolsMenu();
+                    break;
+                case "6":
+                    showMenu = false;
+                    await GraphMenu();
                     break;
                 case "clear":
                     Console.Clear();
@@ -187,4 +192,50 @@ class Menus
         ColoredConsole.WriteLine($"\"{Cyan("-ps")}\": {DarkYellow("Phone Schedule")} - Opens the Desktop Support Phone schedule.");
         return Task.CompletedTask;
     }
+    public static async Task GraphMenu()
+    {
+        Console.Clear();
+        GraphServiceClient graphClient = null;
+        bool graphMenu = true;
+
+        while (graphMenu)
+        {
+            Console.WriteLine("\nTesting Graph Menu:");
+            Console.WriteLine("1 - Initialize Graph Client");
+            Console.WriteLine("2 - Test Graph Connection");
+            Console.WriteLine("q - Quit");
+            Console.Write("Select an option: ");
+
+            string input = Console.ReadLine()?.ToLower().Trim();
+
+            switch (input)
+            {
+                case "1":
+                    graphClient = Graph.InitializeGraphClient();
+                    Console.WriteLine("Graph client initialized.");
+                    break;
+
+                case "2":
+                    if (graphClient == null)
+                    {
+                        Console.WriteLine("Graph client not initialized. Choose option 1 first.");
+                    }
+                    else
+                    {
+                        bool success = await Graph.TestGraphConnectionAsync(graphClient);
+                        Console.WriteLine(success ? "Connection successful." : "Connection failed.");
+                    }
+                    break;
+
+                case "q":
+                    graphMenu = false;
+                    break;
+
+                default:
+                    Console.WriteLine("Invalid option.");
+                    break;
+            }
+        }
+    }
+
 }

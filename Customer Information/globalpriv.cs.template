@@ -1,0 +1,5 @@
+public partial class Globals
+{
+    public const string g_ClientID = "replace me"; //ClientID okay in respository. Users need to login via entra user creds to allow
+    public const string g_TenantID = "replace me too";
+}
