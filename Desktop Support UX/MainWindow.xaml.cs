@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Xml;
 using static QuickLinks;
 
 namespace Desktop_Support_UX
@@ -338,7 +337,6 @@ namespace Desktop_Support_UX
         private async Task handleSearch()
         {
             string userMenuText = txtInput.Text.Trim();
-            //PENDING: Adding history to populate input text to compensate the text input clear
             inputHistory.Add(txtInput.Text.Trim());
             iterator = inputHistory.Count - 1;
 
@@ -507,7 +505,8 @@ namespace Desktop_Support_UX
             if (iterator == 0)
             {
                 txtInput.Text = inputHistory[iterator];
-            } else 
+            }
+            else
             {
                 txtInput.Text = inputHistory[iterator];
                 iterator--;
@@ -520,9 +519,9 @@ namespace Desktop_Support_UX
             {
                 return;
             }
-            if(iterator == inputHistory.Count - 2)
+            if (iterator == inputHistory.Count - 2)
             {
-                txtInput.Text = inputHistory[iterator+1];
+                txtInput.Text = inputHistory[iterator + 1];
             }
             else
             {
