@@ -70,7 +70,7 @@
             </Label>
             <TextBox Foreground="White" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" FontFamily="Consolas" x:Name="textPlaceholder" FontWeight="ExtraLight"  VerticalAlignment="Bottom" HorizontalAlignment="Center" TextWrapping="Wrap" Text="" Width="165" Height="25" FontSize="14" Background="Transparent" Margin="70,0,0,15"/>
             <TextBox Foreground="White" FontFamily="Consolas" KeyDown="Button_Click" x:Name="txtInput" HorizontalAlignment="Center" VerticalAlignment="Bottom" Height="25" TextWrapping="Wrap" Width="165" Background="Transparent" TextChanged="txtInput_TextChanged" Margin="70,0,0,15" FontSize="14"/>
-            <ComboBox FontSize="13" x:Name="dropDownMenu" Width="195" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="45,0,0,15" FontFamily="Consolas">
+            <ComboBox FontSize="13" x:Name="dropDownMenu" Width="197.5" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="41.5,0,0,15" FontFamily="Consolas">
                 <ComboBoxItem x:Name="netIDButton" IsSelected="true" Content="User Info" Selected="RadioButton_Checked"/>
                 <ComboBoxItem x:Name="computerInfoButton" Content="Computer Info" Selected="computerInfoButton_Checked"/>
                 <ComboBoxItem x:Name="checkMIMButton" Content="Dept MIM Group" Selected="checkMIMButton_Checked_1"/>
