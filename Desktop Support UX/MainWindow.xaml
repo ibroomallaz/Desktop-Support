@@ -68,16 +68,22 @@
                     </RadialGradientBrush>
                 </Label.Background>
             </Label>
-            <TextBox Foreground="White" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" FontFamily="Consolas" x:Name="textPlaceholder" FontWeight="ExtraLight"  VerticalAlignment="Bottom" HorizontalAlignment="Center" TextWrapping="Wrap" Text="" Width="150" Height="25" FontSize="13" Background="Transparent" Margin="110,0,0,15"/>
-            <TextBox Foreground="White" FontFamily="Consolas" KeyDown="Button_Click" x:Name="txtInput" HorizontalAlignment="Center" VerticalAlignment="Bottom" Height="25" TextWrapping="Wrap" Width="150" Background="Transparent" TextChanged="txtInput_TextChanged" Margin="110,0,0,15" FontSize="13"/>
-            <ComboBox FontSize="13" x:Name="dropDownMenu" Width="195" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="70,0,0,15" FontFamily="Consolas">
+            <TextBox Foreground="White" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" FontFamily="Consolas" x:Name="textPlaceholder" FontWeight="ExtraLight"  VerticalAlignment="Bottom" HorizontalAlignment="Center" TextWrapping="Wrap" Text="" Width="150" Height="25" FontSize="14" Background="Transparent" Margin="80,0,0,15"/>
+            <TextBox Foreground="White" FontFamily="Consolas" KeyDown="Button_Click" x:Name="txtInput" HorizontalAlignment="Center" VerticalAlignment="Bottom" Height="25" TextWrapping="Wrap" Width="150" Background="Transparent" TextChanged="txtInput_TextChanged" Margin="80,0,0,15" FontSize="14"/>
+            <ComboBox FontSize="13.5" x:Name="dropDownMenu" Width="200" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="50,0,0,15" FontFamily="Consolas">
                 <ComboBoxItem x:Name="netIDButton" IsSelected="true" Content="User Info" Selected="RadioButton_Checked"/>
                 <ComboBoxItem x:Name="computerInfoButton" Content="Computer Info" Selected="computerInfoButton_Checked"/>
                 <ComboBoxItem x:Name="checkMIMButton" Content="Dept MIM Group" Selected="checkMIMButton_Checked_1"/>
                 <ComboBoxItem x:Name="reportMIMButton" Content="Individual's MIM Groups" Selected="reportMIMButton_Checked"/>
                 <ComboBoxItem x:Name="justIDButton" Content="EmployeeID/StudentID" Selected="checkMIMButton_Checked"/>
             </ComboBox>
-            <Button  FontFamily="Consolas" Content="Search" FontSize="15"  HorizontalAlignment="Right" Height="25" VerticalAlignment="Center" Width="70" Click="Button_Click_12" Margin="0,15,85,0"/>
+            <Button FontFamily="Consolas" Content="Search" FontSize="15" HorizontalAlignment="Right" Height="25" VerticalAlignment="Center" Width="70" Click="Button_Click_12" Margin="0,15,100,0"/>
+            <Button FontFamily="Consolas" Content="^" FontSize="15" HorizontalAlignment="Right" Height="25" VerticalAlignment="Center" VerticalContentAlignment="Center" Width="23" Click="Button_Click_3" Margin="0,15,74,0"/>
+            <Button FontFamily="Consolas" Content="^" FontSize="15" HorizontalAlignment="Right" Height="25" VerticalAlignment="Center" VerticalContentAlignment="Center" Width="23" Click="Button_Click_4" Margin="0,15,46,0">
+                <Button.RenderTransform>
+                    <RotateTransform Angle="180" CenterX="10" CenterY="12.5"/>
+                </Button.RenderTransform>
+            </Button>
         </Grid>
 
         <Grid Width="500" HorizontalAlignment="Center" Height="35" Margin="0,0,0,230" Background="Black" >

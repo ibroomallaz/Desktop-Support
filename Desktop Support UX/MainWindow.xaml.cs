@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Xml;
 using static QuickLinks;
 
 namespace Desktop_Support_UX
@@ -13,14 +14,20 @@ namespace Desktop_Support_UX
     {
         private static Links? cachedLinks = null;
         private static readonly HttpClient client = new HttpClient();
-        //private List<String> netIDHistory = new List<String>();
+        private List<String> inputHistory = new List<String>();
 
-        String outputText = "";
+        string outputText = "";
+
         public MainWindow()
         {
-            _ = VersionChecker.VersionCheck();
-            _ = populateQuickLinks();
             InitializeComponent();
+            _ = startPreparations();
+        }
+
+        private async Task startPreparations()
+        {
+            await VersionChecker.VersionCheck();
+            await populateQuickLinks();
         }
 
         private void txtInput_TextChanged(object sender, TextChangedEventArgs e)
@@ -47,6 +54,8 @@ namespace Desktop_Support_UX
             window.Height = 25;
             window.Width = 300;
             window.Show();
+
+            string version = Globals.g_AppVersion;
             try
             {
                 HttpClient client = new HttpClient();
@@ -56,10 +65,11 @@ namespace Desktop_Support_UX
                 string json = await response.Content.ReadAsStringAsync();
                 var versionData = JsonConvert.DeserializeObject<Root>(json);
                 window.Close();
-                if (versionData?.Version != null && versionData?.Version.Current != null)
+                if (versionData?.Version != null)
                 {
-                    MessageBox.Show($"UITS Desktop Support App \nVersion " + versionData?.Version.Current.Version + "\n" 
-                        + "Developed by Isaac Broomall (ibroomall)\n" + "User Interface developed by JJ (jjvelasquez) :D", "About");
+                    MessageBox.Show($"UITS Desktop Support App \nVersion " + version + "\n"
+                        + "Developed by Isaac Broomall (ibroomall)\n"
+                        + "User Interface developed by JJ (jjvelasquez) :D", "About");
                 }
             }
             catch (HttpRequestException e)
@@ -240,7 +250,8 @@ namespace Desktop_Support_UX
                 }
                 catch (Exception ex)
                 {
-                    outputText += ex.Message.ToString() + "\n-----------------------------------------------\n";
+                    outputText += ex.Message.ToString()
+                        + "\n-----------------------------------------------\n";
                     outputGrid.Text = outputText;
                 }
             }
@@ -253,7 +264,8 @@ namespace Desktop_Support_UX
             outputText += userMenuText + "\n\n";
             if (!group.Exists)
             {
-                outputText += "MIM Group " + dept + " does not exist.\n" + "-----------------------------------------------\n";
+                outputText += "MIM Group " + dept + " does not exist.\n"
+                    + "-----------------------------------------------\n";
                 outputGrid.Text = outputText;
             }
             else
@@ -280,11 +292,13 @@ namespace Desktop_Support_UX
             {
                 if (userMenuText == "")
                 {
-                    outputText += "[Blank] is not a Valid NetID" + "\n-----------------------------------------------\n";
+                    outputText += "[Blank] is not a Valid NetID"
+                        + "\n-----------------------------------------------\n";
                 }
                 else
                 {
-                    outputText += userMenuText + " is not a Valid NetID" + "\n-----------------------------------------------\n";
+                    outputText += userMenuText + " is not a Valid NetID"
+                        + "\n-----------------------------------------------\n";
                 }
                 outputGrid.Text = outputText;
                 return;
@@ -302,7 +316,8 @@ namespace Desktop_Support_UX
             }
             else
             {
-                outputText += "No valid MIM groups found for " + userMenuText + "\n-----------------------------------------------\n";
+                outputText += "No valid MIM groups found for " + userMenuText
+                    + "\n-----------------------------------------------\n";
                 outputGrid.Text = outputText;
             }
         }
@@ -318,12 +333,14 @@ namespace Desktop_Support_UX
             outputGrid.ScrollToEnd();
         }
 
-        private void handleSearch()
+
+        int iterator = 0;
+        private async Task handleSearch()
         {
-            String userMenuText = txtInput.Text.Trim();
+            string userMenuText = txtInput.Text.Trim();
             //PENDING: Adding history to populate input text to compensate the text input clear
-            //netIDHistory.Add(txtInput.Text.Trim());
-            //num = netIDHistory.Count-1;
+            inputHistory.Add(txtInput.Text.Trim());
+            iterator = inputHistory.Count - 1;
 
             //Prevents enter key spamming cause it is annoying and messes up printing
             txtInput.Clear();
@@ -335,7 +352,7 @@ namespace Desktop_Support_UX
             window.Show();
             if (netIDButton.IsSelected == true)
             {
-                _ = handleUserInfo(userMenuText);
+                await handleUserInfo(userMenuText);
             }
             else if (justIDButton.IsSelected == true)
             {
@@ -389,7 +406,8 @@ namespace Desktop_Support_UX
             {
                 for (int i = 0; i < comboBox.Items.Count; i++)
                 {
-                    if (cachedLinks != null && comboBox.SelectedItem.Equals(cachedLinks.QL[i].Name + ": " + cachedLinks.QL[i].Description))
+                    if (cachedLinks != null && comboBox.SelectedItem.Equals(cachedLinks.QL[i].Name
+                        + ": " + cachedLinks.QL[i].Description))
                     {
                         HTTP.OpenURL(cachedLinks.QL[i].URL);
                         comboBox.SelectedIndex = 0;
@@ -399,12 +417,11 @@ namespace Desktop_Support_UX
             }
         }
 
-        //int num = 0;
         private void Button_Click(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && txtInput.Text.Trim() != "")
             {
-                handleSearch();
+                _ = handleSearch();
             }
         }
 
@@ -412,7 +429,7 @@ namespace Desktop_Support_UX
         {
             if (txtInput.Text.Trim() != "")
             {
-                handleSearch();
+                _ = handleSearch();
             }
         }
 
@@ -479,6 +496,40 @@ namespace Desktop_Support_UX
             DarkModeLabel.Content = "Dark Mode";
             textPlaceholder.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
             txtInput.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+        }
+
+        private void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+            if (inputHistory.Count == 0)
+            {
+                return;
+            }
+            if (iterator == 0)
+            {
+                txtInput.Text = inputHistory[iterator];
+            } else 
+            {
+                txtInput.Text = inputHistory[iterator];
+                iterator--;
+            }
+        }
+
+        private void Button_Click_4(object sender, RoutedEventArgs e)
+        {
+            if (inputHistory.Count == 0 || iterator == inputHistory.Count - 1)
+            {
+                return;
+            }
+            if(iterator == inputHistory.Count - 2)
+            {
+                txtInput.Text = inputHistory[iterator+1];
+            }
+            else
+            {
+                iterator++;
+                txtInput.Text = inputHistory[iterator];
+            }
+
         }
     }
 }
