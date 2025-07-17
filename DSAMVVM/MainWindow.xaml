@@ -5,98 +5,111 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DSAMVVM"
         xmlns:viewModel="clr-namespace:DSAMVVM.MVVM.ViewModel"
+        xmlns:view="clr-namespace:DSAMVVM.MVVM.View"
         mc:Ignorable="d"
         Height="600" Width="920"
         WindowStyle="None"
         ResizeMode="NoResize"
         Background="Transparent"
         AllowsTransparency="True">
+
     <Window.DataContext>
-        <viewModel:MainViewModel/>
+        <viewModel:MainViewModel />
     </Window.DataContext>
-    <Border Background="#272537"
-            CornerRadius="20">
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"/>
-                <ColumnDefinition/>
 
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="75"/>
-                <RowDefinition/>
+    <Border Background="#272537" CornerRadius="20" Padding="0">
+        <DockPanel LastChildFill="True">
 
-            </Grid.RowDefinitions>
-            <TextBlock Text="Text1"
-                   VerticalAlignment="Center"
-                   HorizontalAlignment="Left"
-                   Foreground="White"
-                   FontSize="22"
-                   Margin="20,0,0,0"/>
-            <StackPanel Grid.Row="1">
+            <!--  Status Bar -->
+            <view:StatusBarView DockPanel.Dock="Bottom"
+                                 DataContext="{Binding StatusBar}"
+                                 Margin="10,0,10,10" />
+
+            <!-- Optional: Header row -->
+            <TextBlock DockPanel.Dock="Top"
+                       Text="Text1"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Left"
+                       Foreground="White"
+                       FontSize="22"
+                       Margin="20,10,0,10" />
+
+            <!--  Sidebar (left) -->
+            <StackPanel DockPanel.Dock="Left"
+                        Width="200"
+                        Background="Transparent"
+                        Margin="0,0,0,0">
+
                 <RadioButton Content="Home"
                              Height="50"
                              Foreground="White"
                              FontSize="14"
                              Style="{StaticResource MenuButtonTheme}"
                              IsChecked="True"
-                             Command="{Binding HomeViewCommand}"/>
-                
+                             Command="{Binding HomeViewCommand}" />
+
                 <RadioButton Content="User"
                              Height="50"
                              Foreground="White"
                              FontSize="14"
                              Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding UserCommand}"/>
-                
+                             Command="{Binding UserCommand}" />
+
                 <RadioButton Content="Computer"
                              Height="50"
                              Foreground="White"
                              FontSize="14"
                              Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding ComputerCommand}"/>
-                
+                             Command="{Binding ComputerCommand}" />
+
                 <RadioButton Content="Groups"
-                            Height="50"
-                            Foreground="White"
-                            FontSize="14"
-                            Style="{StaticResource MenuButtonTheme}"
-                            Command="{Binding GroupCommand}"/>
-                
+                             Height="50"
+                             Foreground="White"
+                             FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding GroupCommand}" />
+
                 <RadioButton Content="Entra"
-                            Height="50"
-                            Foreground="White"
-                            FontSize="14"
-                            Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding EntraCommand}"/>
-                
+                             Height="50"
+                             Foreground="White"
+                             FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding EntraCommand}" />
+
                 <RadioButton Content="Links"
-                            Height="50"
-                            Foreground="White"
-                            FontSize="14"
-                            Style="{StaticResource MenuButtonTheme}"
-                            Command="{Binding LinksCommand}"/>
-                
+                             Height="50"
+                             Foreground="White"
+                             FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding LinksCommand}" />
+
                 <RadioButton Content="About"
-                            Height="50"
-                            Foreground="White"
-                            FontSize="14"
-                            Style="{StaticResource MenuButtonTheme}"
-                            Command="{Binding AboutCommand}"/>
+                             Height="50"
+                             Foreground="White"
+                             FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding AboutCommand}" />
             </StackPanel>
-            <TextBox Width="250"
-                       Height="40"
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Left"
-                       Margin="5"
-                       Grid.Column="1"
-                       Style="{StaticResource TextBoxTheme}"/>
-            <ContentControl Grid.Row="1"
-                            Grid.Column="1"
-                            Margin="10"
-                            Content="{Binding CurrentView}"/>
-        </Grid>
 
+            <!-- Main content area (fills remaining space) -->
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
+                <!-- Search box -->
+                <TextBox Width="250"
+                         Height="40"
+                         Margin="5"
+                         VerticalAlignment="Top"
+                         Style="{StaticResource TextBoxTheme}" />
+
+                <!-- Main view -->
+                <ContentControl Grid.Row="1"
+                                Content="{Binding CurrentView}" />
+            </Grid>
+
+        </DockPanel>
     </Border>
 </Window>
