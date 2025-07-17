@@ -26,6 +26,8 @@ namespace DSAMVVM.Core
         public List<string>? MimGroupsList { get; set; }
         public bool? Enabled { get; set; }
 
+
+        //TODO: Change to a non-console printing version
         public static Task UserFromNumber(string userNumber)
         {
             using (DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP))
@@ -157,7 +159,7 @@ namespace DSAMVVM.Core
 
             return "No valid O365 license found";
         }
-
+        //Old print method
         public static async Task PrintADUserInfo(ADUserInfo ADUser)
         {
             Console.WriteLine();
@@ -322,7 +324,7 @@ namespace DSAMVVM.Core
             }
             return false;
         }
-
+//Console Print method
         public static Task PrintADComputerInfo(ADComputer computer)
         {
             Console.WriteLine();

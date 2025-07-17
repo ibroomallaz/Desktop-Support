@@ -14,8 +14,8 @@
             <DataTemplate DataType="{x:Type viewModel:HomeViewModel}">
                 <view:HomeView/>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type viewModel:Text2ViewModel}">
-                <view:Text2View/>
+            <DataTemplate DataType="{x:Type viewModel:UserViewModel}">
+                <view:UserView/>
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>

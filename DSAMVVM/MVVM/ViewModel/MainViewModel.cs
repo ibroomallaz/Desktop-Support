@@ -10,10 +10,10 @@ namespace DSAMVVM.MVVM.ViewModel
     class MainViewModel : DSAMVVM.Core.ObeservableObject
     {
         public RelayCommand HomeViewCommand { get; set; }
-        public RelayCommand Text2ViewCommand { get; set; }
+        public RelayCommand UserCommand { get; set; }
         public HomeViewModel HomeVM { get; set; }
 
-        public Text2ViewModel Text2VM { get; set; }
+        public UserViewModel UserVM { get; set; }
         private object _currentView;
 
         public object CurrentView
@@ -27,13 +27,13 @@ namespace DSAMVVM.MVVM.ViewModel
         public MainViewModel() 
         { 
             HomeVM = new HomeViewModel();
-            Text2VM = new Text2ViewModel(); 
+            UserVM = new UserViewModel(); 
             CurrentView = HomeVM;
             HomeViewCommand = new RelayCommand(o => { 
                 CurrentView = HomeVM;
             });
-            Text2ViewCommand = new RelayCommand(o => {
-                CurrentView = Text2VM;
+            UserCommand = new RelayCommand(o => {
+                CurrentView = UserVM;
             });
         }
     }

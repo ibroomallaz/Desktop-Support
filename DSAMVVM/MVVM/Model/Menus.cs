@@ -5,7 +5,7 @@ using DSAMVVM.MVVM.Model.utils;
 using Microsoft.Extensions.DependencyInjection;
 using static Colors.Net.StringStaticMethods;
 
-
+//Old console Menus - retaining for method checks
 namespace DSAMVVM.MVVM.Model
 {
     class Menus

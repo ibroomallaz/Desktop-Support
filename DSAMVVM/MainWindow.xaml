@@ -42,15 +42,15 @@
                              IsChecked="True"
                              Command="{Binding HomeViewCommand}"
                              />
-                <RadioButton Content="Two"
+                <RadioButton Content="User"
              Height="50"
              Foreground="White"
              FontSize="14"
              Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding Text2ViewCommand}"
+                             Command="{Binding UserCommand}"
                            
              />
-                <RadioButton Content="Three"
+                <RadioButton Content="Computer"
              Height="50"
              Foreground="White"
              FontSize="14"

@@ -146,7 +146,7 @@ namespace DSAMVVM.MVVM.Model
                 _lock.Release();
             }
         }
-
+        //TODO: Non-console method
         private async Task LoadDepartmentsInternalAsync()   //Load data without sempahor, helps prevent issues on -reaload command
         {
             try

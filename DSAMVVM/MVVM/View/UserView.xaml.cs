@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace DSAMVVM.MVVM.View
 {
     /// <summary>
-    /// Interaction logic for Text2View.xaml
+    /// Interaction logic for UserView.xaml
     /// </summary>
-    public partial class Text2View : UserControl
+    public partial class UserView : UserControl
     {
-        public Text2View()
+        public UserView()
         {
             InitializeComponent();
         }
