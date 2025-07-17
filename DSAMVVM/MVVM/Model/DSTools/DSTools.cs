@@ -1,7 +1,8 @@
 ﻿using Colors.Net;
+using DSAMVVM.Core;
 using static Colors.Net.StringStaticMethods;
 
-namespace DSAMVVM.Core.DSTools
+namespace DSAMVVM.MVVM.Model.DSTools
 {
     public partial class DSTools
 
@@ -95,7 +96,7 @@ namespace DSAMVVM.Core.DSTools
                     case "back":
                         Console.Clear();
                         userLBN = false;
-                        await DSTools.DSToolsMenu();
+                        await DSToolsMenu();
                         break;
                     case "exit":
                         userLBN = false;

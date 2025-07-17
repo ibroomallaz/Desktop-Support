@@ -5,8 +5,10 @@ using Newtonsoft.Json;
 using Colors.Net;
 using Colors.Net.StringColorExtensions;
 using static Colors.Net.StringStaticMethods;
+using DSAMVVM.Core;
+using DSAMVVM.MVVM.Model.utils;
 
-namespace DSAMVVM.Core.DSTools
+namespace DSAMVVM.MVVM.Model.DSTools
 {
     public class QuickLinks
     {
@@ -67,7 +69,7 @@ namespace DSAMVVM.Core.DSTools
                 if (index < QL.Length)
                 {
                     string url = QL[index].URL;
-                    DSAMVVM.Core.utils.HTTP.OpenURL(url);
+                    HTTP.OpenURL(url);
                     ColoredConsole.WriteLine($"{Green("Opening")} {QL[index].Name}");
                 }
                 else

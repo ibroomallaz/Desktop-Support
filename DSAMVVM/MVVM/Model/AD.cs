@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using static Colors.Net.StringStaticMethods;
 using Microsoft.Extensions.DependencyInjection;
+using DSAMVVM.MVVM.Model;
 
 namespace DSAMVVM.Core
 {

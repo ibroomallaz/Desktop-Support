@@ -1,10 +1,12 @@
 ﻿using Colors.Net;
 using Colors.Net.StringColorExtensions;
+using DSAMVVM.Core;
+using DSAMVVM.MVVM.Model.utils;
 using Microsoft.Extensions.DependencyInjection;
 using static Colors.Net.StringStaticMethods;
 
 
-namespace DSAMVVM.Core
+namespace DSAMVVM.MVVM.Model
 {
     class Menus
     {
@@ -53,7 +55,7 @@ namespace DSAMVVM.Core
                         break;
                     case "4":
                         showMenu = false;
-                        await DSAMVVM.Core.DSTools.DSTools.DSToolsMenu();
+                        await MVVM.Model.DSTools.DSTools.DSToolsMenu();
                         break;
                     case "clear":
                         Console.Clear();
@@ -70,7 +72,7 @@ namespace DSAMVVM.Core
         public static async Task AboutMenu()
         {
             Console.Clear();
-            ColoredConsole.WriteLine($"UITS Desktop Support App \n {Red("Version")} {Application.ProductVersion} \n Developed by Isaac {Cyan("Broomall")} ({Green("i")}{Cyan("broomall")})\n Press {DarkYellow("Enter")} to go back.");
+            ColoredConsole.WriteLine($"UITS Desktop Support App \n {Red("Version")} {Globals.g_AppVersion} \n Developed by Isaac {Cyan("Broomall")} ({Green("i")}{Cyan("broomall")})\n Press {DarkYellow("Enter")} to go back.");
             Console.ReadLine();
             Console.Clear();
             await MainMenu();
@@ -110,11 +112,11 @@ namespace DSAMVVM.Core
                         }
                         break;
                     case "-cl":
-                        DSAMVVM.Core.utils.HTTP.OpenURL("https://emailarizona.sharepoint.com/:x:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/Customer%20List%20by%20Core%20Support%20Team.xlsx?d=w086768426f3745cda79987cc374d1ed5&csf=1&web=1&e=SbhIsJ");
+                        HTTP.OpenURL("https://emailarizona.sharepoint.com/:x:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/Customer%20List%20by%20Core%20Support%20Team.xlsx?d=w086768426f3745cda79987cc374d1ed5&csf=1&web=1&e=SbhIsJ");
                         ColoredConsole.WriteLine($"{Green("Opening")} Customer List by Core Support Team");
                         break;
                     case "-ps":
-                        DSAMVVM.Core.utils.HTTP.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/DST%20TS-Phone%20Coverage.docx?d=w080a9cc0f66c4a9baa10e7f9eeed418f&csf=1&web=1&e=Mre5jG");
+                        HTTP.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/DST%20TS-Phone%20Coverage.docx?d=w080a9cc0f66c4a9baa10e7f9eeed418f&csf=1&web=1&e=Mre5jG");
                         ColoredConsole.WriteLine($"{Green("Opening")} Desktop Support Phone Schedule");
                         break;
                     case "help":

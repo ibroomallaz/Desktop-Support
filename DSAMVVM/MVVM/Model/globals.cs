@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Reflection;
+using System.Windows;
 using static System.Net.WebRequestMethods;
 
-namespace DSAMVVM.Core
+namespace DSAMVVM.MVVM.Model
 {
     public class Globals
     {
-        public static string g_AppVersion = Application.ProductVersion.ToLower();
+        public static string g_AppVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
         public static IDepartmentService DepartmentService { get; set; } = new DepartmentService();
         public const string g_domainPath = "bluecat.arizona.edu";
         public const string g_domainPathLDAP = "LDAP://DC=bluecat,DC=arizona,DC=edu";

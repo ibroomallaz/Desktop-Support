@@ -1,19 +1,20 @@
-﻿using Newtonsoft.Json;
+﻿using DSAMVVM.Core;
+using Newtonsoft.Json;
 using System;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Forms;
 
-namespace DSAMVVM.Core.utils
+
+namespace DSAMVVM.MVVM.Model.utils
 {
     public class VersionChecker
     {
         private static bool BetaCheck()
         {
-            string version = Application.ProductVersion.ToLower();
+            string version = Globals.g_AppVersion;
             return version.Contains("beta") || version.Contains("alpha");
         }
 
@@ -48,7 +49,7 @@ namespace DSAMVVM.Core.utils
 
         private static void NotifyUser(VersionInfo versionInfo)
         {
-            string installedVersion = Application.ProductVersion;
+            string installedVersion = Globals.g_AppVersion;
             bool isBetaUser = BetaCheck();
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
@@ -82,19 +83,19 @@ namespace DSAMVVM.Core.utils
 
         private static void PromptUpdate(string title, string newVersion, string installedVersion, string? location, string? changelog, bool isBeta)
         {
-            location ??= Globals.g_sharepointHome; // Fallback URL in case location is missing
+            location ??= Globals.g_sharepointHome;
             changelog ??= "No details provided.";
 
             var result = MessageBox.Show(
                 $"{title}\n\nA new version ({newVersion}) is available.\n\nCurrent version: {installedVersion}\n\nChanges:\n{changelog}\n\nWould you like to update?",
                 title,
-                MessageBoxButtons.OKCancel,
-                isBeta ? MessageBoxIcon.Information : MessageBoxIcon.Exclamation
+                MessageBoxButton.OKCancel,
+                isBeta ? MessageBoxImage.Information : MessageBoxImage.Warning
             );
 
-            if (result == DialogResult.OK)
+            if (result == MessageBoxResult.OK)
             {
-                HTTP.OpenURL(location); // Open the correct download URL
+                HTTP.OpenURL(location);
             }
         }
 

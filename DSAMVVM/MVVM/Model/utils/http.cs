@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace DSAMVVM.Core.utils
+namespace DSAMVVM.MVVM.Model.utils
 {
     public static class HTTP
     {
@@ -33,11 +33,11 @@ namespace DSAMVVM.Core.utils
             catch (System.ComponentModel.Win32Exception noBrowser)
             {
                 if (noBrowser.ErrorCode == -2147467259)
-                    MessageBox.Show(noBrowser.Message);
+                    System.Windows.MessageBox.Show(noBrowser.Message);
             }
-            catch (System.Exception other)
+            catch (Exception other)
             {
-                MessageBox.Show(other.Message);
+                System.Windows.MessageBox.Show(other.Message);
             }
         }
     }

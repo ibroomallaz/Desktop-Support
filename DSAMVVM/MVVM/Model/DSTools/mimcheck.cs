@@ -1,8 +1,9 @@
 ﻿using Colors.Net;
 using Colors.Net.StringColorExtensions;
+using DSAMVVM.Core;
 using static Colors.Net.StringStaticMethods;
 
-namespace DSAMVVM.Core.DSTools
+namespace DSAMVVM.MVVM.Model.DSTools
 {
     public class MIMCheck
     {
