@@ -40,51 +40,49 @@
                              FontSize="14"
                              Style="{StaticResource MenuButtonTheme}"
                              IsChecked="True"
-                             Command="{Binding HomeViewCommand}"
-                             />
+                             Command="{Binding HomeViewCommand}"/>
+                
                 <RadioButton Content="User"
-             Height="50"
-             Foreground="White"
-             FontSize="14"
-             Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding UserCommand}"
-                           
-             />
+                             Height="50"
+                             Foreground="White"
+                             FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding UserCommand}"/>
+                
                 <RadioButton Content="Computer"
-             Height="50"
-             Foreground="White"
-             FontSize="14"
-             Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding ComputerCommand}"
-             />
+                             Height="50"
+                             Foreground="White"
+                             FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding ComputerCommand}"/>
+                
                 <RadioButton Content="Groups"
-Height="50"
-Foreground="White"
-FontSize="14"
-Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding GroupCommand}"
-/>
+                            Height="50"
+                            Foreground="White"
+                            FontSize="14"
+                            Style="{StaticResource MenuButtonTheme}"
+                            Command="{Binding GroupCommand}"/>
+                
                 <RadioButton Content="Entra"
-Height="50"
-Foreground="White"
-FontSize="14"
-Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding EntraCommand}"
-/>
+                            Height="50"
+                            Foreground="White"
+                            FontSize="14"
+                            Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding EntraCommand}"/>
+                
                 <RadioButton Content="Links"
-Height="50"
-Foreground="White"
-FontSize="14"
-Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding LinksCommand}"
-/>
+                            Height="50"
+                            Foreground="White"
+                            FontSize="14"
+                            Style="{StaticResource MenuButtonTheme}"
+                            Command="{Binding LinksCommand}"/>
+                
                 <RadioButton Content="About"
-Height="50"
-Foreground="White"
-FontSize="14"
-Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding AboutCommand}"
-/>
+                            Height="50"
+                            Foreground="White"
+                            FontSize="14"
+                            Style="{StaticResource MenuButtonTheme}"
+                            Command="{Binding AboutCommand}"/>
             </StackPanel>
             <TextBox Width="250"
                        Height="40"

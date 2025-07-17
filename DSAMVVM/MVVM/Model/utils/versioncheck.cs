@@ -18,7 +18,7 @@ namespace DSAMVVM.MVVM.Model.utils
             string version = Globals.g_AppVersion;
             return version.Contains("beta") || version.Contains("alpha");
         }
-
+        //TODO: Replace old console alert methods
         public static async Task VersionCheck()
         {
             try
