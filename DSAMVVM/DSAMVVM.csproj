@@ -13,6 +13,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Colors.Net" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="9.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="MVVM\View\HomeView - Template.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
