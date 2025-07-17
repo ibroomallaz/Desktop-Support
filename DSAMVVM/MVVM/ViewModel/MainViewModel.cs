@@ -24,6 +24,8 @@ namespace DSAMVVM.MVVM.ViewModel
         public EntraViewModel EntraVM { get; set; }
         public LinksViewModel LinksVM { get; set; }
         public AboutViewModel AboutVM { get; set; }
+        public StatusBarViewModel StatusBar { get; }
+
 
         private object _currentView;
 
@@ -44,6 +46,7 @@ namespace DSAMVVM.MVVM.ViewModel
             EntraVM = new EntraViewModel();
             LinksVM = new LinksViewModel();
             AboutVM = new AboutViewModel();
+            StatusBar = new StatusBarViewModel();
             CurrentView = HomeVM;
             HomeViewCommand = new RelayCommand(o => { 
                 CurrentView = HomeVM;
