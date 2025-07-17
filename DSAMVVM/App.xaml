@@ -4,7 +4,7 @@
              xmlns:local="clr-namespace:DSAMVVM"
              xmlns:viewModel="clr-namespace:DSAMVVM.MVVM.ViewModel"
              xmlns:view="clr-namespace:DSAMVVM.MVVM.View"
-             StartupUri="MainWindow.xaml">
+             >
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

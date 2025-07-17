@@ -12,6 +12,7 @@ namespace DSAMVVM.MVVM.Model.utils
 {
     public class VersionChecker
     {
+        private static readonly HttpClient _client = new(); //Reusable client instance
         private static bool BetaCheck()
         {
             string version = Globals.g_AppVersion;
@@ -22,9 +23,7 @@ namespace DSAMVVM.MVVM.Model.utils
         {
             try
             {
-                Console.WriteLine("Checking Version...");
-                HttpClient client = new HttpClient();
-                using HttpResponseMessage response = await client.GetAsync(Globals.g_versionJSON);
+                using HttpResponseMessage response = await _client.GetAsync(Globals.g_versionJSON);
                 response.EnsureSuccessStatusCode();
 
                 string json = await response.Content.ReadAsStringAsync();
@@ -86,17 +85,20 @@ namespace DSAMVVM.MVVM.Model.utils
             location ??= Globals.g_sharepointHome;
             changelog ??= "No details provided.";
 
-            var result = MessageBox.Show(
-                $"{title}\n\nA new version ({newVersion}) is available.\n\nCurrent version: {installedVersion}\n\nChanges:\n{changelog}\n\nWould you like to update?",
-                title,
-                MessageBoxButton.OKCancel,
-                isBeta ? MessageBoxImage.Information : MessageBoxImage.Warning
-            );
-
-            if (result == MessageBoxResult.OK)
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                HTTP.OpenURL(location);
-            }
+                var result = MessageBox.Show(
+                    $"{title}\n\nA new version ({newVersion}) is available.\n\nCurrent version: {installedVersion}\n\nChanges:\n{changelog}\n\nWould you like to update?",
+                    title,
+                    MessageBoxButton.OKCancel,
+                    isBeta ? MessageBoxImage.Information : MessageBoxImage.Warning
+                );
+
+                if (result == MessageBoxResult.OK)
+                {
+                    HTTP.OpenURL(location);
+                }
+            });
         }
 
         private static bool IsNewerVersion(string? currentVersion, string? newVersion)
