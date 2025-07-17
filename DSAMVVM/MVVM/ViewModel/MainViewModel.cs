@@ -11,7 +11,9 @@ namespace DSAMVVM.MVVM.ViewModel
     {
         public RelayCommand HomeViewCommand { get; set; }
         public RelayCommand UserCommand { get; set; }
+        public RelayCommand ComputerCommand { get; set; }
         public HomeViewModel HomeVM { get; set; }
+        public ComputerViewModel ComputerVM { get; set; }
 
         public UserViewModel UserVM { get; set; }
         private object _currentView;
@@ -28,12 +30,16 @@ namespace DSAMVVM.MVVM.ViewModel
         { 
             HomeVM = new HomeViewModel();
             UserVM = new UserViewModel(); 
+            ComputerVM = new ComputerViewModel();
             CurrentView = HomeVM;
             HomeViewCommand = new RelayCommand(o => { 
                 CurrentView = HomeVM;
             });
             UserCommand = new RelayCommand(o => {
                 CurrentView = UserVM;
+            });
+            ComputerCommand = new RelayCommand(o => {
+                CurrentView = ComputerVM;
             });
         }
     }
