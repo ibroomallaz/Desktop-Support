@@ -32,7 +32,7 @@
                    HorizontalAlignment="Left"
                    Foreground="White"
                    FontSize="22"
-                       Margin="20,0,0,0"/>
+                   Margin="20,0,0,0"/>
             <StackPanel Grid.Row="1">
                 <RadioButton Content="Home"
                              Height="50"
