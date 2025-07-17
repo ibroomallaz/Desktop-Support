@@ -62,24 +62,28 @@ Height="50"
 Foreground="White"
 FontSize="14"
 Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding GroupCommand}"
 />
                 <RadioButton Content="Entra"
 Height="50"
 Foreground="White"
 FontSize="14"
 Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding EntraCommand}"
 />
                 <RadioButton Content="Links"
 Height="50"
 Foreground="White"
 FontSize="14"
 Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding LinksCommand}"
 />
                 <RadioButton Content="About"
 Height="50"
 Foreground="White"
 FontSize="14"
 Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding AboutCommand}"
 />
             </StackPanel>
             <TextBox Width="250"

@@ -20,6 +20,18 @@
             <DataTemplate DataType="{x:Type viewModel:ComputerViewModel}">
                 <view:ComputerView/>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:GroupViewModel}">
+                <view:GroupView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:EntraViewModel}">
+                <view:EntraView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:LinksViewModel}">
+                <view:LinksView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:AboutViewModel}">
+                <view:AboutView/>
+            </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
