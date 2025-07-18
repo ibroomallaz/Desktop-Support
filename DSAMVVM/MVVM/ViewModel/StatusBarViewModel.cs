@@ -1,13 +1,10 @@
 ﻿using DSAMVVM.Core;
 using DSAMVVM.MVVM.Model;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -16,14 +13,14 @@ namespace DSAMVVM.MVVM.ViewModel
         private StatusMessage? _currentMessage;
         private CancellationTokenSource? _cts;
 
-        public string Message => _currentMessage?.Message ?? "";
+        public StatusMessage? CurrentStatusMessage => _currentMessage;
 
         public void Report(StatusMessage message, int timeoutMs = 5000)
         {
             if (_currentMessage == null || message.Priority >= _currentMessage.Priority)
             {
                 _currentMessage = message;
-                OnPropertyChanged(nameof(Message));
+                OnPropertyChanged(nameof(CurrentStatusMessage));
 
                 if (!message.Sticky)
                 {
@@ -42,7 +39,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 if (_currentMessage == msg)
                 {
                     _currentMessage = null;
-                    OnPropertyChanged(nameof(Message));
+                    OnPropertyChanged(nameof(CurrentStatusMessage));
                 }
             }
             catch (TaskCanceledException) { }
@@ -52,6 +49,4 @@ namespace DSAMVVM.MVVM.ViewModel
         protected void OnPropertyChanged([CallerMemberName] string? name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
-
-
 }

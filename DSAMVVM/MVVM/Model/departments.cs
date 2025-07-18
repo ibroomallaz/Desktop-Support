@@ -9,6 +9,7 @@ using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
 
 
 namespace DSAMVVM.MVVM.Model
@@ -164,13 +165,19 @@ namespace DSAMVVM.MVVM.Model
                     .Select(d => (IDepartment)d)
                     .ToList() ?? new List<IDepartment>();
 
-                _status.Report(new StatusMessage($"Loaded {_departments.Count} departments into memory.", 0));
-
+                _status.Report(StatusMessageFactory.Plain($"Loaded {_departments.Count} departments into memory.", 0));
             }
             catch (Exception e)
             {
-                //TODO: Removed autoreload to prevent loop, add a refresh link that can be user initiated
-                _status.Report(new StatusMessage($"Failed to load department data: {e}", 3, sticky: true));
+                _status.Report(StatusMessageFactory.CreateRichInternalMessage(
+                    $"Failed to load department data: {e.Message}. {{0}}",
+                    new Inline[]
+                    {
+                        StatusMessageFactory.ActionLink("Retry", () => _ = ReloadDataAsync())
+                    },
+                    priority: 3,
+                    sticky: true
+                ));
             }
         }
 
