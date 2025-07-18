@@ -27,7 +27,7 @@ namespace DSAMVVM.MVVM.ViewModel
             EntraVM = new EntraViewModel();
             LinksVM = new LinksViewModel();
             AboutVM = new AboutViewModel();
-
+            //TODO: Move to inject?
             DeptService = InjectStatus(status => new DepartmentService(status));
         }
     }
