@@ -159,8 +159,8 @@ namespace DSAMVVM.Core
 
             return "No valid O365 license found";
         }
-        //Old print method
-        public static async Task PrintADUserInfo(ADUserInfo ADUser)
+        // Old print method
+        public static async Task PrintADUserInfo(ADUserInfo ADUser, IDepartmentService deptService)
         {
             Console.WriteLine();
             ColoredConsole.WriteLine(ADUser.DisplayName.DarkYellow());
@@ -193,7 +193,7 @@ namespace DSAMVVM.Core
 
             if (!string.IsNullOrEmpty(ADUser.DepartmentNumber))
             {
-                var department = await Globals.DepartmentService.GetDepartmentAsync(ADUser.DepartmentNumber);
+                var department = await deptService.GetDepartmentAsync(ADUser.DepartmentNumber);
 
                 if (department != null)
                 {
@@ -213,9 +213,9 @@ namespace DSAMVVM.Core
                         ColoredConsole.WriteLine(Cyan("Teams: ") + "None".Red());
                     }
 
-                    if (await Globals.DepartmentService.HasFileRepoAsync(ADUser.DepartmentNumber))
+                    if (await deptService.HasFileRepoAsync(ADUser.DepartmentNumber))
                     {
-                        var fileRepo = await Globals.DepartmentService.GetFileRepoAsync(ADUser.DepartmentNumber);
+                        var fileRepo = await deptService.GetFileRepoAsync(ADUser.DepartmentNumber);
                         if (fileRepo != null)
                         {
                             ColoredConsole.Write($"{Cyan("File Repository: ")}");

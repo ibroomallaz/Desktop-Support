@@ -104,7 +104,7 @@ namespace DSAMVVM.MVVM.Model
                     case "-reload":
                         try
                         {
-                            await Globals.DepartmentService.ReloadDataAsync();
+                      //      await Globals.DepartmentService.ReloadDataAsync();
                         }
                         catch (Exception ex)
                         {
@@ -126,7 +126,7 @@ namespace DSAMVVM.MVVM.Model
                         ADUserInfo ADUser = new ADUserInfo(userMenuText);
                         if (ADUser.Exists)
                         {
-                            await ADUserInfo.PrintADUserInfo(ADUser);
+                           // await ADUserInfo.PrintADUserInfo(ADUser);
                         }
                         else if (!string.IsNullOrWhiteSpace(ADUser.ErrorMessage))
                         {

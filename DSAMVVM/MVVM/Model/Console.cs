@@ -14,7 +14,7 @@ namespace DSAMVVM.MVVM.Model
             try
             {
                 //Download departmental data, parse JSON and cache into memory for later
-                await Globals.DepartmentService.PreCacheDataAsync();
+               // await Globals.DepartmentService.PreCacheDataAsync();
                 //Run Version check and initial processes
                 await VersionChecker.VersionCheck();
                 Console.Clear();
