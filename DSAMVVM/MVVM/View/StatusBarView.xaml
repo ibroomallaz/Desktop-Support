@@ -1,10 +1,24 @@
 ﻿<UserControl x:Class="DSAMVVM.MVVM.View.StatusBarView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:DSAMVVM.MVVM.View">
-    
+             xmlns:local="clr-namespace:DSAMVVM.MVVM.View"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="40"
+             d:DesignWidth="400">
 
-    <Border Background="#EEE" Padding="10,3">
-        <ContentControl Content="{Binding CurrentStatusMessage.Content}" />
-    </Border>
+    <Grid>
+        <Border Background="#EEE" Padding="10,3" MinHeight="24" VerticalAlignment="Bottom">
+            <ContentControl Content="{Binding CurrentStatusMessage.Content}">
+                <ContentControl.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="TextWrapping" Value="Wrap"/>
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="Foreground" Value="Black"/>
+                    </Style>
+                </ContentControl.Resources>
+            </ContentControl>
+        </Border>
+    </Grid>
 </UserControl>
