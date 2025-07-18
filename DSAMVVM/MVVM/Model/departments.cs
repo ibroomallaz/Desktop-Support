@@ -151,7 +151,7 @@ namespace DSAMVVM.MVVM.Model
                 _lock.Release();
             }
         }
-        //TODO: Non-console method
+
         private async Task LoadDepartmentsInternalAsync()   //Load data without sempahor, helps prevent issues on -reaload command
         {
             try
@@ -169,8 +169,8 @@ namespace DSAMVVM.MVVM.Model
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Failed to load department data: {e}");
-                _departments = new List<IDepartment>();
+                //TODO: Removed autoreload to prevent loop, add a refresh link that can be user initiated
+                _status.Report(new StatusMessage($"Failed to load department data: {e}", 1, sticky: true));
             }
         }
 
