@@ -22,8 +22,10 @@ namespace DSAMVVM.MVVM.ViewModel
             try
             {
                 InitializeStatusBar();
+                InitializeInject();
                 InitializeViewModels();
                 InitializeCommands();
+                
 
                 CurrentView = HomeVM;
             }

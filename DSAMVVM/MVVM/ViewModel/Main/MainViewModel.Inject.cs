@@ -1,4 +1,5 @@
 ﻿using DSAMVVM.Core;
+using DSAMVVM.MVVM.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,11 @@ namespace DSAMVVM.MVVM.ViewModel
         private T InjectStatus<T>(Func<IStatusReporter, T> factory) where T : class
         {
             return factory(StatusBar);
+        }
+        
+        private void InitializeInject()
+        {
+            DeptService = InjectStatus(status => new DepartmentService(status));
         }
     }
 }
