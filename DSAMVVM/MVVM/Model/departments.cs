@@ -1,11 +1,15 @@
-﻿using System;
+﻿using DSAMVVM.Core;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using System.Windows.Controls.Primitives;
+
 
 namespace DSAMVVM.MVVM.Model
 {
@@ -67,9 +71,10 @@ namespace DSAMVVM.MVVM.Model
     {
         private List<IDepartment>? _departments;
         private readonly SemaphoreSlim _lock = new(1, 1);  //Thread lock
-
-        public DepartmentService()
+        private readonly IStatusReporter _status;
+        public DepartmentService(IStatusReporter status)
         {
+            _status = status ?? throw new ArgumentNullException(nameof(status));
             _ = LoadDepartmentsAsync();
         }
 
@@ -159,7 +164,8 @@ namespace DSAMVVM.MVVM.Model
                     .Select(d => (IDepartment)d)
                     .ToList() ?? new List<IDepartment>();
 
-                Console.WriteLine($"Loaded {_departments.Count} departments into memory.");
+                _status.Report(new StatusMessage($"Loaded {_departments.Count} departments into memory.", 0));
+
             }
             catch (Exception e)
             {

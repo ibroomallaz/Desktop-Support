@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    class LinksViewModel
+    public class LinksViewModel
     {
     }
 }

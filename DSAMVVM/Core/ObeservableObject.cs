@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace DSAMVVM.Core
 {
-    class ObeservableObject : INotifyPropertyChanged
+    public class ObeservableObject : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
-        public void OnProptertyChanged([CallerMemberName] string? name = null)
+        public void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }

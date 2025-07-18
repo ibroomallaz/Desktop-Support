@@ -11,7 +11,7 @@ using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class StatusBarViewModel : INotifyPropertyChanged
+    public class StatusBarViewModel : INotifyPropertyChanged, IStatusReporter
     {
         private StatusMessage? _currentMessage;
         private CancellationTokenSource? _cts;
