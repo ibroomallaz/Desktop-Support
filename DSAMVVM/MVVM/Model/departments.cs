@@ -170,7 +170,7 @@ namespace DSAMVVM.MVVM.Model
             catch (Exception e)
             {
                 //TODO: Removed autoreload to prevent loop, add a refresh link that can be user initiated
-                _status.Report(new StatusMessage($"Failed to load department data: {e}", 1, sticky: true));
+                _status.Report(new StatusMessage($"Failed to load department data: {e}", 3, sticky: true));
             }
         }
 

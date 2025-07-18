@@ -19,6 +19,12 @@ namespace DSAMVVM.MVVM.Model
             Sticky = sticky;
         }
     }
-
-
+    /* Priority message levels (WiP):
+     * 0 - Standard message
+     * 1 - 
+     * 2 - 
+     * 3 - Failure Message
+     * 4 - Failure Overcome
+     * 5 - Error
+    */
 }
