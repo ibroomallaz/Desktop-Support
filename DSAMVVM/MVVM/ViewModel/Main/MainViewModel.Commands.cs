@@ -9,13 +9,13 @@ namespace DSAMVVM.MVVM.ViewModel
 {
     public partial class MainViewModel
     {
-        public RelayCommand HomeViewCommand { get; private set; }
-        public RelayCommand UserCommand { get; private set; }
-        public RelayCommand ComputerCommand { get; private set; }
-        public RelayCommand GroupCommand { get; private set; }
-        public RelayCommand EntraCommand { get; private set; }
-        public RelayCommand LinksCommand { get; private set; }
-        public RelayCommand AboutCommand { get; private set; }
+        public RelayCommand HomeViewCommand { get; private set; } = null;
+        public RelayCommand UserCommand { get; private set; } = null;
+        public RelayCommand ComputerCommand { get; private set; } = null;
+        public RelayCommand GroupCommand { get; private set; } = null;
+        public RelayCommand EntraCommand { get; private set; } = null;
+        public RelayCommand LinksCommand { get; private set; } = null;
+        public RelayCommand AboutCommand { get; private set; } = null;
 
         private void InitializeCommands()
         {

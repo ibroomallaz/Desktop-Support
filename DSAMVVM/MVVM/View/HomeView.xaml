@@ -30,7 +30,7 @@
                 </Border.Clip>
             <Grid>
                 <StackPanel>
-                        <TextBlock Text="Meow Meow1&#x0a;Bitch I'm hungry"
+                        <TextBlock Text="Meow Meow1&#x0a;I'm hungry"
                                    Foreground="White"
                                    FontSize="28"
                                    Margin="20,10,10,0"/>

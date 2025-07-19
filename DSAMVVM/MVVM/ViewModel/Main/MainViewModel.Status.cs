@@ -8,7 +8,7 @@ namespace DSAMVVM.MVVM.ViewModel
 {
     public partial class MainViewModel
     {
-        public StatusBarViewModel StatusBar { get; private set; }
+        public StatusBarViewModel StatusBar { get; private set; } = null;
 
         private void InitializeStatusBar()
         {

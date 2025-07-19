@@ -9,14 +9,14 @@ namespace DSAMVVM.MVVM.ViewModel
 {
     public partial class MainViewModel
     {
-        public HomeViewModel HomeVM { get; private set; }
-        public ComputerViewModel ComputerVM { get; private set; }
-        public UserViewModel UserVM { get; private set; }
-        public GroupViewModel GroupVM { get; private set; }
-        public EntraViewModel EntraVM { get; private set; }
-        public LinksViewModel LinksVM { get; private set; }
-        public AboutViewModel AboutVM { get; private set; }
-        public DSAMVVM.MVVM.Model.IDepartmentService DeptService { get; private set; }
+        public HomeViewModel HomeVM { get; private set; } = null;
+        public ComputerViewModel ComputerVM { get; private set; } = null;
+        public UserViewModel UserVM { get; private set; } = null;
+        public GroupViewModel GroupVM { get; private set; } = null;
+        public EntraViewModel EntraVM { get; private set; } = null;
+        public LinksViewModel LinksVM { get; private set; } = null;
+        public AboutViewModel AboutVM { get; private set; } = null;
+        public DSAMVVM.MVVM.Model.IDepartmentService DeptService { get; private set; } = null!;
 
         private void InitializeViewModels()
         {

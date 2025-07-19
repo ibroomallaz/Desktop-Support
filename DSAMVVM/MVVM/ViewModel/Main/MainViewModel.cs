@@ -31,7 +31,7 @@ namespace DSAMVVM.MVVM.ViewModel
             }
             catch (Exception ex)
             {
-                StatusBar.Report(StatusMessageFactory.Plain($"Initialization error: {ex.Message}", priority: 2, sticky: true));
+                StatusBar?.Report(StatusMessageFactory.Plain($"Initialization error: {ex.Message}", priority: 2, sticky: true));
             }
         }
     }
