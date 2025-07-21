@@ -1,41 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace DSAMVVM.Core
 {
     public class RelayCommand : ICommand
     {
-        private Action<object> _execute;
-        private Func<object, bool> _canExecute;
-#pragma warning disable CS8612 // Nullability of reference types in type doesn't match implicitly implemented member.
-        public event EventHandler CanExecuteChanged
-#pragma warning restore CS8612 // Nullability of reference types in type doesn't match implicitly implemented member.
+        private readonly Action<object?> _execute;
+        private readonly Func<object?, bool>? _canExecute;
+
+        public event EventHandler? CanExecuteChanged
         {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
+            add => CommandManager.RequerySuggested += value;
+            remove => CommandManager.RequerySuggested -= value;
         }
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        public RelayCommand(Action<object> execute, Func<object, bool>? canExecute = null)
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+
+        public RelayCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
         {
-            _execute = execute;
-#pragma warning disable CS8601 // Possible null reference assignment.
+            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             _canExecute = canExecute;
-#pragma warning restore CS8601 // Possible null reference assignment.
         }
-#pragma warning disable CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
-        public bool CanExecute(object parameter)
-#pragma warning restore CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
+
+        public bool CanExecute(object? parameter)
         {
-            return _canExecute == null || _canExecute(parameter);
+            return _canExecute?.Invoke(parameter) ?? true;
         }
-#pragma warning disable CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
-        public void Execute(object parameter)
-#pragma warning restore CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
+
+        public void Execute(object? parameter)
         {
             _execute(parameter);
         }
