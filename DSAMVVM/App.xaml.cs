@@ -1,4 +1,5 @@
 ﻿using DSAMVVM.MVVM.Model.utils;
+using DSAMVVM.MVVM.ViewModel;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -10,14 +11,20 @@ namespace DSAMVVM
         {
             base.OnStartup(e);
 
-            var mainWindow = new MainWindow();
+            var mainVM = new MainViewModel();
+            var mainWindow = new MainWindow
+            {
+                DataContext = mainVM
+            };
+
             MainWindow = mainWindow;
             mainWindow.Show();
 
-            // Fire-and-forget version check — runs concurrently
+            // Pass the StatusBarViewModel to VersionChecker
             _ = Task.Run(async () =>
             {
-                await VersionChecker.VersionCheck();
+                var versionChecker = new VersionChecker(mainVM.StatusBar);
+                await versionChecker.CheckAsync();
             });
         }
     }

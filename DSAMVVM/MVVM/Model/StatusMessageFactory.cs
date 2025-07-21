@@ -14,7 +14,7 @@ namespace DSAMVVM.MVVM.Model
 
         // Creates a plain text status message.
 
-        public static StatusMessage Plain(string message, int priority = 0, bool sticky = false)
+        public static StatusMessage Plain(string message, int priority = 0, bool sticky = false, string? key = null)
         {
             var textBlock = new TextBlock
             {
@@ -22,8 +22,9 @@ namespace DSAMVVM.MVVM.Model
                 TextWrapping = TextWrapping.Wrap
             };
 
-            return new StatusMessage(textBlock, priority, sticky);
+            return new StatusMessage(textBlock, priority, sticky, key);
         }
+
 
 
         // Creates a hyperlink that opens an external URI.
@@ -73,10 +74,11 @@ namespace DSAMVVM.MVVM.Model
         // Creates a rich message with format text and external links (e.g., "Click {0} or {1}").
 
         public static StatusMessage CreateRichExternalMessage(
-            string format,
-            Inline[] inlines,
-            int priority = 0,
-            bool sticky = false)
+     string format,
+     Inline[] inlines,
+     int priority = 0,
+     bool sticky = false,
+     string? key = null)
         {
             var tb = new TextBlock
             {
@@ -86,8 +88,9 @@ namespace DSAMVVM.MVVM.Model
             foreach (var inline in FormatWithInlines(format, inlines))
                 tb.Inlines.Add(inline);
 
-            return new StatusMessage(tb, priority, sticky);
+            return new StatusMessage(tb, priority, sticky, key);
         }
+
 
 
         // Creates a rich message with format text and internal method links.
@@ -96,10 +99,12 @@ namespace DSAMVVM.MVVM.Model
             string format,
             Inline[] inlines,
             int priority = 0,
-            bool sticky = false)
+            bool sticky = false,
+            string? key = null)
         {
-            return CreateRichExternalMessage(format, inlines, priority, sticky);
+            return CreateRichExternalMessage(format, inlines, priority, sticky, key);
         }
+
 
         private static IEnumerable<Inline> FormatWithInlines(string format, Inline[] args)
         {

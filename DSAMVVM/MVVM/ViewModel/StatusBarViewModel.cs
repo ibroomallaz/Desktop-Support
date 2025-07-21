@@ -11,15 +11,22 @@ namespace DSAMVVM.MVVM.ViewModel
     public class StatusBarViewModel : INotifyPropertyChanged, IStatusReporter
     {
         private StatusMessage? _currentMessage;
+        private string? _currentKey;
         private CancellationTokenSource? _cts;
 
         public StatusMessage? CurrentStatusMessage => _currentMessage;
 
         public void Report(StatusMessage message, int timeoutMs = 5000)
         {
-            if (_currentMessage == null || message.Priority >= _currentMessage.Priority)
+            bool shouldReplace =
+                _currentMessage == null ||
+                message.Priority >= _currentMessage.Priority ||
+                (!string.IsNullOrEmpty(message.Key) && message.Key == _currentKey);
+
+            if (shouldReplace)
             {
                 _currentMessage = message;
+                _currentKey = message.Key;
                 OnPropertyChanged(nameof(CurrentStatusMessage));
 
                 if (!message.Sticky)
@@ -39,6 +46,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 if (_currentMessage == msg)
                 {
                     _currentMessage = null;
+                    _currentKey = null;
                     OnPropertyChanged(nameof(CurrentStatusMessage));
                 }
             }

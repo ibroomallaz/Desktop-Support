@@ -165,7 +165,7 @@ namespace DSAMVVM.MVVM.Model
                     .Select(d => (IDepartment)d)
                     .ToList() ?? new List<IDepartment>();
 
-                _status.Report(StatusMessageFactory.Plain($"Loaded {_departments.Count} departments into memory.", 0));
+                _status.Report(StatusMessageFactory.Plain($"Loaded {_departments.Count} departments into memory.", 0, sticky:false, key:"DepartmentService"));
             }
             catch (Exception e)
             {
@@ -176,7 +176,8 @@ namespace DSAMVVM.MVVM.Model
                         StatusMessageFactory.ActionLink("Retry", () => _ = ReloadDataAsync())
                     },
                     priority: 3,
-                    sticky: true
+                    sticky: true,
+                    key:"DepartmentService"
                 ));
             }
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 
@@ -11,26 +12,39 @@ namespace DSAMVVM.MVVM.Model
 {
     public class StatusMessage
     {
-        public UIElement? Content { get; set; }
-        public int Priority { get; set; } = 0;
-        public bool Sticky { get; set; } = false;
+        public string? Message { get; }
+        public TextBlock? RichContent { get; }
+        public int Priority { get; }
+        public bool Sticky { get; }
+        public string? Key { get; }
 
-        public StatusMessage(UIElement content, int priority = 0, bool sticky = false)
+        // Constructor for plain text
+        public StatusMessage(string message, int priority = 0, bool sticky = false, string? key = null)
         {
-            Content = content;
+            Message = message;
             Priority = priority;
             Sticky = sticky;
+            Key = key;
+        }
+
+        // Constructor for rich TextBlock content
+        public StatusMessage(TextBlock richContent, int priority = 0, bool sticky = false, string? key = null)
+        {
+            RichContent = richContent;
+            Priority = priority;
+            Sticky = sticky;
+            Key = key;
         }
     }
-
 }
+
 /* Priority message levels (WiP):
  * 0 - Standard message
  * 1 - 
  * 2 - 
  * 3 - Failure Message
- * 4 - Failure Overcome
- * 5 - Error
+ * 4 - Higher Error
+
 */
 
 /* 

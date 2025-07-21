@@ -38,7 +38,11 @@ namespace DSAMVVM.MVVM.Model.utils
                 var versionData = JsonConvert.DeserializeObject<Root>(json);
 
                 if (versionData?.Version != null)
+                {
                     NotifyUser(versionData.Version);
+                    ReportSuccess();
+                }
+
             }
             catch (HttpRequestException e)
             {
@@ -49,7 +53,8 @@ namespace DSAMVVM.MVVM.Model.utils
                         StatusMessageFactory.ActionLink("Retry", () => _ = CheckAsync())
                     },
                     priority: 3,
-                    sticky: true
+                    sticky: true,
+                    key:"VersionCheck"
                 ));
             }
             catch (JsonException e)
@@ -61,10 +66,16 @@ namespace DSAMVVM.MVVM.Model.utils
                         StatusMessageFactory.ActionLink("Retry", () => _ = CheckAsync())
                     },
                     priority: 3,
-                    sticky: true
+                    sticky: true,
+                    key:"VersionCheck"
                 ));
             }
         }
+        private void ReportSuccess()
+        {
+            _status.Report(StatusMessageFactory.Plain($"Version: {Globals.g_AppVersion}. No updates found.", priority: 0, sticky: false, key: "VersionCheck"));
+        }
+
 
         private void NotifyUser(VersionInfo versionInfo)
         {
