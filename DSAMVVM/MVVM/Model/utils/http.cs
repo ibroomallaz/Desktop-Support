@@ -24,6 +24,8 @@ namespace DSAMVVM.MVVM.Model.utils
                 }
             }
         }
+
+        //TODO: Change to statusbar method
         public static void OpenURL(string target)
         {
             try

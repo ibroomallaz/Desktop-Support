@@ -82,4 +82,13 @@ Internal with formatting:
             sticky: true
             ));
 
+ _status.Report(StatusMessageFactory.CreateRichInternalMessage($"Failed to load department data: {e.Message}. {{0}}",
+                    new Inline[]
+                    {
+                        StatusMessageFactory.ActionLink("Retry", () => _ = ReloadDataAsync())
+                    },
+                    priority: 3,
+                    sticky: true,
+                    key:"DepartmentService"
+
 */

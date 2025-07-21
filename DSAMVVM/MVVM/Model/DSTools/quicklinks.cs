@@ -1,12 +1,13 @@
-﻿using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Colors.Net;
+﻿using Colors.Net;
 using Colors.Net.StringColorExtensions;
-using static Colors.Net.StringStaticMethods;
 using DSAMVVM.Core;
 using DSAMVVM.MVVM.Model.utils;
+using Newtonsoft.Json;
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Windows.Controls.Primitives;
+using static Colors.Net.StringStaticMethods;
 
 namespace DSAMVVM.MVVM.Model.DSTools
 {
@@ -15,14 +16,22 @@ namespace DSAMVVM.MVVM.Model.DSTools
         // In-memory cache for the deserialized quick links
         private static Links? cachedLinks = null;
         private static readonly HttpClient client = new HttpClient();
+        private readonly IStatusReporter _status;
+        public QuickLinks(IStatusReporter status, HttpClient? client = null)
+        {
+            _status = status ?? throw new ArgumentNullException(nameof(status));
+            client = client ?? new HttpClient();
+            _ = GetQuickLinksDataAsync();
+        }
 
-        public static async Task<Links?> GetQuickLinksDataAsync()
+        public async Task<Links?> GetQuickLinksDataAsync()
         {
             if (cachedLinks == null)
             {
                 try
                 {
-                    Console.WriteLine("Downloading Quicklinks data...");
+
+                    _status.Report(StatusMessageFactory.Plain("Downloading Links Data..."));
                     string json = await client.GetStringAsync(Globals.g_QuickLinksURL);
                     cachedLinks = JsonConvert.DeserializeObject<Links>(json);
                     if (cachedLinks == null || cachedLinks.QL == null)
@@ -87,7 +96,7 @@ namespace DSAMVVM.MVVM.Model.DSTools
             public string URL { get; set; } = string.Empty;
         }
 
-
+        //Old print method
         public static Task PrintQL(Links? quicklinks)
         {
             if (quicklinks?.QL == null || quicklinks.QL.Length == 0)
@@ -104,7 +113,7 @@ namespace DSAMVVM.MVVM.Model.DSTools
         }
 
 
-        public static async Task QLMainMenu()
+        public async Task QLMainMenu()
         {
 
             Console.Clear();

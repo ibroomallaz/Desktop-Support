@@ -34,8 +34,8 @@ namespace DSAMVVM.MVVM.Model.DSTools
                 {
                     case "1":
                         dstoolsMenu = false;
-                        Console.Clear();
-                        await QuickLinks.QLMainMenu();
+              //          Console.Clear();
+              //          await QuickLinks.QLMainMenu();
                         break;
                     case "2":
                         dstoolsMenu = false;
