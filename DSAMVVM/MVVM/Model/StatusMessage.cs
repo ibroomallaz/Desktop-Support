@@ -24,7 +24,7 @@ namespace DSAMVVM.MVVM.Model
             Message = message;
             Priority = priority;
             Sticky = sticky;
-            Key = key;
+            Key = key; //Allows for typing for clearing of messages caused by failures
         }
 
         // Constructor for rich TextBlock content
