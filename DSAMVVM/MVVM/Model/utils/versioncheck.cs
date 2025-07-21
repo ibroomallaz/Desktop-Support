@@ -2,24 +2,32 @@
 using Newtonsoft.Json;
 using System;
 using System.Net.Http;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
-
+using System.Windows.Documents;
 
 namespace DSAMVVM.MVVM.Model.utils
 {
     public class VersionChecker
     {
-        private static readonly HttpClient _client = new(); //Reusable client instance
+        private readonly HttpClient _client;
+        private readonly IStatusReporter _status;
+
+        public VersionChecker(IStatusReporter status, HttpClient? client = null)
+        {
+            _status = status ?? throw new ArgumentNullException(nameof(status));
+            _client = client ?? new HttpClient();
+            _ = CheckAsync();
+        }
+
         private static bool BetaCheck()
         {
             string version = Globals.g_AppVersion;
-            return version.Contains("beta") || version.Contains("alpha");
+            return version.Contains("beta", StringComparison.OrdinalIgnoreCase) || version.Contains("alpha", StringComparison.OrdinalIgnoreCase);
         }
-        //TODO: Replace old console alert methods
-        public static async Task VersionCheck()
+
+        public async Task CheckAsync()
         {
             try
             {
@@ -30,52 +38,61 @@ namespace DSAMVVM.MVVM.Model.utils
                 var versionData = JsonConvert.DeserializeObject<Root>(json);
 
                 if (versionData?.Version != null)
-                {
                     NotifyUser(versionData.Version);
-                }
             }
             catch (HttpRequestException e)
             {
-                Console.WriteLine("\nException Caught!");
-                Console.WriteLine($"Message: {e.Message}");
+                _status.Report(StatusMessageFactory.CreateRichInternalMessage(
+                    $"Version check HTTP Error: {e.Message}. {{0}}",
+                    new Inline[]
+                    {
+                        StatusMessageFactory.ActionLink("Retry", () => _ = CheckAsync())
+                    },
+                    priority: 3,
+                    sticky: true
+                ));
             }
-            catch (Newtonsoft.Json.JsonException e)
+            catch (JsonException e)
             {
-                Console.WriteLine("\nJSON Parsing Error!");
-                Console.WriteLine($"Message: {e.Message}");
+                _status.Report(StatusMessageFactory.CreateRichInternalMessage(
+                    $"Version Check JSON Parse Error: {e.Message}. {{0}}",
+                    new Inline[]
+                    {
+                        StatusMessageFactory.ActionLink("Retry", () => _ = CheckAsync())
+                    },
+                    priority: 3,
+                    sticky: true
+                ));
             }
         }
 
-        private static void NotifyUser(VersionInfo versionInfo)
+        private void NotifyUser(VersionInfo versionInfo)
         {
             string installedVersion = Globals.g_AppVersion;
             bool isBetaUser = BetaCheck();
 
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            bool isStableUpdateAvailable = IsNewerVersion(installedVersion, versionInfo.Current.Version);
-            bool isBetaUpdateAvailable = versionInfo.PreRelease.Exists && IsNewerVersion(installedVersion, versionInfo.PreRelease.Version);
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-            bool isBetaHigherThanStable = IsNewerVersion(versionInfo.Current.Version, versionInfo.PreRelease.Version);
+            bool isStableUpdateAvailable = versionInfo.Current?.Version != null && IsNewerVersion(installedVersion, versionInfo.Current.Version);
 
-            // Notify about stable update (applies to all users)
-            if (isStableUpdateAvailable && !isBetaUser)
+            bool isBetaUpdateAvailable = versionInfo.PreRelease?.Exists == true && !string.IsNullOrEmpty(versionInfo.PreRelease.Version) && IsNewerVersion(installedVersion, versionInfo.PreRelease.Version);
+
+            bool isBetaHigherThanStable = versionInfo.Current?.Version != null && versionInfo.PreRelease?.Version != null && IsNewerVersion(versionInfo.Current.Version, versionInfo.PreRelease.Version);
+
+            if (isStableUpdateAvailable && !isBetaUser && versionInfo.Current != null)
             {
-#pragma warning disable CS8604 // Possible null reference argument.
-                PromptUpdate("Update Available", versionInfo.Current.Version, installedVersion, versionInfo.Current.Location, versionInfo.Current.Changelog, false);
+                var current = versionInfo.Current;
+                PromptUpdate("Update Available", current.Version!, installedVersion, current.Location, current.Changelog, false);
             }
+
 
             if (isBetaUser)
             {
                 if (isBetaUpdateAvailable)
                 {
-                    // Only update beta if a new beta version exists
-                    PromptUpdate("PreRelease Update Available", versionInfo.PreRelease.Version, installedVersion, versionInfo.PreRelease.Location, versionInfo.PreRelease.Changelog, true);
+                    PromptUpdate("PreRelease Update Available", versionInfo.PreRelease!.Version!, installedVersion, versionInfo.PreRelease.Location, versionInfo.PreRelease.Changelog, true);
                 }
                 else if (!isBetaHigherThanStable && isStableUpdateAvailable)
                 {
-                    // If beta version is not higher than stable and stable is newer or equal, update to stable
-                    PromptUpdate("Stable Update Recommended", versionInfo.Current.Version, installedVersion, versionInfo.Current.Location, versionInfo.Current.Changelog, false);
-#pragma warning restore CS8604 // Possible null reference argument.
+                    PromptUpdate("Stable Update Recommended", versionInfo.Current!.Version!, installedVersion, versionInfo.Current.Location, versionInfo.Current.Changelog, false);
                 }
             }
         }
@@ -91,52 +108,40 @@ namespace DSAMVVM.MVVM.Model.utils
                     $"{title}\n\nA new version ({newVersion}) is available.\n\nCurrent version: {installedVersion}\n\nChanges:\n{changelog}\n\nWould you like to update?",
                     title,
                     MessageBoxButton.OKCancel,
-                    isBeta ? MessageBoxImage.Information : MessageBoxImage.Warning
-                );
+                    isBeta ? MessageBoxImage.Information : MessageBoxImage.Warning);
 
                 if (result == MessageBoxResult.OK)
-                {
                     HTTP.OpenURL(location);
-                }
             });
         }
 
         private static bool IsNewerVersion(string? currentVersion, string? newVersion)
         {
-            if (string.IsNullOrEmpty(newVersion)) return false;
-            if (string.IsNullOrEmpty(currentVersion)) return true;
+            if (string.IsNullOrWhiteSpace(newVersion)) return false;
+            if (string.IsNullOrWhiteSpace(currentVersion)) return true;
 
-            bool currentIsPreRelease = currentVersion.Contains("alpha") || currentVersion.Contains("beta");
-            bool newIsPreRelease = newVersion.Contains("alpha") || newVersion.Contains("beta");
+            bool currentIsPre = currentVersion.Contains("alpha") || currentVersion.Contains("beta");
+            bool newIsPre = newVersion.Contains("alpha") || newVersion.Contains("beta");
 
-            if (!currentIsPreRelease && !newIsPreRelease)
+            if (!currentIsPre && !newIsPre)
             {
-                return Version.TryParse(currentVersion, out var current) &&
-                       Version.TryParse(newVersion, out var latest) &&
-                       latest > current;
+                return Version.TryParse(currentVersion, out var curr) && Version.TryParse(newVersion, out var latest) && latest > curr;
             }
 
-            var (baseCurrent, labelCurrent, currentBetaNumber) = ExtractBetaVersion(currentVersion);
-            var (baseNew, labelNew, newBetaNumber) = ExtractBetaVersion(newVersion);
+            var (baseCurr, labelCurr, betaNumCurr) = ExtractBetaVersion(currentVersion);
+            var (baseNew, labelNew, betaNumNew) = ExtractBetaVersion(newVersion);
 
-            if (Version.TryParse(baseCurrent, out var currentBase) && Version.TryParse(baseNew, out var newBase))
+            if (Version.TryParse(baseCurr, out var baseC) && Version.TryParse(baseNew, out var baseN))
             {
-                if (newBase > currentBase)
-                    return true;
-                if (newBase < currentBase)
-                    return false;
+                if (baseN > baseC) return true;
+                if (baseN < baseC) return false;
             }
 
-            if (string.Equals(labelCurrent, "alpha", StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(labelNew, "beta", StringComparison.OrdinalIgnoreCase))
-            {
+            if (string.Equals(labelCurr, "alpha", StringComparison.OrdinalIgnoreCase) && string.Equals(labelNew, "beta", StringComparison.OrdinalIgnoreCase))
                 return true;
-            }
 
-            // If both versions have the same label or no special ordering is required, compare the beta numbers.
-            return newBetaNumber > currentBetaNumber;
+            return betaNumNew > betaNumCurr;
         }
-
 
         private static (string baseVersion, string? label, int betaNumber) ExtractBetaVersion(string version)
         {
@@ -145,13 +150,11 @@ namespace DSAMVVM.MVVM.Model.utils
             {
                 string baseVersion = match.Groups["base"].Value;
                 string? label = match.Groups["label"].Success ? match.Groups["label"].Value : null;
-                string number = match.Groups["number"].Value;
-                int betaNumber = string.IsNullOrEmpty(number) ? 1 : int.Parse(number);
-                return (baseVersion, label, betaNumber);
+                int betaNum = int.TryParse(match.Groups["number"].Value, out var n) ? n : 1;
+                return (baseVersion, label, betaNum);
             }
-            return (version, null, 1); // Fallback if regex fails
+            return (version, null, 1);
         }
-
     }
 
     // JSON Classes
