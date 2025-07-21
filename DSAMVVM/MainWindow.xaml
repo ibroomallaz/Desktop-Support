@@ -11,34 +11,63 @@
         WindowStyle="None"
         ResizeMode="NoResize"
         Background="Transparent"
-        AllowsTransparency="True">
+        AllowsTransparency="True"
+        Title="Support App">
 
     <Window.DataContext>
         <viewModel:MainViewModel />
     </Window.DataContext>
 
     <Border Background="#272537" CornerRadius="20" Padding="0">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.5" />
+        </Border.Effect>
+
         <DockPanel LastChildFill="True">
 
-            <!--  Status Bar -->
+            <!-- Status Bar -->
             <view:StatusBarView DockPanel.Dock="Bottom"
                                  DataContext="{Binding StatusBar}"
                                  Margin="10,0,10,10" />
 
-            <!-- Optional: Header row -->
-            <TextBlock DockPanel.Dock="Top"
-                       Text="Text1"
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Left"
-                       Foreground="White"
-                       FontSize="22"
-                       Margin="20,10,0,10" />
+            <!-- Header -->
+            <Grid DockPanel.Dock="Top" Height="40" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-            <!--  Sidebar (left) -->
+                <!-- Title (draggable area) -->
+                <TextBlock Text="Support App"
+                           VerticalAlignment="Center"
+                           FontSize="18"
+                           Foreground="White"
+                           Margin="20,0,0,0"
+                           MouseLeftButtonDown="TitleBar_MouseLeftButtonDown" />
+
+                <!-- Window buttons -->
+                <StackPanel Orientation="Horizontal"
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Right"
+                            Margin="0,0,10,0">
+                    <Button Content="—"
+                            Width="30"
+                            Height="30"
+                            Margin="0,0,5,0"
+                            Click="Minimize_Click" />
+                    <Button Content="X"
+                            Width="30"
+                            Height="30"
+                            Click="Close_Click" />
+                </StackPanel>
+            </Grid>
+
+            <!-- Sidebar -->
             <StackPanel DockPanel.Dock="Left"
                         Width="200"
                         Background="Transparent"
-                        Margin="0,0,0,0">
+                        Margin="0">
 
                 <RadioButton Content="Home"
                              Height="50"
@@ -91,21 +120,19 @@
                              Command="{Binding AboutCommand}" />
             </StackPanel>
 
-            <!-- Main content area (fills remaining space) -->
+            <!-- Main content -->
             <Grid Margin="10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <!-- Search box -->
                 <TextBox Width="250"
                          Height="40"
                          Margin="5"
                          VerticalAlignment="Top"
                          Style="{StaticResource TextBoxTheme}" />
 
-                <!-- Main view -->
                 <ContentControl Grid.Row="1"
                                 Content="{Binding CurrentView}" />
             </Grid>
