@@ -73,7 +73,7 @@ namespace DSAMVVM.MVVM.Model.utils
         }
         private void ReportSuccess()
         {
-            _status.Report(StatusMessageFactory.Plain($"Version: {Globals.g_AppVersion}. No updates found.", priority: 0, sticky: false, key: "VersionCheck"));
+            _status.Report(StatusMessageFactory.Plain($"Version: {Globals.g_AppVersion}.", priority: 0, sticky: false, key: "VersionCheck"));
         }
 
 

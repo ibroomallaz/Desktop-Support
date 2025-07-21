@@ -10,8 +10,9 @@
 
     <Grid>
         <Border Background="#EEE" Padding="10,3" MinHeight="24" VerticalAlignment="Bottom">
-            <ContentControl Content="{Binding CurrentStatusMessage.Content}">
-                <ContentControl.Resources>
+            <ContentControl Content="{Binding CurrentStatusMessage.RichContent}">
+
+            <ContentControl.Resources>
                     <Style TargetType="TextBlock">
                         <Setter Property="TextWrapping" Value="Wrap"/>
                         <Setter Property="VerticalAlignment" Value="Center"/>
