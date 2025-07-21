@@ -73,12 +73,7 @@ namespace DSAMVVM.MVVM.Model
 
         // Creates a rich message with format text and external links (e.g., "Click {0} or {1}").
 
-        public static StatusMessage CreateRichExternalMessage(
-     string format,
-     Inline[] inlines,
-     int priority = 0,
-     bool sticky = false,
-     string? key = null)
+        public static StatusMessage CreateRichExternalMessage(string format, Inline[] inlines, int priority = 0, bool sticky = false, string? key = null)
         {
             var tb = new TextBlock
             {
@@ -95,12 +90,7 @@ namespace DSAMVVM.MVVM.Model
 
         // Creates a rich message with format text and internal method links.
 
-        public static StatusMessage CreateRichInternalMessage(
-            string format,
-            Inline[] inlines,
-            int priority = 0,
-            bool sticky = false,
-            string? key = null)
+        public static StatusMessage CreateRichInternalMessage(string format, Inline[] inlines, int priority = 0, bool sticky = false, string? key = null)
         {
             return CreateRichExternalMessage(format, inlines, priority, sticky, key);
         }

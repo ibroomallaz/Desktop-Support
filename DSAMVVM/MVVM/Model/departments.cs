@@ -169,8 +169,7 @@ namespace DSAMVVM.MVVM.Model
             }
             catch (Exception e)
             {
-                _status.Report(StatusMessageFactory.CreateRichInternalMessage(
-                    $"Failed to load department data: {e.Message}. {{0}}",
+                _status.Report(StatusMessageFactory.CreateRichInternalMessage($"Failed to load department data: {e.Message}. {{0}}",
                     new Inline[]
                     {
                         StatusMessageFactory.ActionLink("Retry", () => _ = ReloadDataAsync())
