@@ -7,6 +7,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
 using static Colors.Net.StringStaticMethods;
 
 namespace DSAMVVM.MVVM.Model.DSTools
@@ -36,37 +37,66 @@ namespace DSAMVVM.MVVM.Model.DSTools
                     cachedLinks = JsonConvert.DeserializeObject<Links>(json);
                     if (cachedLinks == null || cachedLinks.QL == null)
                     {
-                        Console.WriteLine("Deserialization resulted in null or invalid data.");
-                        return null;
+                        _status.Report(StatusMessageFactory.CreateRichInternalMessage($"Deserialization resulted in null or invalid data.: {{0}}",
+                            new Inline[]
+                            {
+                                 StatusMessageFactory.ActionLink("Retry", () => _ = ReloadQuickLinksDataAsync())
+                            },
+                            priority: 3,
+                            sticky: true,
+                            key: "Quicklinks"));
                     }
-                    Console.Clear();
+                    _status.Report(StatusMessageFactory.Plain("Quick Links loaded successfully.", priority: 0, sticky: false));
                     return cachedLinks;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error retrieving or deserializing JSON: " + ex);
-                    return null;
+                    _status.Report(StatusMessageFactory.CreateRichInternalMessage($"Error retrieving or deserializing JSON: {ex.Message}. {{0}}",
+                        new Inline[]
+                        {
+                             StatusMessageFactory.ActionLink("Retry", () => _ = ReloadQuickLinksDataAsync())
+                        },
+                        priority: 3,
+                        sticky: true,
+                        key: "Quicklinks"));
                 }
             }
             return cachedLinks;
         }
 
-        public static async Task ReloadQuickLinksDataAsync()
+        public async Task ReloadQuickLinksDataAsync()
         {
             using (HttpClient client = new HttpClient())
             {
                 try
                 {
-
                     string json = await client.GetStringAsync(Globals.g_QuickLinksURL);
                     cachedLinks = JsonConvert.DeserializeObject<Links>(json);
+
+                    if (cachedLinks != null && cachedLinks.QL != null)
+                    {
+                        _status.Report(StatusMessageFactory.Plain(
+                            "Quick Links reloaded successfully.",
+                            priority: 0,
+                            sticky: false,
+                            key: "Quicklinks"));
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error reloading quick links: " + ex);
+                    _status.Report(StatusMessageFactory.CreateRichInternalMessage(
+                        $"Error reloading quick links: {ex.Message}: {{0}}",
+                        new Inline[]
+                        {
+                    StatusMessageFactory.ActionLink("Retry", () => _ = ReloadQuickLinksDataAsync())
+                        },
+                        priority: 3,
+                        sticky: true,
+                        key: "Quicklinks"));
                 }
             }
         }
+
 
         public class Links
         {
@@ -112,7 +142,7 @@ namespace DSAMVVM.MVVM.Model.DSTools
             return Task.CompletedTask;
         }
 
-
+        //Old menu.. Kept for methods until no longer needed
         public async Task QLMainMenu()
         {
 
