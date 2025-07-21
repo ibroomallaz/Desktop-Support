@@ -10,8 +10,8 @@ namespace DSAMVVM.MVVM.ViewModel
 {
     public partial class MainViewModel : DSAMVVM.Core.ObeservableObject
     {
-        private object _currentView;
-        public object CurrentView
+        private object? _currentView;
+        public object? CurrentView
         {
             get => _currentView;
             set { _currentView = value; OnPropertyChanged(); }
@@ -27,7 +27,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 InitializeCommands();
                 
 
-                CurrentView = HomeVM;
+                CurrentView = HomeVM!;
             }
             catch (Exception ex)
             {
