@@ -100,7 +100,7 @@ namespace DSAMVVM.Core
             }
             catch (Exception ex)
             {
-                this.ErrorMessage = $"Unexpected error during AD lookup: {ex}";
+                this.ErrorMessage = $"Unexpected error during AD lookup: {ex.Message}";
                 this.Exists = false;
             }
         }
@@ -307,7 +307,7 @@ namespace DSAMVVM.Core
             }
             catch (Exception ex)
             {
-                this.ErrorMessage = $"Unexpected error during AD computer lookup: {ex}";
+                this.ErrorMessage = $"Unexpected error during AD computer lookup: {ex.Message}";
                 this.Exists = false;
             }
         }
@@ -408,7 +408,7 @@ namespace DSAMVVM.Core
             catch (Exception ex)
             {
                 Exists = false;
-                ErrorMessage = $"Error retrieving group: {ex}";
+                ErrorMessage = $"Error retrieving group: {ex.Message}";
                 GroupMembers = new List<string> { ErrorMessage };
                 MemberCount = 0;
             }
