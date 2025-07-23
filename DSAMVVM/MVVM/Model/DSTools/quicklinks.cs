@@ -121,7 +121,6 @@ namespace DSAMVVM.MVVM.Model.DSTools
         public class Link
         {
             public string Name { get; set; } = string.Empty;
-            public string Number { get; set; } = string.Empty;
             public string Description { get; set; } = string.Empty;
             public string URL { get; set; } = string.Empty;
         }
@@ -137,7 +136,7 @@ namespace DSAMVVM.MVVM.Model.DSTools
 
             foreach (var link in quicklinks.QL)
             {
-                ColoredConsole.WriteLine($"({link.Number.Red()}) {link.Name.Cyan()}: {link.Description}");
+                //             ColoredConsole.WriteLine($"({link.Number.Red()}) {link.Name.Cyan()}: {link.Description}");
             }
             return Task.CompletedTask;
         }
@@ -202,3 +201,37 @@ namespace DSAMVVM.MVVM.Model.DSTools
         }
     }
 }
+/*  Potential new structure: WIP
+ *  TODO: new links structure
+public class Rootobject
+{
+    public Link[] Links { get; set; }
+}
+
+public class Link
+{
+    public General[] General { get; set; }
+    public Department[] Department { get; set; }
+}
+
+public class General
+{
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public string URL { get; set; }
+}
+
+public class Department
+{
+    public string Group { get; set; }
+    public SubLinks[] SLinks { get; set; }
+}
+
+public class SubLinks
+{
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public string URL { get; set; }
+}
+
+*/
