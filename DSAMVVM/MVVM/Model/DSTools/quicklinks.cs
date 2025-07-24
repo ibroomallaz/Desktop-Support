@@ -108,7 +108,7 @@ namespace DSAMVVM.MVVM.Model.DSTools
                 if (index < QL.Length)
                 {
                     string url = QL[index].URL;
-                    HTTP.OpenURL(url);
+                    HTTPService.OpenURL(url);
                     ColoredConsole.WriteLine($"{Green("Opening")} {QL[index].Name}");
                 }
                 else

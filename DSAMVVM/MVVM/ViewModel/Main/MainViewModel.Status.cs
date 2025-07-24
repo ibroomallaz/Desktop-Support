@@ -10,7 +10,7 @@ namespace DSAMVVM.MVVM.ViewModel
     {
         public StatusBarViewModel StatusBar { get; private set; } = null;
 
-        private void InitializeStatusBar()
+        public void InitializeStatusBar()
         {
             StatusBar = new StatusBarViewModel();
         }

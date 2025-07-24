@@ -122,7 +122,7 @@ namespace DSAMVVM.MVVM.Model.utils
                     isBeta ? MessageBoxImage.Information : MessageBoxImage.Warning);
 
                 if (result == MessageBoxResult.OK)
-                    HTTP.OpenURL(location);
+                    HTTPService.OpenURL(location);
             });
         }
 

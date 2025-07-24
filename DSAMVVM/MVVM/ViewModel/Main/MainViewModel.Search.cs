@@ -5,42 +5,44 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
-public partial class MainViewModel : DSAMVVM.Core.ObeservableObject
+namespace DSAMVVM.MVVM.ViewModel
 {
-    private string? _searchQuery;
-    public string? SearchQuery
+    public partial class MainViewModel : DSAMVVM.Core.ObeservableObject
     {
-        get => _searchQuery;
-        set
+        private string? _searchQuery;
+        public string? SearchQuery
         {
-            if (_searchQuery != value)
+            get => _searchQuery;
+            set
             {
-                _searchQuery = value;
-                if (!string.IsNullOrWhiteSpace(_searchQuery) &&
-                CurrentView is ISearchableViewModel searchable)
+                if (_searchQuery != value)
                 {
-                    searchable.OnSearchUpdated(_searchQuery);
+                    _searchQuery = value;
+                    if (!string.IsNullOrWhiteSpace(_searchQuery) &&
+                    CurrentView is ISearchableViewModel searchable)
+                    {
+                        searchable.OnSearchUpdated(_searchQuery);
+                    }
                 }
             }
         }
-    }
 
-    private object? _currentView;
-    public object? CurrentView
-    {
-        get => _currentView;
-        set
+        private object? _currentView;
+        public object? CurrentView
         {
-            if (_currentView != value)
+            get => _currentView;
+            set
             {
-                _currentView = value;
-                OnPropertyChanged();
-
-                if (!string.IsNullOrWhiteSpace(_searchQuery) &&
-                    value is ISearchableViewModel searchable)
+                if (_currentView != value)
                 {
-                    searchable.OnSearchUpdated(_searchQuery);
+                    _currentView = value;
+                    OnPropertyChanged();
+
+                    if (!string.IsNullOrWhiteSpace(_searchQuery) &&
+                        value is ISearchableViewModel searchable)
+                    {
+                        searchable.OnSearchUpdated(_searchQuery);
+                    }
                 }
             }
         }

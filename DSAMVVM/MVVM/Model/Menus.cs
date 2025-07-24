@@ -112,11 +112,11 @@ namespace DSAMVVM.MVVM.Model
                         }
                         break;
                     case "-cl":
-                        HTTP.OpenURL("https://emailarizona.sharepoint.com/:x:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/Customer%20List%20by%20Core%20Support%20Team.xlsx?d=w086768426f3745cda79987cc374d1ed5&csf=1&web=1&e=SbhIsJ");
+                        HTTPService.OpenURL("https://emailarizona.sharepoint.com/:x:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/Customer%20List%20by%20Core%20Support%20Team.xlsx?d=w086768426f3745cda79987cc374d1ed5&csf=1&web=1&e=SbhIsJ");
                         ColoredConsole.WriteLine($"{Green("Opening")} Customer List by Core Support Team");
                         break;
                     case "-ps":
-                        HTTP.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/DST%20TS-Phone%20Coverage.docx?d=w080a9cc0f66c4a9baa10e7f9eeed418f&csf=1&web=1&e=Mre5jG");
+                        HTTPService.OpenURL("https://emailarizona.sharepoint.com/:w:/r/sites/UITS-DesktopSupport/Shared%20Documents/General/DST%20TS-Phone%20Coverage.docx?d=w080a9cc0f66c4a9baa10e7f9eeed418f&csf=1&web=1&e=Mre5jG");
                         ColoredConsole.WriteLine($"{Green("Opening")} Desktop Support Phone Schedule");
                         break;
                     case "help":
