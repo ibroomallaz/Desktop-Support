@@ -7,7 +7,7 @@ using DSAMVVM.Core;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class EntraViewModel : ObeservableObject, IStatusReporter
+    public class EntraViewModel : ObeservableObject, ISearchableViewModel
     {
         public void OnSearchUpdated(string query)
         {
