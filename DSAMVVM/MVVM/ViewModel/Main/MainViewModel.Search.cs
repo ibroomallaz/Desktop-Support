@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 public partial class MainViewModel : DSAMVVM.Core.ObeservableObject
 {
-    private string _searchQuery;
-    public string SearchQuery
+    private string? _searchQuery;
+    public string? SearchQuery
     {
         get => _searchQuery;
         set
@@ -17,24 +17,32 @@ public partial class MainViewModel : DSAMVVM.Core.ObeservableObject
             if (_searchQuery != value)
             {
                 _searchQuery = value;
-                OnPropertyChanged();
-                (CurrentView as ISearchableViewModel)?.OnSearchUpdated(_searchQuery);
+                if (!string.IsNullOrWhiteSpace(_searchQuery) &&
+                CurrentView is ISearchableViewModel searchable)
+                {
+                    searchable.OnSearchUpdated(_searchQuery);
+                }
             }
         }
     }
 
-    private object _currentView;
-    public object CurrentView
+    private object? _currentView;
+    public object? CurrentView
     {
         get => _currentView;
         set
         {
-            _currentView = value;
-            OnPropertyChanged();
+            if (_currentView != value)
+            {
+                _currentView = value;
+                OnPropertyChanged();
 
-            // Optional: sync search query on view switch
-            if (_searchQuery is not null)
-                (value as ISearchableViewModel)?.OnSearchUpdated(_searchQuery);
+                if (!string.IsNullOrWhiteSpace(_searchQuery) &&
+                    value is ISearchableViewModel searchable)
+                {
+                    searchable.OnSearchUpdated(_searchQuery);
+                }
+            }
         }
     }
 }
