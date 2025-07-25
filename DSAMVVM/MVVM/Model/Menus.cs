@@ -1,6 +1,5 @@
 ﻿using Colors.Net;
 using Colors.Net.StringColorExtensions;
-using DSAMVVM.Core;
 using DSAMVVM.MVVM.Model.utils;
 using Microsoft.Extensions.DependencyInjection;
 using static Colors.Net.StringStaticMethods;
@@ -123,7 +122,7 @@ namespace DSAMVVM.MVVM.Model
                         await HiddenMenu();
                         break;
                     default:
-                        ADUserInfo ADUser = new ADUserInfo(userMenuText);
+                        ADUserInfo ADUser = new(userMenuText);
                         if (ADUser.Exists)
                         {
                            // await ADUserInfo.PrintADUserInfo(ADUser);
@@ -169,7 +168,7 @@ namespace DSAMVVM.MVVM.Model
                     case "":
                         break;
                     default:
-                        ADComputer ADComputer = new ADComputer(computerMenuText);
+                        ADComputer ADComputer = new(computerMenuText);
                         if (ADComputer.Exists)
                         {
                             await ADComputer.PrintADComputerInfo(ADComputer);

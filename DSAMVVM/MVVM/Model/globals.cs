@@ -7,7 +7,8 @@ namespace DSAMVVM.MVVM.Model
 {
     public class Globals
     {
-        public static string g_AppVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "4.0.0";
+        private static readonly string v = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "4.0.0";
+        public static string g_AppVersion = v;
         public const string g_domainPath = "bluecat.arizona.edu";
         public const string g_domainPathLDAP = "LDAP://DC=bluecat,DC=arizona,DC=edu";
         //Old QL data

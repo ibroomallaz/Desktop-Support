@@ -1,6 +1,5 @@
 ﻿using Colors.Net;
 using Colors.Net.StringColorExtensions;
-using DSAMVVM.Core;
 using static Colors.Net.StringStaticMethods;
 
 namespace DSAMVVM.MVVM.Model.DSTools
@@ -81,7 +80,7 @@ namespace DSAMVVM.MVVM.Model.DSTools
                         break;
                     default:
                         string dept = "UA-MIM-0" + listMIMMenuAnswer;
-                        ADGroup group = new ADGroup(dept);
+                        ADGroup group = new(dept);
                         if (!group.Exists)
                         {
                             ColoredConsole.WriteLine($"MIM Group {DarkYellow(dept)} does {DarkRed("not")} exist.");
@@ -129,7 +128,7 @@ namespace DSAMVVM.MVVM.Model.DSTools
                         Console.Clear();
                         break;
                     default:
-                        ADUserInfo user = new ADUserInfo(currentMIMMenuAnswer);
+                        ADUserInfo user = new(currentMIMMenuAnswer);
                         user.GetADMIMGroups(currentMIMMenuAnswer);
                         bool mimExists = user.MimGroupExists ?? false;
                         Console.WriteLine();

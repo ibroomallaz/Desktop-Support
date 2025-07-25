@@ -13,14 +13,14 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IStatusReporter _status;
         private readonly QuickLinks _quickLinks;
 
-        private List<QuickLinks.Link> _commonLinks = new();
+        private List<QuickLinks.Link> _commonLinks = [];
         public List<QuickLinks.Link> CommonLinks
         {
             get => _commonLinks;
             set { _commonLinks = value; OnPropertyChanged(); }
         }
 
-        private List<QuickLinks.TeamLinkGroup> _teamLinks = new();
+        private List<QuickLinks.TeamLinkGroup> _teamLinks = [];
         public List<QuickLinks.TeamLinkGroup> TeamLinks
         {
             get => _teamLinks;

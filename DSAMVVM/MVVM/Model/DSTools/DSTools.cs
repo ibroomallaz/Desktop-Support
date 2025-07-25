@@ -1,5 +1,4 @@
 ﻿using Colors.Net;
-using DSAMVVM.Core;
 using static Colors.Net.StringStaticMethods;
 
 namespace DSAMVVM.MVVM.Model.DSTools

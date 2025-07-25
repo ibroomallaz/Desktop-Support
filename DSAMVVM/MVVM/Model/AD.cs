@@ -7,9 +7,8 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using static Colors.Net.StringStaticMethods;
 using Microsoft.Extensions.DependencyInjection;
-using DSAMVVM.MVVM.Model;
 
-namespace DSAMVVM.Core
+namespace DSAMVVM.MVVM.Model
 {
     public class ADUserInfo
     {
@@ -30,8 +29,8 @@ namespace DSAMVVM.Core
         //TODO: Change to a non-console printing version, retire until functionality either needed or 
         public static Task UserFromNumber(string userNumber)
         {
-            using (DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP))
-            using (DirectorySearcher searcher = new DirectorySearcher(entry))
+            using (DirectoryEntry entry = new(Globals.g_domainPathLDAP))
+            using (DirectorySearcher searcher = new(entry))
             {
                 searcher.Filter = $"(&(objectClass=user)(employeeID={userNumber}))";
                 searcher.PropertiesToLoad.Add("displayName");
@@ -52,56 +51,52 @@ namespace DSAMVVM.Core
 
         public ADUserInfo(string netid)
         {
-            this.Name = netid;
+            Name = netid;
             try
             {
-                using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, Globals.g_domainPath))
+                using PrincipalContext AD = new(ContextType.Domain, Globals.g_domainPath);
+                UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
+                if (userPrincipal != null)
                 {
-                    UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
-                    if (userPrincipal != null)
+                    Exists = true;
+                    DirectoryEntry dirEntry = (DirectoryEntry)userPrincipal.GetUnderlyingObject();
+                    DepartmentName = dirEntry.Properties[nameof(Department)]?.Value?.ToString() ?? "None";
+                    DepartmentNumber =
+                    !string.IsNullOrEmpty(DepartmentName) && DepartmentName.Length >= 4
+                        ? DepartmentName[..4]
+                        : null;
+                    DisplayName = userPrincipal.DisplayName ?? "Unknown";
+                    EduAffiliation = dirEntry.Properties["eduPersonPrimaryAffiliation"]?.Value?.ToString() ?? "Unknown";
+                    License = ADUserLicCheck(dirEntry.Properties["extensionattribute15"]?.Value?.ToString() ?? "Unlicensed");
+                    Enabled = userPrincipal.Enabled ?? false;
+                    using DirectorySearcher searcher = new(AD.ConnectedServer);
+                    searcher.Filter = $"(&(objectCategory=group)(member={userPrincipal.DistinguishedName})(cn=*MIM-DivisionRollup*))";
+                    SearchResult? result = searcher.FindOne();
+                    if (result?.Properties["cn"]?.Count > 0)
                     {
-                        this.Exists = true;
-                        DirectoryEntry dirEntry = (DirectoryEntry)userPrincipal.GetUnderlyingObject();
-                        this.DepartmentName = dirEntry.Properties[nameof(Department)]?.Value?.ToString() ?? "None";
-                        this.DepartmentNumber =
-                        !string.IsNullOrEmpty(this.DepartmentName) && this.DepartmentName.Length >= 4
-                            ? this.DepartmentName.Substring(0, 4)
-                            : null;
-                        this.DisplayName = userPrincipal.DisplayName ?? "Unknown";
-                        this.EduAffiliation = dirEntry.Properties["eduPersonPrimaryAffiliation"]?.Value?.ToString() ?? "Unknown";
-                        this.License = _ADUserLicCheck(dirEntry.Properties["extensionattribute15"]?.Value?.ToString() ?? "Unlicensed");
-                        this.Enabled = userPrincipal.Enabled ?? false;
-                        using (DirectorySearcher searcher = new DirectorySearcher(AD.ConnectedServer))
-                        {
-                            searcher.Filter = $"(&(objectCategory=group)(member={userPrincipal.DistinguishedName})(cn=*MIM-DivisionRollup*))";
-                            SearchResult? result = searcher.FindOne();
-                            if (result?.Properties["cn"]?.Count > 0)
-                            {
-                                string? groupName = result.Properties["cn"][0]?.ToString();
-                                this.Division = groupName?.Length >= 4 ? groupName.Substring(0, 4) : "N/A";
-                            }
-                            else
-                            {
-                                //Clarify lack of MIM group for ease of support
-                                this.Division = "No Departmental MIM group";
-                            }
-                        }
+                        string? groupName = result.Properties["cn"][0]?.ToString();
+                        Division = groupName?.Length >= 4 ? groupName[..4] : "N/A";
                     }
                     else
                     {
-                        this.Exists = false;
+                        //Clarify lack of MIM group for ease of support
+                        Division = "No Departmental MIM group";
                     }
+                }
+                else
+                {
+                    Exists = false;
                 }
             }
             catch (PrincipalServerDownException)
             {
-                this.ErrorMessage = "Unable to connect to the domain controller.";
-                this.Exists = false;
+                ErrorMessage = "Unable to connect to the domain controller.";
+                Exists = false;
             }
             catch (Exception ex)
             {
-                this.ErrorMessage = $"Unexpected error during AD lookup: {ex.Message}";
-                this.Exists = false;
+                ErrorMessage = $"Unexpected error during AD lookup: {ex.Message}";
+                Exists = false;
             }
         }
 
@@ -110,29 +105,27 @@ namespace DSAMVVM.Core
             List<string> mimGroups = new();
             try
             {
-                using (PrincipalContext AD = new PrincipalContext(ContextType.Domain, Globals.g_domainPath))
+                using PrincipalContext AD = new(ContextType.Domain, Globals.g_domainPath);
+                UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
+                if (userPrincipal != null)
                 {
-                    UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(AD, netid);
-                    if (userPrincipal != null)
-                    {
-                        mimGroups = userPrincipal.GetGroups()?
-                            .Where(group => group.Name.Contains("MIM"))
-                            .Select(group => group.Name)
-                            .ToList() ?? new();
-                        this.MimGroupsList = mimGroups;
-                        this.MimGroupExists = mimGroups.Count > 0;
-                        return mimGroups;
-                    }
+                    mimGroups = userPrincipal.GetGroups()?
+                        .Where(group => group.Name.Contains("MIM"))
+                        .Select(group => group.Name)
+                        .ToList() ?? new();
+                    MimGroupsList = mimGroups;
+                    MimGroupExists = mimGroups.Count > 0;
+                    return mimGroups;
                 }
             }
             catch (Exception ex)
             {
-                this.ErrorMessage = $"Error retrieving MIM groups: {ex}";
+                ErrorMessage = $"Error retrieving MIM groups: {ex}";
             }
             return null;
         }
 
-        private string _ADUserLicCheck(string license)
+        private static string ADUserLicCheck(string license)
         {
             string p = "([om]{1}\\d{3})([A-Z]+)([AE]\\d{1})";
             Match match = Regex.Match(license, p);
@@ -245,7 +238,7 @@ namespace DSAMVVM.Core
 
     public class ADComputer
     {
-        public string name { get; set; }
+        public string Name { get; set; }
         private string? DistinguishedName { get; set; }
         public string? OUs { get; set; }
         public string? Description { get; set; }
@@ -257,62 +250,58 @@ namespace DSAMVVM.Core
 
         public ADComputer(string hostname)
         {
-            this.name = hostname;
+            Name = hostname;
             string searchFilter = $"(&(objectCategory=computer)(cn={hostname}))";
 
             try
             {
-                using (DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP))
-                using (DirectorySearcher searcher = new DirectorySearcher(entry))
+                using DirectoryEntry entry = new(Globals.g_domainPathLDAP);
+                using DirectorySearcher searcher = new(entry);
+                searcher.Filter = searchFilter;
+                SearchResult? result = searcher.FindOne();
+                if (result != null)
                 {
-                    searcher.Filter = searchFilter;
-                    SearchResult? result = searcher.FindOne();
-                    if (result != null)
+                    Exists = true;
+                    using DirectoryEntry computer = result.GetDirectoryEntry();
+                    string? dn = computer.Properties["distinguishedName"].Value?.ToString();
+                    if (dn != null)
                     {
-                        this.Exists = true;
-                        using (DirectoryEntry computer = result.GetDirectoryEntry())
-                        {
-                            string? dn = computer.Properties["distinguishedName"].Value?.ToString();
-                            if (dn != null)
-                            {
-                                this.OUs = string.Join(", ", dn.Split(',').Where(p => p.StartsWith("OU=")));
-                            }
+                        OUs = string.Join(", ", dn.Split(',').Where(p => p.StartsWith("OU=")));
+                    }
 
-                            this.Description = computer.Properties["description"]?.Value?.ToString();
-                            this.OperatingSystem = computer.Properties["operatingSystem"]?.Value?.ToString() ?? "Unknown";
-                            this.IsHybridGroupMember = _HybridGroup(computer);
-                            object? enabledObj = computer.Properties["userAccountControl"]?.Value;
-                            if (enabledObj is int uac)
-                            {
-                                // Bit 2 (0x2) disabled: https://learn.microsoft.com/en-us/troubleshoot/windows-server/identity/useraccountcontrol-manipulate-account-properties
-                                this.Enabled = (uac & 0x2) == 0;
-                            }
-                            else
-                            {
-                                this.Enabled = false;
-                            }
-                        }
+                    Description = computer.Properties["description"]?.Value?.ToString();
+                    OperatingSystem = computer.Properties["operatingSystem"]?.Value?.ToString() ?? "Unknown";
+                    IsHybridGroupMember = HybridGroup(computer);
+                    object? enabledObj = computer.Properties["userAccountControl"]?.Value;
+                    if (enabledObj is int uac)
+                    {
+                        // Bit 2 (0x2) disabled: https://learn.microsoft.com/en-us/troubleshoot/windows-server/identity/useraccountcontrol-manipulate-account-properties
+                        Enabled = (uac & 0x2) == 0;
                     }
                     else
                     {
-                        this.Exists = false;
-                        this.ErrorMessage = $"Computer name {hostname} not found.";
+                        Enabled = false;
                     }
+                }
+                else
+                {
+                    Exists = false;
+                    ErrorMessage = $"Computer name {hostname} not found.";
                 }
             }
             catch (DirectoryServicesCOMException)
             {
-                this.ErrorMessage = "Unable to connect to the domain controller.";
-                this.Exists = false;
+                ErrorMessage = "Unable to connect to the domain controller.";
+                Exists = false;
             }
             catch (Exception ex)
             {
-                this.ErrorMessage = $"Unexpected error during AD computer lookup: {ex.Message}";
-                this.Exists = false;
+                ErrorMessage = $"Unexpected error during AD computer lookup: {ex.Message}";
+                Exists = false;
             }
         }
 
-        private bool _HybridGroup(DirectoryEntry computer)
+        private static bool HybridGroup(DirectoryEntry computer)
         {
             var memberOf = computer.Properties["memberOf"];
             if (memberOf == null) return false;
@@ -373,29 +362,27 @@ namespace DSAMVVM.Core
         {
             try
             {
-                using (PrincipalContext ctx = new PrincipalContext(ContextType.Domain, Globals.g_domainPath))
-                using (GroupPrincipal grp = GroupPrincipal.FindByIdentity(ctx, IdentityType.Name, groupName))
+                using PrincipalContext ctx = new(ContextType.Domain, Globals.g_domainPath);
+                using GroupPrincipal grp = GroupPrincipal.FindByIdentity(ctx, IdentityType.Name, groupName);
+                if (grp != null)
                 {
-                    if (grp != null)
-                    {
-                        Exists = true;
-                        GroupMembers = grp.GetMembers()
-                            .Select(p => p.Name)
-                            .Where(name => !string.IsNullOrEmpty(name))
-                            .ToList();
+                    Exists = true;
+                    GroupMembers = grp.GetMembers()
+                        .Select(p => p.Name)
+                        .Where(name => !string.IsNullOrEmpty(name))
+                        .ToList();
 
-                        GroupMembers.Sort();
-                        MemberCount = GroupMembers.Count;
+                    GroupMembers.Sort();
+                    MemberCount = GroupMembers.Count;
 
-                        if (MemberCount == 0)
-                            GroupMembers.Add("No group members exist.");
-                    }
-                    else
-                    {
-                        Exists = false;
-                        GroupMembers = new List<string> { "Group does not exist." };
-                        MemberCount = 0;
-                    }
+                    if (MemberCount == 0)
+                        GroupMembers.Add("No group members exist.");
+                }
+                else
+                {
+                    Exists = false;
+                    GroupMembers = ["Group does not exist."];
+                    MemberCount = 0;
                 }
             }
             catch (PrincipalServerDownException)
