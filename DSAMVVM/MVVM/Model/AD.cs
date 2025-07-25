@@ -27,7 +27,7 @@ namespace DSAMVVM.Core
         public bool? Enabled { get; set; }
 
 
-        //TODO: Change to a non-console printing version
+        //TODO: Change to a non-console printing version, retire until functionality either needed or 
         public static Task UserFromNumber(string userNumber)
         {
             using (DirectoryEntry entry = new DirectoryEntry(Globals.g_domainPathLDAP))
