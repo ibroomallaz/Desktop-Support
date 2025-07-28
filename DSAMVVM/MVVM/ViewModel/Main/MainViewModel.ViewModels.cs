@@ -1,4 +1,5 @@
-﻿using DSAMVVM.MVVM.Model;
+﻿using DSAMVVM.Core;
+using DSAMVVM.MVVM.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,17 +18,18 @@ namespace DSAMVVM.MVVM.ViewModel
         public LinksViewModel LinksVM { get; private set; } = null;
         public AboutViewModel AboutVM { get; private set; } = null;
         public DSAMVVM.MVVM.Model.IDepartmentService DeptService { get; private set; } = null!;
+        private IADService _adService = null!;
+
 
         private void InitializeViewModels()
         {
             HomeVM = new HomeViewModel();
-            UserVM = new UserViewModel();
-            ComputerVM = new ComputerViewModel();
-            GroupVM = new GroupViewModel();
+            UserVM = new UserViewModel(_adService, DeptService);
+            ComputerVM = new ComputerViewModel(_adService);
+            GroupVM = new GroupViewModel(_adService);
             EntraVM = new EntraViewModel();
-            LinksVM = new LinksViewModel();
+            LinksVM = new LinksViewModel(StatusBar);
             AboutVM = new AboutViewModel();
-            
         }
     }
 }
