@@ -18,6 +18,15 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 _user = value;
                 OnPropertyChanged();
+
+                // Notify bindings for dependent properties
+                OnPropertyChanged(nameof(DisplayName));
+                OnPropertyChanged(nameof(EduAffiliation));
+                OnPropertyChanged(nameof(DepartmentName));
+                OnPropertyChanged(nameof(DepartmentNumber));
+                OnPropertyChanged(nameof(Division));
+                OnPropertyChanged(nameof(License));
+                OnPropertyChanged(nameof(Enabled));
             }
         }
 
@@ -42,6 +51,15 @@ namespace DSAMVVM.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+
+        // Individual bindable properties
+        public string? DisplayName => User?.DisplayName;
+        public string? EduAffiliation => User?.EduAffiliation;
+        public string? DepartmentName => User?.DepartmentName;
+        public string? DepartmentNumber => User?.DepartmentNumber;
+        public string? Division => User?.Division;
+        public string? License => User?.License;
+        public bool? Enabled => User?.Enabled;
 
         public UserViewModel(IADService adService, IDepartmentService deptService)
         {
@@ -77,6 +95,7 @@ namespace DSAMVVM.MVVM.ViewModel
         }
     }
 }
+
 /* Xaml Bindings:
  * <TextBlock Text="{Binding User.DisplayName}" />
 <TextBlock Text="{Binding User.DepartmentName}" />
