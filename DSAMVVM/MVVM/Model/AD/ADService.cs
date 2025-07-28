@@ -10,11 +10,11 @@ namespace DSAMVVM.MVVM.Model
         private readonly ADComputerService _computerService;
         private readonly ADGroupService _groupService;
 
-        public ADService()
+        public ADService(IStatusReporter status)
         {
-            _userService = new ADUserService(Globals.g_domainPath, Globals.g_domainPathLDAP);
-            _computerService = new ADComputerService(Globals.g_domainPathLDAP);
-            _groupService = new ADGroupService(Globals.g_domainPath);
+            _userService = new ADUserService(Globals.g_domainPath, Globals.g_domainPathLDAP, status);
+            _computerService = new ADComputerService(Globals.g_domainPathLDAP, status);
+            _groupService = new ADGroupService(Globals.g_domainPath, status);
         }
 
         // User

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DSAMVVM.Core;
+using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
@@ -12,11 +13,13 @@ namespace DSAMVVM.MVVM.Model
     {
         private readonly string _domain;
         private readonly string _ldap;
+        private readonly IStatusReporter _status;
 
-        public ADUserService(string domain, string ldap)
+        public ADUserService(string domain, string ldap, IStatusReporter status)
         {
             _domain = domain;
             _ldap = ldap;
+            _status = status;
         }
 
         public Task<ADUserInfo> GetUserAsync(string netid)

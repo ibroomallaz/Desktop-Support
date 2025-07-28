@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DSAMVVM.Core;
+using System;
 using System.Collections.Generic;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
@@ -9,10 +10,12 @@ namespace DSAMVVM.MVVM.Model
     public class ADGroupService
     {
         private readonly string _domain;
+        private readonly IStatusReporter _status;
 
-        public ADGroupService(string domain)
+        public ADGroupService(string domain, IStatusReporter status)
         {
             _domain = domain;
+            _status = status;
         }
 
         public Task<ADGroupInfo> GetGroupAsync(string groupName)

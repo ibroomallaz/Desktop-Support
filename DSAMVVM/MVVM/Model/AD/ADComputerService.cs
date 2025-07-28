@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DSAMVVM.Core;
+using System;
 using System.DirectoryServices;
 using System.DirectoryServices.ActiveDirectory;
 using System.Threading.Tasks;
@@ -8,10 +9,12 @@ namespace DSAMVVM.MVVM.Model
     public class ADComputerService
     {
         private readonly string _ldapPath;
+        private readonly IStatusReporter _status;
 
-        public ADComputerService(string ldapPath)
+        public ADComputerService(string ldapPath, IStatusReporter status)
         {
             _ldapPath = ldapPath;
+            _status = status;
         }
 
         public Task<ADComputerInfo> GetComputerAsync(string hostname)

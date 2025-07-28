@@ -23,13 +23,17 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private void InitializeViewModels()
         {
-            HomeVM = new HomeViewModel();
+            if (_adService == null || DeptService == null)
+                throw new InvalidOperationException("ADService or DeptService not initialized.");
+
             UserVM = new UserViewModel(_adService, DeptService);
             ComputerVM = new ComputerViewModel(_adService);
             GroupVM = new GroupViewModel(_adService);
+            HomeVM = new HomeViewModel();
             EntraVM = new EntraViewModel();
             LinksVM = new LinksViewModel(StatusBar);
             AboutVM = new AboutViewModel();
         }
+
     }
 }

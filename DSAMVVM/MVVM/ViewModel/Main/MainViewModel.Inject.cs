@@ -18,6 +18,7 @@ namespace DSAMVVM.MVVM.ViewModel
         private void InitializeInject()
         {
             DeptService = InjectStatus(status => new DepartmentService(status));
+            _adService = InjectStatus(status => new ADService(status));
         }
     }
 }
