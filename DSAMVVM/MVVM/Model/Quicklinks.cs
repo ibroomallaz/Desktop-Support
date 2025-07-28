@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 
-namespace DSAMVVM.MVVM.Model.DSTools
+namespace DSAMVVM.MVVM.Model
 {
     public class QuickLinks
     {
