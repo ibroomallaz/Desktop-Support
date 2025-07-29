@@ -1,5 +1,5 @@
 ﻿using DSAMVVM.Core;
-using DSAMVVM.MVVM.Model;
+using DSAMVVM.MVVM.Model.AD;
 using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel

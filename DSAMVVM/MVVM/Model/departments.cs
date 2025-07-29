@@ -111,9 +111,9 @@ namespace DSAMVVM.MVVM.Model
         public async Task<List<string>> GetTeamNamesAsync(string departmentNumber)
         {
             var department = await GetDepartmentAsync(departmentNumber);
-            List<string> teamNames = new();
+            List<string> teamNames = [];
 
-            if (department == null || department.Teams == null || !department.Teams.Any())
+            if (department == null || department.Teams == null || department.Teams.Count == 0)
                 return teamNames;
 
             if (department.SplitSupport)
@@ -157,23 +157,22 @@ namespace DSAMVVM.MVVM.Model
         {
             try
             {
-                using HttpClient client = new HttpClient();
+                using HttpClient client = new();
                 string json = await client.GetStringAsync(Globals.g_DepartmentJSONURL);
 
                 var wrapper = JsonConvert.DeserializeObject<DepartmentListWrapper>(json);
                 _departments = wrapper?.DepartmentList?
                     .Select(d => (IDepartment)d)
-                    .ToList() ?? new List<IDepartment>();
+                    .ToList() ?? [];
 
                 _status.Report(StatusMessageFactory.Plain($"Loaded {_departments.Count} departments into memory.", 0, sticky:false, key:"DepartmentService"));
             }
             catch (Exception e)
             {
                 _status.Report(StatusMessageFactory.CreateRichInternalMessage($"Failed to load department data: {e.Message}. {{0}}",
-                    new Inline[]
-                    {
+                    [
                         StatusMessageFactory.ActionLink("Retry", () => _ = ReloadDataAsync())
-                    },
+                    ],
                     priority: 3,
                     sticky: true,
                     key:"DepartmentService"

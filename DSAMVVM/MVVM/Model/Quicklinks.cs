@@ -1,5 +1,4 @@
 ﻿using DSAMVVM.Core;
-using DSAMVVM.MVVM.Model.utils;
 using Newtonsoft.Json;
 using System;
 using System.Net.Http;
@@ -40,7 +39,7 @@ namespace DSAMVVM.MVVM.Model
                         // JSON failed to deserialize — show retry
                         _status.Report(StatusMessageFactory.CreateRichInternalMessage(
                             $"Deserialization returned null. {{0}}",
-                            new Inline[] { StatusMessageFactory.ActionLink("Retry", () => _ = ReloadQuickLinksDataAsync()) },
+                            [StatusMessageFactory.ActionLink("Retry", () => _ = ReloadQuickLinksDataAsync())],
                             priority: 3, sticky: true, key: "Quicklinks"));
                     }
                     else
@@ -53,7 +52,7 @@ namespace DSAMVVM.MVVM.Model
                     // Network or deserialization error
                     _status.Report(StatusMessageFactory.CreateRichInternalMessage(
                         $"Error retrieving or deserializing JSON: {ex.Message}. {{0}}",
-                        new Inline[] { StatusMessageFactory.ActionLink("Retry", () => _ = ReloadQuickLinksDataAsync()) },
+                        [StatusMessageFactory.ActionLink("Retry", () => _ = ReloadQuickLinksDataAsync())],
                         priority: 3, sticky: true, key: "Quicklinks"));
                 }
             }
@@ -77,7 +76,7 @@ namespace DSAMVVM.MVVM.Model
             {
                 _status.Report(StatusMessageFactory.CreateRichInternalMessage(
                     $"Error reloading quick links: {ex.Message}. {{0}}",
-                    new Inline[] { StatusMessageFactory.ActionLink("Retry", () => _ = ReloadQuickLinksDataAsync()) },
+                    [StatusMessageFactory.ActionLink("Retry", () => _ = ReloadQuickLinksDataAsync())],
                     priority: 3, sticky: true, key: "Quicklinks"));
             }
         }
@@ -85,15 +84,15 @@ namespace DSAMVVM.MVVM.Model
         // Root container for parsed QuickLinks data from JSON.
         public class QuickLinksData
         {
-            public List<Link> CommonLinks { get; set; } = new(); // Shared links
-            public List<TeamLinkGroup> TeamLinks { get; set; } = new(); // Per-team links
+            public List<Link> CommonLinks { get; set; } = []; // Shared links
+            public List<TeamLinkGroup> TeamLinks { get; set; } = []; // Per-team links
         }
 
         // Represents a team-specific group of links.
         public class TeamLinkGroup
         {
             public string Team { get; set; } = "";
-            public List<Link> Links { get; set; } = new();
+            public List<Link> Links { get; set; } = [];
         }
 
         // Link entries.

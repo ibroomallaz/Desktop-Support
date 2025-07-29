@@ -104,7 +104,7 @@ namespace DSAMVVM.MVVM.Model
             foreach (Match match in regex.Matches(format))
             {
                 if (match.Index > last)
-                    yield return new Run(format.Substring(last, match.Index - last));
+                    yield return new Run(format[last..match.Index]);
 
                 int index = int.Parse(match.Groups[1].Value);
                 if (index >= 0 && index < args.Length)
@@ -114,7 +114,7 @@ namespace DSAMVVM.MVVM.Model
             }
 
             if (last < format.Length)
-                yield return new Run(format.Substring(last));
+                yield return new Run(format[last..]);
         }
 
         /* Stylization for later usage if needed*/

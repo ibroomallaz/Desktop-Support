@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace DSAMVVM.MVVM.Model
+namespace DSAMVVM.MVVM.Model.AD
 {
     public class ADUserService
     {
@@ -99,7 +99,7 @@ namespace DSAMVVM.MVVM.Model
                         mimGroups = user.GetGroups()?
                             .Where(g => g.Name.Contains("MIM"))
                             .Select(g => g.Name)
-                            .ToList() ?? new List<string>();
+                            .ToList() ?? [];
                     }
                 }
                 catch

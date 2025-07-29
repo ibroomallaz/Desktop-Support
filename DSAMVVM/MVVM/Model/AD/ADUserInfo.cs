@@ -1,4 +1,4 @@
-﻿namespace DSAMVVM.MVVM.Model
+﻿namespace DSAMVVM.MVVM.Model.AD
 {
     public class ADUserInfo
     {

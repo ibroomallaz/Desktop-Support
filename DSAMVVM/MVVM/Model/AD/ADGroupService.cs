@@ -5,7 +5,7 @@ using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DSAMVVM.MVVM.Model
+namespace DSAMVVM.MVVM.Model.AD
 {
     public class ADGroupService
     {
@@ -48,7 +48,7 @@ namespace DSAMVVM.MVVM.Model
                     else
                     {
                         info.Exists = false;
-                        info.GroupMembers = new List<string> { "Group does not exist." };
+                        info.GroupMembers = ["Group does not exist."];
                         info.MemberCount = 0;
                     }
                 }
@@ -56,14 +56,14 @@ namespace DSAMVVM.MVVM.Model
                 {
                     info.Exists = false;
                     info.ErrorMessage = "Unable to connect to the domain controller.";
-                    info.GroupMembers = new List<string> { info.ErrorMessage };
+                    info.GroupMembers = [info.ErrorMessage];
                     info.MemberCount = 0;
                 }
                 catch (Exception ex)
                 {
                     info.Exists = false;
                     info.ErrorMessage = $"Error retrieving group: {ex.Message}";
-                    info.GroupMembers = new List<string> { info.ErrorMessage };
+                    info.GroupMembers = [info.ErrorMessage];
                     info.MemberCount = 0;
                 }
 

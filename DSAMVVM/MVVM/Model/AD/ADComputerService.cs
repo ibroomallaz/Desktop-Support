@@ -4,7 +4,7 @@ using System.DirectoryServices;
 using System.DirectoryServices.ActiveDirectory;
 using System.Threading.Tasks;
 
-namespace DSAMVVM.MVVM.Model
+namespace DSAMVVM.MVVM.Model.AD
 {
     public class ADComputerService
     {

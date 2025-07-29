@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace DSAMVVM.MVVM.Model
+namespace DSAMVVM.MVVM.Model.AD
 {
     public class ADService : IADService
     {

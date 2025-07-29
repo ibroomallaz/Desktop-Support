@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 
-namespace DSAMVVM.MVVM.Model.utils
+namespace DSAMVVM.MVVM.Model
 {
     public class VersionCheckerUI
     {
@@ -26,10 +26,9 @@ namespace DSAMVVM.MVVM.Model.utils
             {
                 _status.Report(StatusMessageFactory.CreateRichInternalMessage(
                     $"Version check error: {result.Error}. {{0}}",
-                    new Inline[]
-                    {
+                    [
                         StatusMessageFactory.ActionLink("Retry", () => _ = CheckAsync())
-                    },
+                    ],
                     priority: 3,
                     sticky: true,
                     key: "VersionCheck"
