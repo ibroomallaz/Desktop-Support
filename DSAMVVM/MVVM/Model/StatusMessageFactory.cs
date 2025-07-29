@@ -9,7 +9,7 @@ using System.Windows.Media;
 
 namespace DSAMVVM.MVVM.Model
 {
-    public static class StatusMessageFactory
+    public static partial class StatusMessageFactory
     {
 
         // Creates a plain text status message.
@@ -98,7 +98,7 @@ namespace DSAMVVM.MVVM.Model
 
         private static IEnumerable<Inline> FormatWithInlines(string format, Inline[] args)
         {
-            var regex = new Regex(@"\{(\d+)\}");
+            var regex = StatusRegex();
             int last = 0;
 
             foreach (Match match in regex.Matches(format))
@@ -167,5 +167,8 @@ namespace DSAMVVM.MVVM.Model
                 TextDecorations = TextDecorations.Underline
             };
         }
+
+        [GeneratedRegex(@"\{(\d+)\}")]
+        private static partial Regex StatusRegex();
     }
 }

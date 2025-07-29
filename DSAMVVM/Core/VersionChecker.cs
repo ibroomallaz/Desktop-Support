@@ -13,7 +13,7 @@ namespace DSAMVVM.Core
         public bool Success => Info != null;
     }
 
-    public static class VersionChecker
+    public static partial class VersionChecker
     {
         public static async Task<VersionCheckResult> CheckVersionAsync(string versionJsonUrl)
         {
@@ -66,7 +66,7 @@ namespace DSAMVVM.Core
 
         public static (string baseVersion, string? label, int betaNumber) ExtractBetaVersion(string version)
         {
-            var match = Regex.Match(version, @"^(?<base>\d+\.\d+\.\d+)(?:-(?<label>alpha|beta)(?<number>\d+)?)?$", RegexOptions.IgnoreCase);
+            var match = VersionRegex().Match(version);
             if (match.Success)
             {
                 string baseVersion = match.Groups["base"].Value;
@@ -76,6 +76,9 @@ namespace DSAMVVM.Core
             }
             return (version, null, 1);
         }
+
+        [GeneratedRegex(@"^(?<base>\d+\.\d+\.\d+)(?:-(?<label>alpha|beta)(?<number>\d+)?)?$", RegexOptions.IgnoreCase, "en-US")]
+        private static partial Regex VersionRegex();
     }
 
     // JSON Models
