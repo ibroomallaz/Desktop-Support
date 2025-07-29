@@ -4,18 +4,11 @@ using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.Model.AD
 {
-    public class ADService : IADService
+    public class ADService(IStatusReporter status) : IADService
     {
-        private readonly ADUserService _userService;
-        private readonly ADComputerService _computerService;
-        private readonly ADGroupService _groupService;
-
-        public ADService(IStatusReporter status)
-        {
-            _userService = new ADUserService(Globals.g_domainPath, Globals.g_domainPathLDAP, status);
-            _computerService = new ADComputerService(Globals.g_domainPathLDAP, status);
-            _groupService = new ADGroupService(Globals.g_domainPath, status);
-        }
+        private readonly ADUserService _userService = new(Globals.g_domainPath, Globals.g_domainPathLDAP, status);
+        private readonly ADComputerService _computerService = new(Globals.g_domainPathLDAP, status);
+        private readonly ADGroupService _groupService = new(Globals.g_domainPath, status);
 
         // User
         public Task<ADUserInfo> GetUserAsync(string netid)

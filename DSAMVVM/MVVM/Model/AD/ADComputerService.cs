@@ -6,16 +6,10 @@ using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.Model.AD
 {
-    public class ADComputerService
+    public class ADComputerService(string ldapPath, IStatusReporter status)
     {
-        private readonly string _ldapPath;
-        private readonly IStatusReporter _status;
-
-        public ADComputerService(string ldapPath, IStatusReporter status)
-        {
-            _ldapPath = ldapPath;
-            _status = status;
-        }
+        private readonly string _ldapPath = ldapPath;
+        private readonly IStatusReporter _status = status;
 
         public Task<ADComputerInfo> GetComputerAsync(string hostname)
         {

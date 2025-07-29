@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class GroupViewModel : ObeservableObject, ISearchableViewModel
+    public class GroupViewModel(IADService adService) : ObeservableObject, ISearchableViewModel
     {
-        private readonly IADService _ad;
+        private readonly IADService _ad = adService;
 
         private ADGroupInfo? _group;
         public ADGroupInfo? Group
@@ -52,11 +52,6 @@ namespace DSAMVVM.MVVM.ViewModel
                 _mimGroups = value;
                 OnPropertyChanged();
             }
-        }
-
-        public GroupViewModel(IADService adService)
-        {
-            _ad = adService;
         }
 
         public async void OnSearchUpdated(string query)

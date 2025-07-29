@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class ComputerViewModel : ObeservableObject, ISearchableViewModel
+    public class ComputerViewModel(IADService adService) : ObeservableObject, ISearchableViewModel
     {
-        private readonly IADService _ad;
+        private readonly IADService _ad = adService;
 
         private ADComputerInfo? _computer;
         public ADComputerInfo? Computer
@@ -28,11 +28,6 @@ namespace DSAMVVM.MVVM.ViewModel
                 _error = value;
                 OnPropertyChanged();
             }
-        }
-
-        public ComputerViewModel(IADService adService)
-        {
-            _ad = adService;
         }
 
         public async void OnSearchUpdated(string query)

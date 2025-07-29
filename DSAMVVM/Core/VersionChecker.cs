@@ -108,16 +108,16 @@ namespace DSAMVVM.Core
 
     public class VersionInfo
     {
-        [JsonProperty("Current")]
+        [JsonProperty(nameof(Current))]
         public CurrentVersion? Current { get; set; }
 
-        [JsonProperty("PreRelease")]
+        [JsonProperty(nameof(PreRelease))]
         public PreReleaseVersion? PreRelease { get; set; }
     }
 
     public class Root
     {
-        [JsonProperty("Version")]
+        [JsonProperty(nameof(Version))]
         public VersionInfo? Version { get; set; }
     }
 }

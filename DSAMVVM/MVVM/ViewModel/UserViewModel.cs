@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class UserViewModel : ObeservableObject, ISearchableViewModel
+    public class UserViewModel(IADService adService, IDepartmentService deptService) : ObeservableObject, ISearchableViewModel
     {
-        private readonly IADService _adService;
-        private readonly IDepartmentService _deptService;
+        private readonly IADService _adService = adService;
+        private readonly IDepartmentService _deptService = deptService;
 
         private ADUserInfo? _user;
         public ADUserInfo? User
@@ -61,12 +61,6 @@ namespace DSAMVVM.MVVM.ViewModel
         public string? Division => User?.Division;
         public string? License => User?.License;
         public bool? Enabled => User?.Enabled;
-
-        public UserViewModel(IADService adService, IDepartmentService deptService)
-        {
-            _adService = adService;
-            _deptService = deptService;
-        }
 
         public async void OnSearchUpdated(string query)
         {

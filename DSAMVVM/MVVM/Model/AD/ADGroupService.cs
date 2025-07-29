@@ -7,16 +7,10 @@ using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.Model.AD
 {
-    public class ADGroupService
+    public class ADGroupService(string domain, IStatusReporter status)
     {
-        private readonly string _domain;
-        private readonly IStatusReporter _status;
-
-        public ADGroupService(string domain, IStatusReporter status)
-        {
-            _domain = domain;
-            _status = status;
-        }
+        private readonly string _domain = domain;
+        private readonly IStatusReporter _status = status;
 
         public Task<ADGroupInfo> GetGroupAsync(string groupName)
         {

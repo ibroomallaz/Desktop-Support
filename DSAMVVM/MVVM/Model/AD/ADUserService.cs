@@ -9,18 +9,11 @@ using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.Model.AD
 {
-    public class ADUserService
+    public class ADUserService(string domain, string ldap, IStatusReporter status)
     {
-        private readonly string _domain;
-        private readonly string _ldap;
-        private readonly IStatusReporter _status;
-
-        public ADUserService(string domain, string ldap, IStatusReporter status)
-        {
-            _domain = domain;
-            _ldap = ldap;
-            _status = status;
-        }
+        private readonly string _domain = domain;
+        private readonly string _ldap = ldap;
+        private readonly IStatusReporter _status = status;
 
         public Task<ADUserInfo> GetUserAsync(string netid)
         {
