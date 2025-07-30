@@ -49,15 +49,15 @@
                             VerticalAlignment="Center"
                             HorizontalAlignment="Right"
                             Margin="0,0,10,0">
-                    <Button Content="—"
-                            Width="30"
-                            Height="30"
-                            Margin="0,0,5,0"
-                            Click="Minimize_Click" />
-                    <Button Content="X"
-                            Width="30"
-                            Height="30"
-                            Click="Close_Click" />
+                    <Button Style="{StaticResource RoundedWindowButtonStyle}"
+        Content="—"
+        Click="Minimize_Click"
+        Margin="0,0,5,0" />
+
+                    <Button Style="{StaticResource RoundedWindowButtonStyle}"
+        Content="X"
+        Click="Close_Click" />
+
                 </StackPanel>
             </Grid>
 

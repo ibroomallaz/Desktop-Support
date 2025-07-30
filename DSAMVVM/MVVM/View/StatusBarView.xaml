@@ -9,7 +9,7 @@
              d:DesignWidth="400">
 
     <Grid>
-        <Border Background="#EEE" Padding="10,3" MinHeight="24" VerticalAlignment="Bottom">
+        <Border Background="DarkGray" Padding="10,3" MinHeight="24" VerticalAlignment="Bottom" CornerRadius="10">
             <ContentControl Content="{Binding CurrentStatusMessage.RichContent}">
 
             <ContentControl.Resources>
