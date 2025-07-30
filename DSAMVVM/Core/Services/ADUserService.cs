@@ -1,4 +1,5 @@
-﻿using DSAMVVM.Core;
+﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.MVVM.Model.AD;
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
@@ -7,7 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace DSAMVVM.MVVM.Model.AD
+namespace DSAMVVM.Core.Services
 {
     public class ADUserService(string domain, string ldap, IStatusReporter status)
     {

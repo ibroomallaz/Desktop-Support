@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DSAMVVM.Core
+namespace DSAMVVM.Core.Utilities
 {
     public class ObeservableObject : INotifyPropertyChanged
     {

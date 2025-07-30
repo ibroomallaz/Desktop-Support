@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DSAMVVM.Core
+namespace DSAMVVM.Core.Interfaces
 {
     public interface ISearchableViewModel
     {

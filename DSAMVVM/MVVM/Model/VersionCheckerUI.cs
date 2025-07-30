@@ -1,4 +1,6 @@
 ﻿using DSAMVVM.Core;
+using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Services;
 using System;
 using System.Threading.Tasks;
 using System.Windows;

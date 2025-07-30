@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DSAMVVM.Core;
+using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Utilities;
 
 namespace DSAMVVM.MVVM.ViewModel
 {

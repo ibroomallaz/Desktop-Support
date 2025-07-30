@@ -1,42 +1,39 @@
-﻿using DSAMVVM.Core;
+﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Services;
+using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
     public class LinksViewModel : ObeservableObject
     {
-        private readonly IStatusReporter _status;
-        private readonly QuickLinks _quickLinks;
+        private readonly ILinksService _linksService;
 
-        private List<QuickLinks.Link> _commonLinks = [];
-        public List<QuickLinks.Link> CommonLinks
+        private List<Link> _commonLinks = [];
+        public List<Link> CommonLinks
         {
             get => _commonLinks;
             set { _commonLinks = value; OnPropertyChanged(); }
         }
 
-        private List<QuickLinks.TeamLinkGroup> _teamLinks = [];
-        public List<QuickLinks.TeamLinkGroup> TeamLinks
+        private List<TeamLinkGroup> _teamLinks = [];
+        public List<TeamLinkGroup> TeamLinks
         {
             get => _teamLinks;
             set { _teamLinks = value; OnPropertyChanged(); }
         }
 
-        public LinksViewModel(IStatusReporter status)
+        public LinksViewModel(ILinksService linksService)
         {
-            _status = status;
-            _quickLinks = new QuickLinks(_status);
+            _linksService = linksService;
             _ = LoadLinksAsync();
         }
 
         private async Task LoadLinksAsync()
         {
-            var data = await _quickLinks.GetQuickLinksDataAsync();
+            var data = await _linksService.LoadLinksDataAsync();
             if (data is not null)
             {
                 CommonLinks = data.CommonLinks;
@@ -44,5 +41,4 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
     }
-
 }

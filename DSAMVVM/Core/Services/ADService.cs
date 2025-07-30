@@ -1,8 +1,10 @@
-﻿using DSAMVVM.Core;
+﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.MVVM.Model;
+using DSAMVVM.MVVM.Model.AD;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace DSAMVVM.MVVM.Model.AD
+namespace DSAMVVM.Core.Services
 {
     public class ADService(IStatusReporter status) : IADService
     {

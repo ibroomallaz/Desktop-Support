@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace DSAMVVM.Core
+namespace DSAMVVM.Core.Interfaces
 {
     public interface IADService
     {

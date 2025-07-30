@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace DSAMVVM.Core
+namespace DSAMVVM.Core.Utilities
 {
     public class RelayCommand(Action<object?> execute, Func<object?, bool>? canExecute = null) : ICommand
     {

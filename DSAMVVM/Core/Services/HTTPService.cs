@@ -4,7 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace DSAMVVM.Core
+namespace DSAMVVM.Core.Services
 {
     public static class HTTPService
     {

@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core;
+﻿using DSAMVVM.Core.Interfaces;
 using DSAMVVM.MVVM.Model;
 using System;
 using System.ComponentModel;

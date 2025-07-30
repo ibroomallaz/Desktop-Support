@@ -1,11 +1,12 @@
-﻿using DSAMVVM.Core;
+﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.MVVM.Model.AD;
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DSAMVVM.MVVM.Model.AD
+namespace DSAMVVM.Core.Services
 {
     public class ADGroupService(string domain, IStatusReporter status)
     {

@@ -1,10 +1,11 @@
-﻿using DSAMVVM.Core;
+﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.MVVM.Model.AD;
 using System;
 using System.DirectoryServices;
 using System.DirectoryServices.ActiveDirectory;
 using System.Threading.Tasks;
 
-namespace DSAMVVM.MVVM.Model.AD
+namespace DSAMVVM.Core.Services
 {
     public class ADComputerService(string ldapPath, IStatusReporter status)
     {

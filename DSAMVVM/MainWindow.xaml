@@ -14,9 +14,7 @@
         AllowsTransparency="True"
         Title="Support App">
 
-    <Window.DataContext>
-        <viewModel:MainViewModel />
-    </Window.DataContext>
+
 
     <Border Background="#272537" CornerRadius="20" Padding="0">
         <Border.Effect>
