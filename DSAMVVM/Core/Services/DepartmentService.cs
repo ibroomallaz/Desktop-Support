@@ -11,16 +11,11 @@ using System.Threading.Tasks;
 
 namespace DSAMVVM.Core.Services
 {
-    public class DepartmentService : IDepartmentService
+    public class DepartmentService(IStatusReporter status) : IDepartmentService
     {
         private List<IDepartment>? _departments;
         private readonly SemaphoreSlim _lock = new(1, 1);
-        private readonly IStatusReporter _status;
-
-        public DepartmentService(IStatusReporter status)
-        {
-            _status = status ?? throw new ArgumentNullException(nameof(status));
-        }
+        private readonly IStatusReporter _status = status ?? throw new ArgumentNullException(nameof(status));
 
         public async Task PreCacheDataAsync() => await EnsureDataLoaded();
 
@@ -126,11 +121,9 @@ namespace DSAMVVM.Core.Services
             }
         }
 
-        private class DepartmentAdapter : IDepartment
+        private class DepartmentAdapter(Department source) : IDepartment
         {
-            private readonly Department _source;
-
-            public DepartmentAdapter(Department source) => _source = source;
+            private readonly Department _source = source;
 
             public string Number => _source.Number;
             public bool SupportKnown => _source.SupportKnown;

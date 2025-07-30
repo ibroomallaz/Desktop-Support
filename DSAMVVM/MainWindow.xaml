@@ -16,7 +16,7 @@
 
 
 
-    <Border Background="#272537" CornerRadius="20" Padding="0">
+    <Border Background="#071732" CornerRadius="20" Padding="0">
         <Border.Effect>
             <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.5" />
         </Border.Effect>

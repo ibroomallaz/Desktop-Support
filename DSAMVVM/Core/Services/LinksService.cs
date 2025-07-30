@@ -7,16 +7,11 @@ using System.Threading.Tasks;
 
 namespace DSAMVVM.Core.Services
 {
-    public class LinksService : ILinksService
+    public class LinksService(IStatusReporter status) : ILinksService
     {
         private static LinksData? _cachedLinks;
         private static readonly HttpClient _client = new();
-        private readonly IStatusReporter _status;
-
-        public LinksService(IStatusReporter status)
-        {
-            _status = status ?? throw new ArgumentNullException(nameof(status));
-        }
+        private readonly IStatusReporter _status = status ?? throw new ArgumentNullException(nameof(status));
 
         public async Task<LinksData?> LoadLinksDataAsync()
         {
