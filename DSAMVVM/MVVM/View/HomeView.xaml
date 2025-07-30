@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel>
-        <TextBlock Text="TextA"
+        <TextBlock Text="Welcome"
                    Foreground="White"
                    FontSize="28"
                    HorizontalAlignment="Left"
@@ -57,6 +57,16 @@
                         <GradientStop Color="#3aa0ff" Offset="1"/>
                     </LinearGradientBrush>
                 </Border.Background>
+                <StackPanel>
+                    <TextBlock Text="User Info:"
+                               Foreground="White"
+                               FontSize="24"
+                               Margin="20,10,10,0"/>
+                    <TextBlock Text="Bananas"
+                               Foreground="White"
+                               FontSize="18"
+                               Margin="25,10,10,0"/>
+                </StackPanel>
             </Border>
             
         </StackPanel>
