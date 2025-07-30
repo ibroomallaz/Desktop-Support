@@ -62,10 +62,12 @@
                                Foreground="White"
                                FontSize="24"
                                Margin="20,10,10,0"/>
-                    <TextBlock Text="Bananas"
+                    <TextBlock Text="Name&#10;Division&#10;Department&#10;Office Licensing&#10;Service Now Team&#10;Notes"
                                Foreground="White"
                                FontSize="18"
-                               Margin="25,10,10,0"/>
+                               Margin="25,0"/>
+                    
+                    
                 </StackPanel>
             </Border>
             
@@ -85,19 +87,64 @@
                 <Border Width="150"
                         Height="150"
                         Background="#844eff"
-                        CornerRadius="10"/>
+                        CornerRadius="10">
+                    <StackPanel>
+                        <TextBlock Text="Computer Info:"
+                                    Foreground="White"
+                                    FontSize="20"
+                                    Margin="5,10"/>
+                        <TextBlock Text="AD Location&#10;OS&#10;Hybrid Group"
+                                    Foreground="White"
+                                    FontSize="16"
+                                    Margin="20,0"/> 
+                    </StackPanel>
+                </Border>
+
                 <Border Width="150"
-        Height="150"
-        Background="#4e99ff"
-        CornerRadius="10"/>
+                        Height="150"
+                        Background="#4e99ff"
+                        CornerRadius="10">
+                    <StackPanel>
+                        <TextBlock Text="AD Group Info:"
+                                    Foreground="White"
+                                    FontSize="20"
+                                    Margin="5,10"/>
+                        <TextBlock Text="Individual MIM&#10;Dept MIM"
+                                    Foreground="White"
+                                    FontSize="16"
+                                    Margin="20,0"/>
+                    </StackPanel>
+                </Border>
                 <Border Width="150"
-        Height="150"
-        Background="#4eff91"
-        CornerRadius="10"/>
+                        Height="150"
+                        Background="DarkGreen"
+                        CornerRadius="10">
+                    <StackPanel>
+                        <TextBlock Text="Entra Info:"
+                                    Foreground="White"
+                                    FontSize="20"
+                                    Margin="5,10"/>
+                        <TextBlock Text="Coming Soon"
+                                    Foreground="White"
+                                    FontSize="16"
+                                    Margin="20,0"/>
+                    </StackPanel>
+                </Border>
                 <Border Width="150"
-        Height="150"
-        Background="#Ecff4e"
-        CornerRadius="10"/>
+                        Height="150"
+                        Background="orange"
+                        CornerRadius="10">
+                    <StackPanel>
+                        <TextBlock Text="Links:"
+                                    Foreground="White"
+                                    FontSize="20"
+                                    Margin="5,10"/>
+                        <TextBlock Text="Helpful Links"
+                                    Foreground="White"
+                                    FontSize="16"
+                                    Margin="20,0"/>
+                    </StackPanel>
+                </Border>
 
             </StackPanel>
         </StackPanel>
