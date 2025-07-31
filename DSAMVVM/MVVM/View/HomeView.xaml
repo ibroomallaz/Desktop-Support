@@ -34,10 +34,10 @@
                                    Foreground="White"
                                    FontSize="28"
                                    Margin="20,10,10,0"/>
-                        <TextBlock Text="Woof Woof"
-           Foreground="White"
-           FontSize="18"
-           Margin="20,10,10,0"/>
+                        <TextBlock Text="{Binding AppVersion}" 
+                                   Foreground="White"
+                                   FontSize="18"
+                                   Margin="25,10"/>
                     </StackPanel>
                  <!-- Optional image
                     <Image Width="250"

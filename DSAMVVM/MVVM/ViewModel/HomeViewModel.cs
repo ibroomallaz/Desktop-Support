@@ -1,10 +1,11 @@
-﻿using System;
+﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Utilities;
+using DSAMVVM.MVVM.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Utilities;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -14,5 +15,6 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             // search logic here
         }
+        public string AppVersion => $"Version: {Globals.g_AppVersion}";
     }
 }
