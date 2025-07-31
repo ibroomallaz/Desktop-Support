@@ -31,7 +31,7 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        public async void OnSearchUpdated(string query)
+        public async Task OnSearchUpdated(string query)
         {
             Error = null;
             Computer = null;
@@ -47,6 +47,7 @@ namespace DSAMVVM.MVVM.ViewModel
         }
     }
 }
+
 /*
  * XAML Bindings:
  * <TextBlock Text="{Binding Computer.Name}" />

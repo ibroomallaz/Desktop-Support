@@ -55,7 +55,7 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        public async void OnSearchUpdated(string query)
+        public async Task OnSearchUpdated(string query)
         {
             Error = null;
             Group = null;
@@ -86,6 +86,7 @@ namespace DSAMVVM.MVVM.ViewModel
         }
     }
 }
+
 /* XAML Bindigns
 <!-- Error message -->
     <TextBlock Text="{Binding Error}" Foreground="Red" FontWeight="Bold" Margin="0,0,0,10" />

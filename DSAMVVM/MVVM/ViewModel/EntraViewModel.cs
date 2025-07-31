@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Utilities;
 
@@ -10,9 +6,11 @@ namespace DSAMVVM.MVVM.ViewModel
 {
     public class EntraViewModel : ObeservableObject, ISearchableViewModel
     {
-        public void OnSearchUpdated(string query)
+        public async Task OnSearchUpdated(string query)
         {
-            // search logic here
+            // Placeholder for future Entra ID search logic
+            await Task.CompletedTask;
         }
     }
 }
+
