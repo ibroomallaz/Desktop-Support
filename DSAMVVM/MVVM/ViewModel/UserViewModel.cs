@@ -54,6 +54,17 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
+        private bool _isLoading;
+        public bool IsLoading
+        {
+            get => _isLoading;
+            private set
+            {
+                _isLoading = value;
+                OnPropertyChanged();
+            }
+        }
+
         // Individual bindable properties
         public string? DisplayName => User?.DisplayName;
         public string? EduAffiliation => User?.EduAffiliation;
@@ -63,7 +74,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public string? License => User?.License;
         public bool? Enabled => User?.Enabled;
 
-        public async void OnSearchUpdated(string query)
+        public async Task OnSearchUpdated(string query)
         {
             Error = null;
             MimGroups = null;
@@ -85,12 +96,14 @@ namespace DSAMVVM.MVVM.ViewModel
             MimGroups = groups;
         }
 
+
         public async Task<string?> LookupNameByID(string id)
         {
             return await _adService.LookupNameByEmployeeID(id);
         }
     }
 }
+
 
 /* Xaml Bindings:
  * <TextBlock Text="{Binding User.DisplayName}" />

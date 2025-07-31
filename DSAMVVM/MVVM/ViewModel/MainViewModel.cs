@@ -33,6 +33,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public RelayCommand EntraCommand { get; private set; }
         public RelayCommand LinksCommand { get; private set; }
         public RelayCommand AboutCommand { get; private set; }
+        public RelayCommand ExecuteSearchCommand { get; private set; }
 
         // Current View
         private object? _currentView;
@@ -45,11 +46,6 @@ namespace DSAMVVM.MVVM.ViewModel
                 {
                     _currentView = value;
                     OnPropertyChanged();
-
-                    if (!string.IsNullOrWhiteSpace(_searchQuery) && value is ISearchableViewModel searchable)
-                    {
-                        searchable.OnSearchUpdated(_searchQuery);
-                    }
                 }
             }
         }
@@ -64,11 +60,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 if (_searchQuery != value)
                 {
                     _searchQuery = value;
-
-                    if (!string.IsNullOrWhiteSpace(_searchQuery) && CurrentView is ISearchableViewModel searchable)
-                    {
-                        searchable.OnSearchUpdated(_searchQuery);
-                    }
+                    OnPropertyChanged();
                 }
             }
         }
@@ -137,6 +129,30 @@ namespace DSAMVVM.MVVM.ViewModel
             EntraCommand = new RelayCommand(_ => CurrentView = EntraVM);
             LinksCommand = new RelayCommand(_ => CurrentView = LinksVM);
             AboutCommand = new RelayCommand(_ => CurrentView = AboutVM);
+
+            ExecuteSearchCommand = new RelayCommand(_ => TriggerSearch());
         }
+
+        private async void TriggerSearch()
+        {
+            if (string.IsNullOrWhiteSpace(SearchQuery) || CurrentView is not ISearchableViewModel searchable)
+                return;
+
+            string viewName = CurrentView.GetType().Name;
+            string key = $"{viewName}_Search";
+
+            StatusBar.Report(StatusMessageFactory.Plain($"Searching in {viewName}...", priority: 1, key: key));
+
+            try
+            {
+                await searchable.OnSearchUpdated(SearchQuery);
+                StatusBar.Report(StatusMessageFactory.Success("Search complete.", key: key));
+            }
+            catch (Exception ex)
+            {
+                StatusBar.Report(StatusMessageFactory.Plain($"Search failed: {ex.Message}", priority: 2, sticky: true, key: key));
+            }
+        }
+
     }
 }

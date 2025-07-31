@@ -124,14 +124,14 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-             <!-- Search Box -->   
+             <!-- Search Box -->
                 <TextBox Width="250"
                          Height="40"
                          Margin="5"
                          VerticalAlignment="Top"
                          Style="{StaticResource TextBoxTheme}"
-                         Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" />
-
+                         Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                         KeyDown="SearchBox_KeyDown" /> 
                 <ContentControl Grid.Row="1"
                                 Content="{Binding CurrentView}" />
             </Grid>

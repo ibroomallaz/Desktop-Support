@@ -8,6 +8,6 @@ namespace DSAMVVM.Core.Interfaces
 {
     public interface ISearchableViewModel
     {
-        void OnSearchUpdated(string query);
+        Task OnSearchUpdated(string query);
     }
 }

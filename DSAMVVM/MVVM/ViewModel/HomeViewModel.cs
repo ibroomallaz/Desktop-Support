@@ -11,9 +11,10 @@ namespace DSAMVVM.MVVM.ViewModel
 {
     public class HomeViewModel: ObeservableObject, ISearchableViewModel
     {
-        public void OnSearchUpdated(string query)
+        public Task OnSearchUpdated(string query)
         {
             // search logic here
+            return Task.CompletedTask;
         }
         public string AppVersion => $"Version: {Globals.g_AppVersion}";
     }
