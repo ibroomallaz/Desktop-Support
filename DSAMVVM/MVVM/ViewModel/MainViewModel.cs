@@ -138,10 +138,19 @@ namespace DSAMVVM.MVVM.ViewModel
             if (string.IsNullOrWhiteSpace(SearchQuery) || CurrentView is not ISearchableViewModel searchable)
                 return;
 
-            string viewName = CurrentView.GetType().Name;
-            string key = $"{viewName}_Search";
+            string rawName = CurrentView.GetType().Name;
+            string displayName = rawName switch
+            {
+                "UserViewModel" => "NetID",
+                "ComputerViewModel" => "Computer",
+                "GroupViewModel" => "Group",
+                "EntraViewModel" => "Entra",
+                _ => rawName.Replace("ViewModel", "") // fallback
+            };
 
-            StatusBar.Report(StatusMessageFactory.Plain($"Searching in {viewName}...", priority: 1, key: key));
+            string key = $"{rawName}_Search";
+
+            StatusBar.Report(StatusMessageFactory.Plain($"Searching {displayName}...", priority: 1, key: key));
 
             try
             {
@@ -150,7 +159,7 @@ namespace DSAMVVM.MVVM.ViewModel
             }
             catch (Exception ex)
             {
-                StatusBar.Report(StatusMessageFactory.Plain($"Search failed: {ex.Message}", priority: 2, sticky: true, key: key));
+                StatusBar.Report(StatusMessageFactory.Error($"Search failed: {ex.Message}", key: key));
             }
         }
 
