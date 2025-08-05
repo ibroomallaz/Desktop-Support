@@ -45,6 +45,7 @@ namespace DSAMVVM
             services.AddSingleton<IDepartmentService, DepartmentService>();
             services.AddSingleton<IADService, ADService>();
             services.AddSingleton<ILinksService, LinksService>();
+            services.AddSingleton<ISearchService, SearchService>();
 
             // ViewModels
             services.AddSingleton<MainViewModel>();

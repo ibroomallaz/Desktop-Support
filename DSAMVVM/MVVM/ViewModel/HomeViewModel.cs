@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class HomeViewModel: ObeservableObject, ISearchableViewModel
+    public class HomeViewModel: ObeservableObject
     {
         public Task OnSearchUpdated(string query)
         {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class GroupViewModel(IADService adService) : ObeservableObject, ISearchableViewModel
+    public class GroupViewModel(IADService adService) : ObeservableObject
     {
         private readonly IADService _ad = adService;
 

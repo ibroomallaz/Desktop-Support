@@ -1,6 +1,9 @@
-﻿using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
+using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel
@@ -31,22 +34,76 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        public async Task OnSearchUpdated(string query)
+        private bool _isLoading;
+        public bool IsLoading
+        {
+            get => _isLoading;
+            private set
+            {
+                _isLoading = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
             Error = null;
             Computer = null;
 
-            if (string.IsNullOrWhiteSpace(query))
+            Debug.WriteLine($"[DEBUG] ComputerViewModel: Received search for '{context.Query}'");
+
+            if (target != SearchTarget.Computer)
+            {
+                Error = "Invalid search target passed to ComputerViewModel.";
+                Debug.WriteLine("[DEBUG] Invalid search target.");
                 return;
+            }
 
-            var computerInfo = await _ad.GetComputerAsync(query);
-            Computer = computerInfo;
+            if (string.IsNullOrWhiteSpace(context.Query))
+            {
+                Debug.WriteLine("[DEBUG] Empty or whitespace query.");
+                return;
+            }
 
-            if (!computerInfo.Exists)
-                Error = computerInfo.ErrorMessage ?? "Computer not found.";
+            try
+            {
+                IsLoading = true;
+                Debug.WriteLine("[DEBUG] Starting computer search...");
+
+                var result = await searchService.SearchAsync(context, target);
+                Computer = result as ADComputerInfo;
+
+                if (Computer is null || !Computer.Exists)
+                {
+                    Error = Computer?.ErrorMessage ?? "Computer not found.";
+                    Debug.WriteLine($"[DEBUG] Search complete. Computer not found. Error: {Error}");
+                    return;
+                }
+
+                // Output all fields from ADComputerInfo
+                Debug.WriteLine("[DEBUG] AD Computer Lookup Result:");
+                Debug.WriteLine($"  Name:              {Computer.Name}");
+                Debug.WriteLine($"  Description:       {Computer.Description}");
+                Debug.WriteLine($"  Operating System:  {Computer.OperatingSystem}");
+                Debug.WriteLine($"  OUs:               {Computer.OUs}");
+                Debug.WriteLine($"  Enabled:           {Computer.Enabled}");
+                Debug.WriteLine($"  IsHybridGroup:     {Computer.IsHybridGroupMember}");
+            }
+            catch (Exception ex)
+            {
+                Error = $"Search failed: {ex.Message}";
+                Debug.WriteLine($"[DEBUG] Exception during computer search: {ex}");
+            }
+            finally
+            {
+                IsLoading = false;
+                Debug.WriteLine("[DEBUG] Computer search process completed.");
+            }
         }
     }
 }
+
+
 
 /*
  * XAML Bindings:

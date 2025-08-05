@@ -130,6 +130,7 @@ namespace DSAMVVM.Core.Services
 
             return "No valid O365 license found";
         }
+        //Keeping logic for now but depricating search until later
         public Task<string?> LookupNameByEmployeeID(string userNumber)
         {
             return Task.Run(() =>

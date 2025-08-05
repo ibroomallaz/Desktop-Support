@@ -1,4 +1,5 @@
-﻿using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Services;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
@@ -14,6 +15,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public IDepartmentService DeptService { get; }
         private readonly IADService _adService;
         private readonly ILinksService _linksService;
+        private readonly ISearchService _searchService;
         public StatusBarViewModel StatusBar { get; }
 
         // ViewModels
@@ -68,6 +70,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public MainViewModel(
             IDepartmentService deptService,
             IADService adService,
+            ISearchService searchService,
             StatusBarViewModel statusBar,
             ILinksService linksService,
             Func<UserViewModel> userVMFactory,
@@ -78,6 +81,7 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 DeptService = deptService;
                 _adService = adService;
+                _searchService = searchService;
                 _linksService = linksService;
                 StatusBar = statusBar;
 
@@ -90,7 +94,10 @@ namespace DSAMVVM.MVVM.ViewModel
             }
             catch (Exception ex)
             {
-                StatusBar?.Report(StatusMessageFactory.Plain($"Initialization error: {ex.Message}", priority: 2, sticky: true));
+                StatusBar?.Report(StatusMessageFactory.Plain(
+                    $"Initialization error: {ex.Message}",
+                    priority: 2,
+                    sticky: true));
             }
         }
 
@@ -102,7 +109,10 @@ namespace DSAMVVM.MVVM.ViewModel
             }
             catch (Exception ex)
             {
-                StatusBar?.Report(StatusMessageFactory.Plain($"Failed to load department data: {ex.Message}", priority: 2, sticky: true));
+                StatusBar?.Report(StatusMessageFactory.Plain(
+                    $"Failed to load department data: {ex.Message}",
+                    priority: 2,
+                    sticky: true));
             }
         }
 
@@ -133,28 +143,38 @@ namespace DSAMVVM.MVVM.ViewModel
             ExecuteSearchCommand = new RelayCommand(_ => TriggerSearch());
         }
 
+        private static SearchTarget? ResolveTargetFromView(object view)
+        {
+            return view switch
+            {
+                UserViewModel => SearchTarget.User,
+                ComputerViewModel => SearchTarget.Computer,
+                GroupViewModel => SearchTarget.Group,
+                _ => null
+            };
+        }
+
         private async void TriggerSearch()
         {
             if (string.IsNullOrWhiteSpace(SearchQuery) || CurrentView is not ISearchableViewModel searchable)
                 return;
 
-            string rawName = CurrentView.GetType().Name;
-            string displayName = rawName switch
+            var target = ResolveTargetFromView(CurrentView);
+            if (target is null)
             {
-                "UserViewModel" => "NetID",
-                "ComputerViewModel" => "Computer",
-                "GroupViewModel" => "Group",
-                "EntraViewModel" => "Entra",
-                _ => rawName.Replace("ViewModel", "") // fallback
-            };
+                StatusBar.Report(StatusMessageFactory.Error("Search not supported for this view."));
+                return;
+            }
 
-            string key = $"{rawName}_Search";
+            string displayName = target.Value.ToString();
+            string key = $"{target}_Search";
 
             StatusBar.Report(StatusMessageFactory.Plain($"Searching {displayName}...", priority: 1, key: key));
 
             try
             {
-                await searchable.OnSearchUpdated(SearchQuery);
+                var context = new SearchContextDTO(SearchQuery);
+                await searchable.OnSearchUpdated(context, _searchService, target.Value);
                 StatusBar.Report(StatusMessageFactory.Success("Search complete.", key: key));
             }
             catch (Exception ex)
@@ -162,6 +182,5 @@ namespace DSAMVVM.MVVM.ViewModel
                 StatusBar.Report(StatusMessageFactory.Error($"Search failed: {ex.Message}", key: key));
             }
         }
-
     }
 }

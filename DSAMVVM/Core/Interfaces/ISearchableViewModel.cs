@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Interfaces;
 
-namespace DSAMVVM.Core.Interfaces
+public interface ISearchableViewModel
 {
-    public interface ISearchableViewModel
-    {
-        Task OnSearchUpdated(string query);
-    }
+    Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target);
 }

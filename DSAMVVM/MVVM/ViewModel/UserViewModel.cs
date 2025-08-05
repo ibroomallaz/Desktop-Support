@@ -1,8 +1,11 @@
-﻿using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel
@@ -21,7 +24,6 @@ namespace DSAMVVM.MVVM.ViewModel
                 _user = value;
                 OnPropertyChanged();
 
-                // Notify bindings for dependent properties
                 OnPropertyChanged(nameof(DisplayName));
                 OnPropertyChanged(nameof(EduAffiliation));
                 OnPropertyChanged(nameof(DepartmentName));
@@ -54,6 +56,28 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
+        private string? _departmentNotes;
+        public string? DepartmentNotes
+        {
+            get => _departmentNotes;
+            private set
+            {
+                _departmentNotes = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private List<string>? _teamNames;
+        public List<string>? TeamNames
+        {
+            get => _teamNames;
+            private set
+            {
+                _teamNames = value;
+                OnPropertyChanged();
+            }
+        }
+
         private bool _isLoading;
         public bool IsLoading
         {
@@ -65,7 +89,7 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        // Individual bindable properties
+        // Bindable AD properties
         public string? DisplayName => User?.DisplayName;
         public string? EduAffiliation => User?.EduAffiliation;
         public string? DepartmentName => User?.DepartmentName;
@@ -74,28 +98,91 @@ namespace DSAMVVM.MVVM.ViewModel
         public string? License => User?.License;
         public bool? Enabled => User?.Enabled;
 
-        public async Task OnSearchUpdated(string query)
+        public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
             Error = null;
             MimGroups = null;
+            DepartmentNotes = null;
+            TeamNames = null;
             User = null;
 
-            if (string.IsNullOrWhiteSpace(query))
-                return;
+            Debug.WriteLine($"[DEBUG] UserViewModel: Received search for '{context.Query}'");
 
-            var userInfo = await _adService.GetUserAsync(query);
-            User = userInfo;
-
-            if (!userInfo.Exists)
+            if (target != SearchTarget.User)
             {
-                Error = userInfo.ErrorMessage ?? "User not found.";
+                Error = "Invalid search target provided to UserViewModel.";
+                Debug.WriteLine("[DEBUG] Invalid search target for UserViewModel");
                 return;
             }
 
-            var groups = await _adService.GetMimGroupsAsync(query);
-            MimGroups = groups;
-        }
+            if (string.IsNullOrWhiteSpace(context.Query))
+            {
+                Debug.WriteLine("[DEBUG] Query was null or whitespace.");
+                return;
+            }
 
+            try
+            {
+                IsLoading = true;
+                Debug.WriteLine("[DEBUG] Starting user search...");
+
+                var result = await searchService.SearchAsync(context, target);
+                User = result as ADUserInfo;
+
+                if (User is null || !User.Exists)
+                {
+                    Error = User?.ErrorMessage ?? "User not found.";
+                    Debug.WriteLine($"[DEBUG] Search complete. User not found. Error: {Error}");
+                    return;
+                }
+
+                Debug.WriteLine("[DEBUG] AD User Lookup Result:");
+                Debug.WriteLine($"  Name:              {User.Name}");
+                Debug.WriteLine($"  DisplayName:       {User.DisplayName}");
+                Debug.WriteLine($"  Enabled:           {User.Enabled}");
+                Debug.WriteLine($"  Exists:            {User.Exists}");
+                Debug.WriteLine($"  DepartmentName:    {User.DepartmentName}");
+                Debug.WriteLine($"  DepartmentNumber:  {User.DepartmentNumber}");
+                Debug.WriteLine($"  EduAffiliation:    {User.EduAffiliation}");
+                Debug.WriteLine($"  License:           {User.License}");
+                Debug.WriteLine($"  Division:          {User.Division}");
+
+                // MIM Groups
+                MimGroups = await _adService.GetMimGroupsAsync(context.Query);
+                Debug.WriteLine($"[DEBUG] MIM Groups: {(MimGroups?.Count > 0 ? string.Join(", ", MimGroups) : "None")}");
+
+                // Departmental Data
+                if (!string.IsNullOrWhiteSpace(User.DepartmentNumber))
+                {
+                    var dept = await _deptService.GetDepartmentAsync(User.DepartmentNumber);
+                    if (dept != null)
+                    {
+                        DepartmentNotes = dept.Notes;
+                        TeamNames = await _deptService.GetTeamNamesAsync(dept.Number);
+                        Debug.WriteLine($"[DEBUG] Dept Notes: {DepartmentNotes}");
+                        Debug.WriteLine($"[DEBUG] Team Names: {(TeamNames?.Count > 0 ? string.Join(", ", TeamNames) : "None")}");
+                    }
+                    else
+                    {
+                        Debug.WriteLine("[DEBUG] No department info found.");
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine("[DEBUG] No department number provided.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Error = $"Search failed: {ex.Message}";
+                Debug.WriteLine($"[DEBUG] Exception during user search: {ex}");
+            }
+            finally
+            {
+                IsLoading = false;
+                Debug.WriteLine("[DEBUG] User search process completed.");
+            }
+        }
 
         public async Task<string?> LookupNameByID(string id)
         {
@@ -106,7 +193,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
 
 /* Xaml Bindings:
- * <TextBlock Text="{Binding User.DisplayName}" />
+<TextBlock Text="{Binding User.DisplayName}" />
 <TextBlock Text="{Binding User.DepartmentName}" />
 <TextBlock Text="{Binding User.DepartmentNumber}" />
 <TextBlock Text="{Binding User.EduAffiliation}" />
@@ -114,6 +201,7 @@ namespace DSAMVVM.MVVM.ViewModel
 <TextBlock Text="{Binding User.License}" />
 <TextBlock Text="{Binding User.Enabled}" />
 <TextBlock Text="{Binding Error}" Foreground="Red" />
-
 <ItemsControl ItemsSource="{Binding User.MimGroupsList}" />
+<TextBlock Text="{Binding DepartmentNotes}" />
+<ItemsControl ItemsSource="{Binding TeamNames}" />
 */
