@@ -6,6 +6,7 @@ using DSAMVVM.MVVM.Model.AD;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel
@@ -23,7 +24,6 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 _user = value;
                 OnPropertyChanged();
-
                 OnPropertyChanged(nameof(DisplayName));
                 OnPropertyChanged(nameof(EduAffiliation));
                 OnPropertyChanged(nameof(DepartmentName));
@@ -89,6 +89,24 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
+        private string _searchLog = string.Empty;
+        public string SearchLog
+        {
+            get => _searchLog;
+            private set
+            {
+                _searchLog = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private void AppendLog(string message)
+        {
+            string line = $"[{DateTime.Now:HH:mm:ss}] {message}";
+            SearchLog += line + "\n";
+            Debug.WriteLine(line);
+        }
+
         // Bindable AD properties
         public string? DisplayName => User?.DisplayName;
         public string? EduAffiliation => User?.EduAffiliation;
@@ -105,26 +123,27 @@ namespace DSAMVVM.MVVM.ViewModel
             DepartmentNotes = null;
             TeamNames = null;
             User = null;
+            SearchLog = string.Empty;
 
-            Debug.WriteLine($"[DEBUG] UserViewModel: Received search for '{context.Query}'");
+            AppendLog($"UserViewModel received search for '{context.Query}'");
 
             if (target != SearchTarget.User)
             {
                 Error = "Invalid search target provided to UserViewModel.";
-                Debug.WriteLine("[DEBUG] Invalid search target for UserViewModel");
+                AppendLog("Invalid search target for UserViewModel");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(context.Query))
             {
-                Debug.WriteLine("[DEBUG] Query was null or whitespace.");
+                AppendLog("Query was null or whitespace.");
                 return;
             }
 
             try
             {
                 IsLoading = true;
-                Debug.WriteLine("[DEBUG] Starting user search...");
+                AppendLog("Starting user search...");
 
                 var result = await searchService.SearchAsync(context, target);
                 User = result as ADUserInfo;
@@ -132,26 +151,24 @@ namespace DSAMVVM.MVVM.ViewModel
                 if (User is null || !User.Exists)
                 {
                     Error = User?.ErrorMessage ?? "User not found.";
-                    Debug.WriteLine($"[DEBUG] Search complete. User not found. Error: {Error}");
+                    AppendLog($"Search complete. User not found. Error: {Error}");
                     return;
                 }
 
-                Debug.WriteLine("[DEBUG] AD User Lookup Result:");
-                Debug.WriteLine($"  Name:              {User.Name}");
-                Debug.WriteLine($"  DisplayName:       {User.DisplayName}");
-                Debug.WriteLine($"  Enabled:           {User.Enabled}");
-                Debug.WriteLine($"  Exists:            {User.Exists}");
-                Debug.WriteLine($"  DepartmentName:    {User.DepartmentName}");
-                Debug.WriteLine($"  DepartmentNumber:  {User.DepartmentNumber}");
-                Debug.WriteLine($"  EduAffiliation:    {User.EduAffiliation}");
-                Debug.WriteLine($"  License:           {User.License}");
-                Debug.WriteLine($"  Division:          {User.Division}");
+                AppendLog("AD User Lookup Result:");
+                AppendLog($"  Name:              {User.Name}");
+                AppendLog($"  DisplayName:       {User.DisplayName}");
+                AppendLog($"  Enabled:           {User.Enabled}");
+                AppendLog($"  Exists:            {User.Exists}");
+                AppendLog($"  DepartmentName:    {User.DepartmentName}");
+                AppendLog($"  DepartmentNumber:  {User.DepartmentNumber}");
+                AppendLog($"  EduAffiliation:    {User.EduAffiliation}");
+                AppendLog($"  License:           {User.License}");
+                AppendLog($"  Division:          {User.Division}");
 
-                // MIM Groups
                 MimGroups = await _adService.GetMimGroupsAsync(context.Query);
-                Debug.WriteLine($"[DEBUG] MIM Groups: {(MimGroups?.Count > 0 ? string.Join(", ", MimGroups) : "None")}");
+                AppendLog("MIM Groups: " + (MimGroups?.Count > 0 ? string.Join(", ", MimGroups) : "None"));
 
-                // Departmental Data
                 if (!string.IsNullOrWhiteSpace(User.DepartmentNumber))
                 {
                     var dept = await _deptService.GetDepartmentAsync(User.DepartmentNumber);
@@ -159,28 +176,41 @@ namespace DSAMVVM.MVVM.ViewModel
                     {
                         DepartmentNotes = dept.Notes;
                         TeamNames = await _deptService.GetTeamNamesAsync(dept.Number);
-                        Debug.WriteLine($"[DEBUG] Dept Notes: {DepartmentNotes}");
-                        Debug.WriteLine($"[DEBUG] Team Names: {(TeamNames?.Count > 0 ? string.Join(", ", TeamNames) : "None")}");
+
+                        AppendLog($"Department Info for {dept.Number}:");
+                        AppendLog($"  Notes:         {dept.Notes}");
+                        AppendLog($"  SupportKnown:  {dept.SupportKnown}");
+                        AppendLog($"  SplitSupport:  {dept.SplitSupport}");
+                        AppendLog($"  Teams:         {(dept.Teams?.Count > 0 ? string.Join(", ", dept.Teams.Select(t => t.Name)) : "None")}");
+                        AppendLog($"  FileRepos:     {(dept.FileRepos?.Count > 0
+                                    ? string.Join(", ", dept.FileRepos.Select(fr => fr.Exists
+                                        ? $"{fr.Location ?? "(unknown)"} (Exists)"
+                                        : $"{fr.Location ?? "(unknown)"} (Missing)"))
+                                    : "None")}");
+
+
+
+                        AppendLog("Team Names from service: " + (TeamNames?.Count > 0 ? string.Join(", ", TeamNames) : "None"));
                     }
                     else
                     {
-                        Debug.WriteLine("[DEBUG] No department info found.");
+                        AppendLog("No department info found.");
                     }
                 }
                 else
                 {
-                    Debug.WriteLine("[DEBUG] No department number provided.");
+                    AppendLog("No department number provided.");
                 }
             }
             catch (Exception ex)
             {
                 Error = $"Search failed: {ex.Message}";
-                Debug.WriteLine($"[DEBUG] Exception during user search: {ex}");
+                AppendLog($"Exception during user search: {ex}");
             }
             finally
             {
                 IsLoading = false;
-                Debug.WriteLine("[DEBUG] User search process completed.");
+                AppendLog("User search process completed.");
             }
         }
 
@@ -190,6 +220,8 @@ namespace DSAMVVM.MVVM.ViewModel
         }
     }
 }
+
+
 
 
 /* Xaml Bindings:
