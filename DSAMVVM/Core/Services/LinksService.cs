@@ -67,5 +67,10 @@ namespace DSAMVVM.Core.Services
                     priority: 3, sticky: true, key: "LinksService"));
             }
         }
+        public LinksData? GetCachedLinksData()
+        {
+            return _cachedLinks;
+        }
+
     }
 }
