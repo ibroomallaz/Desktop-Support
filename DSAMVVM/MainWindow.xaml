@@ -125,13 +125,29 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
              <!-- Search Box -->
-                <TextBox Width="250"
-                         Height="40"
-                         Margin="5"
-                         VerticalAlignment="Top"
-                         Style="{StaticResource TextBoxTheme}"
-                         Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                         KeyDown="SearchBox_KeyDown" /> 
+                <ComboBox Width="250"
+          Height="40"
+          Margin="5"
+          VerticalAlignment="Top"
+          Style="{StaticResource SearchComboTheme}"
+          Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+          ItemsSource="{Binding SearchHistory}"
+          IsEditable="True"
+          IsTextSearchEnabled="False"
+          StaysOpenOnEdit="True"
+          PreviewMouseDown="SearchBox_ShowHistory"
+          PreviewTextInput="SearchBox_PreviewTextInput">
+                    <ComboBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding ExecuteSearchCommand}" />
+                    </ComboBox.InputBindings>
+                </ComboBox>
+
+
+
+
+
+
+
                 <ContentControl Grid.Row="1"
                                 Content="{Binding CurrentView}" />
             </Grid>

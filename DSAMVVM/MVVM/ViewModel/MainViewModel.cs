@@ -5,6 +5,7 @@ using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
 using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel
@@ -67,6 +68,10 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
+        // Search History
+        public ObservableCollection<string> SearchHistory { get; } = new();
+        private const int MaxHistoryCount = 10;
+
         public MainViewModel(
             IDepartmentService deptService,
             IADService adService,
@@ -85,7 +90,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 _linksService = linksService;
                 StatusBar = statusBar;
 
-                _ = InitializeAsync(); // Fire-and-forget
+                _ = InitializeAsync();
 
                 InitializeViewModels(userVMFactory, computerVMFactory, groupVMFactory);
                 InitializeCommands();
@@ -159,6 +164,14 @@ namespace DSAMVVM.MVVM.ViewModel
             if (string.IsNullOrWhiteSpace(SearchQuery) || CurrentView is not ISearchableViewModel searchable)
                 return;
 
+            // Add to history if not already present
+            if (!SearchHistory.Contains(SearchQuery))
+            {
+                SearchHistory.Insert(0, SearchQuery);
+                if (SearchHistory.Count > MaxHistoryCount)
+                    SearchHistory.RemoveAt(SearchHistory.Count - 1);
+            }
+
             var target = ResolveTargetFromView(CurrentView);
             if (target is null)
             {
@@ -176,6 +189,9 @@ namespace DSAMVVM.MVVM.ViewModel
                 var context = new SearchContextDTO(SearchQuery);
                 await searchable.OnSearchUpdated(context, _searchService, target.Value);
                 StatusBar.Report(StatusMessageFactory.Success("Search complete.", key: key));
+
+                // Clear after search
+                SearchQuery = string.Empty;
             }
             catch (Exception ex)
             {

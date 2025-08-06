@@ -166,8 +166,6 @@ namespace DSAMVVM.MVVM.ViewModel
                 AppendLog($"  License:           {User.License}");
                 AppendLog($"  Division:          {User.Division}");
 
-                MimGroups = await _adService.GetMimGroupsAsync(context.Query);
-                AppendLog("MIM Groups: " + (MimGroups?.Count > 0 ? string.Join(", ", MimGroups) : "None"));
 
                 if (!string.IsNullOrWhiteSpace(User.DepartmentNumber))
                 {
