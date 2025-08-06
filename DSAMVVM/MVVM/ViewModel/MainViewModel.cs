@@ -69,7 +69,7 @@ namespace DSAMVVM.MVVM.ViewModel
         }
 
         // Search History
-        public ObservableCollection<string> SearchHistory { get; } = new();
+        public ObservableCollection<string> SearchHistory { get; } = [];
         private const int MaxHistoryCount = 10;
 
         public MainViewModel(

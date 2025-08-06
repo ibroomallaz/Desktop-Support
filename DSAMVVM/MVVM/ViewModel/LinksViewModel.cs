@@ -1,4 +1,5 @@
-﻿using DSAMVVM.Core.Utilities;
+﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 
 namespace DSAMVVM.MVVM.ViewModel;
