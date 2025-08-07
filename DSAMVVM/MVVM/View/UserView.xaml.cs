@@ -18,6 +18,7 @@ namespace DSAMVVM.MVVM.View
                 // Optional: force initial log into box
                //  OutputBox.Text = vm.SearchLog;
             }
+           
         }
     }
 }

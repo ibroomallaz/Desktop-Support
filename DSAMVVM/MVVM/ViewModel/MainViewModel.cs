@@ -13,30 +13,30 @@ namespace DSAMVVM.MVVM.ViewModel
     public class MainViewModel : ObeservableObject
     {
         // Services
-        public IDepartmentService DeptService { get; }
-        private readonly IADService _adService;
-        private readonly ILinksService _linksService;
-        private readonly ISearchService _searchService;
-        public StatusBarViewModel StatusBar { get; }
+        public IDepartmentService DeptService { get; } = null!;
+        private readonly IADService _adService = null!;
+        private readonly ISearchService _searchService = null!;
+        private readonly ILinksService _linksService = null!;
+        public StatusBarViewModel StatusBar { get; } = null!;
 
         // ViewModels
-        public HomeViewModel HomeVM { get; private set; }
-        public ComputerViewModel ComputerVM { get; private set; }
-        public UserViewModel UserVM { get; private set; }
-        public GroupViewModel GroupVM { get; private set; }
-        public EntraViewModel EntraVM { get; private set; }
-        public LinksViewModel LinksVM { get; private set; }
-        public AboutViewModel AboutVM { get; private set; }
+        public HomeViewModel HomeVM { get; private set; } = null!;
+        public ComputerViewModel ComputerVM { get; private set; } = null!;
+        public UserViewModel UserVM { get; private set; } = null!;
+        public GroupViewModel GroupVM { get; private set; } = null!;
+        public EntraViewModel EntraVM { get; private set; } = null!;
+        public LinksViewModel LinksVM { get; private set; } = null!;
+        public AboutViewModel AboutVM { get; private set; } = null!;
 
         // Commands
-        public RelayCommand HomeViewCommand { get; private set; }
-        public RelayCommand UserCommand { get; private set; }
-        public RelayCommand ComputerCommand { get; private set; }
-        public RelayCommand GroupCommand { get; private set; }
-        public RelayCommand EntraCommand { get; private set; }
-        public RelayCommand LinksCommand { get; private set; }
-        public RelayCommand AboutCommand { get; private set; }
-        public RelayCommand ExecuteSearchCommand { get; private set; }
+        public RelayCommand HomeViewCommand { get; private set; } = null!;
+        public RelayCommand UserCommand { get; private set; } = null!;
+        public RelayCommand ComputerCommand { get; private set; } = null!;
+        public RelayCommand GroupCommand { get; private set; } = null!;
+        public RelayCommand EntraCommand { get; private set; } = null!;
+        public RelayCommand LinksCommand { get; private set; } = null!;
+        public RelayCommand AboutCommand { get; private set; } = null!;
+        public RelayCommand ExecuteSearchCommand { get; private set; } = null!;
 
         // Current View
         private object? _currentView;

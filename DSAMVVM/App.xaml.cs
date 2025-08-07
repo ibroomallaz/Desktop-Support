@@ -30,7 +30,7 @@ namespace DSAMVVM
 
             _ = Task.Run(async () =>
             {
-                var versionChecker = _serviceProvider.GetRequiredService<VersionCheckerUI>();
+                var versionChecker = _serviceProvider!.GetRequiredService<VersionCheckerUI>();
                 await versionChecker.CheckAsync();
             });
         }
