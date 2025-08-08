@@ -50,73 +50,75 @@
                             HorizontalAlignment="Right"
                             Margin="0,0,10,0">
                     <Button Style="{StaticResource RoundedWindowButtonStyle}"
-        Content="—"
-        Click="Minimize_Click"
-        Margin="0,0,5,0" />
+                            Content="—"
+                            Click="Minimize_Click"
+                            Margin="0,0,5,0" />
 
                     <Button Style="{StaticResource RoundedWindowButtonStyle}"
-        Content="X"
-        Click="Close_Click" />
+                            Content="X"
+                            Click="Close_Click" />
 
                 </StackPanel>
             </Grid>
 
             <!-- Sidebar -->
-            <StackPanel DockPanel.Dock="Left"
-                        Width="200"
-                        Background="Transparent"
-                        Margin="0">
+            <Grid DockPanel.Dock="Left" Width="200" Background="Transparent" Margin="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-                <RadioButton Content="Home"
-                             Height="50"
-                             Foreground="White"
-                             FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}"
-                             IsChecked="True"
-                             Command="{Binding HomeViewCommand}" />
+                <!-- Top nav (scrollable) -->
+                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <RadioButton Content="Home"     GroupName="MainMenu"
+                         Height="50" Foreground="White" FontSize="14"
+                         Style="{StaticResource MenuButtonTheme}" IsChecked="True"
+                         Command="{Binding HomeViewCommand}" />
 
-                <RadioButton Content="User"
-                             Height="50"
-                             Foreground="White"
-                             FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding UserCommand}" />
+                        <RadioButton Content="User"     GroupName="MainMenu"
+                         Height="50" Foreground="White" FontSize="14"
+                         Style="{StaticResource MenuButtonTheme}"
+                         Command="{Binding UserCommand}" />
 
-                <RadioButton Content="Computer"
-                             Height="50"
-                             Foreground="White"
-                             FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding ComputerCommand}" />
+                        <RadioButton Content="Computer" GroupName="MainMenu"
+                         Height="50" Foreground="White" FontSize="14"
+                         Style="{StaticResource MenuButtonTheme}"
+                         Command="{Binding ComputerCommand}" />
 
-                <RadioButton Content="Groups"
-                             Height="50"
-                             Foreground="White"
-                             FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding GroupCommand}" />
+                        <RadioButton Content="Groups"   GroupName="MainMenu"
+                         Height="50" Foreground="White" FontSize="14"
+                         Style="{StaticResource MenuButtonTheme}"
+                         Command="{Binding GroupCommand}" />
 
-                <RadioButton Content="Entra"
-                             Height="50"
-                             Foreground="White"
-                             FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding EntraCommand}" />
+                        <RadioButton Content="Entra"    GroupName="MainMenu"
+                         Height="50" Foreground="White" FontSize="14"
+                         Style="{StaticResource MenuButtonTheme}"
+                         Command="{Binding EntraCommand}" />
 
-                <RadioButton Content="Links"
-                             Height="50"
-                             Foreground="White"
-                             FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding LinksCommand}" />
+                        <RadioButton Content="Links"    GroupName="MainMenu"
+                         Height="50" Foreground="White" FontSize="14"
+                         Style="{StaticResource MenuButtonTheme}"
+                         Command="{Binding LinksCommand}" />
 
-                <RadioButton Content="About"
-                             Height="50"
-                             Foreground="White"
-                             FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding AboutCommand}" />
-            </StackPanel>
+                        <RadioButton Content="About"    GroupName="MainMenu"
+                         Height="50" Foreground="White" FontSize="14"
+                         Style="{StaticResource MenuButtonTheme}"
+                         Command="{Binding AboutCommand}" />
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Bottom pinned -->
+                <RadioButton Grid.Row="1" GroupName="MainMenu"
+                 Content="Settings"
+                 Height="50"
+                 Foreground="White"
+                 FontSize="14"
+                 Style="{StaticResource MenuButtonTheme}"
+                 Command="{Binding SettingsCommand}"
+                 Margin="0,0,0,10" />
+            </Grid>
+
 
             <!-- Main content -->
             <Grid Margin="10">

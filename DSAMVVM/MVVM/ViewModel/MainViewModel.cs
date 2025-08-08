@@ -27,6 +27,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public EntraViewModel EntraVM { get; private set; } = null!;
         public LinksViewModel LinksVM { get; private set; } = null!;
         public AboutViewModel AboutVM { get; private set; } = null!;
+        public SettingsViewModel SettingsVM { get; private set; } = null!;
 
         // Commands
         public RelayCommand HomeViewCommand { get; private set; } = null!;
@@ -37,6 +38,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public RelayCommand LinksCommand { get; private set; } = null!;
         public RelayCommand AboutCommand { get; private set; } = null!;
         public RelayCommand ExecuteSearchCommand { get; private set; } = null!;
+        public RelayCommand SettingsCommand { get; private set; } = null!;
 
         // Current View
         private object? _currentView;
@@ -133,6 +135,7 @@ namespace DSAMVVM.MVVM.ViewModel
             EntraVM = new EntraViewModel();
             LinksVM = new LinksViewModel(_linksService);
             AboutVM = new AboutViewModel();
+            SettingsVM = new SettingsViewModel();
         }
 
         private void InitializeCommands()
@@ -144,7 +147,7 @@ namespace DSAMVVM.MVVM.ViewModel
             EntraCommand = new RelayCommand(_ => CurrentView = EntraVM);
             LinksCommand = new RelayCommand(_ => CurrentView = LinksVM);
             AboutCommand = new RelayCommand(_ => CurrentView = AboutVM);
-
+            SettingsCommand = new RelayCommand(_ => CurrentView =  SettingsVM);
             ExecuteSearchCommand = new RelayCommand(_ => TriggerSearch());
         }
 

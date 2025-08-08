@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Enums;
+﻿﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
@@ -102,9 +102,9 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private void AppendLog(string message)
         {
-            string line = $"[{DateTime.Now:HH:mm:ss}] {message}";
-            SearchLog += line + "\n";
-            Debug.WriteLine(line);
+            string line = message;
+            SearchLog += message + "\n";
+            Debug.WriteLine($"[{DateTime.Now:HH:mm:ss}] {message}");
         }
 
         // Bindable AD properties
@@ -156,7 +156,6 @@ namespace DSAMVVM.MVVM.ViewModel
                 }
 
                 AppendLog("AD User Lookup Result:");
-                AppendLog($"  Name:              {User.Name}");
                 AppendLog($"  DisplayName:       {User.DisplayName}");
                 AppendLog($"  Enabled:           {User.Enabled}");
                 AppendLog($"  Exists:            {User.Exists}");
@@ -165,7 +164,6 @@ namespace DSAMVVM.MVVM.ViewModel
                 AppendLog($"  EduAffiliation:    {User.EduAffiliation}");
                 AppendLog($"  License:           {User.License}");
                 AppendLog($"  Division:          {User.Division}");
-
 
                 if (!string.IsNullOrWhiteSpace(User.DepartmentNumber))
                 {
@@ -185,9 +183,6 @@ namespace DSAMVVM.MVVM.ViewModel
                                         ? $"{fr.Location ?? "(unknown)"} (Exists)"
                                         : $"{fr.Location ?? "(unknown)"} (Missing)"))
                                     : "None")}");
-
-
-
                         AppendLog("Team Names from service: " + (TeamNames?.Count > 0 ? string.Join(", ", TeamNames) : "None"));
                     }
                     else
@@ -216,22 +211,51 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             return await _adService.LookupNameByEmployeeID(id);
         }
+
+        // 🔽 NEW METHODS
+
+        public void ClearLog()
+        {
+            SearchLog = string.Empty;
+        }
+
+        public async Task RefreshDepartmentInfoAsync()
+        {
+            if (User?.DepartmentNumber is not string deptNum || string.IsNullOrWhiteSpace(deptNum))
+            {
+                AppendLog("Cannot refresh department info: No department number.");
+                return;
+            }
+
+            AppendLog("Refreshing department data...");
+            try
+            {
+                var dept = await _deptService.GetDepartmentAsync(deptNum);
+                if (dept != null)
+                {
+                    DepartmentNotes = dept.Notes;
+                    TeamNames = await _deptService.GetTeamNamesAsync(dept.Number);
+
+                    AppendLog($"Refreshed Department Info for {dept.Number}:");
+                    AppendLog($"  Notes:         {dept.Notes}");
+                    AppendLog($"  SupportKnown:  {dept.SupportKnown}");
+                    AppendLog($"  SplitSupport:  {dept.SplitSupport}");
+                    AppendLog($"  Teams:         {(dept.Teams?.Count > 0 ? string.Join(", ", dept.Teams.Select(t => t.Name)) : "None")}");
+                    AppendLog($"  FileRepos:     {(dept.FileRepos?.Count > 0
+                                    ? string.Join(", ", dept.FileRepos.Select(fr => fr.Exists
+                                        ? $"{fr.Location ?? "(unknown)"} (Exists)"
+                                        : $"{fr.Location ?? "(unknown)"} (Missing)"))
+                                    : "None")}");
+                }
+                else
+                {
+                    AppendLog("No department data found on refresh.");
+                }
+            }
+            catch (Exception ex)
+            {
+                AppendLog($"Exception during department refresh: {ex.Message}");
+            }
+        }
     }
 }
-
-
-
-
-/* Xaml Bindings:
-<TextBlock Text="{Binding User.DisplayName}" />
-<TextBlock Text="{Binding User.DepartmentName}" />
-<TextBlock Text="{Binding User.DepartmentNumber}" />
-<TextBlock Text="{Binding User.EduAffiliation}" />
-<TextBlock Text="{Binding User.Division}" />
-<TextBlock Text="{Binding User.License}" />
-<TextBlock Text="{Binding User.Enabled}" />
-<TextBlock Text="{Binding Error}" Foreground="Red" />
-<ItemsControl ItemsSource="{Binding User.MimGroupsList}" />
-<TextBlock Text="{Binding DepartmentNotes}" />
-<ItemsControl ItemsSource="{Binding TeamNames}" />
-*/
