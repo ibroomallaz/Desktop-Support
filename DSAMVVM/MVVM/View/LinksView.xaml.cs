@@ -24,5 +24,15 @@ namespace DSAMVVM.MVVM.View
         {
             InitializeComponent();
         }
+
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = e.Uri.AbsoluteUri,
+                UseShellExecute = true
+            });
+            e.Handled = true;
+        }
     }
 }
