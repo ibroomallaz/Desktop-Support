@@ -1,36 +1,35 @@
 ﻿using DSAMVVM.Core;
 using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Services;
 using System;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Documents;
 
 namespace DSAMVVM.MVVM.Model
 {
     public class VersionCheckerUI
     {
         private readonly IStatusReporter _status;
+        private readonly IHttpService _http;
+
         private readonly string _installedVersion = Globals.g_AppVersion;
         private readonly string _versionUrl = Globals.g_versionJSON;
 
-        public VersionCheckerUI(IStatusReporter status)
+        public VersionCheckerUI(IStatusReporter status, IHttpService http)
         {
             _status = status ?? throw new ArgumentNullException(nameof(status));
+            _http = http ?? throw new ArgumentNullException(nameof(http));
             _ = CheckAsync();
         }
 
         public async Task CheckAsync()
         {
-            var result = await VersionChecker.CheckVersionAsync(_versionUrl);
+            var result = await VersionChecker.CheckVersionAsync(_versionUrl, _http);
 
             if (!result.Success)
             {
                 _status.Report(StatusMessageFactory.CreateRichInternalMessage(
                     $"Version check error: {result.Error}. {{0}}",
-                    [
-                        StatusMessageFactory.ActionLink("Retry", () => _ = CheckAsync())
-                    ],
+                    [StatusMessageFactory.ActionLink("Retry", () => _ = CheckAsync())],
                     priority: 3,
                     sticky: true,
                     key: "VersionCheck"
@@ -44,13 +43,17 @@ namespace DSAMVVM.MVVM.Model
 
         private void ReportSuccess()
         {
-            _status.Report(StatusMessageFactory.Plain($"Version: {_installedVersion}.", priority: 0, sticky: false, key: "VersionCheck"));
+            _status.Report(StatusMessageFactory.Plain(
+                $"Version: {_installedVersion}.",
+                priority: 0,
+                sticky: false,
+                key: "VersionCheck"));
         }
 
         private void NotifyUser(VersionInfo versionInfo)
         {
             bool isBetaUser = _installedVersion.Contains("beta", StringComparison.OrdinalIgnoreCase)
-                            || _installedVersion.Contains("alpha", StringComparison.OrdinalIgnoreCase);
+                           || _installedVersion.Contains("alpha", StringComparison.OrdinalIgnoreCase);
 
             bool isStableUpdate = versionInfo.Current?.Version != null &&
                                   VersionChecker.IsNewerVersion(_installedVersion, versionInfo.Current.Version);
@@ -96,7 +99,7 @@ namespace DSAMVVM.MVVM.Model
 
                 if (result == MessageBoxResult.OK)
                 {
-                    HTTPService.TryOpenURL(location, out var _);
+                    _http.TryOpenUrl(location, out _);
                 }
             });
         }

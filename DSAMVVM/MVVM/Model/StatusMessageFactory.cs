@@ -23,7 +23,7 @@ namespace DSAMVVM.MVVM.Model
             return new StatusMessage(textBlock, priority, sticky, key);
         }
 
-        // ✅ Success (Green)
+        // Success (Green)
         public static StatusMessage Success(string message, int priority = 0, bool sticky = false, string? key = null)
         {
             var textBlock = new TextBlock
@@ -36,7 +36,7 @@ namespace DSAMVVM.MVVM.Model
             return new StatusMessage(textBlock, priority, sticky, key);
         }
 
-        // ✅ Error (Red)
+        //Error (Red)
         public static StatusMessage Error(string message, int priority = 2, bool sticky = true, string? key = null)
         {
             var textBlock = new TextBlock
@@ -49,7 +49,7 @@ namespace DSAMVVM.MVVM.Model
             return new StatusMessage(textBlock, priority, sticky, key);
         }
 
-        // ✅ Warning (Orange)
+        // Warning (Orange)
         public static StatusMessage Warning(string message, int priority = 1, bool sticky = false, string? key = null)
         {
             var textBlock = new TextBlock
@@ -62,7 +62,7 @@ namespace DSAMVVM.MVVM.Model
             return new StatusMessage(textBlock, priority, sticky, key);
         }
 
-        // ✅ Info (Gray)
+        //Info (Gray)
         public static StatusMessage Info(string message, int priority = 0, bool sticky = false, string? key = null)
         {
             var textBlock = new TextBlock

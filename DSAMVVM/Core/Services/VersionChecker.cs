@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using DSAMVVM.Core.Interfaces;
+using Newtonsoft.Json;
 using System;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -15,12 +15,11 @@ namespace DSAMVVM.Core
 
     public static partial class VersionChecker
     {
-        public static async Task<VersionCheckResult> CheckVersionAsync(string versionJsonUrl)
+        public static async Task<VersionCheckResult> CheckVersionAsync(string versionJsonUrl, IHttpService http)
         {
             try
             {
-                using HttpClient client = new();
-                string json = await client.GetStringAsync(versionJsonUrl);
+                string json = await http.GetStringAsync(versionJsonUrl);
                 var data = JsonConvert.DeserializeObject<Root>(json);
                 return new VersionCheckResult { Info = data?.Version };
             }
@@ -35,14 +34,16 @@ namespace DSAMVVM.Core
             if (string.IsNullOrWhiteSpace(newVersion)) return false;
             if (string.IsNullOrWhiteSpace(currentVersion)) return true;
 
-            bool currentIsPre = currentVersion.Contains("alpha") || currentVersion.Contains("beta");
-            bool newIsPre = newVersion.Contains("alpha") || newVersion.Contains("beta");
+            bool currentIsPre = currentVersion.Contains("alpha", StringComparison.OrdinalIgnoreCase)
+                                || currentVersion.Contains("beta", StringComparison.OrdinalIgnoreCase);
+            bool newIsPre = newVersion.Contains("alpha", StringComparison.OrdinalIgnoreCase)
+                            || newVersion.Contains("beta", StringComparison.OrdinalIgnoreCase);
 
             if (!currentIsPre && !newIsPre)
             {
-                return Version.TryParse(currentVersion, out var curr) &&
-                       Version.TryParse(newVersion, out var latest) &&
-                       latest > curr;
+                return Version.TryParse(currentVersion, out var curr)
+                    && Version.TryParse(newVersion, out var latest)
+                    && latest > curr;
             }
 
             var (baseCurr, labelCurr, betaNumCurr) = ExtractBetaVersion(currentVersion);
@@ -81,7 +82,7 @@ namespace DSAMVVM.Core
         private static partial Regex VersionRegex();
     }
 
-    // JSON Models
+    // JSON models
     public class CurrentVersion
     {
         [JsonProperty("version", NullValueHandling = NullValueHandling.Ignore)]

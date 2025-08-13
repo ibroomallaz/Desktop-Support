@@ -23,8 +23,6 @@ namespace DSAMVVM.MVVM.View
         {
             if (DataContext is UserViewModel vm)
             {
-                // Optional: uncomment to see what was in the log at load time
-                // Debug.WriteLine("SearchLog at load:\n" + vm.SearchLog);
 
                 OutputViewer.Document = new FlowDocument
                 {
