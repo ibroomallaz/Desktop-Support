@@ -1,17 +1,18 @@
-﻿using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
-using System;
-using System.Collections.Generic;
 using System.DirectoryServices.AccountManagement;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace DSAMVVM.Core.Services
 {
-    public class ADGroupService(string domain, IStatusReporter status)
+    public class ADGroupService
     {
-        private readonly string _domain = domain;
-        private readonly IStatusReporter _status = status;
+        private readonly string _domain;
+
+        public ADGroupService(string domain)
+        {
+            _domain = domain;
+        }
 
         public Task<ADGroupInfo> GetGroupAsync(string groupName)
         {
@@ -45,14 +46,17 @@ namespace DSAMVVM.Core.Services
                         info.Exists = false;
                         info.GroupMembers = ["Group does not exist."];
                         info.MemberCount = 0;
+                        UiNotify.Warn($"AD group '{groupName}' not found.");
                     }
                 }
-                catch (PrincipalServerDownException)
+                catch (PrincipalServerDownException ex)
                 {
                     info.Exists = false;
                     info.ErrorMessage = "Unable to connect to the domain controller.";
                     info.GroupMembers = [info.ErrorMessage];
                     info.MemberCount = 0;
+                    // Surface -  actionable for the user (VPN/connection issues)
+                    UiNotify.Error("AD group lookup failed", "Domain controller is unreachable.", ex, alsoStatusBar: true);
                 }
                 catch (Exception ex)
                 {
@@ -60,6 +64,8 @@ namespace DSAMVVM.Core.Services
                     info.ErrorMessage = $"Error retrieving group: {ex.Message}";
                     info.GroupMembers = [info.ErrorMessage];
                     info.MemberCount = 0;
+
+                    UiNotify.Error("AD group lookup failed", ex.Message, ex, alsoStatusBar: true);
                 }
 
                 return info;

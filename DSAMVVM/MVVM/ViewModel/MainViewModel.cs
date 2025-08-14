@@ -101,10 +101,8 @@ namespace DSAMVVM.MVVM.ViewModel
             }
             catch (Exception ex)
             {
-                StatusBar?.Report(StatusMessageFactory.Plain(
-                    $"Initialization error: {ex.Message}",
-                    priority: 2,
-                    sticky: true));
+                // Was: StatusBar.Report(StatusMessageFactory.Plain(...))
+                UiNotify.Error("Initialization error", ex.Message, ex, alsoStatusBar: true);
             }
         }
 
@@ -116,10 +114,8 @@ namespace DSAMVVM.MVVM.ViewModel
             }
             catch (Exception ex)
             {
-                StatusBar?.Report(StatusMessageFactory.Plain(
-                    $"Failed to load department data: {ex.Message}",
-                    priority: 2,
-                    sticky: true));
+                // Was: StatusBar.Report(StatusMessageFactory.Plain(...sticky:true))
+                UiNotify.Warn($"Failed to load department data: {ex.Message}", sticky: true);
             }
         }
 
@@ -147,7 +143,7 @@ namespace DSAMVVM.MVVM.ViewModel
             EntraCommand = new RelayCommand(_ => CurrentView = EntraVM);
             LinksCommand = new RelayCommand(_ => CurrentView = LinksVM);
             AboutCommand = new RelayCommand(_ => CurrentView = AboutVM);
-            SettingsCommand = new RelayCommand(_ => CurrentView =  SettingsVM);
+            SettingsCommand = new RelayCommand(_ => CurrentView = SettingsVM);
             ExecuteSearchCommand = new RelayCommand(_ => TriggerSearch());
         }
 
@@ -178,27 +174,31 @@ namespace DSAMVVM.MVVM.ViewModel
             var target = ResolveTargetFromView(CurrentView);
             if (target is null)
             {
-                StatusBar.Report(StatusMessageFactory.Error("Search not supported for this view."));
+                UiNotify.Warn("Search not supported for this view.");
                 return;
             }
 
             string displayName = target.Value.ToString();
             string key = $"{target}_Search";
 
-            StatusBar.Report(StatusMessageFactory.Plain($"Searching {displayName}...", priority: 1, key: key));
+            // Was: StatusBar.Report(StatusMessageFactory.Plain(...priority:1, key))
+            UiNotify.Info($"Searching {displayName}...", showStatusBar: true, key: key);
 
             try
             {
                 var context = new SearchContextDTO(SearchQuery);
                 await searchable.OnSearchUpdated(context, _searchService, target.Value);
-                StatusBar.Report(StatusMessageFactory.Success("Search complete.", key: key));
+
+                // Was: StatusBar.Report(StatusMessageFactory.Success(...))
+                UiNotify.Success("Search complete.", key: key);
 
                 // Clear after search
                 SearchQuery = string.Empty;
             }
             catch (Exception ex)
             {
-                StatusBar.Report(StatusMessageFactory.Error($"Search failed: {ex.Message}", key: key));
+                // Was: StatusBar.Report(StatusMessageFactory.Error(...))
+                UiNotify.Error("Search failed", ex.Message, ex, alsoStatusBar: true, key: key);
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
 using System;
 using System.Collections.Generic;
@@ -10,11 +10,16 @@ using System.Threading.Tasks;
 
 namespace DSAMVVM.Core.Services
 {
-    public class ADUserService(string domain, string ldap, IStatusReporter status)
+    public class ADUserService
     {
-        private readonly string _domain = domain;
-        private readonly string _ldap = ldap;
-        private readonly IStatusReporter _status = status;
+        private readonly string _domain;
+        private readonly string _ldap;
+
+        public ADUserService(string domain, string ldap)
+        {
+            _domain = domain;
+            _ldap = ldap;
+        }
 
         public Task<ADUserInfo> GetUserAsync(string netid)
         {
@@ -62,15 +67,21 @@ namespace DSAMVVM.Core.Services
                         info.Division = "No Departmental MIM group";
                     }
                 }
-                catch (PrincipalServerDownException)
+                catch (PrincipalServerDownException ex)
                 {
                     info.ErrorMessage = "Unable to connect to the domain controller.";
                     info.Exists = false;
+
+                    // Surface -  actionable for the user (VPN/connection issues)
+                    UiNotify.Error("AD lookup failed", "Domain controller is unreachable.", ex, alsoStatusBar: true);
                 }
                 catch (Exception ex)
                 {
                     info.ErrorMessage = $"Unexpected error: {ex.Message}";
                     info.Exists = false;
+
+                    // Bubble a concise error and log details; also echo to status bar.
+                    UiNotify.Error("AD lookup failed", ex.Message, ex, alsoStatusBar: true);
                 }
 
                 return info;
@@ -96,9 +107,10 @@ namespace DSAMVVM.Core.Services
                             .ToList() ?? [];
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Silent fail for now; could log
+                    // Non-fatal; warn and continue with empty list
+                    UiNotify.Warn($"Could not enumerate MIM groups for '{netid}'.");
                 }
 
                 return mimGroups;
@@ -130,7 +142,8 @@ namespace DSAMVVM.Core.Services
 
             return "No valid O365 license found";
         }
-        //Keeping logic for now but depricating search until later
+
+        // Keeping logic for now but deprecating search until later
         public Task<string?> LookupNameByEmployeeID(string userNumber)
         {
             return Task.Run(() =>
@@ -150,14 +163,14 @@ namespace DSAMVVM.Core.Services
                     if (result != null)
                         return result.Properties["displayName"][0]?.ToString();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Optionally handle/log
+                    // Non-fatal lookup; warn and return null
+                    UiNotify.Warn($"Could not resolve displayName for employeeID '{userNumber}'.");
                 }
 
                 return null;
             });
         }
-
     }
 }

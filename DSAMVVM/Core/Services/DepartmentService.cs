@@ -1,21 +1,24 @@
-﻿using DSAMVVM.Core;
+﻿// DSAMVVM.Core.Services/DepartmentService.cs
+using DSAMVVM.Core;
 using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Utilities;   // UiNotify + StatusMessageFactory
 using DSAMVVM.MVVM.Model;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;       // Stopwatch
 using System.Linq;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace DSAMVVM.Core.Services
 {
-    public class DepartmentService(IStatusReporter status) : IDepartmentService
+    // Uses shared IHttpService + UiNotify (no direct HttpClient, no IStatusReporter).
+    public class DepartmentService(IHttpService http) : IDepartmentService
     {
-        private List<IDepartment>? _departments;
+        private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
         private readonly SemaphoreSlim _lock = new(1, 1);
-        private readonly IStatusReporter _status = status ?? throw new ArgumentNullException(nameof(status));
+        private List<IDepartment>? _departments;
 
         public async Task PreCacheDataAsync() => await EnsureDataLoaded();
 
@@ -44,10 +47,8 @@ namespace DSAMVVM.Core.Services
 
             if (department.SplitSupport)
             {
-                if (department.Teams.Count >= 1)
-                    teamNames.Add(department.Teams[0].Name);
-                if (department.Teams.Count >= 2)
-                    teamNames.Add(department.Teams[1].Name);
+                if (department.Teams.Count >= 1) teamNames.Add(department.Teams[0].Name);
+                if (department.Teams.Count >= 2) teamNames.Add(department.Teams[1].Name);
             }
             else
             {
@@ -60,46 +61,7 @@ namespace DSAMVVM.Core.Services
         public async Task<bool?> IsSupportKnownAsync(string departmentNumber)
             => (await GetDepartmentAsync(departmentNumber))?.SupportKnown;
 
-        private async Task LoadDepartmentsAsync()
-        {
-            await _lock.WaitAsync();
-            try
-            {
-                if (_departments != null)
-                    return;
-
-                await LoadDepartmentsInternalAsync();
-            }
-            finally
-            {
-                _lock.Release();
-            }
-        }
-
-        private async Task LoadDepartmentsInternalAsync()
-        {
-            try
-            {
-                using HttpClient client = new();
-                string json = await client.GetStringAsync(Globals.g_DepartmentJSONURL);
-
-                var wrapper = JsonConvert.DeserializeObject<DepartmentListWrapper>(json);
-                _departments = wrapper?.DepartmentList?
-                    .Select(d => new DepartmentAdapter(d))
-                    .ToList<IDepartment>() ?? [];
-
-                _status.Report(StatusMessageFactory.Plain(
-                    $"Loaded {_departments.Count} departments into memory.",
-                    priority: 0, sticky: false, key: "DepartmentService"));
-            }
-            catch (Exception e)
-            {
-                _status.Report(StatusMessageFactory.CreateRichInternalMessage(
-                    $"Failed to load department data: {e.Message}. {{0}}",
-                    [StatusMessageFactory.ActionLink("Retry", () => _ = ReloadDataAsync())],
-                    priority: 3, sticky: true, key: "DepartmentService"));
-            }
-        }
+        // internals
 
         private async Task EnsureDataLoaded()
         {
@@ -107,20 +69,67 @@ namespace DSAMVVM.Core.Services
                 await LoadDepartmentsAsync();
         }
 
+        private async Task LoadDepartmentsAsync()
+        {
+            await _lock.WaitAsync();
+            try
+            {
+                if (_departments != null) return;
+                await LoadDepartmentsInternalAsync(isReload: false);
+            }
+            finally { _lock.Release(); }
+        }
+
         public async Task ReloadDataAsync()
         {
             await _lock.WaitAsync();
             try
             {
-                _departments = null;
-                await LoadDepartmentsInternalAsync();
+                await LoadDepartmentsInternalAsync(isReload: true);
             }
-            finally
+            finally { _lock.Release(); }
+        }
+
+        private async Task LoadDepartmentsInternalAsync(bool isReload)
+        {
+            const string key = "DepartmentService";
+
+            // Start: sticky status so it's visible during work
+            UiNotify.Push(StatusMessageFactory.Plain(
+                isReload ? "Refreshing department data…" : "Loading department data…",
+                priority: 0, sticky: true, key: key));
+
+            var sw = Stopwatch.StartNew();
+            try
             {
-                _lock.Release();
+                // Shared HttpService, no direct HttpClient
+                string json = await _http.GetStringAsync(Globals.g_DepartmentJSONURL);
+
+                var wrapper = JsonConvert.DeserializeObject<DepartmentListWrapper>(json);
+                _departments = wrapper?.DepartmentList?
+                    .Select(d => new DepartmentAdapter(d))
+                    .ToList<IDepartment>() ?? [];
+
+                sw.Stop();
+
+                // Success: short, non-sticky toast on the status bar + log
+                UiNotify.Success(
+                    $"{(isReload ? "Refreshed" : "Loaded")} {_departments.Count} departments in {sw.ElapsedMilliseconds} ms.",
+                    showStatusBar: true, key: key);
+            }
+            catch (Exception e)
+            {
+                sw.Stop();
+
+                // Failure: log + rich status with a Retry action
+                UiNotify.WarnWithLinks(
+                    $"Failed to {(isReload ? "refresh" : "load")} department data: {e.Message}",
+                    sticky: true, priority: 3, key: key,
+                    UiNotify.Link.Action("Retry", () => ReloadDataAsync()));
             }
         }
 
+        // Adapter keeps public surface aligned with IDepartment
         private class DepartmentAdapter(Department source) : IDepartment
         {
             private readonly Department _source = source;

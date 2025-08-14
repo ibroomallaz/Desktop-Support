@@ -1,41 +1,77 @@
-﻿
-using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Interfaces;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DSAMVVM.Core.Services
 {
-    public class HttpService : IHttpService
+    // Shared HTTP utility. HttpClient is reused app-wide.
+    public class HttpService : IHttpService, IDisposable
     {
-        public HttpClient Client { get; }
+        private readonly HttpClient _client;
 
         public HttpService()
         {
-            Client = new HttpClient
-            {
-                Timeout = TimeSpan.FromSeconds(15)
-            };
-            
-            Client.DefaultRequestHeaders.UserAgent.ParseAdd("DesktopSupportApp/1.0");
+            // One shared client
+            _client = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+            //User Agent
+            //TODO: proper version detection
+            _client.DefaultRequestHeaders.UserAgent.ParseAdd("DesktopSupportApp/4.0");
         }
 
-        public Task<string> GetStringAsync(string url) => Client.GetStringAsync(url);
+        public Task<string> GetStringAsync(string url, CancellationToken ct = default)
+            => _client.GetStringAsync(url, ct);
 
-        public async Task DownloadFileAsync(string url, string filePath)
+        public Task<Stream> GetStreamAsync(string url, CancellationToken ct = default)
+            => _client.GetStreamAsync(url, ct);
+
+        public async Task DownloadFileAsync(string url, string filePath, CancellationToken ct = default)
         {
-            using var stream = await Client.GetStreamAsync(url);
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-            using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
-            await stream.CopyToAsync(fs);
+            // Ensure target directory exists.
+            var dir = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+
+            var tmp = filePath + ".tmp";
+            var succeeded = false;
+
+            try
+            {
+                // Stream response without buffering entire content.
+                using var resp = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
+                resp.EnsureSuccessStatusCode();
+
+                await using var src = await resp.Content.ReadAsStreamAsync(ct);
+                await using (var dst = new FileStream(tmp, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
+                    await src.CopyToAsync(dst, ct);
+
+                // Atomic move: replace if exists, else move into place.
+                if (File.Exists(filePath))
+                    File.Replace(tmp, filePath, destinationBackupFileName: null);
+                else
+                    File.Move(tmp, filePath);
+
+                succeeded = true;
+            }
+            catch
+            {
+                // Clean up temp on failure.
+                if (File.Exists(tmp)) File.Delete(tmp);
+                throw;
+            }
+            finally
+            {
+                if (!succeeded && File.Exists(tmp)) File.Delete(tmp);
+            }
         }
 
         public bool TryOpenUrl(string target, out Exception? error)
         {
             try
             {
+                // UseShellExecute = true lets Windows choose the default handler.
                 Process.Start(new ProcessStartInfo { FileName = target, UseShellExecute = true });
                 error = null;
                 return true;
@@ -46,5 +82,7 @@ namespace DSAMVVM.Core.Services
                 return false;
             }
         }
+
+        public void Dispose() => _client.Dispose();
     }
 }

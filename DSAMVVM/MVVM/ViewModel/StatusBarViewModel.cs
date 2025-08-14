@@ -1,56 +1,20 @@
-﻿using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
-using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class StatusBarViewModel : INotifyPropertyChanged, IStatusReporter
+    public class StatusBarViewModel : INotifyPropertyChanged
     {
-        private StatusMessage? _currentMessage;
-        private string? _currentKey;
-        private CancellationTokenSource? _cts;
+        private readonly StatusBus _bus;
 
-        public StatusMessage? CurrentStatusMessage => _currentMessage;
+        public StatusMessage? CurrentStatusMessage => _bus.Current;
 
-        public void Report(StatusMessage message, int timeoutMs = 5000)
+        public StatusBarViewModel(StatusBus bus)
         {
-            bool shouldReplace =
-                _currentMessage == null ||
-                message.Priority >= _currentMessage.Priority ||
-                (!string.IsNullOrEmpty(message.Key) && message.Key == _currentKey);
-
-            if (shouldReplace)
-            {
-                _currentMessage = message;
-                _currentKey = message.Key;
-                OnPropertyChanged(nameof(CurrentStatusMessage));
-
-                if (!message.Sticky)
-                {
-                    _cts?.Cancel();
-                    _cts = new CancellationTokenSource();
-                    _ = AutoClearAsync(message, timeoutMs, _cts.Token);
-                }
-            }
-        }
-
-        private async Task AutoClearAsync(StatusMessage msg, int timeout, CancellationToken token)
-        {
-            try
-            {
-                await Task.Delay(timeout, token);
-                if (_currentMessage == msg)
-                {
-                    _currentMessage = null;
-                    _currentKey = null;
-                    OnPropertyChanged(nameof(CurrentStatusMessage));
-                }
-            }
-            catch (TaskCanceledException) { }
+            _bus = bus;
+            _bus.CurrentChanged += (_, __) => OnPropertyChanged(nameof(CurrentStatusMessage));
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

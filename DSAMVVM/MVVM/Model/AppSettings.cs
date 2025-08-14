@@ -1,17 +1,18 @@
-﻿using Newtonsoft.Json;
+﻿using DSAMVVM.Core.Enums;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 
 namespace DSAMVVM.MVVM.Model
 {
-    // Centralized UI limits/helpers
-   
 
     public class AppSettings
     {
         public Meta Meta { get; set; } = new();
         public Paths Paths { get; set; } = new();
         public Ui Ui { get; set; } = new();
+        public LoggingSettings Logging { get; set; } = new LoggingSettings();
 
         // Call after deserialization
         public void ApplyDefaultsAndClamp()
@@ -19,11 +20,25 @@ namespace DSAMVVM.MVVM.Model
             Ui?.Search?.Clamp();
             Ui?.Font?.Clamp();
 
+            // Ensure case-insensitive view keys even if JSON replaced the dictionary
+            if (Ui?.ViewFontSizes != null &&
+                !ReferenceEquals(Ui.ViewFontSizes.Comparer, StringComparer.OrdinalIgnoreCase))
+            {
+                Ui.ViewFontSizes = new Dictionary<string, ViewFontSetting>(Ui.ViewFontSizes, StringComparer.OrdinalIgnoreCase);
+            }
+
             if (Ui?.ViewFontSizes != null)
             {
                 foreach (var kvp in Ui.ViewFontSizes)
                     kvp.Value?.Clamp();
             }
+
+            // Normalize data locations
+            Paths?.DepartmentData?.Normalize();
+            Paths?.LinksData?.Normalize();
+
+            // Clamp logging settings
+            Logging?.Clamp();
         }
     }
 
@@ -45,12 +60,30 @@ namespace DSAMVVM.MVVM.Model
         public string Source { get; set; } = "web"; // "web" | "file"
         public string Uri { get; set; } = "";       // URL or path
         public string? FallbackFile { get; set; }   // relative to DataDir if not absolute
+
+        public void Normalize()
+        {
+            // Force Source to "web" or "file" only
+            if (!Source.Equals("file", StringComparison.OrdinalIgnoreCase) &&
+                !Source.Equals("web", StringComparison.OrdinalIgnoreCase))
+            {
+                Source = "web";
+            }
+
+            // Null-safe fields
+            Uri ??= "";
+            if (string.IsNullOrWhiteSpace(FallbackFile)) FallbackFile = null;
+        }
     }
 
     public class Ui
     {
         public FontSettings Font { get; set; } = new();
-        public Dictionary<string, ViewFontSetting> ViewFontSizes { get; set; } = new();
+
+        // Case-insensitive keys so "UserView" and "userview" don't duplicate
+        public Dictionary<string, ViewFontSetting> ViewFontSizes { get; set; }
+            = new(StringComparer.OrdinalIgnoreCase);
+
         public SearchSettings Search { get; set; } = new();
     }
 
@@ -74,10 +107,11 @@ namespace DSAMVVM.MVVM.Model
             FontSize = UiLimits.ClampFontSize(FontSize);
         }
     }
+
     public static class UiLimits
     {
         public const double MinFontSize = 8.0;
-        public const double MaxFontSize = 48.0;
+        public const double MaxFontSize = 24.0;
 
         public static double ClampFontSize(double size)
         {
@@ -86,6 +120,7 @@ namespace DSAMVVM.MVVM.Model
             return size;
         }
     }
+
     public class SearchSettings
     {
         public bool UseSavedSearchHistory { get; set; } = true;
@@ -98,6 +133,21 @@ namespace DSAMVVM.MVVM.Model
         {
             if (MaxSearchHistory < Min) MaxSearchHistory = Min;
             if (MaxSearchHistory > Max) MaxSearchHistory = Max;
+        }
+    }
+
+    public class LoggingSettings
+    {
+        [JsonConverter(typeof(StringEnumConverter))]
+        public AppLogLevel MinimumLevel { get; set; } = AppLogLevel.Warn;
+
+        public int RetentionDays { get; set; } = 14;
+
+        public void Clamp()
+        {
+            if (RetentionDays < 1) RetentionDays = 1;
+            if (!Enum.IsDefined(typeof(AppLogLevel), MinimumLevel))
+                MinimumLevel = AppLogLevel.Warn;
         }
     }
 }

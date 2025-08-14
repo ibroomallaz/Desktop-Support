@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net.Http;
 using System.Text;
@@ -13,6 +14,13 @@ namespace DSAMVVM.Core.Services
 {
     public class SettingsService : ISettingsService
     {
+        // one lock per final file path (case-insensitive)
+        private static readonly ConcurrentDictionary<string, SemaphoreSlim> _saveLocks =
+            new(StringComparer.OrdinalIgnoreCase);
+
+        private static SemaphoreSlim SaveLockFor(string path) =>
+            _saveLocks.GetOrAdd(Path.GetFullPath(path), _ => new SemaphoreSlim(1, 1));
+
         public async Task<AppSettings> LoadAsync(string settingsPath, CancellationToken ct = default)
         {
             var path = Expand(settingsPath);
@@ -26,12 +34,11 @@ namespace DSAMVVM.Core.Services
 
                 try
                 {
-                    json = await File.ReadAllTextAsync(path, ct);
+                    json = await File.ReadAllTextAsync(path, ct).ConfigureAwait(false);
                     var fileSchema = ReadSchemaVersion(json);
 
                     if (fileSchema > Globals.g_SettingsSchema)
                     {
-                        // Move future-schema file to "settings-legacy" and ignore
                         var legacyDir = Path.Combine(Path.GetDirectoryName(path)!, "settings-legacy");
                         Directory.CreateDirectory(legacyDir);
                         var legacyFile = Path.Combine(
@@ -43,11 +50,10 @@ namespace DSAMVVM.Core.Services
                         SeedDefaults(settings);
                         EnsureDirectories(settings);
                         settings.ApplyDefaultsAndClamp();
-                        await SaveAsync(settings, settingsPath, ct);
+                        await SaveAsync(settings, settingsPath, ct).ConfigureAwait(false);
                         return settings;
                     }
 
-                    // Try to deserialize current file
                     var loaded = JsonConvert.DeserializeObject<AppSettings>(json);
                     if (loaded is not null)
                     {
@@ -68,15 +74,16 @@ namespace DSAMVVM.Core.Services
                 {
                     try
                     {
-                        var bakJson = await File.ReadAllTextAsync(bak, ct);
+                        var bakJson = await File.ReadAllTextAsync(bak, ct).ConfigureAwait(false);
                         var fromBak = JsonConvert.DeserializeObject<AppSettings>(bakJson);
                         if (fromBak is not null)
                         {
                             SeedViewFontSizes(fromBak);
                             EnsureDirectories(fromBak);
                             fromBak.ApplyDefaultsAndClamp();
+
                             // Restore .bak back to main atomically
-                            await WriteTextAtomicallyAsync(path, bakJson, ct);
+                            await WriteTextAtomicallyAsync(path, bakJson, ct).ConfigureAwait(false);
                             return fromBak;
                         }
                     }
@@ -91,13 +98,12 @@ namespace DSAMVVM.Core.Services
             SeedDefaults(settings);
             EnsureDirectories(settings);
             settings.ApplyDefaultsAndClamp();
-            await SaveAsync(settings, settingsPath, ct);
+            await SaveAsync(settings, settingsPath, ct).ConfigureAwait(false);
             return settings;
         }
 
         public async Task SaveAsync(AppSettings settings, string settingsPath, CancellationToken ct = default)
         {
-            // Guard: allow cancellation to behave normally
             ct.ThrowIfCancellationRequested();
 
             var path = Expand(settingsPath);
@@ -105,22 +111,29 @@ namespace DSAMVVM.Core.Services
 
             try
             {
-                // Update metadata just before serialize
                 settings.Meta.LastUpdatedUtc = DateTime.UtcNow;
                 settings.Meta.SchemaVersion = Globals.g_SettingsSchema;
 
-                // 1) Serialize
                 string json = JsonConvert.SerializeObject(settings, Formatting.Indented);
 
-                // 2) Validate in-memory; if invalid, discard and keep last good
+                // validate before touching disk
                 if (!IsValidJson(json))
                 {
-                    await WriteDiagnosticDumpAsync(path, json, "invalid-json", ct);
+                    await WriteDiagnosticDumpAsync(path, json, "invalid-json", ct).ConfigureAwait(false);
                     return;
                 }
 
-                // 3) Atomic write (tmp + replace). If anything fails, we catch and discard changes.
-                await WriteTextAtomicallyAsync(path, json, ct);
+                // per-path in-process lock
+                var slim = SaveLockFor(path);
+                await slim.WaitAsync(ct).ConfigureAwait(false);
+                try
+                {
+                    await WriteTextAtomicallyAsync(path, json, ct).ConfigureAwait(false);
+                }
+                finally
+                {
+                    slim.Release();
+                }
             }
             catch (OperationCanceledException)
             {
@@ -128,9 +141,8 @@ namespace DSAMVVM.Core.Services
             }
             catch (Exception ex)
             {
-                // Don’t crash UI; record for analysis and discard changes
-                await WriteDiagnosticDumpAsync(path, ex.ToString(), "save-exception", CancellationToken.None);
-                return;
+                // record for analysis and discard changes
+                await WriteDiagnosticDumpAsync(path, ex.ToString(), "save-exception", CancellationToken.None).ConfigureAwait(false);
             }
         }
 
@@ -142,7 +154,7 @@ namespace DSAMVVM.Core.Services
             return dataDir;
         }
 
-        public double GetFontSizeFor(string viewName, AppSettings s, double min = 9, double max = 24)
+        public double GetFontSizeFor(string viewName, AppSettings s, double min = 8, double max = 24)
         {
             if (s.Ui.Font.ViewFontSizeOverride &&
                 s.Ui.ViewFontSizes.TryGetValue(viewName, out var v) &&
@@ -161,19 +173,18 @@ namespace DSAMVVM.Core.Services
             {
                 try
                 {
-                    var json = await http.GetStringAsync(loc.Uri, ct);
+                    var json = await http.GetStringAsync(loc.Uri, ct).ConfigureAwait(false);
 
-                    // Optional: validate if you expect JSON
                     TryValidateJson(json);
 
-                    await WriteFallbackAsync(json, loc, s, ct);
+                    await WriteFallbackAsync(json, loc, s, ct).ConfigureAwait(false);
                     return json;
                 }
                 catch
                 {
                     var fb = ResolveFallback(loc, s);
                     if (fb is not null && File.Exists(fb))
-                        return await File.ReadAllTextAsync(fb, ct);
+                        return await File.ReadAllTextAsync(fb, ct).ConfigureAwait(false);
 
                     return null;
                 }
@@ -182,17 +193,17 @@ namespace DSAMVVM.Core.Services
             {
                 var primary = ResolvePrimaryFile(loc, s);
                 if (primary is not null && File.Exists(primary))
-                    return await File.ReadAllTextAsync(primary, ct);
+                    return await File.ReadAllTextAsync(primary, ct).ConfigureAwait(false);
 
                 var fb = ResolveFallback(loc, s);
                 if (fb is not null && File.Exists(fb))
-                    return await File.ReadAllTextAsync(fb, ct);
+                    return await File.ReadAllTextAsync(fb, ct).ConfigureAwait(false);
 
                 return null;
             }
         }
 
-        // ----------------- Helpers -----------------
+        // Helpers
 
         private static bool IsWeb(DataLocation loc) =>
             loc.Source.Equals("web", StringComparison.OrdinalIgnoreCase);
@@ -279,10 +290,9 @@ namespace DSAMVVM.Core.Services
 
             Directory.CreateDirectory(Path.GetDirectoryName(fb)!);
 
-            // Optional: validate JSON if you expect JSON
             TryValidateJson(json);
 
-            await WriteTextAtomicallyAsync(fb, json, ct);
+            await WriteTextAtomicallyAsync(fb, json, ct).ConfigureAwait(false);
         }
 
         private static int ReadSchemaVersion(string json)
@@ -313,53 +323,93 @@ namespace DSAMVVM.Core.Services
             catch { return false; }
         }
 
+        // Atomic writer with unique temp + retries (no fixed .tmp collisions)
         private static async Task WriteTextAtomicallyAsync(string finalPath, string content, CancellationToken ct)
         {
             string dir = Path.GetDirectoryName(finalPath)!;
             Directory.CreateDirectory(dir);
-            string tmp = finalPath + ".tmp";
-            string bak = finalPath + ".bak";
 
-            // Write to .tmp and flush to disk
-            using (var fs = new FileStream(tmp, FileMode.Create, FileAccess.Write, FileShare.None, 8192, useAsync: true))
-            using (var sw = new StreamWriter(fs, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)))
+            string name = Path.GetFileName(finalPath);
+            string tempPath = Path.Combine(dir, $"{name}.{Guid.NewGuid():N}.tmp");
+            string bakPath = finalPath + ".bak";
+
+            // Write to unique temp with exclusive handle
+            var bytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(content);
+            using (var fs = new FileStream(tempPath, FileMode.CreateNew, FileAccess.Write, FileShare.None, 8192, useAsync: true))
             {
-                await sw.WriteAsync(content.AsMemory(), ct);
-                await sw.FlushAsync();
+                await fs.WriteAsync(bytes, 0, bytes.Length, ct).ConfigureAwait(false);
+                await fs.FlushAsync(ct).ConfigureAwait(false);
                 fs.Flush(true); // force to disk
             }
 
-            // Atomic swap (NTFS). Creates/updates .bak for rollback
-            try
-            {
-                File.Replace(tmp, finalPath, bak, ignoreMetadataErrors: true);
-            }
-            catch (PlatformNotSupportedException)
-            {
-                // Cross-volume or FS without Replace support
-                if (File.Exists(finalPath)) File.Copy(finalPath, bak, overwrite: true);
-                File.Delete(finalPath);
-                File.Move(tmp, finalPath);
-            }
+            await ReplaceWithRetriesAsync(tempPath, finalPath, bakPath, ct).ConfigureAwait(false);
+
+            // best-effort cleanup (should not exist if Replace succeeded)
+            TryDeleteQuiet(tempPath);
         }
 
-        private static async Task WriteDiagnosticDumpAsync(string finalPath, string payload, string tag, CancellationToken ct)
+        private static async Task ReplaceWithRetriesAsync(string temp, string final, string bak, CancellationToken ct)
+        {
+            const int maxAttempts = 6;
+            int delayMs = 50;
+
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                try
+                {
+                    if (File.Exists(final))
+                        File.Replace(temp, final, bak, ignoreMetadataErrors: true);
+                    else
+                        File.Move(temp, final);
+                    return; // success
+                }
+                catch (IOException) when (attempt < maxAttempts) { /* try again */ }
+                catch (UnauthorizedAccessException) when (attempt < maxAttempts) { /* try again */ }
+
+                await Task.Delay(delayMs, ct).ConfigureAwait(false);
+                delayMs *= 2;
+            }
+
+            // last attempt - let errors bubble if still failing
+            if (File.Exists(final))
+                File.Replace(temp, final, bak, ignoreMetadataErrors: true);
+            else
+                File.Move(temp, final);
+        }
+
+        private static void TryDeleteQuiet(string path)
+        {
+            try { if (File.Exists(path)) File.Delete(path); } catch { }
+        }
+        // Add near other helpers in SettingsService
+        private static async Task WriteDiagnosticDumpAsync(string targetSettingsPath, string payload, string tag, CancellationToken ct)
         {
             try
             {
-                var dir = Path.GetDirectoryName(finalPath)!;
-                var logDir = Path.Combine(dir, "settings-logs");
-                Directory.CreateDirectory(logDir);
+                var logsDir = Globals.g_LogsDir;
+                Directory.CreateDirectory(logsDir);
 
-                var name = $"{Path.GetFileNameWithoutExtension(finalPath)}.{tag}.{DateTime.UtcNow:yyyyMMdd-HHmmss}.txt";
-                var file = Path.Combine(logDir, name);
+                var fileName = $"settings-{tag}-{DateTime.UtcNow:yyyyMMdd-HHmmssfff}.log";
+                var path = Path.Combine(logsDir, fileName);
 
-                await File.WriteAllTextAsync(file, payload ?? string.Empty, ct);
+                var sb = new StringBuilder()
+                    .AppendLine("=== Settings Diagnostic Dump ===")
+                    .AppendLine($"UTC:     {DateTime.UtcNow:O}")
+                    .AppendLine($"Target:  {targetSettingsPath}")
+                    .AppendLine($"Process: {Environment.ProcessPath}")
+                    .AppendLine($"User:    {Environment.UserName}")
+                    .AppendLine("--------------------------------")
+                    .AppendLine(payload ?? string.Empty);
+
+                await File.WriteAllTextAsync(path, sb.ToString(), Encoding.UTF8, ct).ConfigureAwait(false);
             }
             catch
             {
-                // swallow: diagnostics should never cause further errors
+                // best-effort only — never throw from diagnostics
             }
         }
+
     }
 }

@@ -1,76 +1,119 @@
 ﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using Newtonsoft.Json;
 using System;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DSAMVVM.Core.Services
 {
-    public class LinksService(IStatusReporter status) : ILinksService
+    public class LinksService : ILinksService
     {
-        private static LinksData? _cachedLinks;
-        private static readonly HttpClient _client = new();
-        private readonly IStatusReporter _status = status ?? throw new ArgumentNullException(nameof(status));
+        private readonly IHttpService _http;
+        private readonly SemaphoreSlim _gate = new(1, 1);
 
-        public async Task<LinksData?> LoadLinksDataAsync()
+        private LinksData? _cache;
+        private const string StatusKey = "LinksService";
+
+        private static readonly JsonSerializerSettings JsonSettings = new()
         {
-            if (_cachedLinks == null)
-            {
-                try
-                {
-                    _status.Report(StatusMessageFactory.Plain("Downloading Links Data..."));
-                    string json = await _client.GetStringAsync(Globals.g_LinksJSON);
-                    _cachedLinks = JsonConvert.DeserializeObject<LinksData>(json);
+            MissingMemberHandling = MissingMemberHandling.Ignore,
+            NullValueHandling = NullValueHandling.Include
+        };
 
-                    if (_cachedLinks == null)
-                    {
-                        _status.Report(StatusMessageFactory.CreateRichInternalMessage(
-                            "Deserialization returned null. {0}",
-                            [StatusMessageFactory.ActionLink("Retry", () => _ = ReloadLinksDataAsync())],
-                            priority: 3, sticky: true, key: "LinksService"));
-                    }
-                    else
-                    {
-                        _status.Report(StatusMessageFactory.Plain("Links loaded successfully.", priority: 0));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _status.Report(StatusMessageFactory.CreateRichInternalMessage(
-                        $"Error retrieving or deserializing links: {ex.Message}. {{0}}",
-                        [StatusMessageFactory.ActionLink("Retry", () => _ = ReloadLinksDataAsync())],
-                        priority: 3, sticky: true, key: "LinksService"));
-                }
-            }
-
-            return _cachedLinks;
+        public LinksService(IHttpService http)
+        {
+            _http = http ?? throw new ArgumentNullException(nameof(http));
         }
 
-        public async Task ReloadLinksDataAsync()
+        public LinksData? GetCachedLinksData() => _cache;
+
+        public Task<LinksData?> LoadLinksDataAsync() => LoadInternalAsync(force: false, CancellationToken.None);
+
+        public Task ReloadLinksDataAsync() => LoadInternalAsync(force: true, CancellationToken.None);
+
+        private async Task<LinksData?> LoadInternalAsync(bool force, CancellationToken ct)
         {
+            if (!force && _cache != null) return _cache;
+
+            await _gate.WaitAsync(ct);
             try
             {
-                string json = await _client.GetStringAsync(Globals.g_LinksJSON);
-                _cachedLinks = JsonConvert.DeserializeObject<LinksData>(json);
+                if (!force && _cache != null) return _cache;
 
-                if (_cachedLinks != null)
+                UiNotify.Info("Downloading links…", showStatusBar: true, key: StatusKey);
+
+                string json = await _http.GetStringAsync(Globals.g_LinksJSON, ct);
+                var data = JsonConvert.DeserializeObject<LinksData>(json, JsonSettings);
+
+                if (data == null)
                 {
-                    _status.Report(StatusMessageFactory.Plain("Links reloaded successfully.", priority: 0, sticky: false, key: "LinksService"));
+                    UiNotify.WarnWithLinks(
+                        "Links could not be parsed.",
+                        sticky: true,
+                        priority: 3,
+                        key: StatusKey,
+                        UiNotify.Link.Action("Retry", () => ReloadLinksDataAsync()),
+                        UiNotify.Link.External("Open source", new Uri(Globals.g_LinksJSON)),
+                        UiNotify.Link.OpenLogs()
+                    );
+                    return _cache; // keep prior cache if any
                 }
+
+                _cache = data;
+                UiNotify.Success("Links loaded successfully.", showStatusBar: true, key: StatusKey);
+                return _cache;
+            }
+            catch (OperationCanceledException)
+            {
+                UiNotify.Info("Links download canceled.", showStatusBar: false, key: StatusKey);
+                throw;
+            }
+            catch (HttpRequestException ex)
+            {
+                UiNotify.WarnWithLinks(
+                    $"Network error while retrieving links: {ex.Message}",
+                    sticky: true,
+                    priority: 3,
+                    key: StatusKey,
+                    UiNotify.Link.Action("Retry", () => ReloadLinksDataAsync()),
+                    UiNotify.Link.External("Open source", new Uri(Globals.g_LinksJSON)),
+                    UiNotify.Link.OpenLogs()
+                );
+                return _cache;
+            }
+            catch (JsonException ex)
+            {
+                UiNotify.WarnWithLinks(
+                    $"Invalid links JSON: {ex.Message}",
+                    sticky: true,
+                    priority: 3,
+                    key: StatusKey,
+                    UiNotify.Link.Action("Retry", () => ReloadLinksDataAsync()),
+                    UiNotify.Link.External("Open source", new Uri(Globals.g_LinksJSON)),
+                    UiNotify.Link.OpenLogs()
+                );
+                return _cache;
             }
             catch (Exception ex)
             {
-                _status.Report(StatusMessageFactory.CreateRichInternalMessage(
-                    $"Error reloading links: {ex.Message}. {{0}}",
-                    [StatusMessageFactory.ActionLink("Retry", () => _ = ReloadLinksDataAsync())],
-                    priority: 3, sticky: true, key: "LinksService"));
+                UiNotify.WarnWithLinks(
+                    $"Error loading links: {ex.Message}",
+                    sticky: true,
+                    priority: 3,
+                    key: StatusKey,
+                    UiNotify.Link.Action("Retry", () => ReloadLinksDataAsync()),
+                    UiNotify.Link.External("Open source", new Uri(Globals.g_LinksJSON)),
+                    UiNotify.Link.OpenLogs()
+                );
+                return _cache;
+            }
+            finally
+            {
+                _gate.Release();
             }
         }
-        public LinksData? GetCachedLinksData()
-        {
-            return _cachedLinks;
-        }
-
     }
 }

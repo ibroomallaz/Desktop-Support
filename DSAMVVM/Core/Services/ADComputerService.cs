@@ -1,16 +1,17 @@
-﻿using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
-using System;
 using System.DirectoryServices;
-using System.DirectoryServices.ActiveDirectory;
-using System.Threading.Tasks;
 
 namespace DSAMVVM.Core.Services
 {
-    public class ADComputerService(string ldapPath, IStatusReporter status)
+    public class ADComputerService
     {
-        private readonly string _ldapPath = ldapPath;
-        private readonly IStatusReporter _status = status;
+        private readonly string _ldapPath;
+
+        public ADComputerService(string ldapPath)
+        {
+            _ldapPath = ldapPath;
+        }
 
         public Task<ADComputerInfo> GetComputerAsync(string hostname)
         {
@@ -57,17 +58,20 @@ namespace DSAMVVM.Core.Services
                     {
                         info.Exists = false;
                         info.ErrorMessage = $"Computer name {hostname} not found.";
+                        UiNotify.Warn($"Computer '{hostname}' not found in AD.");
                     }
                 }
-                catch (DirectoryServicesCOMException)
+                catch (DirectoryServicesCOMException ex)
                 {
                     info.Exists = false;
                     info.ErrorMessage = "Unable to connect to the domain controller.";
+                    UiNotify.Error("AD computer lookup failed", "Domain controller is unreachable.", ex, alsoStatusBar: true);
                 }
                 catch (Exception ex)
                 {
                     info.Exists = false;
                     info.ErrorMessage = $"Unexpected error during AD computer lookup: {ex.Message}";
+                    UiNotify.Error("AD computer lookup failed", ex.Message, ex, alsoStatusBar: true);
                 }
 
                 return info;
