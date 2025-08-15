@@ -1,24 +1,23 @@
 ﻿using DSAMVVM.Core;
 using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Utilities;      
 using System;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace DSAMVVM.MVVM.Model
 {
     public class VersionCheckerUI
     {
-        private readonly IStatusReporter _status;
         private readonly IHttpService _http;
 
         private readonly string _installedVersion = Globals.g_AppVersion;
         private readonly string _versionUrl = Globals.g_versionJSON;
 
-        public VersionCheckerUI(IStatusReporter status, IHttpService http)
+        public VersionCheckerUI(IHttpService http)
         {
-            _status = status ?? throw new ArgumentNullException(nameof(status));
             _http = http ?? throw new ArgumentNullException(nameof(http));
-            _ = CheckAsync();
         }
 
         public async Task CheckAsync()
@@ -27,13 +26,11 @@ namespace DSAMVVM.MVVM.Model
 
             if (!result.Success)
             {
-                _status.Report(StatusMessageFactory.CreateRichInternalMessage(
-                    $"Version check error: {result.Error}. {{0}}",
-                    [StatusMessageFactory.ActionLink("Retry", () => _ = CheckAsync())],
-                    priority: 3,
-                    sticky: true,
-                    key: "VersionCheck"
-                ));
+                OnUI(() => UiNotify.Error(
+                    "Version check error",
+                    result.Error ?? "Unknown error",
+                    alsoStatusBar: true,
+                    key: "VersionCheck"));
                 return;
             }
 
@@ -43,10 +40,9 @@ namespace DSAMVVM.MVVM.Model
 
         private void ReportSuccess()
         {
-            _status.Report(StatusMessageFactory.Plain(
+            OnUI(() => UiNotify.Info(
                 $"Version: {_installedVersion}.",
-                priority: 0,
-                sticky: false,
+                showStatusBar: true,
                 key: "VersionCheck"));
         }
 
@@ -55,16 +51,16 @@ namespace DSAMVVM.MVVM.Model
             bool isBetaUser = _installedVersion.Contains("beta", StringComparison.OrdinalIgnoreCase)
                            || _installedVersion.Contains("alpha", StringComparison.OrdinalIgnoreCase);
 
-            bool isStableUpdate = versionInfo.Current?.Version != null &&
-                                  VersionChecker.IsNewerVersion(_installedVersion, versionInfo.Current.Version);
+            bool isStableUpdate = versionInfo.Current?.Version != null
+                               && VersionChecker.IsNewerVersion(_installedVersion, versionInfo.Current.Version);
 
-            bool isBetaUpdate = versionInfo.PreRelease?.Exists == true &&
-                                !string.IsNullOrWhiteSpace(versionInfo.PreRelease.Version) &&
-                                VersionChecker.IsNewerVersion(_installedVersion, versionInfo.PreRelease.Version);
+            bool isBetaUpdate = versionInfo.PreRelease?.Exists == true
+                             && !string.IsNullOrWhiteSpace(versionInfo.PreRelease.Version)
+                             && VersionChecker.IsNewerVersion(_installedVersion, versionInfo.PreRelease.Version);
 
-            bool isBetaHigherThanStable = versionInfo.Current?.Version != null &&
-                                          versionInfo.PreRelease?.Version != null &&
-                                          VersionChecker.IsNewerVersion(versionInfo.Current.Version, versionInfo.PreRelease.Version);
+            bool isBetaHigherThanStable = versionInfo.Current?.Version != null
+                                       && versionInfo.PreRelease?.Version != null
+                                       && VersionChecker.IsNewerVersion(versionInfo.Current.Version, versionInfo.PreRelease.Version);
 
             if (isStableUpdate && !isBetaUser && versionInfo.Current != null)
             {
@@ -89,7 +85,7 @@ namespace DSAMVVM.MVVM.Model
             location ??= Globals.g_sharepointHome;
             changelog ??= "No details provided.";
 
-            Application.Current.Dispatcher.Invoke(() =>
+            OnUI(() =>
             {
                 var result = MessageBox.Show(
                     $"{title}\n\nA new version ({newVersion}) is available.\n\nCurrent version: {_installedVersion}\n\nChanges:\n{changelog}\n\nWould you like to update?",
@@ -102,6 +98,15 @@ namespace DSAMVVM.MVVM.Model
                     _http.TryOpenUrl(location, out _);
                 }
             });
+        }
+        // Ensures the provided action runs on the application's UI thread.
+        // Falls back to immediate execution if no WPF dispatcher is available (e.g., in tests or console apps).
+        private static void OnUI(Action action)
+        {
+            var d = Application.Current?.Dispatcher;
+            if (d is null) { action(); return; }
+            if (d.CheckAccess()) action();
+            else d.BeginInvoke(action, DispatcherPriority.Normal);
         }
     }
 }

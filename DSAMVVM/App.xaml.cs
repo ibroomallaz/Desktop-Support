@@ -94,18 +94,16 @@ namespace DSAMVVM
             mainWindow.Show();
 
             // Run version check in the background
-            _ = Task.Run(async () =>
+            try
             {
-                try
-                {
-                    var versionChecker = _serviceProvider.GetRequiredService<VersionCheckerUI>();
-                    await versionChecker.CheckAsync();
-                }
-                catch (Exception ex)
-                {
-                    Log.Warn("VersionCheck", $"Background version check failed: {ex.Message}");
-                }
-            });
+                var versionChecker = _serviceProvider.GetRequiredService<VersionCheckerUI>();
+                await versionChecker.CheckAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("VersionCheck", $"Version check failed: {ex.Message}");
+            }
+
         }
 
         protected override void OnExit(ExitEventArgs e)
