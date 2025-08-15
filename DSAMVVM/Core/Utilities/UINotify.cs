@@ -1,5 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Threading;
@@ -13,10 +16,18 @@ namespace DSAMVVM.Core.Utilities
     {
         private static StatusBus? _bus;
 
-        // Initialize once at startup with the shared StatusBus instance
+        // one-time init
         public static void Initialize(StatusBus bus) => _bus = bus;
 
+        // core forwarders
         public static void Push(StatusMessage message) => _bus?.Report(message);
+        public static void RemoveKey(string key) => _bus?.RemoveByKey(key);
+        public static void ClearStatus() => _bus?.Clear();
+
+        // progress helpers (namespaced under a base "status thread" key)
+        public static string ProgressOf(string baseKey) => baseKey + ".Progress";
+        public static void Progress(string baseKey, string message, int priority = 0)
+            => _bus?.Report(StatusMessageFactory.Info(message, priority: priority, sticky: false, key: ProgressOf(baseKey)));
 
         // Error: logs Error, optional status bar echo, then MessageBox
         public static string Error(string title, string message, Exception? ex = null, string? detailsPath = null, bool alsoStatusBar = true, string? key = null)
@@ -45,12 +56,14 @@ namespace DSAMVVM.Core.Utilities
 
             return code;
         }
+
         // Warning: logs Warn and posts to status bar
         public static void Warn(string message, bool sticky = false, string? key = null)
         {
             Log.Warn("UiNotify", message);
             _bus?.Report(StatusMessageFactory.Warning(message, priority: 1, sticky: sticky, key: key));
         }
+
         // Info: logs Info; optionally show on status bar (useful for quiet modes)
         public static void Info(string message, bool showStatusBar = false, string? key = null)
         {
@@ -58,6 +71,7 @@ namespace DSAMVVM.Core.Utilities
             if (showStatusBar)
                 _bus?.Report(StatusMessageFactory.Info(message, priority: 0, sticky: false, key: key));
         }
+
         // Success is Info-level; by default also shows on the bar
         public static void Success(string message, bool showStatusBar = true, string? key = null)
         {
@@ -66,11 +80,11 @@ namespace DSAMVVM.Core.Utilities
                 _bus?.Report(StatusMessageFactory.Success(message, priority: 0, sticky: false, key: key));
         }
 
-        // Domain-specific language for rich status messages
+        // Rich status with inline links/actions
         public abstract record StatusLink;
         public sealed record ExternalLink(string Text, Uri Uri) : StatusLink;
         public sealed record InternalAction(string Text, Action Action) : StatusLink;
-        public sealed record InternalAsyncAction(string Text, Func<Task> ActionAsync) : StatusLink;
+        public sealed record InternalAsyncAction(string Text, Func<Task> Action) : StatusLink;
 
         public static class Link
         {
@@ -97,7 +111,7 @@ namespace DSAMVVM.Core.Utilities
             {
                 ExternalLink ext => StatusMessageFactory.Link(ext.Text, ext.Uri),
                 InternalAction act => StatusMessageFactory.ActionLink(act.Text, act.Action),
-                InternalAsyncAction aact => StatusMessageFactory.ActionLink(aact.Text, () => FireAndLogAsync(aact.ActionAsync)),
+                InternalAsyncAction aact => StatusMessageFactory.ActionLink(aact.Text, () => FireAndLogAsync(aact.Action)),
                 _ => new Run("")
             }).ToArray();
 
@@ -109,16 +123,13 @@ namespace DSAMVVM.Core.Utilities
             _bus.Report(rich);
         }
 
-        // - UI Helpers
-
-        // Blocking invoke (good for messagebox dialogs)
+        // UI helpers
         public static void RunOnUi(Action a)
         {
             var disp = Application.Current?.Dispatcher;
             if (disp != null && !disp.CheckAccess()) disp.Invoke(a); else a();
         }
 
-        // Non-blocking begininvoke (Status bar updates, animations, background UI changes)
         public static void RunOnUiAsync(Action a, DispatcherPriority priority = DispatcherPriority.Normal)
         {
             var disp = Application.Current?.Dispatcher;

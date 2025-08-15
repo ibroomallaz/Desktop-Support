@@ -1,19 +1,12 @@
-﻿// DSAMVVM.Core.Services/DepartmentService.cs
-using DSAMVVM.Core;
-using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Utilities;   // UiNotify + StatusMessageFactory
+﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;       // Stopwatch
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace DSAMVVM.Core.Services
 {
-    // Uses shared IHttpService + UiNotify (no direct HttpClient, no IStatusReporter).
+
     public class DepartmentService(IHttpService http) : IDepartmentService
     {
         private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
@@ -92,19 +85,18 @@ namespace DSAMVVM.Core.Services
 
         private async Task LoadDepartmentsInternalAsync(bool isReload)
         {
-            const string key = "DepartmentService";
+            string baseKey = isReload ? "DeptData.Reload" : "DeptData.Load";
+            string progressKey = baseKey + ".Progress";
 
-            // Start: sticky status so it's visible during work
+            // Non-sticky progress (queue-friendly; won’t unpin stickies)
             UiNotify.Push(StatusMessageFactory.Plain(
                 isReload ? "Refreshing department data…" : "Loading department data…",
-                priority: 0, sticky: false, key: key));
+                priority: 0, sticky: false, key: progressKey));
 
             var sw = Stopwatch.StartNew();
             try
             {
-                // Shared HttpService, no direct HttpClient
                 string json = await _http.GetStringAsync(Globals.g_DepartmentJSONURL);
-
                 var wrapper = JsonConvert.DeserializeObject<DepartmentListWrapper>(json);
                 _departments = wrapper?.DepartmentList?
                     .Select(d => new DepartmentAdapter(d))
@@ -112,22 +104,29 @@ namespace DSAMVVM.Core.Services
 
                 sw.Stop();
 
-                // Success: short, non-sticky toast on the status bar + log
+                // Remove any stale progress
+                UiNotify.RemoveKey(progressKey);
+
+                // Resolution (non-sticky) with the BASE key -> replaces any sticky on that thread
                 UiNotify.Success(
                     $"{(isReload ? "Refreshed" : "Loaded")} {_departments.Count} departments in {sw.ElapsedMilliseconds} ms.",
-                    showStatusBar: true, key: key);
+                    showStatusBar: true, key: baseKey);
             }
             catch (Exception e)
             {
                 sw.Stop();
 
-                // Failure: log + rich status with a Retry action
+                // Remove progress (we’ll show a sticky instead)
+                UiNotify.RemoveKey(progressKey);
+
+                // Sticky with BASE key (pins, shows Retry). Success with same BASE key will replace it later.
                 UiNotify.WarnWithLinks(
                     $"Failed to {(isReload ? "refresh" : "load")} department data: {e.Message}",
-                    sticky: true, priority: 3, key: key,
+                    sticky: true, priority: 3, key: baseKey,
                     UiNotify.Link.Action("Retry", () => ReloadDataAsync()));
             }
         }
+
 
         // Adapter keeps public surface aligned with IDepartment
         private class DepartmentAdapter(Department source) : IDepartment
