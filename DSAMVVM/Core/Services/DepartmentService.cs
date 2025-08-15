@@ -97,7 +97,7 @@ namespace DSAMVVM.Core.Services
             // Start: sticky status so it's visible during work
             UiNotify.Push(StatusMessageFactory.Plain(
                 isReload ? "Refreshing department data…" : "Loading department data…",
-                priority: 0, sticky: true, key: key));
+                priority: 0, sticky: false, key: key));
 
             var sw = Stopwatch.StartNew();
             try
