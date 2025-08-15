@@ -1,8 +1,6 @@
 ﻿using DSAMVVM.Core.Interfaces;
 using Newtonsoft.Json;
-using System;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace DSAMVVM.Core
 {
@@ -12,7 +10,7 @@ namespace DSAMVVM.Core
         public string? Error { get; set; }
         public bool Success => Info != null;
     }
-
+    //Handles the JSON deserialization for the version check
     public static partial class VersionChecker
     {
         public static async Task<VersionCheckResult> CheckVersionAsync(string versionJsonUrl, IHttpService http)

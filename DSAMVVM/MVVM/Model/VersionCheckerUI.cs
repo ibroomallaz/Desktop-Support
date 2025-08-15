@@ -1,10 +1,9 @@
 ﻿using DSAMVVM.Core;
 using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Utilities;      
+using DSAMVVM.Core.Utilities;
 using System;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Threading;
 
 namespace DSAMVVM.MVVM.Model
 {
@@ -26,11 +25,11 @@ namespace DSAMVVM.MVVM.Model
 
             if (!result.Success)
             {
-                OnUI(() => UiNotify.Error(
+                UiNotify.Error(
                     "Version check error",
                     result.Error ?? "Unknown error",
                     alsoStatusBar: true,
-                    key: "VersionCheck"));
+                    key: "VersionCheck");
                 return;
             }
 
@@ -40,10 +39,10 @@ namespace DSAMVVM.MVVM.Model
 
         private void ReportSuccess()
         {
-            OnUI(() => UiNotify.Info(
+            UiNotify.Info(
                 $"Version: {_installedVersion}.",
                 showStatusBar: true,
-                key: "VersionCheck"));
+                key: "VersionCheck");
         }
 
         private void NotifyUser(VersionInfo versionInfo)
@@ -85,7 +84,7 @@ namespace DSAMVVM.MVVM.Model
             location ??= Globals.g_sharepointHome;
             changelog ??= "No details provided.";
 
-            OnUI(() =>
+            UiNotify.RunOnUi(() =>
             {
                 var result = MessageBox.Show(
                     $"{title}\n\nA new version ({newVersion}) is available.\n\nCurrent version: {_installedVersion}\n\nChanges:\n{changelog}\n\nWould you like to update?",
@@ -98,15 +97,6 @@ namespace DSAMVVM.MVVM.Model
                     _http.TryOpenUrl(location, out _);
                 }
             });
-        }
-        // Ensures the provided action runs on the application's UI thread.
-        // Falls back to immediate execution if no WPF dispatcher is available (e.g., in tests or console apps).
-        private static void OnUI(Action action)
-        {
-            var d = Application.Current?.Dispatcher;
-            if (d is null) { action(); return; }
-            if (d.CheckAccess()) action();
-            else d.BeginInvoke(action, DispatcherPriority.Normal);
         }
     }
 }

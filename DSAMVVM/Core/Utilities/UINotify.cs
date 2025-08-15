@@ -1,10 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
+using System.Windows.Threading;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model;
 
@@ -20,7 +18,7 @@ namespace DSAMVVM.Core.Utilities
 
         public static void Push(StatusMessage message) => _bus?.Report(message);
 
-        // Critical error: logs Error, optional status bar echo, then MessageBox
+        // Error: logs Error, optional status bar echo, then MessageBox
         public static string Error(string title, string message, Exception? ex = null, string? detailsPath = null, bool alsoStatusBar = true, string? key = null)
         {
             string code = NewRef();
@@ -47,14 +45,12 @@ namespace DSAMVVM.Core.Utilities
 
             return code;
         }
-
         // Warning: logs Warn and posts to status bar
         public static void Warn(string message, bool sticky = false, string? key = null)
         {
             Log.Warn("UiNotify", message);
             _bus?.Report(StatusMessageFactory.Warning(message, priority: 1, sticky: sticky, key: key));
         }
-
         // Info: logs Info; optionally show on status bar (useful for quiet modes)
         public static void Info(string message, bool showStatusBar = false, string? key = null)
         {
@@ -62,7 +58,6 @@ namespace DSAMVVM.Core.Utilities
             if (showStatusBar)
                 _bus?.Report(StatusMessageFactory.Info(message, priority: 0, sticky: false, key: key));
         }
-
         // Success is Info-level; by default also shows on the bar
         public static void Success(string message, bool showStatusBar = true, string? key = null)
         {
@@ -71,7 +66,7 @@ namespace DSAMVVM.Core.Utilities
                 _bus?.Report(StatusMessageFactory.Success(message, priority: 0, sticky: false, key: key));
         }
 
-        // Tiny “DSL” for links you can attach to rich status messages
+        // Domain-specific language for rich status messages
         public abstract record StatusLink;
         public sealed record ExternalLink(string Text, Uri Uri) : StatusLink;
         public sealed record InternalAction(string Text, Action Action) : StatusLink;
@@ -85,17 +80,14 @@ namespace DSAMVVM.Core.Utilities
             {
                 var path = customPath ?? (Log.LogsDirectoryPath ?? Environment.CurrentDirectory);
                 if (!Path.IsPathRooted(path)) path = Path.GetFullPath(path);
-                var uri = new Uri(path); // turns "C:\..." into file:///C:/...
+                var uri = new Uri(path);
                 return new ExternalLink("Open logs", uri);
             }
 
             public static StatusLink Action(string text, Action onClick) => new InternalAction(text, onClick);
-
-            // Accept async actions without requiring an async ActionLink overload in the factory
             public static StatusLink Action(string text, Func<Task> onClickAsync) => new InternalAsyncAction(text, onClickAsync);
         }
 
-        // Rich warning with inline links; always logs Warn
         public static void WarnWithLinks(string message, bool sticky = true, int priority = 1, string? key = null, params StatusLink[] links)
         {
             Log.Warn("UiNotify", message);
@@ -104,16 +96,8 @@ namespace DSAMVVM.Core.Utilities
             Inline[] inlines = links.Select(l => l switch
             {
                 ExternalLink ext => StatusMessageFactory.Link(ext.Text, ext.Uri),
-
-                // Sync actions map directly
                 InternalAction act => StatusMessageFactory.ActionLink(act.Text, act.Action),
-
-                // Async actions are wrapped into a fire-and-log Action
-                InternalAsyncAction aact => StatusMessageFactory.ActionLink(
-                                                aact.Text,
-                                                () => FireAndLogAsync(aact.ActionAsync)
-                                            ),
-
+                InternalAsyncAction aact => StatusMessageFactory.ActionLink(aact.Text, () => FireAndLogAsync(aact.ActionAsync)),
                 _ => new Run("")
             }).ToArray();
 
@@ -125,17 +109,24 @@ namespace DSAMVVM.Core.Utilities
             _bus.Report(rich);
         }
 
-        // internals
-        private static void RunOnUi(Action a)
+        // - UI Helpers
+
+        // Blocking invoke (good for messagebox dialogs)
+        public static void RunOnUi(Action a)
         {
             var disp = Application.Current?.Dispatcher;
             if (disp != null && !disp.CheckAccess()) disp.Invoke(a); else a();
         }
 
-        private static void FireAndLogAsync(Func<Task> action)
+        // Non-blocking begininvoke (Status bar updates, animations, background UI changes)
+        public static void RunOnUiAsync(Action a, DispatcherPriority priority = DispatcherPriority.Normal)
         {
-            _ = RunAsync(action);
+            var disp = Application.Current?.Dispatcher;
+            if (disp != null && !disp.CheckAccess()) disp.BeginInvoke(a, priority); else a();
         }
+
+        // internals
+        private static void FireAndLogAsync(Func<Task> action) => _ = RunAsync(action);
 
         private static async Task RunAsync(Func<Task> action)
         {
