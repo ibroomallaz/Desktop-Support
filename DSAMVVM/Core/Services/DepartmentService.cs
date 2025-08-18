@@ -1,17 +1,24 @@
 ﻿using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
+using DSAMVVM.MVVM.Model.Data;
+using DSAMVVM.MVVM.Model.Schemas;
 using Newtonsoft.Json;
 using System.Diagnostics;
 
+
 namespace DSAMVVM.Core.Services
 {
-
     public class DepartmentService(IHttpService http) : IDepartmentService
     {
         private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
         private readonly SemaphoreSlim _lock = new(1, 1);
+
+        // Cached, app-facing list (adapters implementing IDepartment)
         private List<IDepartment>? _departments;
+
+        // Meta is kept if you want to surface schema/timestamp later
+        private DepartmentMeta? _meta;
 
         public async Task PreCacheDataAsync() => await EnsureDataLoaded();
 
@@ -21,45 +28,32 @@ namespace DSAMVVM.Core.Services
             return _departments?.FirstOrDefault(d => d.Number == departmentNumber);
         }
 
+        public async Task<string?> GetTeamAsync(string departmentNumber)
+            => (await GetDepartmentAsync(departmentNumber))?.Team;
+
         public async Task<string?> GetNotesAsync(string departmentNumber)
             => (await GetDepartmentAsync(departmentNumber))?.Notes;
-
-        public async Task<bool> HasFileRepoAsync(string departmentNumber)
-            => (await GetDepartmentAsync(departmentNumber))?.FileRepos?.Any(fr => fr.Exists) ?? false;
-
-        public async Task<FileRepo?> GetFileRepoAsync(string departmentNumber)
-            => (await GetDepartmentAsync(departmentNumber))?.FileRepos?.FirstOrDefault(fr => fr.Exists);
-
-        public async Task<List<string>> GetTeamNamesAsync(string departmentNumber)
-        {
-            var department = await GetDepartmentAsync(departmentNumber);
-            List<string> teamNames = [];
-
-            if (department?.Teams == null || department.Teams.Count == 0)
-                return teamNames;
-
-            if (department.SplitSupport)
-            {
-                if (department.Teams.Count >= 1) teamNames.Add(department.Teams[0].Name);
-                if (department.Teams.Count >= 2) teamNames.Add(department.Teams[1].Name);
-            }
-            else
-            {
-                teamNames.Add(department.Teams[0].Name);
-            }
-
-            return teamNames;
-        }
 
         public async Task<bool?> IsSupportKnownAsync(string departmentNumber)
             => (await GetDepartmentAsync(departmentNumber))?.SupportKnown;
 
-        // internals
+        public async Task<string?> GetFileRepoPathAsync(string departmentNumber)
+            => (await GetDepartmentAsync(departmentNumber))?.FileRepoPath;
+
+        public async Task ReloadDataAsync()
+        {
+            // Force reload regardless of cache state
+            await _lock.WaitAsync();
+            try { await LoadDepartmentsInternalAsync(isReload: true); }
+            finally { _lock.Release(); }
+        }
+
+        //internals
 
         private async Task EnsureDataLoaded()
         {
-            if (_departments == null)
-                await LoadDepartmentsAsync();
+            // Lazy load on first access
+            if (_departments == null) await LoadDepartmentsAsync();
         }
 
         private async Task LoadDepartmentsAsync()
@@ -67,28 +61,18 @@ namespace DSAMVVM.Core.Services
             await _lock.WaitAsync();
             try
             {
-                if (_departments != null) return;
+                if (_departments != null) return; // already loaded in the gap
                 await LoadDepartmentsInternalAsync(isReload: false);
-            }
-            finally { _lock.Release(); }
-        }
-
-        public async Task ReloadDataAsync()
-        {
-            await _lock.WaitAsync();
-            try
-            {
-                await LoadDepartmentsInternalAsync(isReload: true);
             }
             finally { _lock.Release(); }
         }
 
         private async Task LoadDepartmentsInternalAsync(bool isReload)
         {
-            string baseKey = isReload ? "DeptData.Reload" : "DeptData.Load";
-            string progressKey = baseKey + ".Progress";
+            var baseKey = isReload ? "DeptData.Reload" : "DeptData.Load";
+            var progressKey = baseKey + ".Progress";
 
-            // Non-sticky progress (queue-friendly; won’t unpin stickies)
+            // Non-sticky progress message while loading
             UiNotify.Push(StatusMessageFactory.Plain(
                 isReload ? "Refreshing department data…" : "Loading department data…",
                 priority: 0, sticky: false, key: progressKey));
@@ -96,18 +80,26 @@ namespace DSAMVVM.Core.Services
             var sw = Stopwatch.StartNew();
             try
             {
+                // Fetch JSON
                 string json = await _http.GetStringAsync(Globals.g_DepartmentJSONURL);
-                var wrapper = JsonConvert.DeserializeObject<DepartmentListWrapper>(json);
-                _departments = wrapper?.DepartmentList?
+
+                // Deserialize
+                var wrapper = JsonConvert.DeserializeObject<DepartmentListWrapper>(json)
+                              ?? new DepartmentListWrapper();
+
+                // Ensure meta has a timestamp if payload omitted it
+                wrapper.Meta?.Normalize();
+                _meta = wrapper.Meta;
+
+                // Map raw entries to the app-facing interface via adapters
+                _departments = (wrapper.DepartmentList ?? new List<Department>())
                     .Select(d => new DepartmentAdapter(d))
-                    .ToList<IDepartment>() ?? [];
+                    .ToList<IDepartment>();
 
                 sw.Stop();
-
-                // Remove any stale progress
                 UiNotify.RemoveKey(progressKey);
 
-                // Resolution (non-sticky) with the BASE key -> replaces any sticky on that thread
+                // Resolution message replaces any sticky from previous failures
                 UiNotify.Success(
                     $"{(isReload ? "Refreshed" : "Loaded")} {_departments.Count} departments in {sw.ElapsedMilliseconds} ms.",
                     showStatusBar: true, key: baseKey);
@@ -115,11 +107,9 @@ namespace DSAMVVM.Core.Services
             catch (Exception e)
             {
                 sw.Stop();
-
-                // Remove progress (we’ll show a sticky instead)
                 UiNotify.RemoveKey(progressKey);
 
-                // Sticky with BASE key (pins, shows Retry). Success with same BASE key will replace it later.
+                // Sticky with Retry
                 UiNotify.WarnWithLinks(
                     $"Failed to {(isReload ? "refresh" : "load")} department data: {e.Message}",
                     sticky: true, priority: 3, key: baseKey,
@@ -127,18 +117,16 @@ namespace DSAMVVM.Core.Services
             }
         }
 
-
-        // Adapter keeps public surface aligned with IDepartment
-        private class DepartmentAdapter(Department source) : IDepartment
+        // Adapter  for IDepartment
+        private sealed class DepartmentAdapter(Department source) : IDepartment
         {
             private readonly Department _source = source;
 
             public string Number => _source.Number;
             public bool SupportKnown => _source.SupportKnown;
-            public bool SplitSupport => _source.SplitSupport;
-            public List<Team>? Teams => _source.Teams;
-            public List<FileRepo>? FileRepos => _source.FileRepos;
+            public string? Team => string.IsNullOrWhiteSpace(_source.Team) ? null : _source.Team.Trim();
             public string? Notes => _source.Notes;
+            public string? FileRepoPath => string.IsNullOrWhiteSpace(_source.FileRepoPath) ? null : _source.FileRepoPath;
         }
     }
 }

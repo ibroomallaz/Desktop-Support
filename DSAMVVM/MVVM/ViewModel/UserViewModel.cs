@@ -1,13 +1,8 @@
-﻿﻿using DSAMVVM.Core.Enums;
+﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Utilities;
-using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -170,18 +165,19 @@ namespace DSAMVVM.MVVM.ViewModel
                     if (dept != null)
                     {
                         DepartmentNotes = dept.Notes;
-                        TeamNames = await _deptService.GetTeamNamesAsync(dept.Number);
+
+                        // v2 flattened: single Team string -> wrap into list for existing binding
+                        var team = await _deptService.GetTeamAsync(dept.Number);
+                        TeamNames = string.IsNullOrWhiteSpace(team) ? new List<string>() : new List<string> { team! };
+
+                        // v2 flattened: single FileRepoPath
+                        var repoPath = await _deptService.GetFileRepoPathAsync(dept.Number);
 
                         AppendLog($"Department Info for {dept.Number}:");
                         AppendLog($"  Notes:         {dept.Notes}");
                         AppendLog($"  SupportKnown:  {dept.SupportKnown}");
-                        AppendLog($"  SplitSupport:  {dept.SplitSupport}");
-                        AppendLog($"  Teams:         {(dept.Teams?.Count > 0 ? string.Join(", ", dept.Teams.Select(t => t.Name)) : "None")}");
-                        AppendLog($"  FileRepos:     {(dept.FileRepos?.Count > 0
-                                    ? string.Join(", ", dept.FileRepos.Select(fr => fr.Exists
-                                        ? $"{fr.Location ?? "(unknown)"} (Exists)"
-                                        : $"{fr.Location ?? "(unknown)"} (Missing)"))
-                                    : "None")}");
+                        AppendLog($"  Team:          {(string.IsNullOrWhiteSpace(team) ? "None" : team)}");
+                        AppendLog($"  FileRepoPath:  {(string.IsNullOrWhiteSpace(repoPath) ? "None" : repoPath)}");
                         AppendLog("Team Names from service: " + (TeamNames?.Count > 0 ? string.Join(", ", TeamNames) : "None"));
                     }
                     else

@@ -19,7 +19,7 @@ namespace DSAMVVM.MVVM.Model
 
         // JSON Location constants
         public const string g_QuickLinksURL = "https://arizona.box.com/shared/static/4jonapcgzw5lq2i8m40doma5x9t684de.json"; // old
-        public const string g_DepartmentJSONURL = "https://arizona.box.com/shared/static/j3w4j5gdhhden2dheuthu2sdhunp2oxl.json";
+        public const string g_DepartmentJSONURL = "https://arizona.box.com/shared/static/wj9xs1pqsikyya4hkxuyu84dmvm91g4r.json";
         public const string g_versionJSON = "https://arizona.box.com/shared/static/ccfzlvn1gtfdjxv8n9c63uo68fqckp7n.json";
         public const string g_testVersionJSON = "https://arizona.box.com/shared/static/rtt7xirnv2heobjf85t11em8gg6hburt.json";
         public const string g_LinksJSON = "https://arizona.box.com/shared/static/zg9sd4zpbfse7vk060e4fsegqabhdacs.json";
