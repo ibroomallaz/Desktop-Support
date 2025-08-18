@@ -1,8 +1,11 @@
 ﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.MVVM.Model.Schemas;
 using Newtonsoft.Json;
+
 using System.Text.RegularExpressions;
 
-namespace DSAMVVM.Core
+
+namespace DSAMVVM.Core.Utilities
 {
     public class VersionCheckResult
     {
@@ -10,6 +13,7 @@ namespace DSAMVVM.Core
         public string? Error { get; set; }
         public bool Success => Info != null;
     }
+
     //Handles the JSON deserialization for the version check
     public static partial class VersionChecker
     {
@@ -18,7 +22,7 @@ namespace DSAMVVM.Core
             try
             {
                 string json = await http.GetStringAsync(versionJsonUrl);
-                var data = JsonConvert.DeserializeObject<Root>(json);
+                var data = JsonConvert.DeserializeObject<VersionResponse>(json); // was Root
                 return new VersionCheckResult { Info = data?.Version };
             }
             catch (Exception ex)
@@ -78,48 +82,5 @@ namespace DSAMVVM.Core
 
         [GeneratedRegex(@"^(?<base>\d+\.\d+\.\d+)(?:-(?<label>alpha|beta)(?<number>\d+)?)?$", RegexOptions.IgnoreCase, "en-US")]
         private static partial Regex VersionRegex();
-    }
-
-    // JSON models
-    public class CurrentVersion
-    {
-        [JsonProperty("version", NullValueHandling = NullValueHandling.Ignore)]
-        public string? Version { get; set; }
-
-        [JsonProperty("location", NullValueHandling = NullValueHandling.Ignore)]
-        public string? Location { get; set; }
-
-        [JsonProperty("changelog", NullValueHandling = NullValueHandling.Ignore)]
-        public string? Changelog { get; set; }
-    }
-
-    public class PreReleaseVersion
-    {
-        [JsonProperty("exists")]
-        public bool Exists { get; set; }
-
-        [JsonProperty("version", NullValueHandling = NullValueHandling.Ignore)]
-        public string? Version { get; set; }
-
-        [JsonProperty("location", NullValueHandling = NullValueHandling.Ignore)]
-        public string? Location { get; set; }
-
-        [JsonProperty("changelog", NullValueHandling = NullValueHandling.Ignore)]
-        public string? Changelog { get; set; }
-    }
-
-    public class VersionInfo
-    {
-        [JsonProperty(nameof(Current))]
-        public CurrentVersion? Current { get; set; }
-
-        [JsonProperty(nameof(PreRelease))]
-        public PreReleaseVersion? PreRelease { get; set; }
-    }
-
-    public class Root
-    {
-        [JsonProperty(nameof(Version))]
-        public VersionInfo? Version { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Utilities;
-using DSAMVVM.MVVM.Model;
+using DSAMVVM.MVVM.Model.Data;
 
 namespace DSAMVVM.MVVM.ViewModel;
 public class LinksViewModel : ObeservableObject

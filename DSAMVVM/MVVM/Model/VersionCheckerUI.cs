@@ -1,8 +1,7 @@
 ﻿using DSAMVVM.Core;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Utilities;
-using System;
-using System.Threading.Tasks;
+using DSAMVVM.MVVM.Model.Schemas;
 using System.Windows;
 
 namespace DSAMVVM.MVVM.Model

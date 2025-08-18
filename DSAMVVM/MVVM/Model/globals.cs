@@ -66,7 +66,7 @@ namespace DSAMVVM.MVVM.Model
             }
         }
 
-        // If a FILE exists where our folder should be, this is fatal
+        // If a files exists where our folder should be, this is fatal
         private static void EnsureDirSafe(string path)
         {
             if (File.Exists(path))

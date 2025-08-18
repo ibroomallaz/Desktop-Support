@@ -1,15 +1,15 @@
 ﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.MVVM.Model.Schemas;   // use shared SettingsMeta / JsonMetaBase
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 
-namespace DSAMVVM.MVVM.Model
+namespace DSAMVVM.MVVM.Model.Config
 {
-
     public class AppSettings
     {
-        public Meta Meta { get; set; } = new();
+        public SettingsMeta Meta { get; set; } = new();
         public Paths Paths { get; set; } = new();
         public Ui Ui { get; set; } = new();
         public LoggingSettings Logging { get; set; } = new LoggingSettings();
@@ -17,6 +17,9 @@ namespace DSAMVVM.MVVM.Model
         // Call after deserialization
         public void ApplyDefaultsAndClamp()
         {
+            // ensure Meta.LastUpdatedUtc is set when missing
+            Meta?.Normalize();
+
             Ui?.Search?.Clamp();
             Ui?.Font?.Clamp();
 
@@ -40,12 +43,6 @@ namespace DSAMVVM.MVVM.Model
             // Clamp logging settings
             Logging?.Clamp();
         }
-    }
-
-    public class Meta
-    {
-        public int SchemaVersion { get; set; } = 1;
-        public DateTime LastUpdatedUtc { get; set; } = DateTime.UtcNow;
     }
 
     public class Paths
