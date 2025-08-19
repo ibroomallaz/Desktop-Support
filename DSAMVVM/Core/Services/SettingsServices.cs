@@ -1,416 +1,306 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.IO;
-using System.Net.Http;
+﻿using System.IO;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
+using DSAMVVM.Core.Logging;
 
 namespace DSAMVVM.Core.Services
 {
     public class SettingsService : ISettingsService
     {
-        // one lock per final file path (case-insensitive)
-        private static readonly ConcurrentDictionary<string, SemaphoreSlim> _saveLocks =
-            new(StringComparer.OrdinalIgnoreCase);
+        private const string Tag = "SettingsService";
+        private const int MinFont = 9;
+        private const int MaxFont = 24;
 
-        private static SemaphoreSlim SaveLockFor(string path) =>
-            _saveLocks.GetOrAdd(Path.GetFullPath(path), _ => new SemaphoreSlim(1, 1));
+
+        // Load / Save (core)
+
 
         public async Task<AppSettings> LoadAsync(string settingsPath, CancellationToken ct = default)
         {
             var path = Expand(settingsPath);
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
 
-            var settings = new AppSettings(); // start with defaults
+            Log.Debug(Tag, $"LoadAsync: attempting to load settings from \"{path}\".");
+
+            AppSettings settings;
 
             if (File.Exists(path))
             {
-                string? json = null;
-
                 try
                 {
-                    json = await File.ReadAllTextAsync(path, ct).ConfigureAwait(false);
-                    var fileSchema = ReadSchemaVersion(json);
-
-                    if (fileSchema > Globals.g_SettingsSchema)
-                    {
-                        var legacyDir = Path.Combine(Path.GetDirectoryName(path)!, "settings-legacy");
-                        Directory.CreateDirectory(legacyDir);
-                        var legacyFile = Path.Combine(
-                            legacyDir,
-                            $"settings.schema{fileSchema}.{DateTime.UtcNow:yyyyMMdd-HHmmss}.json"
-                        );
-                        File.Move(path, legacyFile, overwrite: false);
-
-                        SeedDefaults(settings);
-                        EnsureDirectories(settings);
-                        settings.ApplyDefaultsAndClamp();
-                        await SaveAsync(settings, settingsPath, ct).ConfigureAwait(false);
-                        return settings;
-                    }
-
-                    var loaded = JsonConvert.DeserializeObject<AppSettings>(json);
-                    if (loaded is not null)
-                    {
-                        SeedViewFontSizes(loaded);
-                        EnsureDirectories(loaded);
-                        loaded.ApplyDefaultsAndClamp();
-                        return loaded;
-                    }
+                    var json = await File.ReadAllTextAsync(path, ct).ConfigureAwait(false);
+                    settings = JsonConvert.DeserializeObject<AppSettings>(json) ?? new AppSettings();
+                    Log.Info(Tag, $"LoadAsync: loaded settings ({json?.Length ?? 0} bytes).");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // fall through to try backup
+                    Log.Warn(Tag, $"LoadAsync: failed to read settings, using defaults. Reason: {ex.Message}");
+                    settings = new AppSettings();
                 }
-
-                // Try .bak if present
-                var bak = path + ".bak";
-                if (File.Exists(bak))
+            }
+            else
+            {
+                Log.Info(Tag, "LoadAsync: settings file not found. Creating with defaults.");
+                settings = new AppSettings();
+                try
                 {
-                    try
-                    {
-                        var bakJson = await File.ReadAllTextAsync(bak, ct).ConfigureAwait(false);
-                        var fromBak = JsonConvert.DeserializeObject<AppSettings>(bakJson);
-                        if (fromBak is not null)
-                        {
-                            SeedViewFontSizes(fromBak);
-                            EnsureDirectories(fromBak);
-                            fromBak.ApplyDefaultsAndClamp();
-
-                            // Restore .bak back to main atomically
-                            await WriteTextAtomicallyAsync(path, bakJson, ct).ConfigureAwait(false);
-                            return fromBak;
-                        }
-                    }
-                    catch
-                    {
-                        // ignore and fall back to defaults
-                    }
+                    await SaveAsync(settings, path, ct).ConfigureAwait(false);
+                    Log.Info(Tag, "LoadAsync: default settings written.");
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn(Tag, $"LoadAsync: failed to write default settings. Reason: {ex.Message}");
                 }
             }
 
-            // No file or both current/bak unusable -> defaults
-            SeedDefaults(settings);
-            EnsureDirectories(settings);
-            settings.ApplyDefaultsAndClamp();
-            await SaveAsync(settings, settingsPath, ct).ConfigureAwait(false);
             return settings;
         }
 
         public async Task SaveAsync(AppSettings settings, string settingsPath, CancellationToken ct = default)
         {
-            ct.ThrowIfCancellationRequested();
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
 
             var path = Expand(settingsPath);
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
 
+            TryTouchMeta(settings);
+
+            var tmp = path + ".tmp";
+            var bak = path + ".bak";
+            var json = JsonConvert.SerializeObject(settings, Formatting.Indented);
+
+            Log.Debug(Tag, $"SaveAsync: writing settings to temp \"{tmp}\" ({json.Length} bytes).");
+
             try
             {
-                settings.Meta.LastUpdatedUtc = DateTime.UtcNow;
-                settings.Meta.SchemaVersion = Globals.g_SettingsSchema;
-
-                string json = JsonConvert.SerializeObject(settings, Formatting.Indented);
-
-                // validate before touching disk
-                if (!IsValidJson(json))
-                {
-                    await WriteDiagnosticDumpAsync(path, json, "invalid-json", ct).ConfigureAwait(false);
-                    return;
-                }
-
-                // per-path in-process lock
-                var slim = SaveLockFor(path);
-                await slim.WaitAsync(ct).ConfigureAwait(false);
-                try
-                {
-                    await WriteTextAtomicallyAsync(path, json, ct).ConfigureAwait(false);
-                }
-                finally
-                {
-                    slim.Release();
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
+                await File.WriteAllTextAsync(tmp, json, Encoding.UTF8, ct).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                // record for analysis and discard changes
-                await WriteDiagnosticDumpAsync(path, ex.ToString(), "save-exception", CancellationToken.None).ConfigureAwait(false);
+                Log.Error(Tag, $"SaveAsync: failed writing temp file \"{tmp}\".", ex);
+                throw;
+            }
+
+            try
+            {
+                if (File.Exists(path))
+                {
+                    File.Copy(path, bak, overwrite: true);
+                    Log.Debug(Tag, $"SaveAsync: backup created at \"{bak}\".");
+                }
+
+                File.Copy(tmp, path, overwrite: true);
+                File.Delete(tmp);
+                Log.Info(Tag, $"SaveAsync: settings persisted to \"{path}\".");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(Tag, $"SaveAsync: replace/cleanup failed for \"{path}\".", ex);
+                throw;
             }
         }
+
+
+        // Paths
 
         public string ResolveDataDir(AppSettings s)
         {
             Directory.CreateDirectory(Globals.g_AppDir);
             var dataDir = Path.Combine(Globals.g_AppDir, s.Paths.DataDir);
             Directory.CreateDirectory(dataDir);
+            Log.Debug(Tag, $"ResolveDataDir: ensured \"{dataDir}\".");
             return dataDir;
         }
 
-        public double GetFontSizeFor(string viewName, AppSettings s, double min = 8, double max = 24)
+
+        // Font sizing
+
+
+        public double GetFontSizeFor(string viewName, AppSettings s, double min = MinFont, double max = MaxFont)
         {
+            double result;
             if (s.Ui.Font.ViewFontSizeOverride &&
                 s.Ui.ViewFontSizes.TryGetValue(viewName, out var v) &&
                 v is not null &&
                 v.FontSize > 0)
             {
-                return Math.Clamp(v.FontSize, min, max);
+                result = Math.Clamp(v.FontSize, min, max);
+                Log.Debug(Tag, $"GetFontSizeFor[{viewName}]: using per-view={v.FontSize} -> {result}.");
+            }
+            else
+            {
+                var def = s.Ui.Font.DefaultSize > 0 ? s.Ui.Font.DefaultSize : 14;
+                result = Math.Clamp(def, min, max);
+                Log.Debug(Tag, $"GetFontSizeFor[{viewName}]: using default={def} -> {result}.");
             }
 
-            return Math.Clamp(s.Ui.Font.DefaultSize, min, max);
+            return result;
         }
 
-        public async Task<string?> GetDataAsync(DataLocation loc, AppSettings s, HttpClient http, CancellationToken ct = default)
+        public double AdjustOutputFontSize(AppSettings s, string? viewName, int delta, bool preferPerView)
         {
-            if (IsWeb(loc))
+            if (s is null) throw new ArgumentNullException(nameof(s));
+
+            if (preferPerView && !string.IsNullOrWhiteSpace(viewName))
             {
-                try
+                var current = GetFontSizeFor(viewName, s, MinFont, MaxFont);
+                var next = (int)Math.Clamp(current + delta, MinFont, MaxFont);
+
+                if (!s.Ui.ViewFontSizes.TryGetValue(viewName, out var entry) || entry is null)
                 {
-                    var json = await http.GetStringAsync(loc.Uri, ct).ConfigureAwait(false);
-
-                    TryValidateJson(json);
-
-                    await WriteFallbackAsync(json, loc, s, ct).ConfigureAwait(false);
-                    return json;
+                    entry = new ViewFontSetting();
+                    s.Ui.ViewFontSizes[viewName] = entry;
                 }
-                catch
-                {
-                    var fb = ResolveFallback(loc, s);
-                    if (fb is not null && File.Exists(fb))
-                        return await File.ReadAllTextAsync(fb, ct).ConfigureAwait(false);
+                entry.FontSize = next;
 
-                    return null;
+                Log.Info(Tag, $"AdjustOutputFontSize: per-view \"{viewName}\" {current} -> {next} (delta {delta}).");
+                return next;
+            }
+            else
+            {
+                var current = s.Ui.Font.DefaultSize > 0 ? s.Ui.Font.DefaultSize : 14;
+                var next = (int)Math.Clamp(current + delta, MinFont, MaxFont);
+                s.Ui.Font.DefaultSize = next;
+
+                Log.Info(Tag, $"AdjustOutputFontSize: global default {current} -> {next} (delta {delta}).");
+                return next;
+            }
+        }
+
+        public void ResetOutputFontSize(AppSettings s, string? viewName, bool preferPerView, int defaultSize = 14)
+        {
+            if (s is null) throw new ArgumentNullException(nameof(s));
+
+            if (preferPerView && !string.IsNullOrWhiteSpace(viewName))
+            {
+                if (s.Ui.ViewFontSizes.Remove(viewName))
+                {
+                    Log.Info(Tag, $"ResetOutputFontSize: removed per-view override for \"{viewName}\".");
+                }
+                else
+                {
+                    Log.Debug(Tag, $"ResetOutputFontSize: no per-view override existed for \"{viewName}\".");
                 }
             }
             else
             {
-                var primary = ResolvePrimaryFile(loc, s);
-                if (primary is not null && File.Exists(primary))
-                    return await File.ReadAllTextAsync(primary, ct).ConfigureAwait(false);
-
-                var fb = ResolveFallback(loc, s);
-                if (fb is not null && File.Exists(fb))
-                    return await File.ReadAllTextAsync(fb, ct).ConfigureAwait(false);
-
-                return null;
+                var clamped = (int)Math.Clamp(defaultSize, MinFont, MaxFont);
+                var prev = s.Ui.Font.DefaultSize;
+                s.Ui.Font.DefaultSize = clamped;
+                Log.Info(Tag, $"ResetOutputFontSize: global default {prev} -> {clamped}.");
             }
         }
+
+
+        // Debounced save
+
+
+        private readonly object _saveGate = new();
+        private System.Threading.Timer? _saveTimer;
+        private AppSettings? _pendingSettings;
+        private string? _pendingPath;
+        private static readonly TimeSpan SaveDebounce = TimeSpan.FromMilliseconds(500);
+
+        public void RequestSave(AppSettings s, string settingsPath)
+        {
+            if (s is null || string.IsNullOrWhiteSpace(settingsPath)) return;
+
+            lock (_saveGate)
+            {
+                _pendingSettings = s;
+                _pendingPath = Expand(settingsPath);
+
+                _saveTimer?.Dispose();
+                _saveTimer = new System.Threading.Timer(async _ =>
+                {
+                    AppSettings? toSave;
+                    string? path;
+
+                    lock (_saveGate)
+                    {
+                        toSave = _pendingSettings;
+                        path = _pendingPath;
+                        _pendingSettings = null;
+                        _pendingPath = null;
+                        _saveTimer?.Dispose();
+                        _saveTimer = null;
+                    }
+
+                    if (toSave != null && !string.IsNullOrWhiteSpace(path))
+                    {
+                        Log.Debug(Tag, $"RequestSave[TIMER]: persisting queued settings to \"{path}\".");
+                        try
+                        {
+                            await SaveAsync(toSave, path).ConfigureAwait(false);
+                            Log.Info(Tag, "RequestSave[TIMER]: settings persisted.");
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Warn(Tag, $"RequestSave[TIMER]: SaveAsync failed. Will rely on later flush. Reason: {ex.Message}");
+                        }
+                    }
+                }, null, SaveDebounce, Timeout.InfiniteTimeSpan);
+
+                Log.Debug(Tag, $"RequestSave: scheduled debounce write for \"{_pendingPath}\" in {SaveDebounce.TotalMilliseconds} ms.");
+            }
+        }
+
+        public void FlushPendingSaves()
+        {
+            lock (_saveGate)
+            {
+                _saveTimer?.Dispose();
+                _saveTimer = null;
+
+                if (_pendingSettings != null && !string.IsNullOrWhiteSpace(_pendingPath))
+                {
+                    try
+                    {
+                        Log.Debug(Tag, $"FlushPendingSaves: flushing queued save to \"{_pendingPath}\".");
+                        SaveAsync(_pendingSettings, _pendingPath).GetAwaiter().GetResult();
+                        Log.Info(Tag, "FlushPendingSaves: flushed successfully.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn(Tag, $"FlushPendingSaves: flush failed. Reason: {ex.Message}");
+                    }
+                    finally
+                    {
+                        _pendingSettings = null;
+                        _pendingPath = null;
+                    }
+                }
+                else
+                {
+                    Log.Debug(Tag, "FlushPendingSaves: nothing pending.");
+                }
+            }
+        }
+
 
         // Helpers
 
-        private static bool IsWeb(DataLocation loc) =>
-            loc.Source.Equals("web", StringComparison.OrdinalIgnoreCase);
+        private static string Expand(string path) =>
+            Environment.ExpandEnvironmentVariables(path ?? string.Empty);
 
-        private static string Expand(string path)
-        {
-            var expanded = Environment.ExpandEnvironmentVariables(path);
-            return Path.GetFullPath(expanded);
-        }
-
-        private static string Resolve(string baseDir, string relativeOrAbsolute)
-        {
-            var p = Expand(relativeOrAbsolute);
-            return Path.IsPathRooted(p) ? p : Path.GetFullPath(Path.Combine(baseDir, p));
-        }
-
-        private static void EnsureDirectories(AppSettings s)
-        {
-            Directory.CreateDirectory(Globals.g_AppDir);
-            var dataDir = Path.Combine(Globals.g_AppDir, s.Paths.DataDir);
-            Directory.CreateDirectory(dataDir);
-        }
-
-        private void SeedDefaults(AppSettings s)
-        {
-            SeedViewFontSizes(s);
-
-            s.Paths.DepartmentData.Uri = Globals.g_DepartmentJSONURL;
-            s.Paths.DepartmentData.FallbackFile = "departments.cache.json";
-            s.Paths.DepartmentData.Source = InferSource(Globals.g_DepartmentJSONURL);
-
-            s.Paths.LinksData.Uri = Globals.g_LinksJSON;
-            s.Paths.LinksData.FallbackFile = "links.cache.json";
-            s.Paths.LinksData.Source = InferSource(Globals.g_LinksJSON);
-        }
-
-        private static string InferSource(string uriOrPath)
-        {
-            if (string.IsNullOrWhiteSpace(uriOrPath))
-                return "web";
-
-            return uriOrPath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-                   uriOrPath.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
-                   ? "web"
-                   : "file";
-        }
-
-        private static void SeedViewFontSizes(AppSettings s)
-        {
-            EnsureView(s, "UserView", 14.0);
-            EnsureView(s, "GroupView", 14.0);
-            EnsureView(s, "ComputerView", 14.0);
-            EnsureView(s, "LinksView", 14.0);
-        }
-
-        private static void EnsureView(AppSettings s, string key, double sizeIfMissing)
-        {
-            if (!s.Ui.ViewFontSizes.TryGetValue(key, out var v) || v is null)
-                s.Ui.ViewFontSizes[key] = new ViewFontSetting { FontSize = sizeIfMissing };
-        }
-
-        private string? ResolveFallback(DataLocation loc, AppSettings s)
-        {
-            if (string.IsNullOrWhiteSpace(loc.FallbackFile))
-                return null;
-
-            var dataDir = ResolveDataDir(s);
-            return Resolve(dataDir, loc.FallbackFile);
-        }
-
-        private string? ResolvePrimaryFile(DataLocation loc, AppSettings s)
-        {
-            if (string.IsNullOrWhiteSpace(loc.Uri))
-                return null;
-
-            var dataDir = ResolveDataDir(s);
-            return Resolve(dataDir, loc.Uri);
-        }
-
-        private async Task WriteFallbackAsync(string json, DataLocation loc, AppSettings s, CancellationToken ct)
-        {
-            var fb = ResolveFallback(loc, s);
-            if (fb is null) return;
-
-            Directory.CreateDirectory(Path.GetDirectoryName(fb)!);
-
-            TryValidateJson(json);
-
-            await WriteTextAtomicallyAsync(fb, json, ct).ConfigureAwait(false);
-        }
-
-        private static int ReadSchemaVersion(string json)
+        private static void TryTouchMeta(AppSettings s)
         {
             try
             {
-                var root = JObject.Parse(json);
-                var ver = root["Meta"]?["SchemaVersion"]?.Value<int?>();
-                return ver ?? 0;
-            }
-            catch
-            {
-                return 0;
-            }
-        }
-
-        private static void TryValidateJson(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return;
-            try { JToken.Parse(text); }
-            catch { /* remove if some endpoints are not JSON */ }
-        }
-
-        private static bool IsValidJson(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return false;
-            try { JToken.Parse(text); return true; }
-            catch { return false; }
-        }
-
-        // Atomic writer with unique temp + retries (no fixed .tmp collisions)
-        private static async Task WriteTextAtomicallyAsync(string finalPath, string content, CancellationToken ct)
-        {
-            string dir = Path.GetDirectoryName(finalPath)!;
-            Directory.CreateDirectory(dir);
-
-            string name = Path.GetFileName(finalPath);
-            string tempPath = Path.Combine(dir, $"{name}.{Guid.NewGuid():N}.tmp");
-            string bakPath = finalPath + ".bak";
-
-            // Write to unique temp with exclusive handle
-            var bytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(content);
-            using (var fs = new FileStream(tempPath, FileMode.CreateNew, FileAccess.Write, FileShare.None, 8192, useAsync: true))
-            {
-                await fs.WriteAsync(bytes, 0, bytes.Length, ct).ConfigureAwait(false);
-                await fs.FlushAsync(ct).ConfigureAwait(false);
-                fs.Flush(true); // force to disk
-            }
-
-            await ReplaceWithRetriesAsync(tempPath, finalPath, bakPath, ct).ConfigureAwait(false);
-
-            // best-effort cleanup (should not exist if Replace succeeded)
-            TryDeleteQuiet(tempPath);
-        }
-
-        private static async Task ReplaceWithRetriesAsync(string temp, string final, string bak, CancellationToken ct)
-        {
-            const int maxAttempts = 6;
-            int delayMs = 50;
-
-            for (int attempt = 1; attempt <= maxAttempts; attempt++)
-            {
-                ct.ThrowIfCancellationRequested();
-
-                try
+                var meta = s.Meta;
+                var prop = meta?.GetType()?.GetProperty("LastUpdatedUtc");
+                if (prop != null && prop.CanWrite)
                 {
-                    if (File.Exists(final))
-                        File.Replace(temp, final, bak, ignoreMetadataErrors: true);
-                    else
-                        File.Move(temp, final);
-                    return; // success
+                    prop.SetValue(meta, DateTime.UtcNow);
                 }
-                catch (IOException) when (attempt < maxAttempts) { /* try again */ }
-                catch (UnauthorizedAccessException) when (attempt < maxAttempts) { /* try again */ }
-
-                await Task.Delay(delayMs, ct).ConfigureAwait(false);
-                delayMs *= 2;
-            }
-
-            // last attempt - let errors bubble if still failing
-            if (File.Exists(final))
-                File.Replace(temp, final, bak, ignoreMetadataErrors: true);
-            else
-                File.Move(temp, final);
-        }
-
-        private static void TryDeleteQuiet(string path)
-        {
-            try { if (File.Exists(path)) File.Delete(path); } catch { }
-        }
-        // Add near other helpers in SettingsService
-        private static async Task WriteDiagnosticDumpAsync(string targetSettingsPath, string payload, string tag, CancellationToken ct)
-        {
-            try
-            {
-                var logsDir = Globals.g_LogsDir;
-                Directory.CreateDirectory(logsDir);
-
-                var fileName = $"settings-{tag}-{DateTime.UtcNow:yyyyMMdd-HHmmssfff}.log";
-                var path = Path.Combine(logsDir, fileName);
-
-                var sb = new StringBuilder()
-                    .AppendLine("=== Settings Diagnostic Dump ===")
-                    .AppendLine($"UTC:     {DateTime.UtcNow:O}")
-                    .AppendLine($"Target:  {targetSettingsPath}")
-                    .AppendLine($"Process: {Environment.ProcessPath}")
-                    .AppendLine($"User:    {Environment.UserName}")
-                    .AppendLine("--------------------------------")
-                    .AppendLine(payload ?? string.Empty);
-
-                await File.WriteAllTextAsync(path, sb.ToString(), Encoding.UTF8, ct).ConfigureAwait(false);
             }
             catch
             {
-                // best-effort only — never throw from diagnostics
+                // best effort only
             }
         }
-
     }
 }

@@ -3,23 +3,25 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d"
-             Loaded="UserControl_Loaded">
+             xmlns:beh="clr-namespace:DSAMVVM.MVVM.Behaviors"
+             mc:Ignorable="d">
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
-            <!-- Log viewer -->
             <RowDefinition Height="*"/>
-            <!-- Bottom bar -->
+            <!-- log viewer -->
             <RowDefinition Height="Auto"/>
+            <!-- bottom bar -->
         </Grid.RowDefinitions>
 
-        <!-- Rich Log Output -->
-        <FlowDocumentScrollViewer x:Name="OutputViewer"
-                                  Grid.Row="0"
-                                  VerticalScrollBarVisibility="Auto"
-                                  Margin="0"
-                                  IsToolBarVisible="False" />
+        <!-- FlowDocument viewer driven by the shared service/behavior -->
+        <FlowDocumentScrollViewer
+            Grid.Row="0"
+            IsToolBarVisible="False"
+            VerticalScrollBarVisibility="Auto"
+            beh:FlowDocBinder.Text="{Binding SearchLog}"
+            beh:FlowDocBinder.ViewName="UserView"
+            beh:FlowDocBinder.PreserveScrollPosition="True" />
 
         <!-- Bottom Bar -->
         <Grid Grid.Row="1" Margin="0,10,0,0">
@@ -28,25 +30,25 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Left: Clear -->
-            <StackPanel Orientation="Horizontal" Grid.Column="0">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <!-- Clear -->
                 <Button Content="Clear Log"
-                        Width="100"
+                        Padding="10,4"
+                        Margin="0,0,12,0"
                         Click="ClearLog_Click"
-                        ToolTip="Clear all log entries from the display" />
-            </StackPanel>
+                        ToolTip="Clear the log output"/>
 
-            <!-- Right: Text size controls -->
-            <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Right">
+                <!-- Font size controls (global unless per-view override is enabled in settings) -->
                 <Button Content="A-"
                         Width="44"
+                        Margin="0,0,6,0"
                         Click="DecreaseFont_Click"
                         ToolTip="Decrease log text size" />
 
                 <Button Content="A"
                         Width="44"
                         Click="ResetFont_Click"
-                        ToolTip="Reset log text size to default" />
+                        ToolTip="Reset log text size (global or per-view depending on settings)" />
 
                 <Button Content="A+"
                         Width="44"

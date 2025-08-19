@@ -7,9 +7,7 @@ using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace DSAMVVM
@@ -19,6 +17,12 @@ namespace DSAMVVM
         private IServiceProvider? _serviceProvider;
         private string _settingsPath = string.Empty;
         private AppSettings? _settings;
+
+        // Expose DI for behaviors (e.g., FlowDocBinder)
+        public static IServiceProvider Services { get; private set; } = default!;
+
+        // NEW: expose the live in-memory settings object (used by UserView buttons, etc.)
+        public static AppSettings Settings => ((App)Current)._settings ?? new AppSettings();
 
         public App()
         {
@@ -39,6 +43,7 @@ namespace DSAMVVM
             base.OnStartup(e);
 
             ConfigureServices();
+            Services = _serviceProvider!; // make DI available app-wide
 
             // Ensure core dirs; if something is wrong, warn but continue
             if (!Globals.TryEnsureCoreDirs(out var ensureErr) && !string.IsNullOrWhiteSpace(ensureErr))
@@ -104,11 +109,12 @@ namespace DSAMVVM
             {
                 Log.Warn("VersionCheck", $"Version check failed: {ex.Message}");
             }
-
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
+            // Flush any debounced saves first, then do a final persisted save
+            try { _serviceProvider?.GetService<ISettingsService>()?.FlushPendingSaves(); } catch { }
             TryPersistSettings();
 
             // Flush/close log file
@@ -131,6 +137,9 @@ namespace DSAMVVM
                 if (_serviceProvider is null || string.IsNullOrWhiteSpace(_settingsPath) || _settings is null) return;
                 var settingsSvc = _serviceProvider.GetRequiredService<ISettingsService>();
                 settingsSvc.SaveAsync(_settings, _settingsPath).GetAwaiter().GetResult();
+
+                // Notify any listeners (e.g., FlowDocBinder) that sizes may have changed
+                _serviceProvider.GetService<IOutputTextSettingsProvider>()?.NotifyChanged();
             }
             catch (Exception ex)
             {
@@ -150,7 +159,6 @@ namespace DSAMVVM
 
             // Core shared services
             services.AddSingleton<StatusBarViewModel>();
-            // (Removed) services.AddSingleton<IStatusReporter, ...>(); // no longer needed
 
             // HTTP + Settings
             services.AddSingleton<IHttpService, HttpService>();
@@ -161,6 +169,13 @@ namespace DSAMVVM
             services.AddSingleton<IADService, ADService>();
             services.AddSingleton<ILinksService, LinksService>();
             services.AddSingleton<ISearchService, SearchService>();
+
+            // FlowDocument rendering + settings bridge
+            services.AddSingleton<IOutputTextSettingsProvider>(sp =>
+                new OutputTextSettingsProvider(
+                    sp.GetRequiredService<ISettingsService>(),
+                    () => _settings ?? new AppSettings()));
+            services.AddSingleton<IFlowDocService, FlowDocService>();
 
             // ViewModels
             services.AddSingleton<MainViewModel>();

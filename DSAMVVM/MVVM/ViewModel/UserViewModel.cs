@@ -1,8 +1,11 @@
 ﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
+using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -11,206 +14,166 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IADService _adService = adService;
         private readonly IDepartmentService _deptService = deptService;
 
-        private ADUserInfo? _user;
-        public ADUserInfo? User
-        {
-            get => _user;
-            private set
-            {
-                _user = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(DisplayName));
-                OnPropertyChanged(nameof(EduAffiliation));
-                OnPropertyChanged(nameof(DepartmentName));
-                OnPropertyChanged(nameof(DepartmentNumber));
-                OnPropertyChanged(nameof(Division));
-                OnPropertyChanged(nameof(License));
-                OnPropertyChanged(nameof(Enabled));
-            }
-        }
-
         private string? _error;
         public string? Error
         {
             get => _error;
-            private set
-            {
-                _error = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private List<string>? _mimGroups;
-        public List<string>? MimGroups
-        {
-            get => _mimGroups;
-            private set
-            {
-                _mimGroups = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string? _departmentNotes;
-        public string? DepartmentNotes
-        {
-            get => _departmentNotes;
-            private set
-            {
-                _departmentNotes = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private List<string>? _teamNames;
-        public List<string>? TeamNames
-        {
-            get => _teamNames;
-            private set
-            {
-                _teamNames = value;
-                OnPropertyChanged();
-            }
+            private set { _error = value; OnPropertyChanged(nameof(Error)); }
         }
 
         private bool _isLoading;
         public bool IsLoading
         {
             get => _isLoading;
-            private set
-            {
-                _isLoading = value;
-                OnPropertyChanged();
-            }
+            private set { _isLoading = value; OnPropertyChanged(nameof(IsLoading)); }
         }
 
         private string _searchLog = string.Empty;
         public string SearchLog
         {
             get => _searchLog;
-            private set
-            {
-                _searchLog = value;
-                OnPropertyChanged();
-            }
+            private set { _searchLog = value; OnPropertyChanged(nameof(SearchLog)); }
         }
 
-        private void AppendLog(string message)
+        private void AppendRaw(string message)
         {
             SearchLog += message + "\n";
             Debug.WriteLine($"[{DateTime.Now:HH:mm:ss}] {message}");
         }
 
-        // Bindable AD properties
-        public string? DisplayName => User?.DisplayName;
-        public string? EduAffiliation => User?.EduAffiliation;
-        public string? DepartmentName => User?.DepartmentName;
-        public string? DepartmentNumber => User?.DepartmentNumber;
-        public string? Division => User?.Division;
-        public string? License => User?.License;
-        public bool? Enabled => User?.Enabled;
+        private void AppendTitle(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return;
+            AppendRaw($"[yellow]{text}[/yellow]");
+        }
+
+        private void AppendLabelValue(string label, string? value, bool treatEmptyAsNone = true)
+        {
+            var finalValue = value;
+            if (string.IsNullOrWhiteSpace(finalValue) && treatEmptyAsNone) finalValue = "None";
+            if (finalValue == null) return;
+            AppendRaw($"[cyan]{label}[/cyan][red]{finalValue}[/red]");
+        }
 
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
+            // reset per-search state (preserve SearchLog)
             Error = null;
-            MimGroups = null;
-            DepartmentNotes = null;
-            TeamNames = null;
-            User = null;
-            SearchLog = string.Empty;
 
-            AppendLog($"UserViewModel received search for '{context.Query}'");
+            if (!string.IsNullOrEmpty(SearchLog))
+            {
+                AppendRaw("[cyan]────────── New Search ──────────[/cyan]");
+                if (!string.IsNullOrWhiteSpace(context.Query))
+                    AppendRaw($"[cyan]Query:[/cyan] [red]{context.Query}[/red]");
+            }
+            else if (!string.IsNullOrWhiteSpace(context.Query))
+            {
+                AppendRaw($"[cyan]Query:[/cyan] [red]{context.Query}[/red]");
+            }
+
+            Log.Info("UserView", $"Search started: target={target}, query='{context.Query}'");
 
             if (target != SearchTarget.User)
             {
                 Error = "Invalid search target provided to UserViewModel.";
-                AppendLog("Invalid search target for UserViewModel");
+                AppendRaw("[red]Invalid search target for UserViewModel[/red]");
+                Log.Warn("UserView", $"Invalid target: {target}");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(context.Query))
             {
-                AppendLog("Query was null or whitespace.");
+                AppendRaw("[cyan]Query was null or whitespace.[/cyan]");
+                Log.Info("UserView", "Aborted: empty query");
                 return;
             }
 
             try
             {
                 IsLoading = true;
-                AppendLog("Starting user search...");
+                AppendRaw("[green]Starting user search...[/green]");
+                Log.Debug("UserView", "Dispatching directory search");
 
-                var result = await searchService.SearchAsync(context, target);
-                User = result as ADUserInfo;
+                var user = await searchService.SearchAsync(context, target) as ADUserInfo;
 
-                if (User is null || !User.Exists)
+                if (user is null || !user.Exists)
                 {
-                    Error = User?.ErrorMessage ?? "User not found.";
-                    AppendLog($"Search complete. User not found. Error: {Error}");
+                    Error = user?.ErrorMessage ?? "User not found.";
+                    AppendRaw($"[red]Search complete. User not found. Error: {Error}[/red]");
+                    Log.Info("UserView", $"Not found. Error='{Error}'");
                     return;
                 }
 
-                AppendLog("AD User Lookup Result:");
-                AppendLog($"  DisplayName:       {User.DisplayName}");
-                AppendLog($"  Enabled:           {User.Enabled}");
-                AppendLog($"  Exists:            {User.Exists}");
-                AppendLog($"  DepartmentName:    {User.DepartmentName}");
-                AppendLog($"  DepartmentNumber:  {User.DepartmentNumber}");
-                AppendLog($"  EduAffiliation:    {User.EduAffiliation}");
-                AppendLog($"  License:           {User.License}");
-                AppendLog($"  Division:          {User.Division}");
+                AppendRaw(string.Empty);
+                AppendTitle(user.DisplayName);
 
-                if (!string.IsNullOrWhiteSpace(User.DepartmentNumber))
+                if (!string.IsNullOrEmpty(user.EduAffiliation))
+                    AppendLabelValue("Affiliation: ", user.EduAffiliation);
+
+                if (!string.IsNullOrEmpty(user.Division))
+                    AppendLabelValue("Division: ", user.Division);
+
+                if (!string.IsNullOrEmpty(user.DepartmentName))
+                    AppendLabelValue("Department: ", user.DepartmentName);
+
+                if (user.Enabled == false)
+                    AppendLabelValue("Enabled: ", "False", treatEmptyAsNone: false);
+
+                AppendLabelValue("O365 Licensing: ", user.License, treatEmptyAsNone: false);
+
+                Log.Info("UserView",
+                    $"User found: DisplayName='{user.DisplayName}', Affiliation='{user.EduAffiliation}', Division='{user.Division}', DeptName='{user.DepartmentName}', Enabled={user.Enabled}, License='{user.License}', DeptNum='{user.DepartmentNumber}'");
+
+                if (!string.IsNullOrEmpty(user.DepartmentNumber))
                 {
-                    var dept = await _deptService.GetDepartmentAsync(User.DepartmentNumber);
+                    var dept = await _deptService.GetDepartmentAsync(user.DepartmentNumber);
+
                     if (dept != null)
                     {
-                        DepartmentNotes = dept.Notes;
-
-                        // v2 flattened: single Team string -> wrap into list for existing binding
                         var team = await _deptService.GetTeamAsync(dept.Number);
-                        TeamNames = string.IsNullOrWhiteSpace(team) ? new List<string>() : new List<string> { team! };
+                        var teamName = string.IsNullOrWhiteSpace(team) ? null : team.Trim();
 
-                        // v2 flattened: single FileRepoPath
+                        if (!string.IsNullOrWhiteSpace(teamName))
+                            AppendLabelValue("Support Team: ", teamName);
+                        else
+                            AppendLabelValue("Teams: ", "None", treatEmptyAsNone: false);
+
                         var repoPath = await _deptService.GetFileRepoPathAsync(dept.Number);
+                        if (!string.IsNullOrWhiteSpace(repoPath))
+                            AppendLabelValue("File Repository: ", repoPath, treatEmptyAsNone: false);
 
-                        AppendLog($"Department Info for {dept.Number}:");
-                        AppendLog($"  Notes:         {dept.Notes}");
-                        AppendLog($"  SupportKnown:  {dept.SupportKnown}");
-                        AppendLog($"  Team:          {(string.IsNullOrWhiteSpace(team) ? "None" : team)}");
-                        AppendLog($"  FileRepoPath:  {(string.IsNullOrWhiteSpace(repoPath) ? "None" : repoPath)}");
-                        AppendLog("Team Names from service: " + (TeamNames?.Count > 0 ? string.Join(", ", TeamNames) : "None"));
+                        if (!string.IsNullOrEmpty(dept.Notes))
+                            AppendLabelValue("Notes: ", dept.Notes, treatEmptyAsNone: false);
+
+                        Log.Info("UserView",
+                            $"Dept info: Number='{dept.Number}', SupportKnown={dept.SupportKnown}, Team='{teamName ?? "(none)"}', Repo='{(string.IsNullOrWhiteSpace(repoPath) ? "(none)" : repoPath)}'");
+                        Log.Debug("UserView", $"Dept notes length={(dept.Notes?.Length ?? 0)}");
                     }
                     else
                     {
-                        AppendLog("No department info found.");
+                        AppendRaw("[cyan]Department information not found in cache.[/cyan]");
+                        Log.Info("UserView", $"Dept cache miss: '{user.DepartmentNumber}'");
                     }
                 }
-                else
-                {
-                    AppendLog("No department number provided.");
-                }
+
+                AppendRaw(string.Empty);
+                Log.Info("UserView", "Search completed");
             }
             catch (Exception ex)
             {
                 Error = $"Search failed: {ex.Message}";
-                AppendLog($"Exception during user search: {ex}");
+                AppendRaw($"[red]Exception during user search: {ex}[/red]");
+                Log.Error("UserView", "Search failed", ex);
             }
             finally
             {
                 IsLoading = false;
-                AppendLog("User search process completed.");
+                AppendRaw("[green]User search process completed.[/green]");
             }
         }
 
-        public async Task<string?> LookupNameByID(string id)
-        {
-            return await _adService.LookupNameByEmployeeID(id);
-        }
+        public Task<string?> LookupNameByID(string id) => _adService.LookupNameByEmployeeID(id);
 
-        public void ClearLog()
-        {
-            SearchLog = string.Empty;
-        }
-
+        public void ClearLog() => SearchLog = string.Empty;
     }
 }

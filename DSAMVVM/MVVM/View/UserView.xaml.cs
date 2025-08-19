@@ -1,108 +1,69 @@
-﻿using DSAMVVM.MVVM.ViewModel;
-using System;
-using System.ComponentModel;
-using System.Diagnostics;
+﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.MVVM.Model;
+using DSAMVVM.MVVM.Model.Config;
+using DSAMVVM.MVVM.ViewModel;
+using Microsoft.Extensions.DependencyInjection;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Media;
 
 namespace DSAMVVM.MVVM.View
 {
     public partial class UserView : UserControl
     {
-        private const double DefaultFontSize = 14;
-        private double _currentFontSize = DefaultFontSize;
+        // Per-view key for settings (used only when ViewFontSizeOverride is enabled)
+        private const string ViewKey = "UserView";
 
         public UserView()
         {
             InitializeComponent();
         }
 
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is UserViewModel vm)
-            {
-
-                OutputViewer.Document = new FlowDocument
-                {
-                    Foreground = Brushes.White
-                };
-
-                vm.PropertyChanged += Vm_PropertyChanged;
-                AppendLogToFlow(vm.SearchLog);
-            }
-        }
-
-        private void Vm_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (sender is UserViewModel vm && e.PropertyName == nameof(UserViewModel.SearchLog))
-            {
-                Dispatcher.Invoke(() => AppendLogToFlow(vm.SearchLog));
-            }
-        }
-
-        private void AppendLogToFlow(string log)
-        {
-            if (OutputViewer.Document == null) return;
-
-            var doc = OutputViewer.Document;
-            doc.Blocks.Clear();
-
-            var lines = log.Split('\n');
-            foreach (var line in lines)
-            {
-                if (string.IsNullOrWhiteSpace(line)) continue;
-
-                var p = new Paragraph
-                {
-                    FontSize = _currentFontSize,
-                    Margin = new Thickness(0),
-                    Padding = new Thickness(0)
-                };
-
-                if (line.Contains("Exception", StringComparison.OrdinalIgnoreCase) ||
-                    line.Contains("Error", StringComparison.OrdinalIgnoreCase))
-                    p.Foreground = Brushes.Red;
-                else if (line.Contains("Starting", StringComparison.OrdinalIgnoreCase) ||
-                         line.Contains("completed", StringComparison.OrdinalIgnoreCase))
-                    p.Foreground = Brushes.Green;
-                else if (line.Contains("Department", StringComparison.OrdinalIgnoreCase) ||
-                         line.Contains("Team", StringComparison.OrdinalIgnoreCase))
-                    p.Foreground = Brushes.SkyBlue;
-                else
-                    p.Foreground = Brushes.White;
-
-                p.Inlines.Add(new Run(line));
-                doc.Blocks.Add(p);
-            }
-        }
-
-        private void IncreaseFont_Click(object sender, RoutedEventArgs e)
-        {
-            _currentFontSize = Math.Min(_currentFontSize + 2, 24);
-            if (DataContext is UserViewModel vm) AppendLogToFlow(vm.SearchLog);
-        }
-
-        private void DecreaseFont_Click(object sender, RoutedEventArgs e)
-        {
-            _currentFontSize = Math.Max(_currentFontSize - 2, 8);
-            if (DataContext is UserViewModel vm) AppendLogToFlow(vm.SearchLog);
-        }
-
-        private void ResetFont_Click(object sender, RoutedEventArgs e)
-        {
-            _currentFontSize = DefaultFontSize;
-            if (DataContext is UserViewModel vm) AppendLogToFlow(vm.SearchLog);
-        }
-
         private void ClearLog_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is UserViewModel vm)
-            {
                 vm.ClearLog();
-                OutputViewer.Document?.Blocks.Clear();
-            }
+        }
+
+        private void IncreaseFont_Click(object sender, RoutedEventArgs e) => AdjustFont(+1);
+        private void DecreaseFont_Click(object sender, RoutedEventArgs e) => AdjustFont(-1);
+        private void ResetFont_Click(object sender, RoutedEventArgs e) => ResetFont();
+
+        // --- helpers ---
+
+        private void AdjustFont(int delta)
+        {
+            var sp = App.Services;
+            var settingsSvc = sp.GetRequiredService<ISettingsService>();
+            var notifier = sp.GetRequiredService<IOutputTextSettingsProvider>();
+            var s = App.Settings;
+
+            // Global-first: only per-view when user has enabled that option in settings
+            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
+            settingsSvc.AdjustOutputFontSize(s, preferPerView ? ViewKey : null, delta, preferPerView);
+
+            // instant UI refresh across all viewers
+            notifier.NotifyChanged();
+
+            // polite, debounced persistence
+            var path = Path.Combine(Globals.g_AppDir, "settings.json");
+            settingsSvc.RequestSave(s, path);
+        }
+
+        private void ResetFont()
+        {
+            var sp = App.Services;
+            var settingsSvc = sp.GetRequiredService<ISettingsService>();
+            var notifier = sp.GetRequiredService<IOutputTextSettingsProvider>();
+            var s = App.Settings;
+
+            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
+            settingsSvc.ResetOutputFontSize(s, preferPerView ? ViewKey : null, preferPerView, defaultSize: 14);
+
+            notifier.NotifyChanged();
+
+            var path = Path.Combine(Globals.g_AppDir, "settings.json");
+            settingsSvc.RequestSave(s, path);
         }
     }
 }

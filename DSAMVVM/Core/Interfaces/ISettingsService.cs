@@ -1,5 +1,4 @@
-﻿using System.Net.Http;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using DSAMVVM.MVVM.Model.Config;
 
@@ -7,22 +6,34 @@ namespace DSAMVVM.Core.Interfaces
 {
     public interface ISettingsService
     {
-        // Load settings from disk. If the file doesn't exist, seed defaults and create necessary directories.
+        // Load settings from disk. Creates defaults on first run.
         Task<AppSettings> LoadAsync(string settingsPath, CancellationToken ct = default);
 
-        // Save settings to disk. Automatically updates lastUpdatedUtc.
+        // Save settings to disk (atomic). For frequent saves, prefer RequestSave (debounced).
         Task SaveAsync(AppSettings settings, string settingsPath, CancellationToken ct = default);
 
-        // Get the data directory path (Globals.g_AppDir + settings.Paths.DataDir) and ensure it exists.
+        // Get (and ensure) the app data directory path based on settings.
         string ResolveDataDir(AppSettings s);
 
-        // Get the font size for the specified view, respecting the override flag and applying clamping.
+        // Effective font size for a given view, honoring per-view overrides and clamping.
         double GetFontSizeFor(string viewName, AppSettings s, double min = 9, double max = 24);
 
-        // Load JSON data from a DataLocation.
-        // For "web": fetch via HTTP, cache to fallbackFile, fallback to cached file on failure.
-        // For "file": read primary file (relative to dataDir if not absolute), fallback to cached file if primary fails.
-        // Returns null if nothing could be loaded.
-        Task<string?> GetDataAsync(DataLocation loc, AppSettings s, HttpClient http, CancellationToken ct = default);
+        // --- Font-size helpers (settings-first model) ---
+
+        // Apply +delta to global default OR per-view (when preferPerView is true and viewName provided).
+        // Returns the new effective size that was written.
+        double AdjustOutputFontSize(AppSettings s, string? viewName, int delta, bool preferPerView);
+
+        // Reset: if preferPerView==true and viewName supplied -> remove per-view override;
+        // otherwise reset the global default to provided defaultSize.
+        void ResetOutputFontSize(AppSettings s, string? viewName, bool preferPerView, int defaultSize = 14);
+
+        // --- Debounced persistence ---
+
+        // Queue a save; multiple calls within a short window coalesce into one write.
+        void RequestSave(AppSettings s, string settingsPath);
+
+        // Force any pending debounced save to flush now (e.g., on shutdown).
+        void FlushPendingSaves();
     }
 }
