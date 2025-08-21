@@ -3,8 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:DSAMVVM"
              xmlns:viewModel="clr-namespace:DSAMVVM.MVVM.ViewModel"
-             xmlns:view="clr-namespace:DSAMVVM.MVVM.View"
-             >
+             xmlns:view="clr-namespace:DSAMVVM.MVVM.View">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -13,6 +12,20 @@
                 <ResourceDictionary Source="/Theme/RoundedButtonTheme.xaml"/>
                 <ResourceDictionary Source="/Theme/SearchComboTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- Fonts-->
+            <!-- UI font (use if you want to change the whole app’s controls/textblocks) -->
+            <FontFamily x:Key="UiFontFamily">Segoe UI</FontFamily>
+
+            <!-- Output (FlowDocument) font -->
+            <FontFamily x:Key="OutputFontFamily">Consolas</FontFamily>
+
+            <!-- Implicit style for FlowDocument -->
+            <Style TargetType="{x:Type FlowDocument}">
+                <Setter Property="FontFamily" Value="{DynamicResource OutputFontFamily}" />
+            </Style>
+
+            <!-- Views  -->
             <DataTemplate DataType="{x:Type viewModel:HomeViewModel}">
                 <view:HomeView/>
             </DataTemplate>
