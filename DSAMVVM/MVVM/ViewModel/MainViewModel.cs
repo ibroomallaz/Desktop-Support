@@ -1,12 +1,8 @@
 ﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Services;
 using DSAMVVM.Core.Utilities;
-using DSAMVVM.MVVM.Model;
-using DSAMVVM.MVVM.Model.AD;
-using System;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
+using DSAMVVM.Core.Models;
 
 namespace DSAMVVM.MVVM.ViewModel
 {

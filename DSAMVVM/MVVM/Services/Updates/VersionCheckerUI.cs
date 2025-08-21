@@ -1,10 +1,9 @@
-﻿using DSAMVVM.Core;
-using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Utilities;
+using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Schemas;
-using System.Windows;
 
-namespace DSAMVVM.MVVM.Model
+namespace DSAMVVM.MVVM.Services.Updates
 {
     public class VersionCheckerUI
     {
@@ -12,6 +11,8 @@ namespace DSAMVVM.MVVM.Model
 
         private readonly string _installedVersion = Globals.g_AppVersion;
         private readonly string _versionUrl = Globals.g_versionJSON;
+
+        private const string StatusKey = "VersionCheck";
 
         public VersionCheckerUI(IHttpService http)
         {
@@ -28,7 +29,7 @@ namespace DSAMVVM.MVVM.Model
                     "Version check error",
                     result.Error ?? "Unknown error",
                     alsoStatusBar: true,
-                    key: "VersionCheck");
+                    key: StatusKey);
                 return;
             }
 
@@ -41,7 +42,7 @@ namespace DSAMVVM.MVVM.Model
             UiNotify.Info(
                 $"Version: {_installedVersion}.",
                 showStatusBar: true,
-                key: "VersionCheck");
+                key: StatusKey);
         }
 
         private void NotifyUser(VersionInfo versionInfo)
@@ -62,40 +63,58 @@ namespace DSAMVVM.MVVM.Model
 
             if (isStableUpdate && !isBetaUser && versionInfo.Current != null)
             {
-                PromptUpdate("Update Available", versionInfo.Current.Version!, versionInfo.Current.Location, versionInfo.Current.Changelog, isBeta: false);
+                ShowUpdateNotice(
+                    title: "Update Available",
+                    newVersion: versionInfo.Current.Version!,
+                    location: versionInfo.Current.Location,
+                    changelog: versionInfo.Current.Changelog,
+                    isBeta: false);
             }
 
             if (isBetaUser)
             {
                 if (isBetaUpdate)
                 {
-                    PromptUpdate("PreRelease Update Available", versionInfo.PreRelease!.Version!, versionInfo.PreRelease.Location, versionInfo.PreRelease.Changelog, isBeta: true);
+                    ShowUpdateNotice(
+                        title: "PreRelease Update Available",
+                        newVersion: versionInfo.PreRelease!.Version!,
+                        location: versionInfo.PreRelease.Location,
+                        changelog: versionInfo.PreRelease.Changelog,
+                        isBeta: true);
                 }
                 else if (!isBetaHigherThanStable && isStableUpdate && versionInfo.Current != null)
                 {
-                    PromptUpdate("Stable Update Recommended", versionInfo.Current.Version!, versionInfo.Current.Location, versionInfo.Current.Changelog, isBeta: false);
+                    ShowUpdateNotice(
+                        title: "Stable Update Recommended",
+                        newVersion: versionInfo.Current.Version!,
+                        location: versionInfo.Current.Location,
+                        changelog: versionInfo.Current.Changelog,
+                        isBeta: false);
                 }
             }
         }
 
-        private void PromptUpdate(string title, string newVersion, string? location, string? changelog, bool isBeta)
+        // Non-blocking status with actionable links
+        private void ShowUpdateNotice(string title, string newVersion, string? location, string? changelog, bool isBeta)
         {
-            location ??= Globals.g_sharepointHome;
-            changelog ??= "No details provided.";
+            var text = $"{title}: A new version ({newVersion}) is available — you’re on {_installedVersion}.";
 
-            UiNotify.RunOnUi(() =>
-            {
-                var result = MessageBox.Show(
-                    $"{title}\n\nA new version ({newVersion}) is available.\n\nCurrent version: {_installedVersion}\n\nChanges:\n{changelog}\n\nWould you like to update?",
-                    title,
-                    MessageBoxButton.OKCancel,
-                    isBeta ? MessageBoxImage.Information : MessageBoxImage.Warning);
+            // Build links if we have valid URIs
+            var links = new System.Collections.Generic.List<UiNotify.StatusLink>();
 
-                if (result == MessageBoxResult.OK)
-                {
-                    _http.TryOpenUrl(location, out _);
-                }
-            });
+            if (Uri.TryCreate(location ?? Globals.g_sharepointHome, UriKind.Absolute, out var downloadUri))
+                links.Add(UiNotify.Link.External("Download", downloadUri, "Get the update"));
+
+            if (!string.IsNullOrWhiteSpace(changelog) && Uri.TryCreate(changelog, UriKind.Absolute, out var notesUri))
+                links.Add(UiNotify.Link.External("Release notes", notesUri, "View changes"));
+
+            // Surface as a warning-level, non-sticky status with links
+            UiNotify.WarnWithLinks(
+                text,
+                sticky: false,
+                priority: 1,
+                key: StatusKey,
+                links.ToArray());
         }
     }
 }

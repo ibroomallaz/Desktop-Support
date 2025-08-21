@@ -5,7 +5,9 @@ using DSAMVVM.Core.Services;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
+using DSAMVVM.MVVM.Services.Status;
 using DSAMVVM.MVVM.ViewModel;
+using DSAMVVM.MVVM.Services.Updates;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using System.Windows;
@@ -58,7 +60,9 @@ namespace DSAMVVM
             _settingsPath = Path.Combine(Globals.g_AppDir, "settings.json");
 
             // Initialize facades that need singletons from DI
-            UiNotify.Initialize(_serviceProvider!.GetRequiredService<StatusBus>());
+            var bus = _serviceProvider!.GetRequiredService<StatusBus>();
+            UiNotify.Initialize(bus.Report, bus.RemoveByKey, bus.Clear);
+
             Log.Initialize(_serviceProvider!.GetRequiredService<IAppLogger>(), min: AppLogLevel.Warn);
 
             // Load settings (service is self-healing; creates/repairs as needed)

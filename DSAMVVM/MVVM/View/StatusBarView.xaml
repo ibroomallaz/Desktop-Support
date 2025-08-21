@@ -1,7 +1,7 @@
 ﻿<UserControl x:Class="DSAMVVM.MVVM.View.StatusBarView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:DSAMVVM.MVVM.View"
+             xmlns:statusRend="clr-namespace:DSAMVVM.MVVM.View.Renderers.Status"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
@@ -9,17 +9,17 @@
              d:DesignWidth="400">
 
     <Grid>
-        <Border Background="DarkGray" Padding="10,3" MinHeight="24" VerticalAlignment="Bottom" CornerRadius="10">
-            <ContentControl Content="{Binding CurrentStatusMessage.RichContent}">
+        <Border Background="DarkGray"
+                Padding="10,3"
+                MinHeight="24"
+                VerticalAlignment="Bottom"
+                CornerRadius="10">
 
-            <ContentControl.Resources>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="TextWrapping" Value="Wrap"/>
-                        <Setter Property="VerticalAlignment" Value="Center"/>
-                        <Setter Property="Foreground" Value="Black"/>
-                    </Style>
-                </ContentControl.Resources>
-            </ContentControl>
+            <!-- Renders the current StatusItem into TextBlock inlines -->
+            <TextBlock TextWrapping="Wrap"
+                       VerticalAlignment="Center"
+                       Foreground="Black"
+                       statusRend:StatusItemRenderer.Item="{Binding StatusBus.Current}" />
         </Border>
     </Grid>
 </UserControl>

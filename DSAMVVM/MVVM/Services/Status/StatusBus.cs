@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
-using DSAMVVM.MVVM.Model;
+using DSAMVVM.Core.Models;
 
-namespace DSAMVVM.Core.Utilities
+namespace DSAMVVM.MVVM.Services.Status
 {
     public sealed class StatusBus
     {
-        public StatusMessage? Current { get; private set; }
+        public StatusItem? Current { get; private set; }
         public event EventHandler? CurrentChanged;
 
         // timing/behavior
@@ -20,8 +20,8 @@ namespace DSAMVVM.Core.Utilities
         public bool RequeueInterruptedNonSticky { get; set; } = true; // put interrupted item back at front
 
         // non-sticky FIFO and keyed lookup
-        private readonly List<StatusMessage> _queue = new();
-        private readonly Dictionary<string, StatusMessage> _byKey =
+        private readonly List<StatusItem> _queue = new();
+        private readonly Dictionary<string, StatusItem> _byKey =
             new(StringComparer.OrdinalIgnoreCase);
 
         private readonly DispatcherTimer _timer;
@@ -32,61 +32,61 @@ namespace DSAMVVM.Core.Utilities
             _timer.Tick += (_, __) => Advance();
         }
 
-        public void Report(StatusMessage message)
+        public void Report(StatusItem item)
         {
             void OnUi()
             {
-                if (!string.IsNullOrEmpty(message.Key))
-                    _byKey[message.Key!] = message;
+                if (!string.IsNullOrEmpty(item.Key))
+                    _byKey[item.Key!] = item;
 
                 // Resolution: non-sticky with same key as a pinned sticky replaces it now
-                if (Current != null && Current.Sticky && !message.Sticky &&
+                if (Current != null && Current.Sticky && !item.Sticky &&
                     !string.IsNullOrEmpty(Current.Key) &&
-                    string.Equals(Current.Key, message.Key, StringComparison.OrdinalIgnoreCase))
+                    string.Equals(Current.Key, item.Key, StringComparison.OrdinalIgnoreCase))
                 {
                     StopTimer();
                     if (!string.IsNullOrEmpty(Current.Key)) _byKey.Remove(Current.Key!); // drop old sticky key
-                    SetCurrent(message);      // show success/info now
-                    StartTimerIfNeeded();     // then continue single-pass queue after dwell
+                    SetCurrent(item);          // show success/info now
+                    StartTimerIfNeeded();      // then continue single-pass queue after dwell
                     return;
                 }
 
                 // Sticky pins and (optionally) preserves interrupted non-sticky by re-queuing to front
-                if (message.Sticky && StickyPinsRotation)
+                if (item.Sticky && StickyPinsRotation)
                 {
                     if (RequeueInterruptedNonSticky && Current != null && !Current.Sticky)
                         RequeueAtFront(Current);
 
                     StopTimer();
-                    SetCurrent(message);
+                    SetCurrent(item);
                     return;
                 }
 
                 // Non-sticky updates
-                if (!string.IsNullOrEmpty(message.Key))
+                if (!string.IsNullOrEmpty(item.Key))
                 {
                     // Update currently showing non-sticky with same key
                     if (Current != null &&
                         !Current.Sticky &&
-                        string.Equals(Current.Key, message.Key, StringComparison.OrdinalIgnoreCase))
+                        string.Equals(Current.Key, item.Key, StringComparison.OrdinalIgnoreCase))
                     {
-                        SetCurrent(message);
+                        SetCurrent(item);
                         StartTimerIfNeeded();
                         return;
                     }
 
                     // Update queued item with same key, else enqueue to tail
-                    int queueIndex = _queue.FindIndex(queuedMessage =>
-                        string.Equals(queuedMessage.Key, message.Key, StringComparison.OrdinalIgnoreCase));
+                    int queueIndex = _queue.FindIndex(q =>
+                        string.Equals(q.Key, item.Key, StringComparison.OrdinalIgnoreCase));
                     if (queueIndex >= 0)
-                        _queue[queueIndex] = message;
+                        _queue[queueIndex] = item;
                     else
-                        _queue.Add(message);
+                        _queue.Add(item);
                 }
                 else
                 {
                     // Unkeyed non-sticky — just enqueue
-                    _queue.Add(message);
+                    _queue.Add(item);
                 }
 
                 // If idle, start queue; else ensure timer running
@@ -215,7 +215,7 @@ namespace DSAMVVM.Core.Utilities
 
         private void StopTimer() => _timer.Stop();
 
-        private void SetCurrent(StatusMessage? msg)
+        private void SetCurrent(StatusItem? msg)
         {
             if (!ReferenceEquals(Current, msg))
             {
@@ -226,7 +226,7 @@ namespace DSAMVVM.Core.Utilities
 
         // Put an interrupted non-sticky back at the front,
         // updating an existing same-key entry if needed to avoid duplicates.
-        private void RequeueAtFront(StatusMessage interrupted)
+        private void RequeueAtFront(StatusItem interrupted)
         {
             if (!string.IsNullOrEmpty(interrupted.Key))
             {

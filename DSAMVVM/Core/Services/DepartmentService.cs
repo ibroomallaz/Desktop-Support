@@ -6,7 +6,6 @@ using DSAMVVM.MVVM.Model.Schemas;
 using Newtonsoft.Json;
 using System.Diagnostics;
 
-
 namespace DSAMVVM.Core.Services
 {
     public class DepartmentService(IHttpService http) : IDepartmentService
@@ -48,7 +47,7 @@ namespace DSAMVVM.Core.Services
             finally { _lock.Release(); }
         }
 
-        //internals
+        // internals
 
         private async Task EnsureDataLoaded()
         {
@@ -70,12 +69,13 @@ namespace DSAMVVM.Core.Services
         private async Task LoadDepartmentsInternalAsync(bool isReload)
         {
             var baseKey = isReload ? "DeptData.Reload" : "DeptData.Load";
-            var progressKey = baseKey + ".Progress";
+            var progressKey = UiNotify.ProgressOf(baseKey);
 
             // Non-sticky progress message while loading
-            UiNotify.Push(StatusMessageFactory.Plain(
+            UiNotify.Progress(
+                baseKey,
                 isReload ? "Refreshing department data…" : "Loading department data…",
-                priority: 0, sticky: false, key: progressKey));
+                priority: 0);
 
             var sw = Stopwatch.StartNew();
             try
@@ -102,22 +102,25 @@ namespace DSAMVVM.Core.Services
                 // Resolution message replaces any sticky from previous failures
                 UiNotify.Success(
                     $"{(isReload ? "Refreshed" : "Loaded")} {_departments.Count} departments in {sw.ElapsedMilliseconds} ms.",
-                    showStatusBar: true, key: baseKey);
+                    showStatusBar: true,
+                    key: baseKey);
             }
             catch (Exception e)
             {
                 sw.Stop();
                 UiNotify.RemoveKey(progressKey);
 
-                // Sticky with Retry
+                // Sticky with Retry (async)
                 UiNotify.WarnWithLinks(
                     $"Failed to {(isReload ? "refresh" : "load")} department data: {e.Message}",
-                    sticky: true, priority: 3, key: baseKey,
-                    UiNotify.Link.Action("Retry", () => ReloadDataAsync()));
+                    sticky: true,
+                    priority: 3,
+                    key: baseKey,
+                    UiNotify.Link.Action("Retry", async () => await ReloadDataAsync(), "Try the download again"));
             }
         }
 
-        // Adapter  for IDepartment
+        // Adapter for IDepartment
         private sealed class DepartmentAdapter(Department source) : IDepartment
         {
             private readonly Department _source = source;

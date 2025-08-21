@@ -1,5 +1,5 @@
-﻿using DSAMVVM.Core.Utilities;
-using DSAMVVM.MVVM.Model;
+﻿using DSAMVVM.Core.Models;
+using DSAMVVM.MVVM.Services.Status;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -7,14 +7,13 @@ namespace DSAMVVM.MVVM.ViewModel
 {
     public class StatusBarViewModel : INotifyPropertyChanged
     {
-        private readonly StatusBus _bus;
-
-        public StatusMessage? CurrentStatusMessage => _bus.Current;
+        public StatusBus StatusBus { get; }                     // expose the bus for simple XAML binding
+        public StatusItem? CurrentStatusItem => StatusBus.Current;
 
         public StatusBarViewModel(StatusBus bus)
         {
-            _bus = bus;
-            _bus.CurrentChanged += (_, __) => OnPropertyChanged(nameof(CurrentStatusMessage));
+            StatusBus = bus;
+            StatusBus.CurrentChanged += (_, __) => OnPropertyChanged(nameof(CurrentStatusItem));
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

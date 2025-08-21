@@ -1,5 +1,6 @@
 ﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Models;
 using System;
 using System.Threading.Tasks;
 
