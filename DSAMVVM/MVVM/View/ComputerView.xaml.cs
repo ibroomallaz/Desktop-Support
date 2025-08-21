@@ -1,19 +1,24 @@
 ﻿using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using DSAMVVM.Core.Interfaces;
+using DSAMVVM.MVVM.Model;
+using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.ViewModel;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DSAMVVM.MVVM.View
 {
     public partial class ComputerView : UserControl
     {
-        private const double DefaultFontSize = 14.0;  // match your UserView default
-        private const double MinFontSize = 10.0;
-        private const double MaxFontSize = 36.0;
+        // Per-view key for settings (used only when ViewFontSizeOverride is enabled)
+        private const string ViewKey = "ComputerView";
 
-        private double _currentFontSize = DefaultFontSize;
+        private ISettingsService? _settingsSvc;
+        private IOutputTextSettingsProvider? _notifier;
 
         public ComputerView()
         {
@@ -22,72 +27,52 @@ namespace DSAMVVM.MVVM.View
             Unloaded += OnUnloaded;
         }
 
-        private void OnLoaded(object sender, RoutedEventArgs e)
+        private void OnLoaded(object? sender, RoutedEventArgs e)
         {
-            // Ensure the FlowDocument has an initial font size
-            ApplyFontSize(_currentFontSize);
+            var sp = App.Services;
+            _settingsSvc = sp.GetRequiredService<ISettingsService>();
+            _notifier = sp.GetRequiredService<IOutputTextSettingsProvider>();
+
+            // Apply once on load
+            ApplyEffectiveFontSize();
+
+            // Listen for global/per-view size changes triggered anywhere
+            _notifier.Changed += OnOutputFontSettingsChanged;
         }
 
         private void OnUnloaded(object? sender, RoutedEventArgs e)
         {
-            // no-op for now; placeholder if you later hook global settings change events
+            if (_notifier != null)
+                _notifier.Changed -= OnOutputFontSettingsChanged;
         }
 
-        // ---------------------------
-        // Bottom bar button handlers
-        // ---------------------------
-
-        private void ClearLog_Click(object sender, RoutedEventArgs e)
+        private void OnOutputFontSettingsChanged(object? sender, EventArgs e)
         {
-            if (DataContext is ComputerViewModel vm)
-            {
-                vm.ClearLog();
-                // Reset internal pointer if you add any delta rendering here later.
-            }
+            ApplyEffectiveFontSize();
         }
 
-        private void IncreaseFont_Click(object sender, RoutedEventArgs e)
+        private void ApplyEffectiveFontSize()
         {
-            var next = Math.Min(MaxFontSize, _currentFontSize + 2);
-            if (Math.Abs(next - _currentFontSize) > double.Epsilon)
-            {
-                _currentFontSize = next;
-                ApplyFontSize(_currentFontSize);
-            }
-        }
+            if (_settingsSvc == null) return;
 
-        private void DecreaseFont_Click(object sender, RoutedEventArgs e)
-        {
-            var next = Math.Max(MinFontSize, _currentFontSize - 2);
-            if (Math.Abs(next - _currentFontSize) > double.Epsilon)
-            {
-                _currentFontSize = next;
-                ApplyFontSize(_currentFontSize);
-            }
-        }
+            // Uses service's effective logic (global or per-view if override is on),
+            // and clamps to [8, 24].
+            double size = _settingsSvc.GetFontSizeFor(ViewKey, App.Settings, min: 8, max: 24);
 
-        private void ResetFont_Click(object sender, RoutedEventArgs e)
-        {
-            _currentFontSize = DefaultFontSize;
-            ApplyFontSize(_currentFontSize);
-        }
-
-        // ---------------------------
-        // Helpers
-        // ---------------------------
-
-        private void ApplyFontSize(double size)
-        {
-            var viewer = FindDescendant<FlowDocumentScrollViewer>(this);
+            var viewer = FindOutputViewer();
             if (viewer == null) return;
 
-            // If Behavior hasn't inserted a document yet, make a minimal one so the size applies.
-            if (viewer.Document == null)
-            {
-                viewer.Document = new FlowDocument();
-            }
-
+            viewer.Document ??= new FlowDocument();
             viewer.Document.FontSize = size;
+        }
+
+        private FlowDocumentScrollViewer? FindOutputViewer()
+        {
+            // Prefer a named element if present in XAML (e.g., x:Name="OutputViewer")
+            if (this.FindName("OutputViewer") is FlowDocumentScrollViewer named) return named;
+
+            // Fallback: search visual tree
+            return FindDescendant<FlowDocumentScrollViewer>(this);
         }
 
         private static T? FindDescendant<T>(DependencyObject root) where T : DependencyObject
@@ -102,6 +87,44 @@ namespace DSAMVVM.MVVM.View
                 if (result != null) return result;
             }
             return null;
+        }
+
+        // --- bottom bar buttons ---
+
+        private void ClearLog_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ComputerViewModel vm)
+                vm.ClearLog();
+        }
+
+        private void IncreaseFont_Click(object sender, RoutedEventArgs e) => AdjustFont(+1);
+        private void DecreaseFont_Click(object sender, RoutedEventArgs e) => AdjustFont(-1);
+        private void ResetFont_Click(object sender, RoutedEventArgs e) => ResetFont();
+
+        private void AdjustFont(int delta)
+        {
+            if (_settingsSvc == null || _notifier == null) return;
+
+            var s = App.Settings;
+            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
+
+            _ = _settingsSvc.AdjustOutputFontSize(s, preferPerView ? ViewKey : null, delta, preferPerView);
+
+            _notifier.NotifyChanged();
+            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
+        }
+
+        private void ResetFont()
+        {
+            if (_settingsSvc == null || _notifier == null) return;
+
+            var s = App.Settings;
+            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
+
+            _settingsSvc.ResetOutputFontSize(s, preferPerView ? ViewKey : null, preferPerView, defaultSize: 14);
+
+            _notifier.NotifyChanged();
+            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
         }
     }
 }

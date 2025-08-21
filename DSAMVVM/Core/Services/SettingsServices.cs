@@ -11,7 +11,7 @@ namespace DSAMVVM.Core.Services
     public class SettingsService : ISettingsService
     {
         private const string Tag = "SettingsService";
-        private const int MinFont = 9;
+        private const int MinFont = 8;
         private const int MaxFont = 24;
 
 
