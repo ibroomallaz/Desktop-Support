@@ -2,7 +2,7 @@
 using DSAMVVM.MVVM.Model.AD;
 using System.DirectoryServices;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.AD
 {
     public class ADComputerService
     {

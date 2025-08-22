@@ -18,7 +18,7 @@
             <FontFamily x:Key="UiFontFamily">Segoe UI</FontFamily>
 
             <!-- Output (FlowDocument) font -->
-            <FontFamily x:Key="OutputFontFamily">Consolas</FontFamily>
+            <FontFamily x:Key="OutputFontFamily">Cascadia Code</FontFamily>
 
             <!-- Implicit style for FlowDocument -->
             <Style TargetType="{x:Type FlowDocument}">

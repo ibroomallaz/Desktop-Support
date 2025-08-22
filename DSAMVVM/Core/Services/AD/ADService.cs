@@ -2,7 +2,7 @@
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.AD
 {
     public class ADService : IADService
     {

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.AD
 {
     public class ADUserService
     {

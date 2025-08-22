@@ -11,6 +11,7 @@ using DSAMVVM.MVVM.Services.Updates;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using System.Windows;
+using DSAMVVM.Core.Services.AD;
 
 namespace DSAMVVM
 {

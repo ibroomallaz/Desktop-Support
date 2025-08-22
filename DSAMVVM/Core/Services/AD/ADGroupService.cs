@@ -3,7 +3,7 @@ using DSAMVVM.MVVM.Model.AD;
 using System.DirectoryServices.AccountManagement;
 
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.AD
 {
     public class ADGroupService
     {
