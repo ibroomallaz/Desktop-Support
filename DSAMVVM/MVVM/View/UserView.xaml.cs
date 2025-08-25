@@ -51,11 +51,10 @@ namespace DSAMVVM.MVVM.View
 
         private void ApplyEffectiveFontSize()
         {
-            if (_settingsSvc == null) return;
+            if (_notifier == null) return;
 
-            // Uses service's effective logic (global or per-view if override is on),
-            // and clamps
-            double size = _settingsSvc.GetFontSizeFor(ViewKey, App.Settings, min: 8, max: 24);
+            // Use cached provider (coalesces duplicate reads across view + FlowDoc)
+            double size = _notifier.GetFontSize(ViewKey);
 
             var viewer = FindOutputViewer();
             if (viewer == null) return;

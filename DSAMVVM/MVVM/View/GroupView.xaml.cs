@@ -30,6 +30,7 @@ namespace DSAMVVM.MVVM.View
             _settingsSvc = sp.GetRequiredService<ISettingsService>();
             _notifier = sp.GetRequiredService<IOutputTextSettingsProvider>();
             _notifier.Changed += OnOutputFontSettingsChanged;
+
             ApplyEffectiveFontSize();
 
             if (DataContext is GroupViewModel vm)
@@ -55,8 +56,10 @@ namespace DSAMVVM.MVVM.View
 
         private void ApplyEffectiveFontSize()
         {
-            if (_settingsSvc == null) return;
-            double size = _settingsSvc.GetFontSizeFor(ViewKey, App.Settings, 8, 24);
+            if (_notifier == null) return;
+
+            // Use the cached provider (coalesces duplicate reads across view + FlowDoc)
+            double size = _notifier.GetFontSize(ViewKey);
 
             var viewer = FindOutputViewer();
             if (viewer == null) return;

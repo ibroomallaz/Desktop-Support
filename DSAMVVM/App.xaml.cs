@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using System.Windows;
 using DSAMVVM.Core.Services.AD;
+using System.Threading;
 
 namespace DSAMVVM
 {
@@ -24,20 +25,23 @@ namespace DSAMVVM
         // Expose DI for behaviors (e.g., FlowDocBinder)
         public static IServiceProvider Services { get; private set; } = default!;
 
-        // NEW: expose the live in-memory settings object (used by UserView buttons, etc.)
+        // Expose the live in-memory settings object (used by view buttons, etc.)
         public static AppSettings Settings => ((App)Current)._settings ?? new AppSettings();
+
+        // Persist-once guard
+        private int _persistOnceFlag = 0;
 
         public App()
         {
             // Last-ditch persistence on unexpected crashes
             this.DispatcherUnhandledException += (s, e) =>
             {
-                TryPersistSettings();
+                TryPersistSettingsOnce();
                 // Let default crash dialog show
             };
             AppDomain.CurrentDomain.UnhandledException += (_, __) =>
             {
-                TryPersistSettings();
+                TryPersistSettingsOnce();
             };
         }
 
@@ -99,8 +103,8 @@ namespace DSAMVVM
             var mainWindow = new MainWindow { DataContext = mainVM };
             MainWindow = mainWindow;
 
-            // Also persist when the main window closes
-            mainWindow.Closed += (_, __) => TryPersistSettings();
+            // Also persist when the main window closes — gated to run only once
+            mainWindow.Closed += (_, __) => TryPersistSettingsOnce();
 
             mainWindow.Show();
 
@@ -118,9 +122,9 @@ namespace DSAMVVM
 
         protected override void OnExit(ExitEventArgs e)
         {
-            // Flush any debounced saves first, then do a final persisted save
+            // Flush any debounced saves first, then do a final persisted save (once)
             try { _serviceProvider?.GetService<ISettingsService>()?.FlushPendingSaves(); } catch { }
-            TryPersistSettings();
+            TryPersistSettingsOnce();
 
             // Flush/close log file
             if (_serviceProvider?.GetService<IAppLogger>() is FileLogger fl)
@@ -132,7 +136,14 @@ namespace DSAMVVM
         private void App_SessionEnding(object? sender, SessionEndingCancelEventArgs e)
         {
             // Persist on user logoff or shutdown; swallow errors to not block shutdown
-            try { TryPersistSettings(); } catch { }
+            try { TryPersistSettingsOnce(); } catch { }
+        }
+
+        // Persist-once wrapper
+        private void TryPersistSettingsOnce()
+        {
+            if (Interlocked.Exchange(ref _persistOnceFlag, 1) == 1) return;
+            TryPersistSettings();
         }
 
         private void TryPersistSettings()

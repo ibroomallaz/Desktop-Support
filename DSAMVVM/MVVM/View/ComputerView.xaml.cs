@@ -1,12 +1,10 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.MVVM.Model;
-using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -53,11 +51,10 @@ namespace DSAMVVM.MVVM.View
 
         private void ApplyEffectiveFontSize()
         {
-            if (_settingsSvc == null) return;
+            if (_notifier == null) return;
 
-            // Uses service's effective logic (global or per-view if override is on),
-            // and clamps to [8, 24].
-            double size = _settingsSvc.GetFontSizeFor(ViewKey, App.Settings, min: 8, max: 24);
+            // Use the cached provider (coalesces duplicate reads across view + FlowDoc)
+            double size = _notifier.GetFontSize(ViewKey);
 
             var viewer = FindOutputViewer();
             if (viewer == null) return;
