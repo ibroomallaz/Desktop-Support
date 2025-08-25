@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 
 namespace DSAMVVM.MVVM.Model
@@ -16,7 +17,7 @@ namespace DSAMVVM.MVVM.Model
         public const string g_domainPath = "bluecat.arizona.edu";
         public const string g_domainPathLDAP = "LDAP://DC=bluecat,DC=arizona,DC=edu";
 
-        // JSON Location constants
+        // JSON locations (remote)
         public const string g_QuickLinksURL = "https://arizona.box.com/shared/static/4jonapcgzw5lq2i8m40doma5x9t684de.json"; // old
         public const string g_DepartmentJSONURL = "https://arizona.box.com/shared/static/wj9xs1pqsikyya4hkxuyu84dmvm91g4r.json";
         public const string g_versionJSON = "https://arizona.box.com/shared/static/ccfzlvn1gtfdjxv8n9c63uo68fqckp7n.json";
@@ -30,8 +31,13 @@ namespace DSAMVVM.MVVM.Model
         public static readonly string g_AppDir =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                          "UArizona", "DesktopSupportApp");
+        public static readonly string g_DataDir = Path.Combine(g_AppDir, "data");
 
-        // Logs + legacy settings dirs under the app dir
+        // Backup/cache files (local)
+        public static readonly string g_DepartmentCachePath = Path.Combine(g_DataDir, "departments.json");
+        public static readonly string g_LinksCachePath = Path.Combine(g_DataDir, "links.json");
+
+        // Logs + legacy settings dirs
         public static readonly string g_LogsDir = Path.Combine(g_AppDir, "logs");
         public static readonly string g_SettingsLegacyDir = Path.Combine(g_AppDir, "settings-legacy");
 
@@ -47,6 +53,7 @@ namespace DSAMVVM.MVVM.Model
             EnsureDirSafe(g_AppDir);
             EnsureDirSafe(g_LogsDir);
             EnsureDirSafe(g_SettingsLegacyDir);
+            EnsureDirSafe(g_DataDir);
         }
 
         // Best-effort creation; returns false and sets error on failure
@@ -65,7 +72,7 @@ namespace DSAMVVM.MVVM.Model
             }
         }
 
-        // If a files exists where our folder should be, this is fatal
+        // If a file exists where our folder should be, this is fatal
         private static void EnsureDirSafe(string path)
         {
             if (File.Exists(path))

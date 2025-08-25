@@ -1,22 +1,24 @@
 ﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.IO;
+using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Data;
 using DSAMVVM.MVVM.Model.Schemas;
-using Newtonsoft.Json;
 using System.Diagnostics;
+using System.Linq;
 
 namespace DSAMVVM.Core.Services
 {
+    // Remote-first with local JSON fallback + conditional backup refresh.
     public class DepartmentService(IHttpService http) : IDepartmentService
     {
         private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
-        private readonly SemaphoreSlim _lock = new(1, 1);
+        private readonly SemaphoreSlim _lock = new(1, 1);                     // single-flight load/reload
+        private readonly JsonFileCache<DepartmentListWrapper> _fileCache =
+            new(Globals.g_DepartmentCachePath);
 
-        // Cached, app-facing list (adapters implementing IDepartment)
         private List<IDepartment>? _departments;
-
-        // Meta is kept if you want to surface schema/timestamp later
         private DepartmentMeta? _meta;
 
         public async Task PreCacheDataAsync() => await EnsureDataLoaded();
@@ -41,17 +43,13 @@ namespace DSAMVVM.Core.Services
 
         public async Task ReloadDataAsync()
         {
-            // Force reload regardless of cache state
             await _lock.WaitAsync();
             try { await LoadDepartmentsInternalAsync(isReload: true); }
             finally { _lock.Release(); }
         }
 
-        // internals
-
         private async Task EnsureDataLoaded()
         {
-            // Lazy load on first access
             if (_departments == null) await LoadDepartmentsAsync();
         }
 
@@ -60,7 +58,7 @@ namespace DSAMVVM.Core.Services
             await _lock.WaitAsync();
             try
             {
-                if (_departments != null) return; // already loaded in the gap
+                if (_departments != null) return;
                 await LoadDepartmentsInternalAsync(isReload: false);
             }
             finally { _lock.Release(); }
@@ -68,63 +66,55 @@ namespace DSAMVVM.Core.Services
 
         private async Task LoadDepartmentsInternalAsync(bool isReload)
         {
-            var baseKey = isReload ? "DeptData.Reload" : "DeptData.Load";
-            var progressKey = UiNotify.ProgressOf(baseKey);
-
-            // Non-sticky progress message while loading
-            UiNotify.Progress(
-                baseKey,
-                isReload ? "Refreshing department data…" : "Loading department data…",
-                priority: 0);
+            var key = isReload ? "DeptData.Reload" : "DeptData.Load";
+            var progressKey = UiNotify.ProgressOf(key);
+            UiNotify.Progress(key, isReload ? "Refreshing department data…" : "Loading department data…", priority: 0);
 
             var sw = Stopwatch.StartNew();
             try
             {
-                // Fetch JSON
-                string json = await _http.GetStringAsync(Globals.g_DepartmentJSONURL);
+                // Loader: web-first; write backup when web stamp is newer (or no local); fallback to local on web failure.
+                var wrapper = await RemoteWithBackUpLoader.LoadAsync(
+                    _http,
+                    Globals.g_DepartmentJSONURL,
+                    _fileCache,
+                    StampSelector,
+                    ct: default,
+                    jsonSettings: null,
+                    normalize: w => w.Meta?.Normalize(),
+                    log: msg => Log.Info("Dept.Loader", msg));
 
-                // Deserialize
-                var wrapper = JsonConvert.DeserializeObject<DepartmentListWrapper>(json)
-                              ?? new DepartmentListWrapper();
+                if (wrapper == null)
+                    throw new InvalidOperationException("No department data available from web or local cache.");
 
-                // Ensure meta has a timestamp if payload omitted it
-                wrapper.Meta?.Normalize();
                 _meta = wrapper.Meta;
-
-                // Map raw entries to the app-facing interface via adapters
                 _departments = (wrapper.DepartmentList ?? new List<Department>())
                     .Select(d => new DepartmentAdapter(d))
                     .ToList<IDepartment>();
 
                 sw.Stop();
                 UiNotify.RemoveKey(progressKey);
-
-                // Resolution message replaces any sticky from previous failures
-                UiNotify.Success(
-                    $"{(isReload ? "Refreshed" : "Loaded")} {_departments.Count} departments in {sw.ElapsedMilliseconds} ms.",
-                    showStatusBar: true,
-                    key: baseKey);
+                UiNotify.Success($"{(isReload ? "Refreshed" : "Loaded")} {_departments.Count} departments in {sw.ElapsedMilliseconds} ms.",
+                                 showStatusBar: true, key: key);
             }
             catch (Exception e)
             {
                 sw.Stop();
                 UiNotify.RemoveKey(progressKey);
-
-                // Sticky with Retry (async)
                 UiNotify.WarnWithLinks(
                     $"Failed to {(isReload ? "refresh" : "load")} department data: {e.Message}",
-                    sticky: true,
-                    priority: 3,
-                    key: baseKey,
+                    sticky: true, priority: 3, key: key,
                     UiNotify.Link.Action("Retry", async () => await ReloadDataAsync(), "Try the download again"));
             }
         }
 
-        // Adapter for IDepartment
+        // UTC stamp used for backup refresh decisions.
+        private static DateTime? StampSelector(DepartmentListWrapper w) => w.Meta?.LastUpdatedUtc;
+
+        // Thin adapter to keep UI decoupled from transport DTOs.
         private sealed class DepartmentAdapter(Department source) : IDepartment
         {
             private readonly Department _source = source;
-
             public string Number => _source.Number;
             public bool SupportKnown => _source.SupportKnown;
             public string? Team => string.IsNullOrWhiteSpace(_source.Team) ? null : _source.Team.Trim();
