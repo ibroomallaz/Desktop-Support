@@ -6,7 +6,7 @@ namespace DSAMVVM.MVVM.Model.Schemas
     {
         public DepartmentMeta()
         {
-            SchemaVersion = 2;
+            SchemaVersion = Globals.g_DepartmentJSONSchema;
         }
     }
 }

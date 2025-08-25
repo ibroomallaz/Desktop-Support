@@ -88,35 +88,6 @@ namespace DSAMVVM.Core.Services.AD
             });
         }
 
-        public Task<List<string>> GetMimGroupsAsync(string netid)
-        {
-            return Task.Run(() =>
-            {
-                var mimGroups = new List<string>();
-
-                try
-                {
-                    using var context = new PrincipalContext(ContextType.Domain, _domain);
-                    var user = UserPrincipal.FindByIdentity(context, netid);
-
-                    if (user != null)
-                    {
-                        mimGroups = user.GetGroups()?
-                            .Where(g => g.Name.Contains("MIM"))
-                            .Select(g => g.Name)
-                            .ToList() ?? [];
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Non-fatal; warn and continue with empty list
-                    UiNotify.Warn($"Could not enumerate MIM groups for '{netid}'.");
-                }
-
-                return mimGroups;
-            });
-        }
-
         private static string ParseLicense(string license)
         {
             string pattern = "([om]{1}\\d{3})([A-Z]+)([AE]\\d{1})";

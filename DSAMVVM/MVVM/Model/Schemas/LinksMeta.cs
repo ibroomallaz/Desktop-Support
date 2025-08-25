@@ -4,7 +4,7 @@
     {
         public LinksMeta()
         {
-            SchemaVersion = 2;
+            SchemaVersion = DSAMVVM.MVVM.Model.Globals.g_LinkJSONSchema;
 
         }
     }

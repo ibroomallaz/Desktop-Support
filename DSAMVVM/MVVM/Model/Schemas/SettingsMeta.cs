@@ -1,10 +1,12 @@
-﻿namespace DSAMVVM.MVVM.Model.Schemas
+﻿
+namespace DSAMVVM.MVVM.Model.Schemas
+
 {
     public sealed class SettingsMeta : JsonMetaBase
     {
         public SettingsMeta()
         {
-            SchemaVersion = 1;
+            SchemaVersion = DSAMVVM.MVVM.Model.Globals.g_SettingsSchema;
 
         }
     }

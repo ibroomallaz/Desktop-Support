@@ -1,9 +1,7 @@
 ﻿using DSAMVVM.Core.Enums;
-using DSAMVVM.MVVM.Model.Schemas;   // use shared SettingsMeta / JsonMetaBase
+using DSAMVVM.MVVM.Model.Schemas;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using System;
-using System.Collections.Generic;
 
 namespace DSAMVVM.MVVM.Model.Config
 {
