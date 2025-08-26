@@ -1,6 +1,13 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+
+    <SolidColorBrush x:Key="MenuButton.Hover"           Color="#1C2531"/>
+    <SolidColorBrush x:Key="MenuButton.Pressed"         Color="#151C25"/>
+    <SolidColorBrush x:Key="MenuButton.Checked"         Color="#421214"/>
+    <SolidColorBrush x:Key="MenuButton.CheckedHover"    Color="#4B171A"/>
+    <SolidColorBrush x:Key="MenuButton.CheckedPressed"  Color="#371013"/>
+
     <Style BasedOn="{StaticResource {x:Type ToggleButton}}"
            TargetType="{x:Type RadioButton}"
            x:Key="MenuButtonTheme">
@@ -23,11 +30,41 @@
         </Setter>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
+
         <Style.Triggers>
+            <!-- hover/press like MenuButton -->
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource MenuButton.Hover}"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{DynamicResource MenuButton.Pressed}"/>
+            </Trigger>
+
+            <!-- checked base -->
             <Trigger Property="IsChecked" Value="True">
-                <Setter Property="Background" Value="#421214"/>
+                <Setter Property="Background" Value="{DynamicResource MenuButton.Checked}"/>
+            </Trigger>
+
+            <!-- checked + hover/press overrides -->
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsChecked" Value="True"/>
+                    <Condition Property="IsMouseOver" Value="True"/>
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" Value="{DynamicResource MenuButton.CheckedHover}"/>
+            </MultiTrigger>
+
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsChecked" Value="True"/>
+                    <Condition Property="IsPressed" Value="True"/>
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" Value="{DynamicResource MenuButton.CheckedPressed}"/>
+            </MultiTrigger>
+
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45"/>
             </Trigger>
         </Style.Triggers>
     </Style>
-
 </ResourceDictionary>
