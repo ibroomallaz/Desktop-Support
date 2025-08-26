@@ -1,7 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- knobs (tweak if you want) -->
     <CornerRadius x:Key="GroupRadio.CornerRadius">12</CornerRadius>
     <SolidColorBrush x:Key="GroupRadio.Border"          Color="#2A2F3A"/>
     <SolidColorBrush x:Key="GroupRadio.Hover"           Color="#1C2531"/>
@@ -11,8 +10,7 @@
     <Style x:Key="GroupViewRadioButtonTheme" TargetType="RadioButton">
         <Setter Property="Foreground" Value="{DynamicResource MenuTextPrimaryBrush}"/>
         <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource GroupRadio.Border}"/>
-        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="14,8"/>
         <Setter Property="MinHeight" Value="36"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -23,8 +21,6 @@
                 <ControlTemplate TargetType="RadioButton">
                     <Border x:Name="Root"
                             Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="{DynamicResource GroupRadio.CornerRadius}">
                         <ContentPresenter Margin="{TemplateBinding Padding}"
                                           HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -35,32 +31,21 @@
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Root" Property="Background"
                                     Value="{DynamicResource GroupRadio.Hover}"/>
-                            <Setter TargetName="Root" Property="BorderBrush"
-                                    Value="{DynamicResource GroupRadio.CheckedBorder}"/>
                         </Trigger>
 
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Root" Property="Background"
                                     Value="{DynamicResource GroupRadio.Checked}"/>
-                            <Setter TargetName="Root" Property="BorderBrush"
-                                    Value="{DynamicResource GroupRadio.CheckedBorder}"/>
                         </Trigger>
 
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="Root" Property="Background"
                                     Value="{DynamicResource GroupRadio.Checked}"/>
-                            <Setter TargetName="Root" Property="BorderBrush"
-                                    Value="{DynamicResource GroupRadio.CheckedBorder}"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
                         </Trigger>
 
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.45"/>
-                        </Trigger>
-
-                        <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="Root" Property="BorderThickness" Value="2"/>
-                            <Setter TargetName="Root" Property="BorderBrush" Value="#7AA2FF"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

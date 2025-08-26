@@ -6,8 +6,13 @@
              xmlns:local="clr-namespace:DSAMVVM.MVVM.View"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
-             Background="Magenta">
+             Background="Transparent">
     <Grid>
-            
+        <TextBlock Text="Work in progress..."
+       VerticalAlignment="Center"
+       HorizontalAlignment="Center"
+       FontSize="18"
+       Foreground="#CCD3DA"
+       Margin="0,0,0,0"/>
     </Grid>
 </UserControl>
