@@ -16,6 +16,7 @@
             <!-- Fonts-->
             <!-- UI font (use if you want to change the whole app’s controls/textblocks) -->
             <FontFamily x:Key="UiFontFamily">Segoe UI</FontFamily>
+        <SolidColorBrush x:Key="MenuTextPrimaryBrush"   Color="#CCD3DA"/>
 
             <!-- Output (FlowDocument) font -->
             <FontFamily x:Key="OutputFontFamily">Cascadia Code</FontFamily>

@@ -63,7 +63,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
             if (!string.IsNullOrEmpty(SearchLog))
             {
-                AppendRaw("[cyan]────────── New Search ──────────[/cyan]");
+                AppendRaw("\n[cyan]────────── New Search ──────────[/cyan]\n");
                 if (!string.IsNullOrWhiteSpace(context.Query))
                     AppendRaw($"[cyan]Query:[/cyan] [red]{context.Query}[/red]");
             }
@@ -169,7 +169,7 @@ namespace DSAMVVM.MVVM.ViewModel
             finally
             {
                 IsLoading = false;
-                AppendRaw("[green]User search process completed.[/green]");
+                AppendRaw("[green]User search process completed.[/green]\n");
             }
         }
 

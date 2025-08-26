@@ -16,7 +16,7 @@
 
 
 
-    <Border Background="#071732" CornerRadius="20" Padding="0">
+    <Border Background="#0C1C36" CornerRadius="20" Padding="0">
         <Border.Effect>
             <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.5" />
         </Border.Effect>
@@ -39,7 +39,7 @@
                 <TextBlock Text="Support App"
                            VerticalAlignment="Center"
                            FontSize="18"
-                           Foreground="White"
+                           Foreground="#CCD3DA"
                            Margin="20,0,0,0"
                            MouseLeftButtonDown="TitleBar_MouseLeftButtonDown" />
 
@@ -72,37 +72,37 @@
                 <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <RadioButton Content="Home"     GroupName="MainMenu"
-                         Height="50" Foreground="White" FontSize="14"
+                         Height="50" Foreground="{DynamicResource MenuTextPrimaryBrush}" FontSize="14"
                          Style="{StaticResource MenuButtonTheme}" IsChecked="True"
                          Command="{Binding HomeViewCommand}" />
 
                         <RadioButton Content="User"     GroupName="MainMenu"
-                         Height="50" Foreground="White" FontSize="14"
+                         Height="50" Foreground="{DynamicResource MenuTextPrimaryBrush}" FontSize="14"
                          Style="{StaticResource MenuButtonTheme}"
                          Command="{Binding UserCommand}" />
 
                         <RadioButton Content="Computer" GroupName="MainMenu"
-                         Height="50" Foreground="White" FontSize="14"
+                         Height="50" Foreground="{DynamicResource MenuTextPrimaryBrush}" FontSize="14"
                          Style="{StaticResource MenuButtonTheme}"
                          Command="{Binding ComputerCommand}" />
 
                         <RadioButton Content="Groups"   GroupName="MainMenu"
-                         Height="50" Foreground="White" FontSize="14"
+                         Height="50" Foreground="{DynamicResource MenuTextPrimaryBrush}" FontSize="14"
                          Style="{StaticResource MenuButtonTheme}"
                          Command="{Binding GroupCommand}" />
 
                         <RadioButton Content="Entra"    GroupName="MainMenu"
-                         Height="50" Foreground="White" FontSize="14"
+                         Height="50" Foreground="{DynamicResource MenuTextPrimaryBrush}" FontSize="14"
                          Style="{StaticResource MenuButtonTheme}"
                          Command="{Binding EntraCommand}" />
 
                         <RadioButton Content="Links"    GroupName="MainMenu"
-                         Height="50" Foreground="White" FontSize="14"
+                         Height="50" Foreground="{DynamicResource MenuTextPrimaryBrush}" FontSize="14"
                          Style="{StaticResource MenuButtonTheme}"
                          Command="{Binding LinksCommand}" />
 
                         <RadioButton Content="About"    GroupName="MainMenu"
-                         Height="50" Foreground="White" FontSize="14"
+                         Height="50" Foreground="{DynamicResource MenuTextPrimaryBrush}" FontSize="14"
                          Style="{StaticResource MenuButtonTheme}"
                          Command="{Binding AboutCommand}" />
                     </StackPanel>
@@ -112,7 +112,7 @@
                 <RadioButton Grid.Row="1" GroupName="MainMenu"
                  Content="Settings"
                  Height="50"
-                 Foreground="White"
+                 Foreground="{DynamicResource MenuTextPrimaryBrush}"
                  FontSize="14"
                  Style="{StaticResource MenuButtonTheme}"
                  Command="{Binding SettingsCommand}"

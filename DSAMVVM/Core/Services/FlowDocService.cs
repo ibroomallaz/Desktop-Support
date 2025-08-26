@@ -13,11 +13,13 @@ namespace DSAMVVM.Core.Services
         private static readonly IReadOnlyDictionary<string, Brush> DefaultColors =
             new Dictionary<string, Brush>(StringComparer.OrdinalIgnoreCase)
             {
-                ["red"] = Brushes.IndianRed,
-                ["green"] = Brushes.MediumSeaGreen,
-                ["yellow"] = Brushes.Khaki,
-                ["cyan"] = Brushes.LightSkyBlue,
-                ["white"] = Brushes.White
+
+                ["red"] = (Brush)new BrushConverter().ConvertFrom("#E57373"),   // softer red
+                ["green"] = (Brush)new BrushConverter().ConvertFrom("#66BB6A"),   // softer green
+                ["yellow"] = (Brush)new BrushConverter().ConvertFrom("#FFD54F"),   // soft amber
+                ["cyan"] = (Brush)new BrushConverter().ConvertFrom("#81D4FA"),   // soft cyan
+                ["white"] = (Brush)new BrushConverter().ConvertFrom("#D0D3D6"),   // muted “white”
+                ["lightgray"] = (Brush)new BrushConverter().ConvertFrom("#B0B3B8")   //light gray
             };
 
         public FlowDocService(IOutputTextSettingsProvider textSettings)
@@ -39,7 +41,8 @@ namespace DSAMVVM.Core.Services
             var doc = new FlowDocument
             {
                 Foreground = Brushes.White,
-                PagePadding = new Thickness(0),
+                Background = (Brush)new BrushConverter().ConvertFrom("#181818"),
+                PagePadding = new Thickness(10,10,0,0),
                 ColumnWidth = double.PositiveInfinity,
                 FontSize = fs
             };
