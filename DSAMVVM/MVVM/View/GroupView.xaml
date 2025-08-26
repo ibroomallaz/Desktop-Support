@@ -20,11 +20,11 @@
                  IsChecked="{Binding IsUserMim}"
                  Margin="0,0,16,0"
                  Foreground="White"
-                 Style="{StaticResource MenuButtonTheme}"/>
+                 Style="{StaticResource GroupViewRadioButtonTheme}"/>
             <RadioButton Content="Group Members"
                  IsChecked="{Binding IsGroupMembers}"
                  Foreground="White"
-                 Style="{StaticResource MenuButtonTheme}"/>
+                 Style="{StaticResource GroupViewRadioButtonTheme}"/>
         </StackPanel>
 
 

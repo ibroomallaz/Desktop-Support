@@ -11,6 +11,7 @@
                 <ResourceDictionary Source="/Theme/TextBoxTheme.xaml"/>
                 <ResourceDictionary Source="/Theme/RoundedButtonTheme.xaml"/>
                 <ResourceDictionary Source="/Theme/SearchComboTheme.xaml"/>
+                <ResourceDictionary Source="/Theme/GroupViewRadioButtonTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Fonts-->
