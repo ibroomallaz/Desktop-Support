@@ -12,22 +12,23 @@
             <!-- bottom bar -->
         </Grid.RowDefinitions>
 
+        <!-- Mode radios -->
         <StackPanel Grid.Row="0"
-            Orientation="Horizontal"
-            HorizontalAlignment="Center"
-            Margin="0,0,0,10">
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Margin="0,0,0,10">
             <RadioButton Content="User's MIM Groups"
-                 IsChecked="{Binding IsUserMim}"
-                 Margin="0,0,16,0"
-                 Foreground="White"
-                 Style="{StaticResource GroupViewRadioButtonTheme}"/>
+                         GroupName="Mode"
+                         IsChecked="{Binding IsUserMim}"
+                         Margin="0,0,16,0"
+                         Style="{StaticResource Radio.GroupView}"/>
             <RadioButton Content="Group Members"
-                 IsChecked="{Binding IsGroupMembers}"
-                 Foreground="White"
-                 Style="{StaticResource GroupViewRadioButtonTheme}"/>
+                         GroupName="Mode"
+                         IsChecked="{Binding IsGroupMembers}"
+                         Style="{StaticResource Radio.GroupView}"/>
         </StackPanel>
 
-
+        <!-- FlowDocument viewer -->
         <FlowDocumentScrollViewer
             Grid.Row="1"
             IsToolBarVisible="False"
@@ -36,17 +37,47 @@
             beh:FlowDocBinder.ViewName="GroupView"
             beh:FlowDocBinder.PreserveScrollPosition="True" />
 
+        <!-- Bottom Bar -->
         <Grid Grid.Row="2" Margin="0,10,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <!-- Clear (left) -->
+                <ColumnDefinition Width="*"/>
+                <!-- spacer -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- Font controls (right) -->
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Clear Log" Padding="10,4" Margin="0,0,12,0" Click="ClearLog_Click"/>
-                <Button Content="A-" Width="44" Margin="0,0,6,0" Click="DecreaseFont_Click"/>
-                <Button Content="A"  Width="44" Click="ResetFont_Click"/>
-                <Button Content="A+" Width="44" Margin="0,0,6,0" Click="IncreaseFont_Click"/>
+            <!-- Clear -->
+            <Button Grid.Column="0"
+                    Content="Clear"
+                    Padding="10,4"
+                    Margin="0,0,12,0"
+                    Click="ClearLog_Click"
+                    Style="{DynamicResource Button.FlowDoc}"
+                    ToolTip="Clear the log output"/>
+
+            <!-- Font size controls -->
+            <StackPanel Grid.Column="2"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button Content="A-"
+                        Width="44"
+                        Margin="0,0,6,0"
+                        Click="DecreaseFont_Click"
+                        Style="{DynamicResource Button.FlowDoc.Small}"
+                        ToolTip="Decrease log text size"/>
+                <Button Content="A"
+                        Width="44"
+                        Click="ResetFont_Click"
+                        Style="{DynamicResource Button.FlowDoc.Small}"
+                        ToolTip="Reset log text size"/>
+                <Button Content="A+"
+                        Width="44"
+                        Margin="0,0,6,0"
+                        Click="IncreaseFont_Click"
+                        Style="{DynamicResource Button.FlowDoc.Small}"
+                        ToolTip="Increase log text size"/>
             </StackPanel>
         </Grid>
     </Grid>

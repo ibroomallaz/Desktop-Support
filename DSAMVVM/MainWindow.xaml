@@ -14,9 +14,7 @@
         AllowsTransparency="True"
         Title="Support App">
 
-
-
-    <Border Background="#0C1C36" CornerRadius="20" Padding="0">
+    <Border Background="{DynamicResource Brush.Surface}" CornerRadius="20" Padding="0">
         <Border.Effect>
             <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.5" />
         </Border.Effect>
@@ -39,7 +37,7 @@
                 <TextBlock Text="Support App"
                            VerticalAlignment="Center"
                            FontSize="18"
-                           Foreground="#CCD3DA"
+                           Foreground="{DynamicResource Brush.Text.Primary}"
                            Margin="20,0,0,0"
                            MouseLeftButtonDown="TitleBar_MouseLeftButtonDown" />
 
@@ -49,15 +47,13 @@
                             VerticalAlignment="Center"
                             HorizontalAlignment="Right"
                             Margin="0,0,10,0">
-                    <Button Style="{StaticResource RoundedWindowButtonStyle}"
+                    <Button Style="{StaticResource Button.Rounded.Small}"
                             Content="—"
                             Click="Minimize_Click"
                             Margin="0,0,5,0" />
-
-                    <Button Style="{StaticResource RoundedWindowButtonStyle}"
+                    <Button Style="{StaticResource Button.Rounded.Small}"
                             Content="X"
                             Click="Close_Click" />
-
                 </StackPanel>
             </Grid>
 
@@ -72,53 +68,42 @@
                 <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <RadioButton Content="Home"     GroupName="MainMenu"
-                         Height="50" Foreground="{DynamicResource MenuTextPrimaryBrush}" FontSize="14"
-                         Style="{StaticResource MenuButtonTheme}" IsChecked="True"
-                         Command="{Binding HomeViewCommand}" />
+                                     Style="{StaticResource Radio.Menu}" IsChecked="True"
+                                     Command="{Binding HomeViewCommand}" />
 
                         <RadioButton Content="User"     GroupName="MainMenu"
-                         Height="50" Foreground="{DynamicResource MenuTextPrimaryBrush}" FontSize="14"
-                         Style="{StaticResource MenuButtonTheme}"
-                         Command="{Binding UserCommand}" />
+                                     Style="{StaticResource Radio.Menu}"
+                                     Command="{Binding UserCommand}" />
 
                         <RadioButton Content="Computer" GroupName="MainMenu"
-                         Height="50" Foreground="{DynamicResource MenuTextPrimaryBrush}" FontSize="14"
-                         Style="{StaticResource MenuButtonTheme}"
-                         Command="{Binding ComputerCommand}" />
+                                     Style="{StaticResource Radio.Menu}"
+                                     Command="{Binding ComputerCommand}" />
 
                         <RadioButton Content="Groups"   GroupName="MainMenu"
-                         Height="50" Foreground="{DynamicResource MenuTextPrimaryBrush}" FontSize="14"
-                         Style="{StaticResource MenuButtonTheme}"
-                         Command="{Binding GroupCommand}" />
+                                     Style="{StaticResource Radio.Menu}"
+                                     Command="{Binding GroupCommand}" />
 
                         <RadioButton Content="Entra"    GroupName="MainMenu"
-                         Height="50" Foreground="{DynamicResource MenuTextPrimaryBrush}" FontSize="14"
-                         Style="{StaticResource MenuButtonTheme}"
-                         Command="{Binding EntraCommand}" />
+                                     Style="{StaticResource Radio.Menu}"
+                                     Command="{Binding EntraCommand}" />
 
                         <RadioButton Content="Links"    GroupName="MainMenu"
-                         Height="50" Foreground="{DynamicResource MenuTextPrimaryBrush}" FontSize="14"
-                         Style="{StaticResource MenuButtonTheme}"
-                         Command="{Binding LinksCommand}" />
+                                     Style="{StaticResource Radio.Menu}"
+                                     Command="{Binding LinksCommand}" />
 
                         <RadioButton Content="About"    GroupName="MainMenu"
-                         Height="50" Foreground="{DynamicResource MenuTextPrimaryBrush}" FontSize="14"
-                         Style="{StaticResource MenuButtonTheme}"
-                         Command="{Binding AboutCommand}" />
+                                     Style="{StaticResource Radio.Menu}"
+                                     Command="{Binding AboutCommand}" />
                     </StackPanel>
                 </ScrollViewer>
 
                 <!-- Bottom pinned -->
                 <RadioButton Grid.Row="1" GroupName="MainMenu"
-                 Content="Settings"
-                 Height="50"
-                 Foreground="{DynamicResource MenuTextPrimaryBrush}"
-                 FontSize="14"
-                 Style="{StaticResource MenuButtonTheme}"
-                 Command="{Binding SettingsCommand}"
-                 Margin="0,0,0,10" />
+                             Content="Settings"
+                             Style="{StaticResource Radio.Menu}"
+                             Command="{Binding SettingsCommand}"
+                             Margin="0,0,0,10" />
             </Grid>
-
 
             <!-- Main content -->
             <Grid Margin="10">
@@ -126,29 +111,23 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-             <!-- Search Box -->
+
+                <!-- Search Box -->
                 <ComboBox Width="250"
-          Height="40"
-          Margin="5"
-          VerticalAlignment="Top"
-          Style="{StaticResource SearchComboTheme}"
-          Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-          ItemsSource="{Binding SearchHistory}"
-          IsEditable="True"
-          IsTextSearchEnabled="False"
-          StaysOpenOnEdit="True"
-          PreviewMouseDown="SearchBox_ShowHistory"
-          PreviewTextInput="SearchBox_PreviewTextInput">
+                          Margin="5"
+                          VerticalAlignment="Top"
+                          Style="{StaticResource ComboBox.Search}"
+                          Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                          ItemsSource="{Binding SearchHistory}"
+                          IsEditable="True"
+                          IsTextSearchEnabled="False"
+                          StaysOpenOnEdit="True"
+                          PreviewMouseDown="SearchBox_ShowHistory"
+                          PreviewTextInput="SearchBox_PreviewTextInput">
                     <ComboBox.InputBindings>
                         <KeyBinding Key="Enter" Command="{Binding ExecuteSearchCommand}" />
                     </ComboBox.InputBindings>
                 </ComboBox>
-
-
-
-
-
-
 
                 <ContentControl Grid.Row="1"
                                 Content="{Binding CurrentView}" />

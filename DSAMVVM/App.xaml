@@ -7,19 +7,14 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/Theme/MenuButtonTheme.xaml"/>
-                <ResourceDictionary Source="/Theme/TextBoxTheme.xaml"/>
-                <ResourceDictionary Source="/Theme/RoundedButtonTheme.xaml"/>
-                <ResourceDictionary Source="/Theme/SearchComboTheme.xaml"/>
-                <ResourceDictionary Source="/Theme/GroupViewRadioButtonTheme.xaml"/>
+                <ResourceDictionary Source="/Theme/Index.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Fonts-->
-            <!-- UI font (use if you want to change the whole app’s controls/textblocks) -->
+            <!-- UI font  -->
             <FontFamily x:Key="UiFontFamily">Segoe UI</FontFamily>
-        <SolidColorBrush x:Key="MenuTextPrimaryBrush"   Color="#CCD3DA"/>
 
-            <!-- Output (FlowDocument) font -->
+            <!-- FlowDocument font -->
             <FontFamily x:Key="OutputFontFamily">Cascadia Code</FontFamily>
 
             <!-- Implicit style for FlowDocument -->
