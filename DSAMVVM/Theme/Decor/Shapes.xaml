@@ -1,0 +1,10 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <CornerRadius x:Key="Radius.Card">12</CornerRadius>
+    <CornerRadius x:Key="Radius.Button">12</CornerRadius>
+
+    <Thickness x:Key="Space.Page">24,24,24,24</Thickness>
+    <Thickness x:Key="Space.CardPadding">16,16,16,16</Thickness>
+    <sys:Double x:Key="Space.Gap">16</sys:Double>
+</ResourceDictionary>

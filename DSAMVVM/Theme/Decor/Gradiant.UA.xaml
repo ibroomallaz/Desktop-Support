@@ -1,0 +1,34 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ACCENT (UA burgundy) — use this for the hero/main card -->
+    <LinearGradientBrush x:Key="CardGradient.Accent" StartPoint="0,0" EndPoint="1,1">
+        <!-- hard-coded to avoid missing-color keys; swap to theme colors later if you like -->
+        <GradientStop Color="#5E1A1F" Offset="0.00"/>
+        <GradientStop Color="#421214" Offset="1.00"/>
+    </LinearGradientBrush>
+
+    <!-- INFO ( old blue “Accent”) -->
+    <LinearGradientBrush x:Key="CardGradient.Info" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{DynamicResource Color.Info.Light}" Offset="0.00"/>
+        <GradientStop Color="{DynamicResource Color.Info}"       Offset="1.00"/>
+    </LinearGradientBrush>
+
+    <!-- Mixed surface (gold → blue) -->
+    <LinearGradientBrush x:Key="CardGradient.Surface" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{DynamicResource Color.Warning}" Offset="0.00"/>
+        <GradientStop Color="{DynamicResource Color.Info}"    Offset="1.00"/>
+    </LinearGradientBrush>
+
+    <!-- Purple -->
+    <LinearGradientBrush x:Key="CardGradient.Purple" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{DynamicResource Color.Purple}"       Offset="0.00"/>
+        <GradientStop Color="{DynamicResource Color.Purple.Hover}" Offset="1.00"/>
+    </LinearGradientBrush>
+
+    <!-- Green -->
+    <LinearGradientBrush x:Key="CardGradient.Success" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{DynamicResource Color.Success}"       Offset="0.00"/>
+        <GradientStop Color="{DynamicResource Color.Success.Hover}" Offset="1.00"/>
+    </LinearGradientBrush>
+</ResourceDictionary>

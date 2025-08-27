@@ -1,7 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Style x:Key="SearchComboTheme" TargetType="{x:Type ComboBox}">
+    <Style x:Key="ComboBox.Search" TargetType="{x:Type ComboBox}">
         <Setter Property="Foreground" Value="#CFCFCF" />
         <Setter Property="Background" Value="#353340" />
         <Setter Property="BorderThickness" Value="0" />

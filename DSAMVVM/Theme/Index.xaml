@@ -1,0 +1,23 @@
+﻿<!-- Theme/Index.xaml -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.MergedDictionaries>
+        <!-- Colors  -->
+        <ResourceDictionary Source="/Theme/Colors/Colors.UA.xaml"/>
+        <ResourceDictionary Source="/Theme/Decor/Gradiant.UA.xaml"/>
+        <!-- Effects etc-->
+        <ResourceDictionary Source="/Theme/Decor/Effects.xaml"/>
+        <ResourceDictionary Source="/Theme/Decor/Shapes.xaml"/>
+        <!-- 
+        <ResourceDictionary Source="/Theme/Typography.xaml"/>
+        <ResourceDictionary Source="/Theme/Icons.xaml"/>
+-->
+        <!-- Controls -->
+        <ResourceDictionary Source="/Theme/Controls/Radio.Menu.xaml"/>
+        <ResourceDictionary Source="/Theme/Controls/Button.Rounded.xaml"/>
+        <ResourceDictionary Source="/Theme/Controls/Button.FlowDoc.xaml"/>
+        <ResourceDictionary Source="/Theme/Controls/Radio.GroupView.xaml"/>
+        <ResourceDictionary Source="/Theme/Controls/ComboBox.Search.xaml"/>
+        <ResourceDictionary Source="/Theme/Controls/Card.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>
