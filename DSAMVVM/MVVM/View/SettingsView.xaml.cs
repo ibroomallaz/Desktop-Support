@@ -139,19 +139,21 @@ namespace DSAMVVM.MVVM.View
         }
 
 
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        private void GeneralFontChecked(object sender, RoutedEventArgs e)
         {
             FontSlider.Visibility = Visibility.Visible;
             FontSlider2.Visibility = Visibility.Visible;
             GeneralFont.Visibility = Visibility.Collapsed;
+            checkBox.Content = "General View Font Settings";
 
         }
 
-        private void checkBox_Unchecked(object sender, RoutedEventArgs e)
+        private void GeneralFontUnChecked(object sender, RoutedEventArgs e)
         {
             FontSlider.Visibility = Visibility.Collapsed;
             FontSlider2.Visibility = Visibility.Collapsed;
             GeneralFont.Visibility = Visibility.Visible;
+            checkBox.Content = "Individual View Font Settings";
         }
 
         private void FileIconButton(object sender, RoutedEventArgs e)
@@ -164,29 +166,35 @@ namespace DSAMVVM.MVVM.View
 
         }
 
-        private void checkBox2_Checked(object sender, RoutedEventArgs e)
+
+        private void KeepHistoryChecked(object sender, RoutedEventArgs e)
         {
 
         }
 
-        private void checkBox2_Checked_1(object sender, RoutedEventArgs e)
+        private void KeepHistoryUnChecked(object sender, RoutedEventArgs e)
         {
 
         }
 
-        private void checkBox2_Unchecked(object sender, RoutedEventArgs e)
+        private void LogRetentionChecked(object sender, RoutedEventArgs e)
         {
-
+            dropDownMenuRetention.IsEnabled = true;
         }
 
-        private void checkBox3_Checked(object sender, RoutedEventArgs e)
+        private void LogRetentionUnChecked(object sender, RoutedEventArgs e)
         {
-            dropDownMenu.IsEnabled = true;
+            dropDownMenuRetention.IsEnabled = false;
         }
 
-        private void checkBox3_Unchecked(object sender, RoutedEventArgs e)
+        private void LogLevelChecked(object sender, RoutedEventArgs e)
         {
-            dropDownMenu.IsEnabled = false;
+            dropDownMenuLogLevel.IsEnabled = true;
+        }
+
+        private void LogLevelUnChecked(object sender, RoutedEventArgs e)
+        {
+            dropDownMenuLogLevel.IsEnabled= false;
         }
     }
 }
