@@ -8,10 +8,7 @@ namespace DSAMVVM.Core.Services.AD
     {
         private readonly string _ldapPath;
 
-        public ADComputerService(string ldapPath)
-        {
-            _ldapPath = ldapPath;
-        }
+        public ADComputerService(string ldapPath) { _ldapPath = ldapPath; }
 
         public Task<ADComputerInfo> GetComputerAsync(string hostname)
         {
@@ -21,45 +18,29 @@ namespace DSAMVVM.Core.Services.AD
 
                 try
                 {
-                    using var entry = new DirectoryEntry(_ldapPath);
-                    using var searcher = new DirectorySearcher(entry)
-                    {
-                        Filter = $"(&(objectCategory=computer)(cn={hostname}))"
-                    };
-
-                    var result = searcher.FindOne();
-                    if (result != null)
-                    {
-                        info.Exists = true;
-
-                        using var computer = result.GetDirectoryEntry();
-                        string? dn = computer.Properties["distinguishedName"].Value?.ToString();
-                        if (dn != null)
-                        {
-                            info.OUs = string.Join(", ", dn.Split(',').Where(p => p.StartsWith("OU=")));
-                        }
-
-                        info.Description = computer.Properties["description"]?.Value?.ToString();
-                        info.OperatingSystem = computer.Properties["operatingSystem"]?.Value?.ToString() ?? "Unknown";
-                        info.IsHybridGroupMember = IsInHybridGroup(computer);
-
-                        object? enabledObj = computer.Properties["userAccountControl"]?.Value;
-                        if (enabledObj is int uac)
-                        {
-                            // Bit 2 (0x2) = disabled
-                            info.Enabled = (uac & 0x2) == 0;
-                        }
-                        else
-                        {
-                            info.Enabled = false;
-                        }
-                    }
-                    else
+                    // single computer search with required attributes preloaded
+                    var r = DirectoryUtility.FindComputerByCn(_ldapPath, hostname);
+                    if (r == null)
                     {
                         info.Exists = false;
                         info.ErrorMessage = $"Computer name {hostname} not found.";
                         UiNotify.Warn($"Computer '{hostname}' not found in AD.");
+                        return info;
                     }
+
+                    info.Exists = true;
+
+                    // DN -> comma-joined OU path for display
+                    var dn = DirectoryUtility.GetString(r, "distinguishedName");
+                    if (!string.IsNullOrEmpty(dn))
+                        info.OUs = string.Join(", ", dn.Split(',').Where(p => p.StartsWith("OU=", StringComparison.OrdinalIgnoreCase)));
+
+                    info.Description = DirectoryUtility.GetString(r, "description");
+                    info.OperatingSystem = DirectoryUtility.GetString(r, "operatingSystem") ?? "Unknown";
+                    info.Enabled = DirectoryUtility.GetEnabledFromUac(r);
+
+                    // simple membership flag from memberOf attribute when present
+                    info.IsHybridGroupMember = DirectoryUtility.IsMemberOf(r, "UA-MEMHybridDevices");
                 }
                 catch (DirectoryServicesCOMException ex)
                 {
@@ -76,20 +57,6 @@ namespace DSAMVVM.Core.Services.AD
 
                 return info;
             });
-        }
-
-        private static bool IsInHybridGroup(DirectoryEntry computer)
-        {
-            var memberOf = computer.Properties["memberOf"];
-            if (memberOf == null) return false;
-
-            foreach (var group in memberOf)
-            {
-                if (group?.ToString()?.Contains("UA-MEMHybridDevices", StringComparison.OrdinalIgnoreCase) == true)
-                    return true;
-            }
-
-            return false;
         }
     }
 }

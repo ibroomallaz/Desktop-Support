@@ -14,7 +14,7 @@ namespace DSAMVVM.MVVM.Model
         public static string g_AppVersion = v;
 
         // AD constants
-        public const string g_domainPath = "bluecat.arizona.edu";
+
         public const string g_domainPathLDAP = "LDAP://DC=bluecat,DC=arizona,DC=edu";
 
         // JSON locations (remote)
