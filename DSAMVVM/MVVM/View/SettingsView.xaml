@@ -6,85 +6,154 @@
              xmlns:local="clr-namespace:DSAMVVM.MVVM.View"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <StackPanel Width="800" Height="450" Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left">
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Width="50" Height="50" VerticalAlignment="Top">
-            </Button>
-            <Button Width="50" Height="50" VerticalAlignment="Top">
-            </Button>
+    <StackPanel Height="450" Width="800" VerticalAlignment="Center" Orientation="Vertical">
+        <Label Content="Utilities" Foreground="White" FontSize="30" Margin="20,0,0,-40"/>
+        <StackPanel Orientation="Horizontal" Width="750" HorizontalAlignment="Left" Margin="20">
+            <Border Width="175"
+                    Height="180"
+                    CornerRadius="10"
+                    VerticalAlignment="Top" 
+                    Background="#FF223184"
+                    HorizontalAlignment="Center"
+                    Margin="20">
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="20">
+                    <Button Width="135" Height="115" VerticalAlignment="Top" Click="FileIconButton" >
+                        <Button.Background>
+                            <ImageBrush ImageSource="/MVVM/View/fileicon.png"/>
+                        </Button.Background>
+                    </Button>
+                    <Label Content="Open File log" Foreground="White" FontFamily="Consolas" FontSize="15" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+            <Border Width="175"
+                    Height="180"
+                    CornerRadius="10"
+                    VerticalAlignment="Top" 
+                    Background="#FF223184"
+                    HorizontalAlignment="Center"
+                    Margin="20">
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="20" Width="135">
+                    <CheckBox Content="Keep History" 
+                    Foreground="White"
+                    Checked="checkBox2_Checked_1"
+                    Unchecked="checkBox2_Unchecked"
+                    Margin="0,20"
+                    x:Name="checkBox2"
+                    FontFamily="Consolas"
+                    FontSize="15"
+                    HorizontalAlignment="Left"/>
+
+                    <CheckBox Content="Log Retention" 
+                    Foreground="White"
+                    Checked="checkBox3_Checked"
+                    Unchecked="checkBox3_Unchecked"
+                    Margin="0,25"
+                    x:Name="checkBox3"
+                    FontFamily="Consolas"
+                    FontSize="15"
+                    HorizontalAlignment="Left"/>
+
+                    <ComboBox FontSize="13" 
+                          x:Name="dropDownMenu" 
+                          Width="75" 
+                          Height="25" 
+                          VerticalAlignment="Bottom" 
+                          HorizontalAlignment="Center" 
+                          FontFamily="Consolas"
+                          Margin="0,-15"
+                          HorizontalContentAlignment="Center"
+                          IsEnabled="False">
+                        <ComboBoxItem x:Name="LogRetention1" IsSelected="true" Content="1"/>
+                        <ComboBoxItem x:Name="LogRetention5" Content="5"/>
+                        <ComboBoxItem x:Name="LogRetention10" Content="10"/>
+                        <ComboBoxItem x:Name="LogRetention15" Content="15"/>
+                        <ComboBoxItem x:Name="LogRetentionNever" Content="30"/>
+                    </ComboBox>
+                </StackPanel>
+            </Border>
+
         </StackPanel>
+        <StackPanel Orientation="Vertical" Margin="0,-40">
+            <Label Content="Font Settings" Foreground="White" FontSize="30" Margin="20,0,0,-5"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10">
+                <CheckBox Content="Overwrite Font Size" 
+                    Foreground="White" 
+                    Checked="CheckBox_Checked"
+                    Unchecked="checkBox_Unchecked"
+                    Margin="35,0"
+                    x:Name="checkBox"
+                    FontFamily="Consolas"
+                    FontSize="16"/>
 
+                <Button x:Name="applyButton" 
+                    Content="Apply" 
+                    HorizontalAlignment="Left"                 
+                    Width="66" 
+                    Height="25"/>
+            </StackPanel>
+            <StackPanel Width="Auto" 
+                    Orientation="Horizontal" 
+                    x:Name="FontSlider"
+                    Margin="20,-5" 
+                    Height="75"
+                    Visibility="Collapsed">
 
-        <StackPanel Orientation="Horizontal">
-            <Grid Width="500" Height="105" HorizontalAlignment="Left">
-                <Label FontFamily="Consolas" Content="User View Font Size" Foreground="White" HorizontalAlignment="Left" FontSize="28" VerticalAlignment="Top"/>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-                    <TextBox Background="Transparent" FontFamily="Consolas" Text="{Binding ElementName=mySlider, Path=Value}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
-                    <Slider IsSnapToTickEnabled="True" TickFrequency="1" x:Name="mySlider" Minimum="8" Maximum="24" Value="{Binding SliderValue, Mode=TwoWay}" Width ="300" Margin="0,40"/>
-                    <TextBlock FontFamily="Consolas" Text ="A" FontSize="{Binding ElementName=mySlider, Path=Value}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
-                </StackPanel>
-                <Button Margin="300,25,0,0" FontFamily="Consolas" FontSize="20" Content="OK" Width="40" Height="35" Click="Button_Click">
-                    <Button.Resources>
-                        <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="10"/>
-                        </Style>
-                    </Button.Resources>
-                </Button>
-            </Grid>
+                <Grid Width="300" Height="100" HorizontalAlignment="Left">
+                    <Label FontFamily="Consolas" Content="User Info Font Size" Foreground="White" HorizontalAlignment="Left" FontSize="18" VerticalAlignment="Top" Margin="20,0"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                        <TextBox Background="Transparent" FontFamily="Consolas" Text="{Binding ElementName=mySlider, Path=Value}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                        <Slider IsSnapToTickEnabled="True" TickFrequency="1" x:Name="mySlider" Minimum="10" Maximum="24" Value="{Binding SliderValue, Mode=TwoWay}" Width ="200" Margin="0,40"/>
+                        <TextBlock FontFamily="Consolas" Text ="A" FontSize="{Binding ElementName=mySlider, Path=Value}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                    </StackPanel>
+                </Grid>
 
+                <Grid Width="300" Height="100" HorizontalAlignment="Left">
+                    <Label FontFamily="Consolas" Content="Computer Info Font Size" Foreground="White" HorizontalAlignment="Left" FontSize="18" VerticalAlignment="Top" Margin="20,0"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                        <TextBox Background="Transparent" FontFamily="Consolas" Text="{Binding ElementName=mySliderComputer, Path=Value}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                        <Slider IsSnapToTickEnabled="True" TickFrequency="1" x:Name="mySliderComputer" Minimum="10" Maximum="26" Value="{Binding SliderValue, Mode=TwoWay}" Width ="200" Margin="0,40"/>
+                        <TextBlock FontFamily="Consolas" Text ="A" FontSize="{Binding ElementName=mySliderComputer, Path=Value}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
 
-            <Grid Width="500" Height="105" HorizontalAlignment="Left">
-                <Label FontFamily="Consolas" Content="Computer Info Font Size" Foreground="White" HorizontalAlignment="Left" FontSize="28" VerticalAlignment="Top"/>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-                    <TextBox Background="Transparent" FontFamily="Consolas" Text="{Binding ElementName=mySliderComputer, Path=Value}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
-                    <Slider IsSnapToTickEnabled="True" TickFrequency="1" x:Name="mySliderComputer" Minimum="8" Maximum="26" Value="{Binding SliderValue, Mode=TwoWay}" Width ="300" Margin="0,40"/>
-                    <TextBlock FontFamily="Consolas" Text ="A" FontSize="{Binding ElementName=mySliderComputer, Path=Value}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
-                </StackPanel>
-                <Button Margin="300,25,0,0" FontFamily="Consolas" FontSize="20" Content="OK" Width="40" Height="35" Click="Button_Click">
-                    <Button.Resources>
-                        <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="10"/>
-                        </Style>
-                    </Button.Resources>
-                </Button>
-            </Grid>
-        </StackPanel>
+            <StackPanel Orientation="Horizontal" 
+                    x:Name="FontSlider2" 
+                    VerticalAlignment="Bottom"
+                    Margin="20,-5"
+                    Height="75"
+                    Visibility="Collapsed">
 
-        <StackPanel Orientation="Horizontal">
+                <Grid Width="300" Height="100" HorizontalAlignment="Left">
+                    <Label FontFamily="Consolas" Content="Groups Info Font Size" Foreground="White" HorizontalAlignment="Left" FontSize="18" VerticalAlignment="Top" Margin="20,0"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                        <TextBox Background="Transparent" FontFamily="Consolas" Text="{Binding ElementName=mySliderGroups, Path=Value}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                        <Slider IsSnapToTickEnabled="True" TickFrequency="1" x:Name="mySliderGroups" Minimum="10" Maximum="26" Value="{Binding SliderValue, Mode=TwoWay}" Width ="200" Margin="0,40"/>
+                        <TextBlock FontFamily="Consolas" Text ="A" FontSize="{Binding ElementName=mySliderGroups, Path=Value}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                    </StackPanel>
+                </Grid>
 
+                <Grid Width="300" Height="100" HorizontalAlignment="Left">
+                    <Label FontFamily="Consolas" Content="Entra Info Font Size" Foreground="White" HorizontalAlignment="Left" FontSize="18" VerticalAlignment="Top" Margin="20,0"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                        <TextBox Background="Transparent" FontFamily="Consolas" Text="{Binding ElementName=mySliderEntra, Path=Value}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                        <Slider IsSnapToTickEnabled="True" TickFrequency="1" x:Name="mySliderEntra" Minimum="10" Maximum="26" Value="{Binding SliderValue, Mode=TwoWay}" Width ="200" Margin="0,40"/>
+                        <TextBlock FontFamily="Consolas" Text ="A" FontSize="{Binding ElementName=mySliderEntra, Path=Value}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
 
-            <Grid Width="500" Height="105" HorizontalAlignment="Left">
-                <Label FontFamily="Consolas" Content="Groups Info Font Size" Foreground="White" HorizontalAlignment="Left" FontSize="28" VerticalAlignment="Top"/>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-                    <TextBox Background="Transparent" FontFamily="Consolas" Text="{Binding ElementName=mySliderComputer, Path=Value}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
-                    <Slider IsSnapToTickEnabled="True" TickFrequency="1" x:Name="mySliderGroups" Minimum="8" Maximum="26" Value="{Binding SliderValue, Mode=TwoWay}" Width ="300" Margin="0,40"/>
-                    <TextBlock FontFamily="Consolas" Text ="A" FontSize="{Binding ElementName=mySliderComputer, Path=Value}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
-                </StackPanel>
-                <Button Margin="300,25,0,0" FontFamily="Consolas" FontSize="20" Content="OK" Width="40" Height="35" Click="Button_Click">
-                    <Button.Resources>
-                        <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="10"/>
-                        </Style>
-                    </Button.Resources>
-                </Button>
-            </Grid>
-
-            <Grid Width="500" Height="105" HorizontalAlignment="Left">
-                <Label FontFamily="Consolas" Content="Entre Info Font Size" Foreground="White" HorizontalAlignment="Left" FontSize="28" VerticalAlignment="Top"/>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-                    <TextBox Background="Transparent" FontFamily="Consolas" Text="{Binding ElementName=mySliderComputer, Path=Value}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
-                    <Slider IsSnapToTickEnabled="True" TickFrequency="1" x:Name="mySliderEntre" Minimum="8" Maximum="26" Value="{Binding SliderValue, Mode=TwoWay}" Width ="300" Margin="0,40"/>
-                    <TextBlock FontFamily="Consolas" Text ="A" FontSize="{Binding ElementName=mySliderComputer, Path=Value}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
-                </StackPanel>
-                <Button Margin="300,25,0,0" FontFamily="Consolas" FontSize="20" Content="OK" Width="40" Height="35" Click="Button_Click">
-                    <Button.Resources>
-                        <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="10"/>
-                        </Style>
-                    </Button.Resources>
-                </Button>
-            </Grid>
+            <StackPanel x:Name="GeneralFont" Orientation="Horizontal" HorizontalAlignment="Left" Margin="15,-5" Visibility="Visible">
+                <Grid Width="300" Height="100" HorizontalAlignment="Left">
+                    <Label FontFamily="Consolas" Content="Change Overall Font Size" Foreground="White" HorizontalAlignment="Left" FontSize="18" VerticalAlignment="Top" Margin="20,0"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                        <TextBox Background="Transparent" FontFamily="Consolas" Text="{Binding ElementName=mySliderGeneral, Path=Value}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="20,0"/>
+                        <Slider IsSnapToTickEnabled="True" TickFrequency="1" x:Name="mySliderGeneral" Minimum="10" Maximum="26" Value="{Binding SliderValue, Mode=TwoWay}" Width ="200" Margin="0,40"/>
+                        <TextBlock FontFamily="Consolas" Text ="A" FontSize="{Binding ElementName=mySliderGeneral, Path=Value}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
         </StackPanel>
     </StackPanel>
 </UserControl>

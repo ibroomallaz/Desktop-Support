@@ -17,6 +17,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="MVVM\View\fileicon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="img\lilyface.ico" />
   </ItemGroup>
 
@@ -24,6 +28,10 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="9.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="MVVM\View\fileicon.png" />
   </ItemGroup>
 
   <ItemGroup>
