@@ -117,7 +117,7 @@
             <StackPanel Width="Auto" 
                     Orientation="Horizontal" 
                     x:Name="FontSlider"
-                    Margin="20,0" 
+                    Margin="30,0" 
                     Height="75"
                     Visibility="Collapsed">
 
@@ -143,7 +143,7 @@
             <StackPanel Orientation="Horizontal" 
                     x:Name="FontSlider2" 
                     VerticalAlignment="Bottom"
-                    Margin="20,0"
+                    Margin="30,0"
                     Height="75"
                     Visibility="Collapsed">
 
@@ -179,7 +179,7 @@
             <StackPanel Orientation="Horizontal" 
                         VerticalAlignment="Bottom" 
                         HorizontalAlignment="Left" 
-                        Margin="0,0"
+                        Margin="0,5"
                         Width="600">
                 <CheckBox Content="Individual View Font Settings" 
                     Foreground="White" 
@@ -191,13 +191,14 @@
                     VerticalAlignment="Bottom"
                     FontSize="16"/>
 
-                <Button x:Name="applyButton" 
+
+            </StackPanel>
+        </StackPanel>
+        <Button x:Name="applyButton" 
                     Content="Apply" 
-                    Margin="150,0"
+                    Margin="200,5"
                     HorizontalAlignment="Right"                 
                     Width="66" 
                     Height="25"/>
-            </StackPanel>
-        </StackPanel>
     </StackPanel>
 </UserControl>
