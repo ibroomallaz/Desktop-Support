@@ -12,14 +12,14 @@
         <Label FontFamily="Consolas" Content="Log Settings" Width="209" HorizontalAlignment="Center" Foreground="White" FontSize="30" Margin="0,-5,30,-40"/>
         <StackPanel Orientation="Horizontal" Width="750" HorizontalAlignment="Left" Margin="20">
             <Border Width="175"
-                    Height="180"
+                    Height="150"
                     CornerRadius="10"
                     VerticalAlignment="Top" 
                     Background="#FF223184"
                     HorizontalAlignment="Center"
                     Margin="20">
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="20">
-                    <Button Width="135" Height="115" VerticalAlignment="Top" Click="FileIconButton" >
+                    <Button Width="105" Height="85" VerticalAlignment="Top" Click="FileIconButton" >
                         <Button.Background>
                             <ImageBrush ImageSource="/MVVM/View/fileicon.png"/>
                         </Button.Background>
@@ -28,13 +28,13 @@
                 </StackPanel>
             </Border>
             <Border Width="260"
-                    Height="180"
+                    Height="150"
                     CornerRadius="10"
                     VerticalAlignment="Top" 
                     Background="#FF223184"
                     HorizontalAlignment="Center"
                     Margin="20">
-                <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="20" Width="225">
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="20,0" Width="225">
                     <StackPanel Orientation="Horizontal" Height="50" Width="225">
                     <CheckBox Content="Keep History" 
                         Foreground="White"
@@ -96,7 +96,7 @@
                               VerticalAlignment="Center" 
                               HorizontalAlignment="Right" 
                               FontFamily="Consolas"
-                              Margin="65,0"
+                              Margin="62,0"
                               HorizontalContentAlignment="Center"
                               IsEnabled="False">
                             <ComboBoxItem x:Name="LogRetention1" IsSelected="true" Content="1"/>
