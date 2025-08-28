@@ -1,25 +1,15 @@
 ﻿using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
-using System;
-using System.Collections.Generic;
 using System.DirectoryServices;
-using System.DirectoryServices.AccountManagement;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace DSAMVVM.Core.Services.AD
 {
     public class ADUserService
     {
-        private readonly string _domain;
         private readonly string _ldap;
 
-        public ADUserService(string domain, string ldap)
-        {
-            _domain = domain;
-            _ldap = ldap;
-        }
+        public ADUserService(string ldap) { _ldap = ldap; }
 
         public Task<ADUserInfo> GetUserAsync(string netid)
         {
@@ -29,10 +19,9 @@ namespace DSAMVVM.Core.Services.AD
 
                 try
                 {
-                    using var context = new PrincipalContext(ContextType.Domain, _domain);
-                    var user = UserPrincipal.FindByIdentity(context, netid);
-
-                    if (user == null)
+                    // single, tight user search with required attributes preloaded
+                    var r = DirectoryUtility.FindUserBySam(_ldap, netid);
+                    if (r == null)
                     {
                         info.Exists = false;
                         info.ErrorMessage = "User not found.";
@@ -40,47 +29,46 @@ namespace DSAMVVM.Core.Services.AD
                     }
 
                     info.Exists = true;
-                    info.DisplayName = user.DisplayName ?? "Unknown";
-                    info.Enabled = user.Enabled ?? false;
+                    info.DisplayName = DirectoryUtility.GetString(r, "displayName") ?? "Unknown";
+                    info.Enabled = DirectoryUtility.GetEnabledFromUac(r);
 
-                    var dirEntry = (DirectoryEntry)user.GetUnderlyingObject();
-                    info.DepartmentName = dirEntry.Properties["Department"]?.Value?.ToString() ?? "None";
-                    info.DepartmentNumber = info.DepartmentName?.Length >= 4 ? info.DepartmentName[..4] : null;
-                    info.EduAffiliation = dirEntry.Properties["eduPersonPrimaryAffiliation"]?.Value?.ToString() ?? "Unknown";
+                    var dept = DirectoryUtility.GetString(r, "department")
+                               ?? DirectoryUtility.GetString(r, "Department")
+                               ?? "None";
+                    info.DepartmentName = dept;
+                    info.DepartmentNumber = dept?.Length >= 4 ? dept[..4] : null;
 
-                    var rawLicense = dirEntry.Properties["extensionattribute15"]?.Value?.ToString() ?? "";
+                    info.EduAffiliation = DirectoryUtility.GetString(r, "eduPersonPrimaryAffiliation") ?? "Unknown";
+
+                    var rawLicense = DirectoryUtility.GetString(r, "extensionAttribute15") ?? "";
                     info.License = ParseLicense(rawLicense);
 
-                    using var searcher = new DirectorySearcher(context.ConnectedServer)
-                    {
-                        Filter = $"(&(objectCategory=group)(member={user.DistinguishedName})(cn=*MIM-DivisionRollup*))"
-                    };
+                    // second query only if needed to resolve Division rollup group
+                    var userDn = DirectoryUtility.GetString(r, "distinguishedName");
+                    var result = !string.IsNullOrWhiteSpace(userDn)
+                        ? DirectoryUtility.FindDivisionRollupGroup(_ldap, userDn!)
+                        : null;
 
-                    var result = searcher.FindOne();
                     if (result?.Properties["cn"]?.Count > 0)
                     {
-                        var group = result.Properties["cn"][0]?.ToString();
-                        info.Division = group?.Length >= 4 ? group[..4] : "N/A";
+                        var cn = result.Properties["cn"][0]?.ToString();
+                        info.Division = cn?.Length >= 4 ? cn[..4] : "N/A";
                     }
                     else
                     {
                         info.Division = "No Departmental MIM group";
                     }
                 }
-                catch (PrincipalServerDownException ex)
+                catch (DirectoryServicesCOMException ex)
                 {
-                    info.ErrorMessage = "Unable to connect to the domain controller.";
                     info.Exists = false;
-
-                    // Surface -  actionable for the user (VPN/connection issues)
-                    UiNotify.Error("AD lookup failed", "Domain controller is unreachable.", ex, alsoStatusBar: true);
+                    info.ErrorMessage = "Unable to connect to the directory service.";
+                    UiNotify.Error("AD lookup failed", "Directory service is unreachable.", ex, alsoStatusBar: true);
                 }
                 catch (Exception ex)
                 {
-                    info.ErrorMessage = $"Unexpected error: {ex.Message}";
                     info.Exists = false;
-
-                    // Bubble a concise error and log details; also echo to status bar.
+                    info.ErrorMessage = $"Unexpected error: {ex.Message}";
                     UiNotify.Error("AD lookup failed", ex.Message, ex, alsoStatusBar: true);
                 }
 
@@ -90,6 +78,7 @@ namespace DSAMVVM.Core.Services.AD
 
         private static string ParseLicense(string license)
         {
+            // matches original semantics; returns human readable classification
             string pattern = "([om]{1}\\d{3})([A-Z]+)([AE]\\d{1})";
             var match = Regex.Match(license, pattern);
             if (match.Success)
@@ -106,40 +95,24 @@ namespace DSAMVVM.Core.Services.AD
             }
 
             foreach (var segment in license.Split('(', ')'))
-            {
-                if (segment.Contains("365"))
-                    return segment + " (Unknown License Type)";
-            }
+                if (segment.Contains("365")) return segment + " (Unknown License Type)";
 
             return "No valid O365 license found";
         }
 
-        // Keeping logic for now but deprecating search until later
         public Task<string?> LookupNameByEmployeeID(string userNumber)
         {
             return Task.Run(() =>
             {
                 try
                 {
-                    using var entry = new DirectoryEntry(_ldap);
-                    using var searcher = new DirectorySearcher(entry)
-                    {
-                        Filter = $"(&(objectClass=user)(employeeID={userNumber}))"
-                    };
-
-                    searcher.PropertiesToLoad.Add("displayName");
-                    searcher.PropertiesToLoad.Add("employeeID");
-
-                    var result = searcher.FindOne();
-                    if (result != null)
-                        return result.Properties["displayName"][0]?.ToString();
+                    var r = DirectoryUtility.FindUserByEmployeeId(_ldap, userNumber);
+                    if (r != null) return DirectoryUtility.GetString(r, "displayName");
                 }
-                catch (Exception ex)
+                catch
                 {
-                    // Non-fatal lookup; warn and return null
                     UiNotify.Warn($"Could not resolve displayName for employeeID '{userNumber}'.");
                 }
-
                 return null;
             });
         }

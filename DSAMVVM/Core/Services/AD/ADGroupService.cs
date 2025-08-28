@@ -1,17 +1,15 @@
-﻿using DSAMVVM.Core;
-using DSAMVVM.Core.Utilities;
+﻿using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
 using System.DirectoryServices;
+
 
 namespace DSAMVVM.Core.Services.AD
 {
     public class ADGroupService
     {
-        // Bind directly to configured LDAP base from Globals
         private static DirectoryEntry Root() => new DirectoryEntry(Globals.g_domainPathLDAP);
 
-        // User → direct MIM groups (single read: memberOf + userAccountControl)
         public Task<MimLookupResult> GetUserMimGroupsAsync(string netid) =>
             Task.Run(() =>
             {
@@ -20,56 +18,65 @@ namespace DSAMVVM.Core.Services.AD
 
                 try
                 {
-                    using var root = Root();
-                    using var ds = new DirectorySearcher(root)
-                    {
-                        // accept sAMAccountName or UPN (prefix only); no deep expansion
-                        Filter = $"(&(objectCategory=person)(objectClass=user)(|(sAMAccountName={Esc(netid)})(userPrincipalName={Esc(netid)}@*)))",
-                        SearchScope = SearchScope.Subtree,
-                        PageSize = 1,
-                        SizeLimit = 1
-                    };
-                    ds.PropertiesToLoad.Add("userAccountControl");
-                    ds.PropertiesToLoad.Add("memberOf");
+                    // user lookup loads memberOf so we can pull direct MIM memberships
+                    var sr = DirectoryUtility.FindUserBySam(Globals.g_domainPathLDAP, netid);
+                    if (sr == null)
+                        return new MimLookupResult { Exists = false, Error = "User not found." };
 
-                    var sr = ds.FindOne();
-                    if (sr == null) return new MimLookupResult { Exists = false, Error = "User not found." };
-
-                    // Enabled = !DISABLED (0x2) bit
-                    int? uac = sr.Properties["userAccountControl"]?.Count > 0 ? (int?)sr.Properties["userAccountControl"][0] : null;
-                    bool? enabled = uac.HasValue ? (uac.Value & 0x2) == 0 : (bool?)null;
-
-                    // Filter direct memberships that contain "MIM"; show CN only
                     var groups = new List<string>();
-                    var mo = sr.Properties["memberOf"];
-                    if (mo is { Count: > 0 })
-                        for (int i = 0; i < mo.Count; i++)
-                        {
-                            var dn = mo[i]?.ToString();
-                            if (dn != null && dn.IndexOf("MIM", StringComparison.OrdinalIgnoreCase) >= 0)
-                                groups.Add(DnToCn(dn));
-                        }
 
-                    return new MimLookupResult { Exists = true, Enabled = enabled, Groups = groups };
+                    // direct memberships
+                    var memberships = DirectoryUtility.GetStrings(sr, "memberOf");
+                    if (memberships.Count > 0)
+                    {
+                        foreach (var dn in memberships)
+                        {
+                            if (string.IsNullOrEmpty(dn)) continue;
+                            var cn = DnToCn(dn); // CN=Foo,OU=Bar -> Foo
+                            if (cn.IndexOf("MIM", StringComparison.OrdinalIgnoreCase) >= 0)
+                                groups.Add(cn);
+                        }
+                    }
+
+                    // fallback if memberOf is empty/filtered: group search by member DN
+                    if (groups.Count == 0)
+                    {
+                        var userDn = DirectoryUtility.GetString(sr, "distinguishedName");
+                        if (!string.IsNullOrWhiteSpace(userDn))
+                        {
+                            var byMember = DirectoryUtility.FindGroupCnsByMemberDn(Globals.g_domainPathLDAP, userDn!, "MIM");
+                            if (byMember.Count > 0) groups.AddRange(byMember);
+                        }
+                    }
+
+                    // preserve order while removing duplicates
+                    var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    groups = groups.Where(seen.Add).ToList();
+
+                    return new MimLookupResult
+                    {
+                        Exists = true,
+                        Enabled = DirectoryUtility.GetEnabledFromUac(sr),
+                        Groups = groups
+                    };
                 }
-                catch (DirectoryServicesCOMException ex) // directory/LDAP failure
+                catch (DirectoryServicesCOMException ex)
                 {
                     UiNotify.Error("AD MIM lookup failed", ex.Message, ex, alsoStatusBar: true);
                     return new MimLookupResult { Exists = false, Error = "Directory error." };
                 }
-                catch (Exception ex) // anything else
+                catch (Exception ex)
                 {
                     UiNotify.Error("AD MIM lookup failed", ex.Message, ex, alsoStatusBar: true);
                     return new MimLookupResult { Exists = false, Error = ex.Message };
                 }
             });
 
-        // Group → direct members (single read: member attribute)
         public Task<ADGroupInfo> GetGroupAsync(string groupName) =>
             Task.Run(() =>
             {
                 var info = new ADGroupInfo();
-                var name = Normalize(groupName); // allows "1234" → "UA-MIM-01234"
+                var name = Normalize(groupName);
                 if (string.IsNullOrWhiteSpace(name))
                 {
                     info.Exists = false; info.ErrorMessage = "Empty group name."; info.GroupMembers = []; info.MemberCount = 0;
@@ -84,9 +91,13 @@ namespace DSAMVVM.Core.Services.AD
                         // match by CN or sAMAccountName
                         Filter = $"(&(objectClass=group)(|(cn={Esc(name)})(sAMAccountName={Esc(name)})))",
                         SearchScope = SearchScope.Subtree,
-                        PageSize = 1,
+                        CacheResults = true,
+                        Asynchronous = true,
+                        ServerTimeLimit = TimeSpan.FromSeconds(3),
+                        PageSize = 0,
                         SizeLimit = 1
                     };
+                    ds.ReferralChasing = ReferralChasingOption.None;
                     ds.PropertiesToLoad.Add("member");
 
                     var sr = ds.FindOne();
@@ -96,15 +107,11 @@ namespace DSAMVVM.Core.Services.AD
                         return info;
                     }
 
-                    // Convert each member DN to CN (no nested expansion)
-                    var members = new List<string>();
-                    var m = sr.Properties["member"];
-                    if (m is { Count: > 0 })
-                        for (int i = 0; i < m.Count; i++)
-                        {
-                            var dn = m[i]?.ToString();
-                            if (dn != null) members.Add(DnToCn(dn));
-                        }
+                    // ranged attribute read handles very large groups safely
+                    var membersDn = DirectoryUtility.GetAllMemberDns(sr);
+                    var members = new List<string>(capacity: membersDn.Count);
+                    foreach (var dn in membersDn)
+                        if (!string.IsNullOrEmpty(dn)) members.Add(DnToCn(dn)); // CN=Foo,OU=Bar -> Foo
 
                     info.Exists = true;
                     info.GroupMembers = members;
@@ -125,20 +132,21 @@ namespace DSAMVVM.Core.Services.AD
                 }
             });
 
-        // "1234" → "UA-MIM-01234"
         private static string Normalize(string s)
         {
             s = s.Trim();
-            return (s.Length == 4 && int.TryParse(s, out _)) ? $"UA-MIM-0{s}" : s;
+            var allDigits = s.All(char.IsDigit);
+            if (allDigits && s.Length == 5) return $"UA-MIM-{s}";
+            if (allDigits && s.Length == 4) return $"UA-MIM-0{s}";
+            return s;
         }
 
-        // basic LDAP filter escaping
         private static string Esc(string s) =>
             s.Replace("\\", "\\5c").Replace("*", "\\2a").Replace("(", "\\28").Replace(")", "\\29").Replace("\0", "");
 
-        // "CN=Some Name,OU=..." → "Some Name"
         private static string DnToCn(string dn)
         {
+            // DN -> CN
             var i = dn.IndexOf("CN=", StringComparison.OrdinalIgnoreCase);
             if (i < 0) return dn;
             var rest = dn[(i + 3)..];
