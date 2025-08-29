@@ -35,14 +35,4 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="9.0.8" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="MVVM\View\fileicon.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="MVVM\View\HomeView - Template.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
 </Project>

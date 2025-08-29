@@ -4,153 +4,116 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             Background="Transparent">
+             d:DesignHeight="450"
+             d:DesignWidth="800">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" 
-                  Padding="5,0" 
-                  HorizontalAlignment="Center"
-                  VerticalAlignment="Center">
-        <StackPanel Margin="10,5,0,20" Orientation="Horizontal">
-            <StackPanel Margin="10" Orientation="Vertical">
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="5,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Margin="10,5,0,20" Orientation="Horizontal">
+
                 <!-- Common Links -->
-                <Label Content="Common Links"
-                       FontFamily="Consolas"
-                       FontSize="20"
-                       FontWeight="Bold"
-                       Foreground="White"
-                       HorizontalAlignment="Center"/>
- 
-                <Border Width="300"
-                        Height="250"
-                        CornerRadius="10"
-                        VerticalAlignment="Top" 
-                        Background="#FFBCC6FF"
-                        HorizontalAlignment="Center">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Auto">
-                        <TextBlock Padding="10,10,10,10">
-                        <StackPanel Orientation="Horizontal">
-                            <ItemsControl ItemsSource="{Binding CommonLinks}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>                               
-                                            <TextBlock FontFamily="Consolas" 
-                                                       FontSize="17" 
-                                                       HorizontalAlignment="Left"
-                                                       Padding="5,5,5,5">
-                                                <Hyperlink NavigateUri="{Binding URL}"
-                                                    RequestNavigate="Hyperlink_RequestNavigate">
-                                                    <TextBlock Text="{Binding Name}"/>
-                                                </Hyperlink>                           
-                                            </TextBlock>                           
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                        </TextBlock>
-                    </ScrollViewer>
-                </Border>
+                <StackPanel Margin="10" Orientation="Vertical">
+                    <Label Content="Common Links"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource MenuTextPrimaryBrush}"
+                           HorizontalAlignment="Center"/>
+
+                    <Border Width="300"
+                            Height="250"
+                            CornerRadius="10"
+                            VerticalAlignment="Top" 
+                            Background="{DynamicResource Brush.Card.Alternate}"
+                            BorderBrush="{DynamicResource Brush.Card.Border.Alternate}"
+                            HorizontalAlignment="Center">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <TextBlock Padding="10,10,10,10">
+                                <StackPanel Orientation="Horizontal">
+                                    <ItemsControl ItemsSource="{Binding CommonLinks}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock FontSize="17"
+                                                           HorizontalAlignment="Left"
+                                                           Padding="5,5,5,5"
+                                                           Foreground="{DynamicResource MenuTextPrimaryBrush}">
+                                                    <Hyperlink NavigateUri="{Binding URL}" RequestNavigate="Hyperlink_RequestNavigate">
+                                                        <TextBlock Text="{Binding Name}"
+                                                                   Foreground="{DynamicResource MenuTextPrimaryBrush}"/>
+                                                    </Hyperlink>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </TextBlock>
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+
+                <!-- Team Links -->
+                <StackPanel Margin="10" Orientation="Vertical">
+                    <Label Content="Team Links"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource MenuTextPrimaryBrush}"
+                           HorizontalAlignment="Center"/>
+                    <!-- Dropdown (non-editable) -->
+                    <ComboBox Style="{StaticResource Combo.Links.Dropdown}"
+          Width="250" Height="24"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Center"
+          Margin="0,0,0,13">
+                        <ComboBoxItem Content="Change Team Links"/>
+                        <ComboBoxItem Content="DST"/>
+                        <ComboBoxItem Content="Example 1"/>
+                        <ComboBoxItem Content="Example 2"/>
+                        <ComboBoxItem Content="Example 3"/>
+                    </ComboBox>
+
+                    <Border Width="300"
+                            Height="215"
+                            CornerRadius="10"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center" 
+                            Background="{DynamicResource Brush.Card.Alternate}"
+                            BorderBrush="{DynamicResource Brush.Card.Border.Alternate}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <TextBlock Padding="10,10,10,10">
+                                <StackPanel Orientation="Horizontal">
+                                    <ItemsControl ItemsSource="{Binding TeamLinks}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Margin="0,0,20,0">
+                                                    <Label Content="{Binding GroupName}"
+                                                           FontSize="14"
+                                                           FontWeight="Bold"
+                                                           Foreground="{DynamicResource MenuTextPrimaryBrush}"/>
+                                                    <ItemsControl ItemsSource="{Binding Links}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <TextBlock FontSize="17"
+                                                                           HorizontalAlignment="Left"
+                                                                           Padding="5,5,5,5"
+                                                                           Foreground="{DynamicResource MenuTextPrimaryBrush}">
+                                                                    <Hyperlink NavigateUri="{Binding URL}" RequestNavigate="Hyperlink_RequestNavigate">
+                                                                        <TextBlock Text="{Binding Name}"
+                                                                                   Foreground="{DynamicResource MenuTextPrimaryBrush}"/>
+                                                                    </Hyperlink>
+                                                                </TextBlock>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </TextBlock>
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+
             </StackPanel>
-
-            <!-- Team Links -->
-            <StackPanel Margin="10" 
-                        Orientation="Vertical">
-
-                <Label Content="Team Links"
-                       FontFamily="Consolas"
-                       FontSize="20"
-                       FontWeight="Bold"
-                       Foreground="White"
-                       HorizontalAlignment="Center"/>
-
-               <!-- <Label Content="Change Team Links" 
-                       Foreground="White"
-                       FontSize="17"
-                       HorizontalAlignment="Center"
-                       Padding="0,15,0,7"
-                       FontFamily="Consolas"
-                       FontWeight="Bold"/> -->
-
-                <ComboBox HorizontalAlignment="Center" 
-                          HorizontalContentAlignment="Center" 
-                          FontSize="13" 
-                          Width="250" 
-                          Height="22" 
-                          VerticalAlignment="Center" 
-                          FontFamily="Consolas" 
-                          Margin="0,0,0,13">
-                    <ComboBoxItem Content="Change Team Links" IsSelected="true"/>
-                    <ComboBoxItem Content="DST" />
-                    <ComboBoxItem Content="Example 1"/>
-                    <ComboBoxItem Content="Example 2" />
-                    <ComboBoxItem Content="Example 3" />
-                </ComboBox>
-
-                <!-- This is an example once binding is set  -->
-                <!--   
-                <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Width="300">
-
-                    <RadioButton FontSize="15" FontFamily="Consolas" Content="DST" Foreground="White" Margin="5,7.5" IsChecked="True"/>
-                    <RadioButton FontSize="15" FontFamily="Consolas" Content="Example 1" Foreground="White" Margin="5,7.5"/>
-                    <RadioButton FontSize="15" FontFamily="Consolas" Content="Example 2" Foreground="White" Margin="5,7.5"/>
-                    <RadioButton FontSize="15" FontFamily="Consolas" Content="Example 3" Foreground="White" Margin="5,7.5"/>
-                    <RadioButton FontSize="15" FontFamily="Consolas" Content="Example 4" Foreground="White" Margin="5,7.5"/>
-                    
-                    Current work in progress to have auto populate radio buttons
-                    <ItemsControl ItemsSource="{Binding TeamLinks}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <RadioButton Content="{Binding GroupName}" 
-                                             IsChecked="{Binding DataContext.SelectedOption}"
-                                             Foreground="White"/>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                    
-                </WrapPanel>-->
-                <Border Width="300"
-                        Height="215"
-                        CornerRadius="10"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center" 
-                        Background="#FFBCC6FF">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Auto">
-                        <TextBlock Padding="10,10,10,10">
-                            <StackPanel Orientation="Horizontal">                                
-                                <ItemsControl ItemsSource="{Binding TeamLinks}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding GroupName}"
-                                                         FontWeight="SemiBold"
-                                                         Margin="0,0,0,3"/>
-                                                <ItemsControl ItemsSource="{Binding Links}">
-                                                   <ItemsControl.ItemTemplate>
-                                                       <DataTemplate>
-                                                           <StackPanel Orientation="Horizontal">
-                                                               <TextBlock FontFamily="Consolas" 
-                                                                          FontSize="17"
-                                                                          HorizontalAlignment="Left"
-                                                                          VerticalAlignment="Top"
-                                                                          Padding="5,5,5,5">
-                                                                   <Hyperlink NavigateUri="{Binding URL}"
-                                                                              RequestNavigate="Hyperlink_RequestNavigate">
-                                                                       <TextBlock Text="{Binding Name}"/>
-                                                                   </Hyperlink>                           
-                                                               </TextBlock>
-                                                           </StackPanel>
-                                                       </DataTemplate>
-                                                   </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>                                
-                            </StackPanel>                           
-                        </TextBlock>                      
-                </ScrollViewer>
-                </Border>
-            </StackPanel>
-        </StackPanel>
-    </ScrollViewer>
+        </ScrollViewer>
+    </Grid>
 </UserControl>

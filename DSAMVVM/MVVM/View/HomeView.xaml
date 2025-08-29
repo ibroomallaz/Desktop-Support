@@ -31,7 +31,7 @@
                        FontSize="24"
                        Margin="0,0,0,8"/>
 
-            <!-- HERO — plain UA burgundy gradient (no sheen) -->
+            <!-- HERO  -->
             <Border Grid.Row="1"
                     MinHeight="140"                              
                     CornerRadius="12"
@@ -120,6 +120,10 @@
                         Padding="12"
                         Margin="6,0,0,0">
                     <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="49*"/>
+                            <ColumnDefinition Width="297*"/>
+                        </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
@@ -130,12 +134,12 @@
                         <TextBlock Grid.Row="0"
                                    Text="Computer lookup"
                                    Foreground="{DynamicResource Brush.Text.Primary}"
-                                   FontSize="18" Margin="0,0,0,6"/>
+                                   FontSize="18" Margin="0,0,0,6" Grid.ColumnSpan="2"/>
 
                         <Border Grid.Row="1"
                                 CornerRadius="12"
                                 Background="{DynamicResource Brush.Surface}"
-                                Padding="8,0" Height="34">
+                                Padding="8,0" Height="34" Grid.ColumnSpan="2">
                             <TextBox Background="Transparent"
                                      BorderThickness="0"
                                      Foreground="{DynamicResource Brush.Text.Primary}"
@@ -146,14 +150,14 @@
                                      ToolTip="Hostname"/>
                         </Border>
 
-                        <Rectangle Grid.Row="2" Height="0"/>
+                        <Rectangle Grid.Row="2" Height="0" Grid.ColumnSpan="2" Margin="0,0,0,36" Grid.RowSpan="2"/>
 
                         <Button Grid.Row="3"
                                 Content="Open Computer"
                                 MinWidth="132"
                                 HorizontalAlignment="Right"
                                 Style="{DynamicResource Button.Rounded}"
-                                Margin="0,8,0,0"/>
+                                Margin="0,8,0,0" Grid.Column="1"/>
                     </Grid>
                 </Border>
             </Grid>

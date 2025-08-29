@@ -1,0 +1,210 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Theme/Colors/Colors.UA.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <!-- visuals -->
+    <SolidColorBrush x:Key="Combo.Bg"            Color="{StaticResource Color.Surface.1}"/>
+    <SolidColorBrush x:Key="Combo.BgHover"       Color="{StaticResource Color.Surface.Hover}"/>
+    <SolidColorBrush x:Key="Combo.BgPressed"     Color="{StaticResource Color.Surface.Pressed}"/>
+    <SolidColorBrush x:Key="Combo.Border"        Color="{StaticResource Color.Border}"/>
+    <SolidColorBrush x:Key="Combo.Border.Active" Color="{StaticResource Color.Border.Active}"/>
+    <SolidColorBrush x:Key="Combo.Fg"            Color="{StaticResource Color.Text.Primary}"/>
+    <SolidColorBrush x:Key="Combo.FgMuted"       Color="{StaticResource Color.Text.Muted}"/>
+    <SolidColorBrush x:Key="Combo.Glyph.Active"  Color="#FFFFFFFF"/>
+
+    <!-- sizing -->
+    <sys:Double x:Key="Combo.GlyphThickness">1.25</sys:Double>
+    <sys:Double x:Key="Combo.GlyphSize">12</sys:Double>
+    <sys:Double x:Key="Combo.GlyphBoxWidthPx">32</sys:Double>
+    <CornerRadius x:Key="Combo.CornerRadius">10</CornerRadius>
+    <Thickness x:Key="Combo.Padding">12,5</Thickness>
+    <Thickness x:Key="Combo.BorderThickness">1.25</Thickness>
+
+    <!-- chevron -->
+    <Geometry x:Key="Combo.Chevron.Rounded">M 1 1 L 6 6 L 11 1</Geometry>
+    <Style x:Key="Combo.ChevronPathStyle" TargetType="Path">
+        <Setter Property="Data" Value="{StaticResource Combo.Chevron.Rounded}"/>
+        <Setter Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}"/>
+        <Setter Property="StrokeThickness" Value="{StaticResource Combo.GlyphThickness}"/>
+        <Setter Property="StrokeStartLineCap" Value="Round"/>
+        <Setter Property="StrokeEndLineCap" Value="Round"/>
+        <Setter Property="StrokeLineJoin" Value="Round"/>
+        <Setter Property="Fill" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <!-- rotate around center so position doesn't shift -->
+        <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <RotateTransform Angle="0"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- toggle button for the closed state (removes default highlight) -->
+    <Style x:Key="Combo.DropToggleStyle" TargetType="ToggleButton">
+        <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ComboBox}}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid Background="{TemplateBinding Background}">
+                        <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <!-- press: keep chevron visible -->
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource Combo.Glyph.Active}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- dropdown item visuals -->
+    <Style x:Key="ComboItem.Links" TargetType="ComboBoxItem">
+        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource Combo.Fg}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBoxItem">
+                    <Border x:Name="Root" Background="{TemplateBinding Background}">
+                        <ContentPresenter Margin="4,0" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Combo.BgHover}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource Combo.Fg}"/>
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource Combo.BgPressed}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.6"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- dropdown (non-editable) -->
+    <Style x:Key="Combo.Links.Dropdown" TargetType="ComboBox">
+        <Setter Property="IsEditable" Value="False"/>
+        <Setter Property="SelectedIndex" Value="0"/>
+        <Setter Property="Padding" Value="{StaticResource Combo.Padding}"/>
+        <Setter Property="Foreground" Value="{StaticResource Combo.Fg}"/>
+        <Setter Property="Background" Value="{StaticResource Combo.Bg}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Combo.Border}"/>
+        <Setter Property="BorderThickness" Value="{StaticResource Combo.BorderThickness}"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="ItemContainerStyle" Value="{StaticResource ComboItem.Links}"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid SnapsToDevicePixels="True">
+                        <!-- box -->
+                        <Border x:Name="Outer"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource Combo.CornerRadius}"/>
+
+                        <!-- closed display + chevron -->
+                        <ToggleButton x:Name="DropDownButton"
+                                      Style="{StaticResource Combo.DropToggleStyle}"
+                                      ClickMode="Press"
+                                      IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- selected text -->
+                                <TextBlock Grid.Column="0"
+                                           Margin="{TemplateBinding Padding}"
+                                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                           TextTrimming="CharacterEllipsis"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedItem.Content}"/>
+
+                                <!-- chevron -->
+                                <Border Grid.Column="1"
+                                        Width="{StaticResource Combo.GlyphBoxWidthPx}"
+                                        Margin="6,0,6,0"
+                                        Background="Transparent"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center">
+                                    <Viewbox Stretch="Uniform"
+                                             Width="{StaticResource Combo.GlyphSize}"
+                                             Height="{StaticResource Combo.GlyphSize}"
+                                             HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Path x:Name="Glyph" Style="{StaticResource Combo.ChevronPathStyle}"/>
+                                    </Viewbox>
+                                </Border>
+                            </Grid>
+                        </ToggleButton>
+
+                        <!-- dropdown list -->
+                        <Popup x:Name="PART_Popup"
+                               Placement="Bottom"
+                               AllowsTransparency="True"
+                               Focusable="False"
+                               PopupAnimation="Fade"
+                               IsOpen="{TemplateBinding IsDropDownOpen}">
+                            <Border Background="{StaticResource Combo.Bg}"
+                                    BorderBrush="{StaticResource Combo.Border.Active}"
+                                    BorderThickness="{StaticResource Combo.BorderThickness}"
+                                    CornerRadius="{StaticResource Combo.CornerRadius}"
+                                    Padding="2"
+                                    MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                    KeyboardNavigation.TabNavigation="Cycle">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Disabled"
+                                              MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <ItemsPresenter/>
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+
+                    <!-- states -->
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Outer" Property="Background" Value="{StaticResource Combo.BgHover}"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource Combo.Border.Active}"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter TargetName="Outer" Property="BorderBrush" Value="{StaticResource Combo.Border.Active}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.6"/>
+                        </Trigger>
+                        <!-- flip chevron without shifting position -->
+                        <Trigger SourceName="PART_Popup" Property="IsOpen" Value="True">
+                            <Setter TargetName="Outer" Property="BorderBrush" Value="{StaticResource Combo.Border.Active}"/>
+                            <Setter TargetName="Outer" Property="Background" Value="{StaticResource Combo.Bg}"/>
+                            <Setter TargetName="Glyph" Property="RenderTransform">
+                                <Setter.Value>
+                                    <RotateTransform Angle="180"/>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>
