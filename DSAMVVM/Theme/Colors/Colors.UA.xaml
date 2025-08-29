@@ -38,14 +38,13 @@
     <Color x:Key="Color.Success.Hover">#186232</Color>
     <Color x:Key="Color.Success.Pressed">#124C28</Color>
 
-    <!-- Secondary accent (purple) -->
-    <Color x:Key="Color.Purple">#7A5BFF</Color>
-    <Color x:Key="Color.Purple.Hover">#6E3ED8</Color>
-    <Color x:Key="Color.Purple.Pressed">#5833B5</Color>
-
     <!-- Control neutral -->
     <Color x:Key="Color.Control.Normal">#A9A9A9</Color>
-    <!-- DarkGray -->
+    
+    <!-- Alternate Card colors -->
+    <Color x:Key="Color.Card.Alternate">#3A4B6E</Color>
+    <Color x:Key="Color.Card.Border.Alternate">#44536F</Color>
+
 
     <!-- ==== Brush wrappers ==== -->
     <SolidColorBrush x:Key="Brush.Surface"         Color="{DynamicResource Color.Surface.0}"/>
@@ -75,12 +74,12 @@
     <SolidColorBrush x:Key="Brush.Success.Hover"   Color="{DynamicResource Color.Success.Hover}"/>
     <SolidColorBrush x:Key="Brush.Success.Pressed" Color="{DynamicResource Color.Success.Pressed}"/>
 
-    <SolidColorBrush x:Key="Brush.Purple"          Color="{DynamicResource Color.Purple}"/>
-    <SolidColorBrush x:Key="Brush.Purple.Hover"    Color="{DynamicResource Color.Purple.Hover}"/>
-    <SolidColorBrush x:Key="Brush.Purple.Pressed"  Color="{DynamicResource Color.Purple.Pressed}"/>
-
     <SolidColorBrush x:Key="Brush.Control.Normal"  Color="{DynamicResource Color.Control.Normal}"/>
 
+    <SolidColorBrush x:Key="Brush.Card.Alternate"
+                     Color="{DynamicResource Color.Card.Alternate}"/>
+    <SolidColorBrush x:Key="Brush.Card.Border.Alternate"
+                     Color="{DynamicResource Color.Card.Border.Alternate}"/>
     <!-- Back-compat alias -->
     <SolidColorBrush x:Key="MenuTextPrimaryBrush"  Color="{DynamicResource Color.Text.Primary}"/>
 </ResourceDictionary>
