@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DSAMVVM.Core.Utilities;
+using System;
 using System.IO;
 using System.Reflection;
 
@@ -6,12 +7,8 @@ namespace DSAMVVM.MVVM.Model
 {
     public class Globals
     {
-        // App version from assembly info (fallback to 4.0.0)
-        private static readonly string v =
-            Assembly.GetExecutingAssembly()
-                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                ?.InformationalVersion ?? "4.0.0";
-        public static string g_AppVersion = v;
+
+        public static string g_AppVersion = VersionDisplayHelper.GetSemVerDisplay();
 
         // AD constants
 

@@ -12,8 +12,14 @@
     <RepositoryType>git</RepositoryType>
     <AssemblyVersion>4.0.0</AssemblyVersion>
     <FileVersion>4.0.0</FileVersion>
-    <Version>4.0.0</Version>
+    <Version>4.0.0-Alpha-1</Version>
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <Title>Desktop Support App</Title>
+    <Product>Desktop Support App</Product>
+    <Description>Tools for UITS Desktop Support</Description>
+    <Company>University of Arizona</Company>
+    <Authors>Isaac Broomall</Authors>
   </PropertyGroup>
 
   <ItemGroup>
