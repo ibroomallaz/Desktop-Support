@@ -23,6 +23,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="MVVM\View\fileicon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="img\lilyface.ico" />
   </ItemGroup>
 
