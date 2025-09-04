@@ -97,7 +97,6 @@ namespace DSAMVVM.MVVM.ViewModel
             }
             catch (Exception ex)
             {
-                // Was: StatusBar.Report(StatusMessageFactory.Plain(...))
                 UiNotify.Error("Initialization error", ex.Message, ex, alsoStatusBar: true);
             }
         }
@@ -110,7 +109,6 @@ namespace DSAMVVM.MVVM.ViewModel
             }
             catch (Exception ex)
             {
-                // Was: StatusBar.Report(StatusMessageFactory.Plain(...sticky:true))
                 UiNotify.Warn($"Failed to load department data: {ex.Message}", sticky: true);
             }
         }
@@ -156,13 +154,15 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private async void TriggerSearch()
         {
-            if (string.IsNullOrWhiteSpace(SearchQuery) || CurrentView is not ISearchableViewModel searchable)
+            var query = (SearchQuery ?? string.Empty).Trim();
+
+            if (string.IsNullOrWhiteSpace(query) || CurrentView is not ISearchableViewModel searchable)
                 return;
 
-            // Add to history if not already present
-            if (!SearchHistory.Contains(SearchQuery))
+            // Add to history if not already present (ignore case; already trimmed)
+            if (!SearchHistory.Any(q => string.Equals(q, query, StringComparison.OrdinalIgnoreCase)))
             {
-                SearchHistory.Insert(0, SearchQuery);
+                SearchHistory.Insert(0, query);
                 if (SearchHistory.Count > MaxHistoryCount)
                     SearchHistory.RemoveAt(SearchHistory.Count - 1);
             }
@@ -177,15 +177,14 @@ namespace DSAMVVM.MVVM.ViewModel
             string displayName = target.Value.ToString();
             string key = $"{target}_Search";
 
-            // Was: StatusBar.Report(StatusMessageFactory.Plain(...priority:1, key))
             UiNotify.Info($"Searching {displayName}...", showStatusBar: true, key: key);
 
             try
             {
-                var context = new SearchContextDTO(SearchQuery);
+                // Use the trimmed query for the actual search
+                var context = new SearchContextDTO(query);
                 await searchable.OnSearchUpdated(context, _searchService, target.Value);
 
-                // Was: StatusBar.Report(StatusMessageFactory.Success(...))
                 UiNotify.Success("Search complete.", key: key);
 
                 // Clear after search
@@ -193,9 +192,9 @@ namespace DSAMVVM.MVVM.ViewModel
             }
             catch (Exception ex)
             {
-                // Was: StatusBar.Report(StatusMessageFactory.Error(...))
                 UiNotify.Error("Search failed", ex.Message, ex, alsoStatusBar: true, key: key);
             }
         }
+
     }
 }
