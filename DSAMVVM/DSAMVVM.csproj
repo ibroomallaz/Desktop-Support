@@ -23,6 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="img\fileicon.png" />
     <None Remove="MVVM\View\fileicon.png" />
   </ItemGroup>
 
@@ -34,5 +35,9 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="9.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="img\fileicon.png" />
   </ItemGroup>
 </Project>
