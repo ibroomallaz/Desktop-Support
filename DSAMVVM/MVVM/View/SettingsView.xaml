@@ -21,7 +21,7 @@
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="20">
                     <Button Width="105" Height="85" VerticalAlignment="Top" Click="FileIconButton" >
                         <Button.Background>
-                            <ImageBrush ImageSource="/MVVM/View/fileicon.png"/>
+                            <ImageBrush ImageSource="/img/fileicon.png"/>
                         </Button.Background>
                     </Button>
                     <Label Content="Open File log" Foreground="White" FontFamily="Consolas" FontSize="17" HorizontalAlignment="Center"/>
