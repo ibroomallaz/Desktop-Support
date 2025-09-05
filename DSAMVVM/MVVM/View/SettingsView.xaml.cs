@@ -1,18 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Media;
-using DSAMVVM.Core.Interfaces;
-using DSAMVVM.MVVM.Model;
-using DSAMVVM.MVVM.ViewModel;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DSAMVVM.MVVM.View
 {
-    /// <summary>
-    /// Interaction logic for SettingsView.xaml
-    /// </summary>
     public partial class SettingsView : UserControl
     {
         public SettingsView()
@@ -22,179 +14,88 @@ namespace DSAMVVM.MVVM.View
             Unloaded += OnUnloaded;
         }
 
-        private double _sliderValue;
-
-        public double SliderValue
-        {
-            get => _sliderValue;
-            set
-            {
-                if (_sliderValue != value)
-                {
-                    _sliderValue = value;
-
-                }
-            }
-        }
-
         private void OnLoaded(object? sender, RoutedEventArgs e)
         {
-            var sp = App.Services;
-            _settingsSvc = sp.GetRequiredService<ISettingsService>();
-            _notifier = sp.GetRequiredService<IOutputTextSettingsProvider>();
+            // Ensure dropdown has a selection (prevents NRE)
+            if (InitialSizeCombo != null && InitialSizeCombo.SelectedIndex < 0)
+                InitialSizeCombo.SelectedIndex = 1; // Normal (14pt)
 
-            // Listen for global/per-view size changes triggered anywhere
-            _notifier.Changed += OnOutputFontSettingsChanged;
+            ApplyInitialSizeFromCombo();
 
-            // Apply once on load
-            ApplyEffectiveFontSize();
+            // If per-tab is OFF, mirror per-tab to default
+            if (UsePerViewCheck?.IsChecked != true)
+                SyncPerViewToGeneral();
         }
 
-        private void OnOutputFontSettingsChanged(object? sender, EventArgs e)
+        private void OnUnloaded(object? sender, RoutedEventArgs e) { }
+
+        private void InitialSizeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ApplyEffectiveFontSize();
+            ApplyInitialSizeFromCombo();
+            if (UsePerViewCheck?.IsChecked != true)
+                SyncPerViewToGeneral();
         }
 
-        private void ApplyEffectiveFontSize()
+        private void GeneralSizeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (_settingsSvc == null) return;
-
-            // Uses service's effective logic (global or per-view if override is on),
-            // and clamps
-            double size = _settingsSvc.GetFontSizeFor(ViewKey, App.Settings, min: 8, max: 24);
-
-            var viewer = FindOutputViewer();
-            if (viewer == null) return;
-
-            viewer.Document ??= new FlowDocument();
-            viewer.Document.FontSize = size;
+            if (UsePerViewCheck?.IsChecked != true)
+                SyncPerViewToGeneral();
         }
 
-        private FlowDocumentScrollViewer? FindOutputViewer()
+        private void UsePerViewCheck_Changed(object sender, RoutedEventArgs e)
         {
-            // Prefer a named element if present in XAML (e.g., x:Name="OutputViewer")
-            if (this.FindName("OutputViewer") is FlowDocumentScrollViewer named) return named;
-
-            // Fallback: search visual tree
-            return FindDescendant<FlowDocumentScrollViewer>(this);
+            if (UsePerViewCheck?.IsChecked != true)
+                SyncPerViewToGeneral();
         }
 
-        private static T? FindDescendant<T>(DependencyObject root) where T : DependencyObject
+        private void PerViewSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (root is T typed) return typed;
+            // No-op
+        }
 
-            int count = VisualTreeHelper.GetChildrenCount(root);
-            for (int i = 0; i < count; i++)
+        private void ApplyInitialSizeFromCombo()
+        {
+            double sizePt = 14;
+            if (InitialSizeCombo?.SelectedItem is ComboBoxItem item)
             {
-                var child = VisualTreeHelper.GetChild(root, i);
-                var result = FindDescendant<T>(child);
-                if (result != null) return result;
+                if (item.Tag is string s && double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var v))
+                    sizePt = v;
+                else if (item.Tag is double d)
+                    sizePt = d;
             }
-            return null;
+
+            sizePt = Clamp(sizePt, 8, 24);
+            if (GeneralSizeSlider != null) GeneralSizeSlider.Value = sizePt;
         }
 
-        private void OnUnloaded(object? sender, RoutedEventArgs e)
+        private void SyncPerViewToGeneral()
         {
-            if (_notifier != null)
-                _notifier.Changed -= OnOutputFontSettingsChanged;
+            var v = GeneralSizeSlider != null ? GeneralSizeSlider.Value : 14;
+            v = Clamp(v, 8, 24);
+            if (UserSize != null) UserSize.Value = v;
+            if (ComputerSize != null) ComputerSize.Value = v;
+            if (GroupSize != null) GroupSize.Value = v;
+            if (EntraSize != null) EntraSize.Value = v;
         }
 
-        // Per-view key for settings (used only when ViewFontSizeOverride is enabled)
-        private const string ViewKey = "UserView";
+        private static double Clamp(double value, double min, double max)
+            => Math.Max(min, Math.Min(max, value));
 
-        private ISettingsService? _settingsSvc;
-        private IOutputTextSettingsProvider? _notifier;
-
-
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void BtnOpenLogsFolder_Click(object sender, RoutedEventArgs e)
         {
-            ResetFont();
+            // TODO: wire up when services/paths are available
         }
 
-
-        private void ResetFont()
+        private void BtnApply_Click(object sender, RoutedEventArgs e)
         {
-            if (_settingsSvc == null || _notifier == null) return;
-
-            var s = App.Settings;
-            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
-
-            _settingsSvc.ResetOutputFontSize(s, preferPerView ? ViewKey : null, preferPerView, defaultSize: 14);
-
-            _notifier.NotifyChanged();
-            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
-        }
-
-        private void AdjustFont(int delta)
-        {
-            if (_settingsSvc == null || _notifier == null) return;
-
-            var s = App.Settings;
-            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
-
-            _ = _settingsSvc.AdjustOutputFontSize(s, preferPerView ? ViewKey : null, delta, preferPerView);
-
-            _notifier.NotifyChanged();
-            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
-        }
-
-
-        private void GeneralFontChecked(object sender, RoutedEventArgs e)
-        {
-            FontSlider.Visibility = Visibility.Visible;
-            FontSlider2.Visibility = Visibility.Visible;
-            GeneralFont.Visibility = Visibility.Collapsed;
-            checkBox.Content = "General View Font Settings";
-
-        }
-
-        private void GeneralFontUnChecked(object sender, RoutedEventArgs e)
-        {
-            FontSlider.Visibility = Visibility.Collapsed;
-            FontSlider2.Visibility = Visibility.Collapsed;
-            GeneralFont.Visibility = Visibility.Visible;
-            checkBox.Content = "Individual View Font Settings";
-        }
-
-        private void FileIconButton(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void LogRention(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-
-        private void KeepHistoryChecked(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void KeepHistoryUnChecked(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void LogRetentionChecked(object sender, RoutedEventArgs e)
-        {
-            dropDownMenuRetention.IsEnabled = true;
-        }
-
-        private void LogRetentionUnChecked(object sender, RoutedEventArgs e)
-        {
-            dropDownMenuRetention.IsEnabled = false;
-        }
-
-        private void LogLevelChecked(object sender, RoutedEventArgs e)
-        {
-            dropDownMenuLogLevel.IsEnabled = true;
-        }
-
-        private void LogLevelUnChecked(object sender, RoutedEventArgs e)
-        {
-            dropDownMenuLogLevel.IsEnabled= false;
+            // TODO: collect current UI values and push to settings service when wired:
+            // - InitialSizeCombo (Tag)
+            // - GeneralSizeSlider
+            // - UsePerViewCheck
+            // - UserSize, ComputerSize, GroupSize, EntraSize
+            // - LogLevelCombo.SelectedIndex
+            // - RetentionCombo (Tag days: -1 = indefinite)
+            // - HistorySizeCombo (Tag items: 0 = Never)
         }
     }
 }

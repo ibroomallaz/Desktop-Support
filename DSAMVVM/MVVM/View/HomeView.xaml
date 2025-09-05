@@ -71,6 +71,10 @@
                         Padding="12"
                         Margin="0,0,6,0">
                     <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="25*"/>
+                            <ColumnDefinition Width="321*"/>
+                        </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <!-- title -->
@@ -85,12 +89,12 @@
                         <TextBlock Grid.Row="0"
                                    Text="User lookup"
                                    Foreground="{DynamicResource Brush.Text.Primary}"
-                                   FontSize="18" Margin="0,0,0,6"/>
+                                   FontSize="18" Margin="0,0,0,6" Grid.ColumnSpan="2"/>
 
                         <Border Grid.Row="1"
                                 CornerRadius="12"
                                 Background="{DynamicResource Brush.Surface}"
-                                Padding="8,0" Height="34">
+                                Padding="8,0" Height="34" Grid.ColumnSpan="2">
                             <TextBox Background="Transparent"
                                      BorderThickness="0"
                                      Foreground="{DynamicResource Brush.Text.Primary}"
@@ -101,14 +105,14 @@
                                      ToolTip="NetID, or email"/>
                         </Border>
 
-                        <Rectangle Grid.Row="2" Height="0"/>
+                        <Rectangle Grid.Row="2" Height="0" Grid.ColumnSpan="2" Margin="0,0,0,36" Grid.RowSpan="2"/>
 
                         <Button Grid.Row="3"
                                 Content="Open User"
                                 MinWidth="110"
                                 HorizontalAlignment="Right"
                                 Style="{DynamicResource Button.Rounded}"
-                                Margin="0,8,0,0"/>
+                                Margin="0,8,0,0" Grid.Column="1"/>
                     </Grid>
                 </Border>
 
