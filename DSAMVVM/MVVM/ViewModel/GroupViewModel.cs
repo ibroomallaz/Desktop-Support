@@ -3,14 +3,22 @@ using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
+using DSAMVVM.MVVM.Model;
 using System.Diagnostics;
+using System.IO;
+
+
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class GroupViewModel(IADService adService) : ObeservableObject, ISearchableViewModel
+    public class GroupViewModel : ObeservableObject, ISearchableViewModel, IDisposable
     {
-        private readonly IADService _ad = adService;
+        // Services
+        private readonly IADService _ad;
+        private readonly ISettingsService _settingsSvc;
+        private readonly IOutputTextSettingsProvider _notifier;
 
+        // Mode state
         private bool _isUserMim = true;
         public bool IsUserMim
         {
@@ -36,6 +44,14 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
+        // UI state
+        private double _effectiveFontSize = 14;
+        public double EffectiveFontSize
+        {
+            get => _effectiveFontSize;
+            private set { _effectiveFontSize = value; OnPropertyChanged(nameof(EffectiveFontSize)); }
+        }
+
         private string _query = string.Empty;
         public string Query
         {
@@ -57,7 +73,7 @@ namespace DSAMVVM.MVVM.ViewModel
             private set { _error = value; OnPropertyChanged(); }
         }
 
-        // --- Printing style to match UserViewModel ---
+        // Output log
         private string _searchLog = string.Empty;
         public string SearchLog
         {
@@ -65,6 +81,27 @@ namespace DSAMVVM.MVVM.ViewModel
             private set { _searchLog = value; OnPropertyChanged(nameof(SearchLog)); }
         }
 
+        public GroupViewModel(
+            IADService adService,
+            ISettingsService settingsSvc,
+            IOutputTextSettingsProvider notifier)
+        {
+            _ad = adService ?? throw new ArgumentNullException(nameof(adService));
+            _settingsSvc = settingsSvc ?? throw new ArgumentNullException(nameof(settingsSvc));
+            _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
+
+            _notifier.Changed += OnFontSettingsChanged;
+            RefreshEffectiveFontSize();
+        }
+
+        private void OnFontSettingsChanged(object? sender, EventArgs e) => RefreshEffectiveFontSize();
+
+        private void RefreshEffectiveFontSize()
+        {
+            EffectiveFontSize = _notifier.GetFontSize("GroupView");
+        }
+
+        // Output helpers
         private void AppendRaw(string message)
         {
             SearchLog += (message ?? string.Empty) + "\n";
@@ -84,10 +121,10 @@ namespace DSAMVVM.MVVM.ViewModel
             if (finalValue == null) return;
             AppendRaw($"[cyan]{label}[/cyan][red]{finalValue}[/red]");
         }
-        // --- end printing helpers ---
 
         public void ClearLog() => SearchLog = string.Empty;
 
+        // Search entry point for this view
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService _search, SearchTarget target)
         {
             Error = null;
@@ -103,7 +140,6 @@ namespace DSAMVVM.MVVM.ViewModel
                 AppendRaw($"[cyan]Query:[/cyan] [red]{context.Query}[/red]");
             }
 
-            // Validate target like UserViewModel does
             if (target != SearchTarget.Group)
             {
                 Error = "Invalid search target provided to GroupViewModel.";
@@ -213,11 +249,37 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
+        // Font control actions; respects per-view override setting
+        public void AdjustFont(int delta)
+        {
+            var s = App.Settings;
+            bool perView = s.Ui.Font.ViewFontSizeOverride;
+
+            _ = _settingsSvc.AdjustOutputFontSize(s, perView ? "GroupView" : null, delta, perView);
+            _notifier.NotifyChanged();
+            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
+        }
+
+        public void ResetFont()
+        {
+            var s = App.Settings;
+            bool perView = s.Ui.Font.ViewFontSizeOverride;
+
+            _settingsSvc.ResetOutputFontSize(s, perView ? "GroupView" : null, perView, 14);
+            _notifier.NotifyChanged();
+            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
+        }
+
         private static string NormalizeGroupName(string input)
         {
             var s = input.Trim();
             if (s.Length == 4 && int.TryParse(s, out _)) return $"UA-MIM-0{s}";
             return s;
+        }
+
+        public void Dispose()
+        {
+            _notifier.Changed -= OnFontSettingsChanged;
         }
     }
 }

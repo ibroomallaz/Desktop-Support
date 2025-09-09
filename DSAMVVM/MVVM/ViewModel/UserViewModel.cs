@@ -3,17 +3,33 @@ using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
+using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class UserViewModel(IADService adService, IDepartmentService deptService) : ObeservableObject, ISearchableViewModel
+    public class UserViewModel : ObeservableObject, ISearchableViewModel, IDisposable
     {
-        private readonly IADService _adService = adService;
-        private readonly IDepartmentService _deptService = deptService;
+        // Services
+        private readonly IADService _adService;
+        private readonly IDepartmentService _deptService;
+        private readonly ISettingsService _settingsSvc;
+        private readonly IOutputTextSettingsProvider _notifier;
+
+        // Per-view font context
+        private const string ViewKey = "UserView";
+
+        // UI state
+        private double _effectiveFontSize = 14;
+        public double EffectiveFontSize
+        {
+            get => _effectiveFontSize;
+            private set { _effectiveFontSize = value; OnPropertyChanged(nameof(EffectiveFontSize)); }
+        }
 
         private string? _error;
         public string? Error
@@ -36,6 +52,29 @@ namespace DSAMVVM.MVVM.ViewModel
             private set { _searchLog = value; OnPropertyChanged(nameof(SearchLog)); }
         }
 
+        public UserViewModel(
+            IADService adService,
+            IDepartmentService deptService,
+            ISettingsService settingsSvc,
+            IOutputTextSettingsProvider notifier)
+        {
+            _adService = adService ?? throw new ArgumentNullException(nameof(adService));
+            _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
+            _settingsSvc = settingsSvc ?? throw new ArgumentNullException(nameof(settingsSvc));
+            _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
+
+            _notifier.Changed += OnFontSettingsChanged;
+            RefreshEffectiveFontSize();
+        }
+
+        private void OnFontSettingsChanged(object? sender, EventArgs e) => RefreshEffectiveFontSize();
+
+        private void RefreshEffectiveFontSize()
+        {
+            EffectiveFontSize = _notifier.GetFontSize(ViewKey);
+        }
+
+        // Output helpers
         private void AppendRaw(string message)
         {
             SearchLog += message + "\n";
@@ -56,9 +95,9 @@ namespace DSAMVVM.MVVM.ViewModel
             AppendRaw($"[cyan]{label}[/cyan][red]{finalValue}[/red]");
         }
 
+        // Search entry point for this view
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
-            // reset per-search state (preserve SearchLog)
             Error = null;
 
             if (!string.IsNullOrEmpty(SearchLog))
@@ -176,5 +215,31 @@ namespace DSAMVVM.MVVM.ViewModel
         public Task<string?> LookupNameByID(string id) => _adService.LookupNameByEmployeeID(id);
 
         public void ClearLog() => SearchLog = string.Empty;
+
+        // Font control actions; respects per-view override setting
+        public void AdjustFont(int delta)
+        {
+            var s = App.Settings;
+            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
+
+            _ = _settingsSvc.AdjustOutputFontSize(s, preferPerView ? ViewKey : null, delta, preferPerView);
+            _notifier.NotifyChanged();
+            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
+        }
+
+        public void ResetFont()
+        {
+            var s = App.Settings;
+            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
+
+            _settingsSvc.ResetOutputFontSize(s, preferPerView ? ViewKey : null, preferPerView, defaultSize: 14);
+            _notifier.NotifyChanged();
+            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
+        }
+
+        public void Dispose()
+        {
+            _notifier.Changed -= OnFontSettingsChanged;
+        }
     }
 }

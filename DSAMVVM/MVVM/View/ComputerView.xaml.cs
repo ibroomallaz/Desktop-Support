@@ -1,66 +1,70 @@
-﻿using System.IO;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using DSAMVVM.Core.Interfaces;
-using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.ViewModel;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DSAMVVM.MVVM.View
 {
     public partial class ComputerView : UserControl
     {
-        // Per-view key for settings (used only when ViewFontSizeOverride is enabled)
-        private const string ViewKey = "ComputerView";
-
-        private ISettingsService? _settingsSvc;
-        private IOutputTextSettingsProvider? _notifier;
+        private ComputerViewModel? _vm;
 
         public ComputerView()
         {
             InitializeComponent();
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
+            DataContextChanged += OnDataContextChanged;
         }
 
         private void OnLoaded(object? sender, RoutedEventArgs e)
         {
-            var sp = App.Services;
-            _settingsSvc = sp.GetRequiredService<ISettingsService>();
-            _notifier = sp.GetRequiredService<IOutputTextSettingsProvider>();
-
-            // Apply once on load
+            AttachVm(DataContext as ComputerViewModel);
             ApplyEffectiveFontSize();
-
-            // Listen for global/per-view size changes triggered anywhere
-            _notifier.Changed += OnOutputFontSettingsChanged;
         }
 
         private void OnUnloaded(object? sender, RoutedEventArgs e)
         {
-            if (_notifier != null)
-                _notifier.Changed -= OnOutputFontSettingsChanged;
+            DetachVm();
         }
 
-        private void OnOutputFontSettingsChanged(object? sender, EventArgs e)
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            DetachVm();
+            AttachVm(e.NewValue as ComputerViewModel);
             ApplyEffectiveFontSize();
+        }
+
+        private void AttachVm(ComputerViewModel? vm)
+        {
+            _vm = vm;
+            if (_vm != null)
+                _vm.PropertyChanged += VmOnPropertyChanged;
+        }
+
+        private void DetachVm()
+        {
+            if (_vm != null)
+                _vm.PropertyChanged -= VmOnPropertyChanged;
+            _vm = null;
+        }
+
+        private void VmOnPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ComputerViewModel.EffectiveOutputFontSize))
+                ApplyEffectiveFontSize();
         }
 
         private void ApplyEffectiveFontSize()
         {
-            if (_notifier == null) return;
-
-            // Use the cached provider (coalesces duplicate reads across view + FlowDoc)
-            double size = _notifier.GetFontSize(ViewKey);
+            if (_vm == null) return;
 
             var viewer = FindOutputViewer();
             if (viewer == null) return;
 
             viewer.Document ??= new FlowDocument();
-            viewer.Document.FontSize = size;
+            viewer.Document.FontSize = _vm.EffectiveOutputFontSize;
         }
 
         private FlowDocumentScrollViewer? FindOutputViewer()
@@ -86,42 +90,18 @@ namespace DSAMVVM.MVVM.View
             return null;
         }
 
-        // --- bottom bar buttons ---
+        // --- bottom bar buttons (thin wrappers -> VM commands) ---
 
         private void ClearLog_Click(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is ComputerViewModel vm)
-                vm.ClearLog();
-        }
+            => _vm?.ClearLogCommand.Execute(null);
 
-        private void IncreaseFont_Click(object sender, RoutedEventArgs e) => AdjustFont(+1);
-        private void DecreaseFont_Click(object sender, RoutedEventArgs e) => AdjustFont(-1);
-        private void ResetFont_Click(object sender, RoutedEventArgs e) => ResetFont();
+        private void IncreaseFont_Click(object sender, RoutedEventArgs e)
+            => _vm?.IncreaseFontCommand.Execute(null);
 
-        private void AdjustFont(int delta)
-        {
-            if (_settingsSvc == null || _notifier == null) return;
+        private void DecreaseFont_Click(object sender, RoutedEventArgs e)
+            => _vm?.DecreaseFontCommand.Execute(null);
 
-            var s = App.Settings;
-            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
-
-            _ = _settingsSvc.AdjustOutputFontSize(s, preferPerView ? ViewKey : null, delta, preferPerView);
-
-            _notifier.NotifyChanged();
-            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
-        }
-
-        private void ResetFont()
-        {
-            if (_settingsSvc == null || _notifier == null) return;
-
-            var s = App.Settings;
-            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
-
-            _settingsSvc.ResetOutputFontSize(s, preferPerView ? ViewKey : null, preferPerView, defaultSize: 14);
-
-            _notifier.NotifyChanged();
-            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
-        }
+        private void ResetFont_Click(object sender, RoutedEventArgs e)
+            => _vm?.ResetFontCommand.Execute(null);
     }
 }
