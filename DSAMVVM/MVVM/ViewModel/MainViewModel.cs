@@ -3,6 +3,7 @@ using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Utilities;
 using System.Collections.ObjectModel;
 using DSAMVVM.Core.Models;
+using System.Windows;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -66,9 +67,8 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        // Search History
+        // Search History (mirrors ISearchService)
         public ObservableCollection<string> SearchHistory { get; } = [];
-        private const int MaxHistoryCount = 10;
 
         public MainViewModel(
             IDepartmentService deptService,
@@ -87,6 +87,10 @@ namespace DSAMVVM.MVVM.ViewModel
                 _searchService = searchService;
                 _linksService = linksService;
                 StatusBar = statusBar;
+
+                // Keep UI history list synced with service history
+                _searchService.HistoryChanged += OnHistoryChanged;
+                SyncHistoryFromService();
 
                 _ = InitializeAsync();
 
@@ -155,17 +159,8 @@ namespace DSAMVVM.MVVM.ViewModel
         private async void TriggerSearch()
         {
             var query = (SearchQuery ?? string.Empty).Trim();
-
             if (string.IsNullOrWhiteSpace(query) || CurrentView is not ISearchableViewModel searchable)
                 return;
-
-            // Add to history if not already present (ignore case; already trimmed)
-            if (!SearchHistory.Any(q => string.Equals(q, query, StringComparison.OrdinalIgnoreCase)))
-            {
-                SearchHistory.Insert(0, query);
-                if (SearchHistory.Count > MaxHistoryCount)
-                    SearchHistory.RemoveAt(SearchHistory.Count - 1);
-            }
 
             var target = ResolveTargetFromView(CurrentView);
             if (target is null)
@@ -181,14 +176,12 @@ namespace DSAMVVM.MVVM.ViewModel
 
             try
             {
-                // Use the trimmed query for the actual search
+                // The service handles history add/dedupe/cap and raises HistoryChanged.
                 var context = new SearchContextDTO(query);
                 await searchable.OnSearchUpdated(context, _searchService, target.Value);
 
                 UiNotify.Success("Search complete.", key: key);
-
-                // Clear after search
-                SearchQuery = string.Empty;
+                SearchQuery = string.Empty; // clear after search
             }
             catch (Exception ex)
             {
@@ -196,5 +189,20 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
+        //History sync
+
+        private void OnHistoryChanged(object? s, EventArgs e)
+        {
+            var d = Application.Current?.Dispatcher;
+            if (d?.CheckAccess() == true) SyncHistoryFromService();
+            else d?.BeginInvoke(new Action(SyncHistoryFromService));
+        }
+
+        private void SyncHistoryFromService()
+        {
+            var snap = _searchService.GetHistorySnapshot(); // IReadOnlyList<string>
+            SearchHistory.Clear();
+            foreach (var q in snap) SearchHistory.Add(q);
+        }
     }
 }

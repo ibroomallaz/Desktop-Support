@@ -14,6 +14,8 @@ namespace DSAMVVM.Core.Interfaces
 
         // Get (and ensure) the app data directory path based on settings.
         string ResolveDataDir(AppSettings s);
+        // Get (and ensure) the app logs directory path based on settings.
+        string ResolveLogDir(AppSettings s);
 
         // Effective font size for a given view, honoring per-view overrides and clamping.
         double GetFontSizeFor(string viewName, AppSettings s, double min = 9, double max = 24);

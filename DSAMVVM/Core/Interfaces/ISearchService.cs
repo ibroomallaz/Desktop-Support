@@ -1,11 +1,23 @@
-﻿using System.Threading.Tasks;
-using DSAMVVM.Core.Enums;
+﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Models;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DSAMVVM.Core.Interfaces
 {
     public interface ISearchService
     {
         Task<object?> SearchAsync(SearchContextDTO context, SearchTarget target);
+
+        // History policy
+        void ConfigureHistory(bool enabled, int capacity);
+        void ClearHistory();
+
+        // History access
+        IReadOnlyList<string> GetHistorySnapshot();
+
+        // Notification for UI sync
+        event EventHandler? HistoryChanged;
     }
 }

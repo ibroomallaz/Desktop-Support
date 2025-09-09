@@ -115,6 +115,11 @@ namespace DSAMVVM.Core.Services
             return dataDir;
         }
 
+        public string ResolveLogDir(AppSettings s)
+        {
+            Directory.CreateDirectory(Globals.g_LogsDir);
+            return Globals.g_LogsDir;
+        }
 
         // Font sizing
 
