@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace DSAMVVM.MVVM.Behaviors
 {
@@ -40,6 +41,19 @@ namespace DSAMVVM.MVVM.Behaviors
         public static bool GetPreserveScrollPosition(DependencyObject obj) =>
             (bool)obj.GetValue(PreserveScrollPositionProperty);
 
+        // Scroll hard to bottom when Text changes (search) -> default on
+        public static readonly DependencyProperty ScrollToBottomOnTextChangeProperty =
+            DependencyProperty.RegisterAttached(
+                "ScrollToBottomOnTextChange",
+                typeof(bool),
+                typeof(FlowDocBinder),
+                new PropertyMetadata(true));
+
+        public static void SetScrollToBottomOnTextChange(DependencyObject obj, bool value) =>
+            obj.SetValue(ScrollToBottomOnTextChangeProperty, value);
+        public static bool GetScrollToBottomOnTextChange(DependencyObject obj) =>
+            (bool)obj.GetValue(ScrollToBottomOnTextChangeProperty);
+
         private static readonly DependencyProperty SubscribedProviderProperty =
             DependencyProperty.RegisterAttached(
                 "SubscribedProvider",
@@ -51,7 +65,7 @@ namespace DSAMVVM.MVVM.Behaviors
         {
             if (d is not FlowDocumentScrollViewer viewer) return;
 
-            // If DI isn't ready yet (XAML designer / early parse), delay until Loaded
+            // If DI isn't ready yet (designer / early parse), delay until Loaded
             if (Application.Current is not App || App.Services == null)
             {
                 viewer.Loaded -= DeferLoaded;
@@ -59,22 +73,23 @@ namespace DSAMVVM.MVVM.Behaviors
                 return;
             }
 
-            EnsureSubscribedAndRender(viewer);
+            // -> yank only when Text changed (new search)
+            bool forceBottom = e.Property == TextProperty && GetScrollToBottomOnTextChange(viewer);
+            EnsureSubscribedAndRender(viewer, forceBottom);
         }
 
         private static void DeferLoaded(object sender, RoutedEventArgs e)
         {
             if (sender is not FlowDocumentScrollViewer viewer) return;
 
-            // Try again; if DI still isn't ready, keep waiting
             if (Application.Current is App && App.Services != null)
             {
                 viewer.Loaded -= DeferLoaded;
-                EnsureSubscribedAndRender(viewer);
+                EnsureSubscribedAndRender(viewer, forceBottom: false);
             }
         }
 
-        private static void EnsureSubscribedAndRender(FlowDocumentScrollViewer viewer)
+        private static void EnsureSubscribedAndRender(FlowDocumentScrollViewer viewer, bool forceBottom)
         {
             var sp = App.Services;
             var flowSvc = sp.GetRequiredService<IFlowDocService>();
@@ -84,21 +99,18 @@ namespace DSAMVVM.MVVM.Behaviors
             var current = (IOutputTextSettingsProvider?)viewer.GetValue(SubscribedProviderProperty);
             if (!ReferenceEquals(current, textSettings))
             {
-                // Strong subscription + unhook on Unloaded keeps it simple and leak-free
-                void Handler(object? _, EventArgs __)
+                void Handler(object? _, System.EventArgs __)
                 {
-                    viewer.Dispatcher.Invoke(() => Rebuild(viewer, flowSvc));
+                    viewer.Dispatcher.Invoke(() => Rebuild(viewer, flowSvc, forceBottom: false)); // settings change -> preserve pos
                 }
 
-                // Remove previous (if any)
                 if (current != null)
-                    current.Changed -= Handler;
+                    current.Changed -= Handler; // safe no-op if not the same delegate instance
 
                 textSettings.Changed += Handler;
 
                 viewer.Unloaded += (_, __) =>
                 {
-                    // Unhook when viewer leaves the tree
                     textSettings.Changed -= Handler;
                     viewer.ClearValue(SubscribedProviderProperty);
                 };
@@ -107,18 +119,18 @@ namespace DSAMVVM.MVVM.Behaviors
             }
 
             // Initial/updated render
-            Rebuild(viewer, flowSvc);
+            Rebuild(viewer, flowSvc, forceBottom);
         }
 
-        private static void Rebuild(FlowDocumentScrollViewer viewer, IFlowDocService flowSvc)
+        private static void Rebuild(FlowDocumentScrollViewer viewer, IFlowDocService flowSvc, bool forceBottom)
         {
             var text = GetText(viewer) ?? string.Empty;
             var viewName = GetViewName(viewer); // null => default/global font size
 
-            // Optionally preserve scroll position
+            // Preserve scroll only if not forcing bottom
             double? oldOffset = null;
             ScrollViewer? sv = null;
-            if (GetPreserveScrollPosition(viewer))
+            if (!forceBottom && GetPreserveScrollPosition(viewer))
             {
                 sv = FindScrollViewer(viewer);
                 if (sv != null) oldOffset = sv.VerticalOffset;
@@ -126,8 +138,19 @@ namespace DSAMVVM.MVVM.Behaviors
 
             viewer.Document = flowSvc.BuildDocument(text, viewName: viewName);
 
-            if (oldOffset is double o && sv != null)
+            if (forceBottom)
+            {
+                // -> wait for layout, then snap to bottom
+                viewer.Dispatcher.InvokeAsync(() =>
+                {
+                    var s = FindScrollViewer(viewer);
+                    s?.ScrollToBottom();
+                }, DispatcherPriority.Background);
+            }
+            else if (oldOffset is double o && sv != null)
+            {
                 sv.ScrollToVerticalOffset(o);
+            }
         }
 
         private static ScrollViewer? FindScrollViewer(DependencyObject root)
@@ -137,8 +160,8 @@ namespace DSAMVVM.MVVM.Behaviors
             for (int i = 0; i < count; i++)
             {
                 var child = VisualTreeHelper.GetChild(root, i);
-                var sv = FindScrollViewer(child);
-                if (sv != null) return sv;
+                var found = FindScrollViewer(child);
+                if (found != null) return found;
             }
             return null;
         }
