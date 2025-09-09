@@ -3,36 +3,95 @@ using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
+using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
-using System;
 using System.Diagnostics;
-using System.Threading.Tasks;
+using System.IO;
+using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class ComputerViewModel(IADService adService) : ObeservableObject, ISearchableViewModel
+    public class ComputerViewModel : ObeservableObject, ISearchableViewModel, IDisposable
     {
-        private readonly IADService _ad = adService;
+        // -> Services
+        private readonly IADService _ad;
+        private readonly ISettingsService _settingsSvc;
+        private readonly IOutputTextSettingsProvider _notifier;
 
+        private const string ViewKey = "ComputerView";
+
+        // -> Errors / state
         private string? _error;
-        public string? Error
-        {
-            get => _error;
-            private set { _error = value; OnPropertyChanged(nameof(Error)); }
-        }
+        public string? Error { get => _error; private set { _error = value; OnPropertyChanged(nameof(Error)); } }
 
         private bool _isLoading;
-        public bool IsLoading
+        public bool IsLoading { get => _isLoading; private set { _isLoading = value; OnPropertyChanged(nameof(IsLoading)); } }
+
+        // -> FlowDoc text (bound to viewer)
+        private string _searchLog = string.Empty;
+        public string SearchLog { get => _searchLog; private set { _searchLog = value; OnPropertyChanged(nameof(SearchLog)); } }
+
+        // -> Effective output font size for this view (the View listens and applies it to FlowDocument)
+        private double _effectiveOutputFontSize;
+        public double EffectiveOutputFontSize
         {
-            get => _isLoading;
-            private set { _isLoading = value; OnPropertyChanged(nameof(IsLoading)); }
+            get => _effectiveOutputFontSize;
+            private set { _effectiveOutputFontSize = value; OnPropertyChanged(nameof(EffectiveOutputFontSize)); }
         }
 
-        private string _searchLog = string.Empty;
-        public string SearchLog
+        // -> Commands
+        public ICommand ClearLogCommand { get; }
+        public ICommand IncreaseFontCommand { get; }
+        public ICommand DecreaseFontCommand { get; }
+        public ICommand ResetFontCommand { get; }
+
+        public ComputerViewModel(IADService adService, ISettingsService settingsSvc, IOutputTextSettingsProvider notifier)
         {
-            get => _searchLog;
-            private set { _searchLog = value; OnPropertyChanged(nameof(SearchLog)); }
+            _ad = adService ?? throw new ArgumentNullException(nameof(adService));
+            _settingsSvc = settingsSvc ?? throw new ArgumentNullException(nameof(settingsSvc));
+            _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
+
+            // Init effective size from provider
+            RefreshEffectiveFont();
+
+            // Listen for global/per-view changes -> update EffectiveOutputFontSize
+            _notifier.Changed += OnOutputFontSettingsChanged;
+
+            // Wire commands
+            ClearLogCommand = new RelayCommand(_ => ClearLog());
+            IncreaseFontCommand = new RelayCommand(_ => AdjustFont(+1));
+            DecreaseFontCommand = new RelayCommand(_ => AdjustFont(-1));
+            ResetFontCommand = new RelayCommand(_ => ResetFont());
+        }
+
+        private void OnOutputFontSettingsChanged(object? sender, EventArgs e) => RefreshEffectiveFont();
+
+        private void RefreshEffectiveFont()
+        {
+            // single source of truth -> provider
+            EffectiveOutputFontSize = _notifier.GetFontSize(ViewKey);
+        }
+
+        private void AdjustFont(int delta)
+        {
+            var s = App.Settings;
+            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
+
+            _ = _settingsSvc.AdjustOutputFontSize(s, preferPerView ? ViewKey : null, delta, preferPerView);
+            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
+
+            _notifier.NotifyChanged(); // -> triggers RefreshEffectiveFont via event
+        }
+
+        private void ResetFont()
+        {
+            var s = App.Settings;
+            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
+
+            _settingsSvc.ResetOutputFontSize(s, preferPerView ? ViewKey : null, preferPerView, defaultSize: 14);
+            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
+
+            _notifier.NotifyChanged(); // -> triggers RefreshEffectiveFont via event
         }
 
         // FlowDoc helpers
@@ -145,5 +204,10 @@ namespace DSAMVVM.MVVM.ViewModel
         }
 
         public void ClearLog() => SearchLog = string.Empty;
+
+        public void Dispose()
+        {
+            _notifier.Changed -= OnOutputFontSettingsChanged;
+        }
     }
 }

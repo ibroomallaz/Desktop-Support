@@ -1,74 +1,75 @@
-﻿using System.IO;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using DSAMVVM.Core.Interfaces;
-using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.ViewModel;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DSAMVVM.MVVM.View
 {
     public partial class UserView : UserControl
     {
-        // Per-view key for settings (used only when ViewFontSizeOverride is enabled)
-        private const string ViewKey = "UserView";
-
-        private ISettingsService? _settingsSvc;
-        private IOutputTextSettingsProvider? _notifier;
+        private UserViewModel? _vm;
+        private FlowDocumentScrollViewer? _viewer;
 
         public UserView()
         {
             InitializeComponent();
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
+            DataContextChanged += OnDataContextChanged;
         }
 
         private void OnLoaded(object? sender, RoutedEventArgs e)
         {
-            var sp = App.Services;
-            _settingsSvc = sp.GetRequiredService<ISettingsService>();
-            _notifier = sp.GetRequiredService<IOutputTextSettingsProvider>();
-
-            // Listen for global/per-view size changes triggered anywhere
-            _notifier.Changed += OnOutputFontSettingsChanged;
-
-            // Apply once on load
-            ApplyEffectiveFontSize();
+            _viewer = FindOutputViewer();
+            HookVm(DataContext as UserViewModel);
+            ApplyFontSizeFromVm();
         }
 
         private void OnUnloaded(object? sender, RoutedEventArgs e)
         {
-            if (_notifier != null)
-                _notifier.Changed -= OnOutputFontSettingsChanged;
+            UnhookVm(_vm);
         }
 
-        private void OnOutputFontSettingsChanged(object? sender, EventArgs e)
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            ApplyEffectiveFontSize();
+            UnhookVm(_vm);
+            HookVm(e.NewValue as UserViewModel);
+            ApplyFontSizeFromVm();
         }
 
-        private void ApplyEffectiveFontSize()
+        private void HookVm(UserViewModel? vm)
         {
-            if (_notifier == null) return;
+            _vm = vm;
+            if (_vm != null) _vm.PropertyChanged += OnVmPropertyChanged;
+        }
 
-            // Use cached provider (coalesces duplicate reads across view + FlowDoc)
-            double size = _notifier.GetFontSize(ViewKey);
+        private void UnhookVm(UserViewModel? vm)
+        {
+            if (vm != null) vm.PropertyChanged -= OnVmPropertyChanged;
+        }
 
-            var viewer = FindOutputViewer();
+        private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(UserViewModel.EffectiveFontSize))
+                ApplyFontSizeFromVm();
+        }
+
+        private void ApplyFontSizeFromVm()
+        {
+            if (_vm == null) return;
+
+            var viewer = _viewer ??= FindOutputViewer();
             if (viewer == null) return;
 
             viewer.Document ??= new FlowDocument();
-            viewer.Document.FontSize = size;
+            viewer.Document.FontSize = _vm.EffectiveFontSize;
         }
 
         private FlowDocumentScrollViewer? FindOutputViewer()
         {
-            // Prefer a named element if present in XAML (e.g., x:Name="OutputViewer")
             if (this.FindName("OutputViewer") is FlowDocumentScrollViewer named) return named;
-
-            // Fallback: search visual tree
             return FindDescendant<FlowDocumentScrollViewer>(this);
         }
 
@@ -86,42 +87,10 @@ namespace DSAMVVM.MVVM.View
             return null;
         }
 
-        // --- bottom bar buttons ---
-
-        private void ClearLog_Click(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is UserViewModel vm)
-                vm.ClearLog();
-        }
-
-        private void IncreaseFont_Click(object sender, RoutedEventArgs e) => AdjustFont(+1);
-        private void DecreaseFont_Click(object sender, RoutedEventArgs e) => AdjustFont(-1);
-        private void ResetFont_Click(object sender, RoutedEventArgs e) => ResetFont();
-
-        private void AdjustFont(int delta)
-        {
-            if (_settingsSvc == null || _notifier == null) return;
-
-            var s = App.Settings;
-            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
-
-            _ = _settingsSvc.AdjustOutputFontSize(s, preferPerView ? ViewKey : null, delta, preferPerView);
-
-            _notifier.NotifyChanged();
-            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
-        }
-
-        private void ResetFont()
-        {
-            if (_settingsSvc == null || _notifier == null) return;
-
-            var s = App.Settings;
-            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
-
-            _settingsSvc.ResetOutputFontSize(s, preferPerView ? ViewKey : null, preferPerView, defaultSize: 14);
-
-            _notifier.NotifyChanged();
-            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
-        }
+        // Bottom bar actions delegate to the ViewModel
+        private void ClearLog_Click(object sender, RoutedEventArgs e) => _vm?.ClearLog();
+        private void IncreaseFont_Click(object sender, RoutedEventArgs e) => _vm?.AdjustFont(+1);
+        private void DecreaseFont_Click(object sender, RoutedEventArgs e) => _vm?.AdjustFont(-1);
+        private void ResetFont_Click(object sender, RoutedEventArgs e) => _vm?.ResetFont();
     }
 }
