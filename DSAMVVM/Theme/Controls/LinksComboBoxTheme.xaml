@@ -35,7 +35,6 @@
         <Setter Property="StrokeLineJoin" Value="Round"/>
         <Setter Property="Fill" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <!-- rotate around center so position doesn't shift -->
         <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
         <Setter Property="RenderTransform">
             <Setter.Value>
@@ -44,7 +43,7 @@
         </Setter>
     </Style>
 
-    <!-- toggle button for the closed state (removes default highlight) -->
+    <!-- toggle button for the closed state -->
     <Style x:Key="Combo.DropToggleStyle" TargetType="ToggleButton">
         <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ComboBox}}"/>
         <Setter Property="Background" Value="Transparent"/>
@@ -58,7 +57,6 @@
                         <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
                     </Grid>
                     <ControlTemplate.Triggers>
-                        <!-- press: keep chevron visible -->
                         <Trigger Property="IsPressed" Value="True">
                             <Setter Property="Foreground" Value="{StaticResource Combo.Glyph.Active}"/>
                         </Trigger>
@@ -76,7 +74,10 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBoxItem">
-                    <Border x:Name="Root" Background="{TemplateBinding Background}">
+                    <!-- Forward Foreground to descendants so DataTemplate TextBlocks pick it up -->
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            TextElement.Foreground="{TemplateBinding Foreground}">
                         <ContentPresenter Margin="4,0" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -99,7 +100,7 @@
     <!-- dropdown (non-editable) -->
     <Style x:Key="Combo.Links.Dropdown" TargetType="ComboBox">
         <Setter Property="IsEditable" Value="False"/>
-        <Setter Property="SelectedIndex" Value="0"/>
+        <!-- Removed SelectedIndex forcing so bindings can select saved values -->
         <Setter Property="Padding" Value="{StaticResource Combo.Padding}"/>
         <Setter Property="Foreground" Value="{StaticResource Combo.Fg}"/>
         <Setter Property="Background" Value="{StaticResource Combo.Bg}"/>
@@ -113,7 +114,9 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
-                    <Grid SnapsToDevicePixels="True">
+                    <!-- Forward Foreground through entire visual tree -->
+                    <Grid SnapsToDevicePixels="True"
+                          TextElement.Foreground="{TemplateBinding Foreground}">
                         <!-- box -->
                         <Border x:Name="Outer"
                                 Background="{TemplateBinding Background}"
@@ -132,13 +135,14 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- selected text -->
-                                <TextBlock Grid.Column="0"
-                                           Margin="{TemplateBinding Padding}"
-                                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                           TextTrimming="CharacterEllipsis"
-                                           Foreground="{TemplateBinding Foreground}"
-                                           Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedItem.Content}"/>
+                                <!-- Selected content (supports ItemsSource + ItemTemplate via SelectionBoxItem) -->
+                                <ContentPresenter Grid.Column="0"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  Content="{TemplateBinding SelectionBoxItem}"
+                                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                  ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"/>
 
                                 <!-- chevron -->
                                 <Border Grid.Column="1"
@@ -170,7 +174,8 @@
                                     CornerRadius="{StaticResource Combo.CornerRadius}"
                                     Padding="2"
                                     MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
-                                    KeyboardNavigation.TabNavigation="Cycle">
+                                    KeyboardNavigation.TabNavigation="Cycle"
+                                    TextElement.Foreground="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}">
                                 <ScrollViewer VerticalScrollBarVisibility="Auto"
                                               HorizontalScrollBarVisibility="Disabled"
                                               MaxHeight="{TemplateBinding MaxDropDownHeight}">
@@ -192,7 +197,6 @@
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.6"/>
                         </Trigger>
-                        <!-- flip chevron without shifting position -->
                         <Trigger SourceName="PART_Popup" Property="IsOpen" Value="True">
                             <Setter TargetName="Outer" Property="BorderBrush" Value="{StaticResource Combo.Border.Active}"/>
                             <Setter TargetName="Outer" Property="Background" Value="{StaticResource Combo.Bg}"/>

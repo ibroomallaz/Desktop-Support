@@ -9,6 +9,7 @@ using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
 
+
 namespace DSAMVVM.MVVM.ViewModel
 {
     public class SettingsViewModel : ObeservableObject
@@ -26,8 +27,8 @@ namespace DSAMVVM.MVVM.ViewModel
         public IReadOnlyList<int> RetentionOptions { get; } =
             new[] { 7, 14, 30, 90, 180, 365, -1 }; // -1 = forever
 
-        public IReadOnlyList<int> HistorySizeOptions { get; } =
-            new[] { 0, 5, 10, 15, 20, 50 }; // 0 = off
+        // Allow insertion of custom/saved values before selection occurs
+        public List<int> HistorySizeOptions { get; } = new() { 0, 5, 10, 15, 20, 50 }; // 0 = off
 
         public IReadOnlyList<double> InitialFontSizeOptions { get; } =
             new[] { 10d, 12d, 14d, 16d, 18d, 20d, 22d };
@@ -78,7 +79,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand ApplyCommand { get; }
         public ICommand OpenLogsCommand { get; }
 
-        // Ctors
+        // Constructors
         public SettingsViewModel()
             : this(App.Services.GetRequiredService<ISettingsService>(),
                    App.Services.GetService<IOutputTextSettingsProvider>(),
@@ -108,7 +109,9 @@ namespace DSAMVVM.MVVM.ViewModel
             RetentionDays = _settings.Logging.RetentionDays;
 
             UseSavedSearchHistory = _settings.Ui.Search.UseSavedSearchHistory;
-            MaxSearchHistory = _settings.Ui.Search.MaxSearchHistory;
+            var savedMax = _settings.Ui.Search.MaxSearchHistory;
+            EnsureHistoryOption(savedMax); // <- make sure the saved value exists in ItemsSource
+            MaxSearchHistory = savedMax;
 
             // ensure runtime policy on open
             _searchSvc?.ConfigureHistory(UseSavedSearchHistory, MaxSearchHistory);
@@ -144,6 +147,7 @@ namespace DSAMVVM.MVVM.ViewModel
             else
             {
                 _settings.Ui.Search.UseSavedSearchHistory = UseSavedSearchHistory;
+                EnsureHistoryOption(MaxSearchHistory); // keep options list consistent if custom value chosen
                 _settings.Ui.Search.MaxSearchHistory = MaxSearchHistory;
             }
 
@@ -192,6 +196,16 @@ namespace DSAMVVM.MVVM.ViewModel
             if (!_settings.Ui.ViewFontSizes.TryGetValue(key, out var entry) || entry == null)
                 _settings.Ui.ViewFontSizes[key] = entry = new ViewFontSetting();
             entry.FontSize = Clamp(size, 8, 24);
+        }
+
+        private void EnsureHistoryOption(int value)
+        {
+            if (!HistorySizeOptions.Contains(value))
+            {
+                HistorySizeOptions.Add(value);
+                HistorySizeOptions.Sort();
+                OnPropertyChanged(nameof(HistorySizeOptions));
+            }
         }
 
         private static void TryFlushPendingSaves(ISettingsService svc)
