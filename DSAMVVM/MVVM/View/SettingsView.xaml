@@ -14,6 +14,53 @@
                 <Setter Property="Foreground" Value="{StaticResource TextPrimBrush}"/>
             </Style>
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+            <!-- Label formatters for int-based ComboBoxes -->
+            <DataTemplate x:Key="HistoryItemTemplate">
+                <TextBlock>
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="{Binding StringFormat={}{0} items}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding}" Value="0">
+                                    <Setter Property="Text" Value="Never"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="1">
+                                    <Setter Property="Text" Value="1 item"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </DataTemplate>
+
+            <DataTemplate x:Key="DaysItemTemplate">
+                <TextBlock>
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="{Binding StringFormat={}{0} days}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding}" Value="-1">
+                                    <Setter Property="Text" Value="Keep indefinitely"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="1">
+                                    <Setter Property="Text" Value="1 day"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </DataTemplate>
+
+            <DataTemplate x:Key="PtItemTemplate">
+                <TextBlock>
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="{Binding StringFormat={}{0} pt}"/>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -58,14 +105,15 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock Text="Default search size at launch" Style="{StaticResource FieldLabel}"/>
+
+                                <!-- Bind to InitialFontSizeOptions + DefaultFontSize -->
                                 <ComboBox x:Name="InitialSizeCombo" Grid.Column="2"
                                           Style="{DynamicResource Combo.Links.Dropdown}"
-                                          SelectionChanged="InitialSizeCombo_SelectionChanged">
-                                    <ComboBoxItem Content="Small (12 pt)"       Tag="12"/>
-                                    <ComboBoxItem Content="Normal (14 pt)"      Tag="14" IsSelected="True"/>
-                                    <ComboBoxItem Content="Large (16 pt)"       Tag="16"/>
-                                    <ComboBoxItem Content="Extra Large (18 pt)" Tag="18"/>
-                                </ComboBox>
+                                          ItemsSource="{Binding InitialFontSizeOptions}"
+                                          SelectedValue="{Binding DefaultFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          SelectedValuePath="."
+                                          ItemTemplate="{StaticResource PtItemTemplate}"
+                                          SelectionChanged="InitialSizeCombo_SelectionChanged"/>
                             </Grid>
 
                             <!-- Default (app-wide) search size -->
@@ -79,9 +127,12 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock Text="Default search text size" Style="{StaticResource FieldLabel}"/>
+
+                                <!-- Bind to DefaultFontSize -->
                                 <Slider x:Name="GeneralSizeSlider" Grid.Column="2"
                                         Minimum="8" Maximum="24" TickFrequency="1"
                                         IsSnapToTickEnabled="True"
+                                        Value="{Binding DefaultFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         ValueChanged="GeneralSizeSlider_ValueChanged"/>
                                 <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
                                     <Run Text="{Binding ElementName=GeneralSizeSlider, Path=Value, StringFormat=F0}"/>
@@ -94,6 +145,7 @@
                                       Foreground="{StaticResource TextPrimBrush}"
                                       Content="Enable per-tab search size (override default)"
                                       Margin="0,0,0,8"
+                                      IsChecked="{Binding UsePerViewOverride, Mode=TwoWay}"
                                       Checked="UsePerViewCheck_Changed"
                                       Unchecked="UsePerViewCheck_Changed"/>
 
@@ -115,7 +167,8 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="User" Style="{StaticResource FieldLabel}"/>
                                         <Slider x:Name="UserSize" Grid.Column="2" Minimum="8" Maximum="24"
-                                                TickFrequency="1" IsSnapToTickEnabled="True" Value="14"
+                                                TickFrequency="1" IsSnapToTickEnabled="True"
+                                                Value="{Binding UserFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                 ValueChanged="PerViewSize_ValueChanged"/>
                                         <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
                                             <Run Text="{Binding ElementName=UserSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
@@ -133,7 +186,8 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Computer" Style="{StaticResource FieldLabel}"/>
                                         <Slider x:Name="ComputerSize" Grid.Column="2" Minimum="8" Maximum="24"
-                                                TickFrequency="1" IsSnapToTickEnabled="True" Value="14"
+                                                TickFrequency="1" IsSnapToTickEnabled="True"
+                                                Value="{Binding ComputerFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                 ValueChanged="PerViewSize_ValueChanged"/>
                                         <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
                                             <Run Text="{Binding ElementName=ComputerSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
@@ -151,7 +205,8 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Group" Style="{StaticResource FieldLabel}"/>
                                         <Slider x:Name="GroupSize" Grid.Column="2" Minimum="8" Maximum="24"
-                                                TickFrequency="1" IsSnapToTickEnabled="True" Value="14"
+                                                TickFrequency="1" IsSnapToTickEnabled="True"
+                                                Value="{Binding GroupFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                 ValueChanged="PerViewSize_ValueChanged"/>
                                         <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
                                             <Run Text="{Binding ElementName=GroupSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
@@ -169,7 +224,8 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Entra" Style="{StaticResource FieldLabel}"/>
                                         <Slider x:Name="EntraSize" Grid.Column="2" Minimum="8" Maximum="24"
-                                                TickFrequency="1" IsSnapToTickEnabled="True" Value="14"
+                                                TickFrequency="1" IsSnapToTickEnabled="True"
+                                                Value="{Binding EntraFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                 ValueChanged="PerViewSize_ValueChanged"/>
                                         <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
                                             <Run Text="{Binding ElementName=EntraSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
@@ -209,13 +265,8 @@
                                 <TextBlock Text="Log level" Style="{StaticResource FieldLabel}"/>
                                 <ComboBox x:Name="LogLevelCombo" Grid.Column="2"
                                           Style="{DynamicResource Combo.Links.Dropdown}"
-                                          SelectedIndex="2">
-                                    <ComboBoxItem Content="Off"/>
-                                    <ComboBoxItem Content="Debug"/>
-                                    <ComboBoxItem Content="Info"/>
-                                    <ComboBoxItem Content="Warning"/>
-                                    <ComboBoxItem Content="Error"/>
-                                </ComboBox>
+                                          ItemsSource="{Binding LogLevels}"
+                                          SelectedItem="{Binding MinimumLogLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </Grid>
 
                             <!-- Retention -->
@@ -228,14 +279,9 @@
                                 <TextBlock Text="Log retention" Style="{StaticResource FieldLabel}"/>
                                 <ComboBox x:Name="RetentionCombo" Grid.Column="2"
                                           Style="{DynamicResource Combo.Links.Dropdown}"
-                                          SelectedIndex="3">
-                                    <ComboBoxItem Content="1 day"             Tag="1"/>
-                                    <ComboBoxItem Content="7 days"            Tag="7"/>
-                                    <ComboBoxItem Content="14 days"           Tag="14"/>
-                                    <ComboBoxItem Content="30 days"           Tag="30"/>
-                                    <ComboBoxItem Content="60 days"           Tag="60"/>
-                                    <ComboBoxItem Content="Keep indefinitely" Tag="-1"/>
-                                </ComboBox>
+                                          ItemsSource="{Binding RetentionOptions}"
+                                          SelectedItem="{Binding RetentionDays, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          ItemTemplate="{StaticResource DaysItemTemplate}"/>
                             </Grid>
 
                             <!-- Action -->
@@ -280,19 +326,14 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock Text="History size" Style="{StaticResource FieldLabel}"/>
+
+                                <!-- Bind to HistorySizeOptions + MaxSearchHistory -->
                                 <ComboBox x:Name="HistorySizeCombo" Grid.Column="2"
                                           Style="{DynamicResource Combo.Links.Dropdown}"
-                                          SelectedIndex="6">
-                                    <ComboBoxItem Content="Never"     Tag="0"/>
-                                    <ComboBoxItem Content="5 items"   Tag="5"/>
-                                    <ComboBoxItem Content="6 items"   Tag="6"/>
-                                    <ComboBoxItem Content="7 items"   Tag="7"/>
-                                    <ComboBoxItem Content="8 items"   Tag="8"/>
-                                    <ComboBoxItem Content="9 items"   Tag="9"/>
-                                    <ComboBoxItem Content="10 items"  Tag="10"/>
-                                    <ComboBoxItem Content="15 items"  Tag="15"/>
-                                    <ComboBoxItem Content="20 items"  Tag="20"/>
-                                </ComboBox>
+                                          ItemsSource="{Binding HistorySizeOptions}"
+                                          SelectedValue="{Binding MaxSearchHistory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          SelectedValuePath="."
+                                          ItemTemplate="{StaticResource HistoryItemTemplate}"/>
                             </Grid>
                         </StackPanel>
                     </Grid>
@@ -305,24 +346,24 @@
         <Grid Grid.Row="1" Margin="16,0,16,16">
             <!-- Glow ring (behind) -->
             <Border x:Name="GlowRing"
-          IsHitTestVisible="False"
-          Background="Transparent"
-          BorderBrush="{DynamicResource Brush.Accent.Hover}"
-          BorderThickness="1.25"
-          CornerRadius="12">
+                    IsHitTestVisible="False"
+                    Background="Transparent"
+                    BorderBrush="{DynamicResource Brush.Accent.Hover}"
+                    BorderThickness="1.25"
+                    CornerRadius="12">
                 <Border.Effect>
                     <!-- Outer glow that follows your accent color -->
                     <DropShadowEffect ShadowDepth="0"
-                        BlurRadius="24"
-                        Opacity="0.35"
-                        Color="{Binding BorderBrush.(SolidColorBrush.Color), ElementName=GlowRing}"/>
+                                      BlurRadius="24"
+                                      Opacity="0.35"
+                                      Color="{Binding BorderBrush.(SolidColorBrush.Color), ElementName=GlowRing}"/>
                 </Border.Effect>
             </Border>
 
             <!-- Actual footer card -->
             <Border Background="{DynamicResource Brush.Surface.Hover}"
-          BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1"
-          CornerRadius="12" Margin="1">
+                    BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1"
+                    CornerRadius="12" Margin="1">
                 <Grid Margin="12,8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -330,15 +371,15 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Text="Changes are not saved until you click Apply."
-                 VerticalAlignment="Center"
-                 Foreground="{DynamicResource Brush.Text.Primary}"/>
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource Brush.Text.Primary}"/>
 
                     <Button x:Name="BtnApply" Grid.Column="1"
-              Style="{DynamicResource Button.Rounded}"
-              Click="BtnApply_Click"
-              MinHeight="32" Height="36" MinWidth="92" Padding="14,6"
-              Margin="12,0,0,0"
-              BorderBrush="{DynamicResource Brush.Accent}" BorderThickness="1.25">
+                            Style="{DynamicResource Button.Rounded}"
+                            Click="BtnApply_Click"
+                            MinHeight="32" Height="36" MinWidth="92" Padding="14,6"
+                            Margin="12,0,0,0"
+                            BorderBrush="{DynamicResource Brush.Accent}" BorderThickness="1.25">
                         <TextBlock Text="Apply"/>
                     </Button>
                 </Grid>
