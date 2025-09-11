@@ -14,8 +14,8 @@ namespace DSAMVVM.MVVM.Model.Data
     {
         public DepartmentMeta Meta { get; set; } = new();
 
-        [JsonProperty("DepartmentList")]
-        public List<Department> DepartmentList { get; set; } = new();
+        [JsonProperty(nameof(DepartmentList))]
+        public List<Department> DepartmentList { get; set; } = [];
     }
 
     public sealed class Department

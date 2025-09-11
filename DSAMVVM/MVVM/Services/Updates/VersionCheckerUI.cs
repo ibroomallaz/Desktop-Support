@@ -5,19 +5,14 @@ using DSAMVVM.MVVM.Model.Schemas;
 
 namespace DSAMVVM.MVVM.Services.Updates
 {
-    public class VersionCheckerUI
+    public class VersionCheckerUI(IHttpService http)
     {
-        private readonly IHttpService _http;
+        private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
 
         private readonly string _installedVersion = Globals.g_AppVersion;
         private readonly string _versionUrl = Globals.g_versionJSON;
 
         private const string StatusKey = "VersionCheck";
-
-        public VersionCheckerUI(IHttpService http)
-        {
-            _http = http ?? throw new ArgumentNullException(nameof(http));
-        }
 
         public async Task CheckAsync()
         {
@@ -114,7 +109,7 @@ namespace DSAMVVM.MVVM.Services.Updates
                 sticky: false,
                 priority: 1,
                 key: StatusKey,
-                links.ToArray());
+                [.. links]);
         }
     }
 }

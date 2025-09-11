@@ -6,7 +6,7 @@ namespace DSAMVVM.MVVM.ViewModel
 {
     public class EntraViewModel : ObeservableObject
     {
-        public async Task OnSearchUpdated(string query)
+        public static async Task OnSearchUpdated(string query)
         {
             // Placeholder for future Entra ID search logic
             await Task.CompletedTask;

@@ -61,7 +61,7 @@ namespace DSAMVVM.Core.Services
 
         public async Task SaveAsync(AppSettings settings, string settingsPath, CancellationToken ct = default)
         {
-            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            ArgumentNullException.ThrowIfNull(settings);
 
             var path = Expand(settingsPath);
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
@@ -147,7 +147,7 @@ namespace DSAMVVM.Core.Services
 
         public double AdjustOutputFontSize(AppSettings s, string? viewName, int delta, bool preferPerView)
         {
-            if (s is null) throw new ArgumentNullException(nameof(s));
+            ArgumentNullException.ThrowIfNull(s);
 
             if (preferPerView && !string.IsNullOrWhiteSpace(viewName))
             {
@@ -177,7 +177,7 @@ namespace DSAMVVM.Core.Services
 
         public void ResetOutputFontSize(AppSettings s, string? viewName, bool preferPerView, int defaultSize = 14)
         {
-            if (s is null) throw new ArgumentNullException(nameof(s));
+            ArgumentNullException.ThrowIfNull(s);
 
             if (preferPerView && !string.IsNullOrWhiteSpace(viewName))
             {
@@ -203,7 +203,7 @@ namespace DSAMVVM.Core.Services
         // Debounced save
 
 
-        private readonly object _saveGate = new();
+        private readonly Lock _saveGate = new();
         private System.Threading.Timer? _saveTimer;
         private AppSettings? _pendingSettings;
         private string? _pendingPath;

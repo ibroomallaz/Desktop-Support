@@ -4,7 +4,7 @@
     {
         public bool Exists { get; init; }
         public bool? Enabled { get; init; }
-        public List<string> Groups { get; init; } = new();
+        public List<string> Groups { get; init; } = [];
         public string? Error { get; init; }
     }
 }
