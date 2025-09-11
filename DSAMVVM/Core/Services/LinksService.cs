@@ -9,22 +9,16 @@ using DSAMVVM.MVVM.Model.Data;
 namespace DSAMVVM.Core.Services
 {
     // Remote-first with local JSON fallback + conditional backup refresh.
-    public class LinksService : ILinksService
+    public class LinksService(IHttpService http, Func<LinksData, DateTime?>? stampSelector = null) : ILinksService
     {
-        private readonly IHttpService _http;
+        private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
         private readonly SemaphoreSlim _gate = new(1, 1);                 // single-flight load/reload
         private readonly JsonFileCache<LinksData> _fileCache =
             new(Globals.g_LinksCachePath);
-        private readonly Func<LinksData, DateTime?> _stamp;
+        private readonly Func<LinksData, DateTime?> _stamp = stampSelector ?? DefaultStamp;
 
         private LinksData? _cache;
         private readonly string _remoteUrl = Globals.g_LinksJSON;
-
-        public LinksService(IHttpService http, Func<LinksData, DateTime?>? stampSelector = null)
-        {
-            _http = http ?? throw new ArgumentNullException(nameof(http));
-            _stamp = stampSelector ?? DefaultStamp;                        // UTC used for refresh decision
-        }
 
         public LinksData? GetCachedLinksData() => _cache;
 

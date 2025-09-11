@@ -4,22 +4,16 @@ using System.Collections.Concurrent;
 
 namespace DSAMVVM.Core.Services
 {
-    public sealed class OutputTextSettingsProvider : IOutputTextSettingsProvider
+    public sealed class OutputTextSettingsProvider(ISettingsService settingsSvc, Func<AppSettings> settingsAccessor) : IOutputTextSettingsProvider
     {
-        private readonly ISettingsService _settingsSvc;
-        private readonly Func<AppSettings> _settingsAccessor;
+        private readonly ISettingsService _settingsSvc = settingsSvc ?? throw new ArgumentNullException(nameof(settingsSvc));
+        private readonly Func<AppSettings> _settingsAccessor = settingsAccessor ?? throw new ArgumentNullException(nameof(settingsAccessor));
 
         // Cache: viewName -> resolved font size ("" = global)
         private readonly ConcurrentDictionary<string, double> _cache =
             new(StringComparer.Ordinal);
 
         public event EventHandler? Changed;
-
-        public OutputTextSettingsProvider(ISettingsService settingsSvc, Func<AppSettings> settingsAccessor)
-        {
-            _settingsSvc = settingsSvc ?? throw new ArgumentNullException(nameof(settingsSvc));
-            _settingsAccessor = settingsAccessor ?? throw new ArgumentNullException(nameof(settingsAccessor));
-        }
 
         public double GetFontSize(string? viewName = null)
         {

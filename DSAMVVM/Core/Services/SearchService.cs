@@ -8,22 +8,17 @@ using System.Threading.Tasks;
 
 namespace DSAMVVM.Core.Services
 {
-    public class SearchService : ISearchService
+    public class SearchService(IADService ad) : ISearchService
     {
-        private readonly IADService _ad;
+        private readonly IADService _ad = ad ?? throw new ArgumentNullException(nameof(ad));
 
         // History state
-        private readonly object _gate = new();
+        private readonly Lock _gate = new();
         private bool _historyEnabled = true;
         private int _historyCap = 10;
-        private readonly List<string> _history = new();
+        private readonly List<string> _history = [];
 
         public event EventHandler? HistoryChanged;
-
-        public SearchService(IADService ad)
-        {
-            _ad = ad ?? throw new ArgumentNullException(nameof(ad));
-        }
 
         public void ConfigureHistory(bool enabled, int capacity)
         {
@@ -57,7 +52,7 @@ namespace DSAMVVM.Core.Services
         public IReadOnlyList<string> GetHistorySnapshot()
         {
             lock (_gate)
-                return _history.ToList();
+                return [.. _history];
         }
 
         public async Task<object?> SearchAsync(SearchContextDTO context, SearchTarget target)

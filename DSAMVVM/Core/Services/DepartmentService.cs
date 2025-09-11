@@ -88,7 +88,7 @@ namespace DSAMVVM.Core.Services
                     throw new InvalidOperationException("No department data available from web or local cache.");
 
                 _meta = wrapper.Meta;
-                _departments = (wrapper.DepartmentList ?? new List<Department>())
+                _departments = (wrapper.DepartmentList ?? [])
                     .Select(d => new DepartmentAdapter(d))
                     .ToList<IDepartment>();
 

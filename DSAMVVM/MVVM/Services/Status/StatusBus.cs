@@ -20,7 +20,7 @@ namespace DSAMVVM.MVVM.Services.Status
         public bool RequeueInterruptedNonSticky { get; set; } = true; // put interrupted item back at front
 
         // non-sticky FIFO and keyed lookup
-        private readonly List<StatusItem> _queue = new();
+        private readonly List<StatusItem> _queue = [];
         private readonly Dictionary<string, StatusItem> _byKey =
             new(StringComparer.OrdinalIgnoreCase);
 

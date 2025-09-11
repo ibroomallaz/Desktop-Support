@@ -9,8 +9,7 @@ namespace DSAMVVM.MVVM.View
         public SettingsView()
         {
             InitializeComponent();
-            if (DataContext == null)
-                DataContext = new SettingsViewModel();
+            DataContext ??= new SettingsViewModel();
         }
 
 
