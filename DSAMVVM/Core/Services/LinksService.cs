@@ -52,11 +52,7 @@ namespace DSAMVVM.Core.Services
                         ct,
                         jsonSettings: null,
                         normalize: m => m.Meta?.Normalize(),
-                        log: msg => Log.Info("Links.Loader", msg));
-
-                    if (model == null)
-                        throw new InvalidOperationException("No links data available from web or local cache.");
-
+                        log: msg => Log.Info("Links.Loader", msg)) ?? throw new InvalidOperationException("No links data available from web or local cache.");
                     _cache = model;
 
                     sw.Stop();

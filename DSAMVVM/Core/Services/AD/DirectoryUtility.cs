@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.DirectoryServices;
-using System.Linq;
+﻿using System.DirectoryServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace DSAMVVM.Core.Services.AD
 {
-    public static class DirectoryUtility
+    public static partial class DirectoryUtility
     {
         // user props used by UI and services
         private static readonly string[] UserProps = [
@@ -119,7 +116,7 @@ namespace DSAMVVM.Core.Services.AD
                     }
                 }
 
-                var m = Regex.Match(key, @"member;range=(\d+)-(\d+|\*)", RegexOptions.IgnoreCase);
+                var m = DirectoryUtilRegex().Match(key);
                 if (!m.Success) break;
 
                 var endToken = m.Groups[2].Value;
@@ -219,5 +216,8 @@ namespace DSAMVVM.Core.Services.AD
             }
             return sb.ToString();
         }
+
+        [GeneratedRegex(@"member;range=(\d+)-(\d+|\*)", RegexOptions.IgnoreCase, "en-US")]
+        private static partial Regex DirectoryUtilRegex();
     }
 }
