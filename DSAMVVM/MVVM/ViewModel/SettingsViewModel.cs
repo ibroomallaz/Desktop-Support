@@ -22,16 +22,16 @@ namespace DSAMVVM.MVVM.ViewModel
 
         // Options for bindings
         public IReadOnlyList<AppLogLevel> LogLevels { get; } =
-            new[] { AppLogLevel.Off, AppLogLevel.Debug, AppLogLevel.Info, AppLogLevel.Warn, AppLogLevel.Error };
+            [AppLogLevel.Off, AppLogLevel.Debug, AppLogLevel.Info, AppLogLevel.Warn, AppLogLevel.Error];
 
         public IReadOnlyList<int> RetentionOptions { get; } =
-            new[] { 7, 14, 30, 90, 180, 365, -1 }; // -1 = forever
+            [7, 14, 30, 90, 180, 365, -1]; // -1 = forever
 
         // Allow insertion of custom/saved values before selection occurs
-        public List<int> HistorySizeOptions { get; } = new() { 0, 5, 10, 15, 20, 50 }; // 0 = off
+        public List<int> HistorySizeOptions { get; } = [0, 5, 10, 15, 20, 25]; // 0 = off
 
         public IReadOnlyList<double> InitialFontSizeOptions { get; } =
-            new[] { 10d, 12d, 14d, 16d, 18d, 20d, 22d };
+            [10d, 12d, 14d, 16d, 18d, 20d, 22d];
 
         // UI state
         private double _defaultFontSize;
@@ -225,7 +225,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 var mi = svc.GetType().GetMethod("ResolveLogDir", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
                 if (mi != null)
                 {
-                    var val = mi.Invoke(svc, new object[] { s }) as string;
+                    var val = mi.Invoke(svc, [s]) as string;
                     if (!string.IsNullOrWhiteSpace(val)) return val!;
                 }
             }

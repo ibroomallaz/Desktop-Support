@@ -4,11 +4,9 @@ using System.DirectoryServices;
 
 namespace DSAMVVM.Core.Services.AD
 {
-    public class ADComputerService
+    public class ADComputerService(string ldapPath)
     {
-        private readonly string _ldapPath;
-
-        public ADComputerService(string ldapPath) { _ldapPath = ldapPath; }
+        private readonly string _ldapPath = ldapPath;
 
         public Task<ADComputerInfo> GetComputerAsync(string hostname)
         {
