@@ -82,15 +82,9 @@ namespace DSAMVVM.Core.Services
                     ct: default,
                     jsonSettings: null,
                     normalize: w => w.Meta?.Normalize(),
-                    log: msg => Log.Info("Dept.Loader", msg));
-
-                if (wrapper == null)
-                    throw new InvalidOperationException("No department data available from web or local cache.");
-
+                    log: msg => Log.Info("Dept.Loader", msg)) ?? throw new InvalidOperationException("No department data available from web or local cache.");
                 _meta = wrapper.Meta;
-                _departments = (wrapper.DepartmentList ?? [])
-                    .Select(d => new DepartmentAdapter(d))
-                    .ToList<IDepartment>();
+                _departments = [.. (wrapper.DepartmentList ?? []).Select(d => new DepartmentAdapter(d))];
 
                 sw.Stop();
                 UiNotify.RemoveKey(progressKey);

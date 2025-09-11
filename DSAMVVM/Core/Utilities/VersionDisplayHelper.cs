@@ -4,10 +4,10 @@ using System.Text.RegularExpressions;
 
 namespace DSAMVVM.Core.Utilities
 {
-    public static class VersionDisplayHelper
+    public static partial class VersionDisplayHelper
     {
         // keeps prerelease, drops +build metadata
-        private static readonly Regex SemVerRx = new(@"^(?:v)?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?", RegexOptions.Compiled);
+        private static readonly Regex SemVerRx = VersionDisRegex();
 
         public static string GetSemVerDisplay(bool lowercase = true)
         {
@@ -43,5 +43,8 @@ namespace DSAMVVM.Core.Utilities
             var parts = fv.Split('.');                       // "4.6.0.1234" -> "4.6.0"
             return parts.Length >= 3 ? $"{parts[0]}.{parts[1]}.{parts[2]}" : fv;
         }
+
+        [GeneratedRegex(@"^(?:v)?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?", RegexOptions.Compiled)]
+        private static partial Regex VersionDisRegex();
     }
 }
