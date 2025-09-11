@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Text;
 using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
@@ -10,7 +8,7 @@ namespace DSAMVVM.Core.Logging
     // Daily rolling file logger with retention; cleanup is deferred until SetRetentionDays is called.
     public sealed class FileLogger : IAppLogger, IDisposable
     {
-        private readonly object _sync = new();
+        private readonly Lock _sync = new();
         private int _retentionDays;
         private string _dir;
         private DateTime _dayUtc;
@@ -196,7 +194,7 @@ namespace DSAMVVM.Core.Logging
         {
             if (!string.IsNullOrEmpty(name) && name.Length >= 12)
             {
-                var datePart = name.Substring(4);
+                var datePart = name[4..];
                 if (DateTime.TryParseExact(
                         datePart, "yyyyMMdd", null,
                         System.Globalization.DateTimeStyles.AssumeUniversal,

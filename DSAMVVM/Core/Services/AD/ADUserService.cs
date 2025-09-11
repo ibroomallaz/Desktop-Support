@@ -5,11 +5,9 @@ using System.Text.RegularExpressions;
 
 namespace DSAMVVM.Core.Services.AD
 {
-    public class ADUserService
+    public class ADUserService(string ldap)
     {
-        private readonly string _ldap;
-
-        public ADUserService(string ldap) { _ldap = ldap; }
+        private readonly string _ldap = ldap;
 
         public Task<ADUserInfo> GetUserAsync(string netid)
         {

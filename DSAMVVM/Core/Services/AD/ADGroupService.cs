@@ -8,9 +8,9 @@ namespace DSAMVVM.Core.Services.AD
 {
     public class ADGroupService
     {
-        private static DirectoryEntry Root() => new DirectoryEntry(Globals.g_domainPathLDAP);
+        private static DirectoryEntry Root() => new(Globals.g_domainPathLDAP);
 
-        public Task<MimLookupResult> GetUserMimGroupsAsync(string netid) =>
+        public static Task<MimLookupResult> GetUserMimGroupsAsync(string netid) =>
             Task.Run(() =>
             {
                 if (string.IsNullOrWhiteSpace(netid))
@@ -33,7 +33,7 @@ namespace DSAMVVM.Core.Services.AD
                         {
                             if (string.IsNullOrEmpty(dn)) continue;
                             var cn = DnToCn(dn); // CN=Foo,OU=Bar -> Foo
-                            if (cn.IndexOf("MIM", StringComparison.OrdinalIgnoreCase) >= 0)
+                            if (cn.Contains("MIM", StringComparison.OrdinalIgnoreCase))
                                 groups.Add(cn);
                         }
                     }
@@ -51,7 +51,7 @@ namespace DSAMVVM.Core.Services.AD
 
                     // preserve order while removing duplicates
                     var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    groups = groups.Where(seen.Add).ToList();
+                    groups = [.. groups.Where(seen.Add)];
 
                     return new MimLookupResult
                     {
@@ -72,7 +72,7 @@ namespace DSAMVVM.Core.Services.AD
                 }
             });
 
-        public Task<ADGroupInfo> GetGroupAsync(string groupName) =>
+        public static Task<ADGroupInfo> GetGroupAsync(string groupName) =>
             Task.Run(() =>
             {
                 var info = new ADGroupInfo();

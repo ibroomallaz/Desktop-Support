@@ -10,16 +10,16 @@ namespace DSAMVVM.Core.Services.AD
     public static class DirectoryUtility
     {
         // user props used by UI and services
-        private static readonly string[] UserProps = new[] {
+        private static readonly string[] UserProps = [
             "displayName","distinguishedName","userAccountControl",
             "department","Department","eduPersonPrimaryAffiliation","extensionAttribute15",
             "memberOf"
-        };
+        ];
 
         // computer props used by UI and services
-        private static readonly string[] ComputerProps = new[] {
+        private static readonly string[] ComputerProps = [
             "distinguishedName","description","operatingSystem","userAccountControl","memberOf"
-        };
+        ];
 
         // ---- user lookups ----
 
@@ -37,7 +37,7 @@ namespace DSAMVVM.Core.Services.AD
             using var root = Bind(ldap);
             using var ds = NewSearcher(root,
                 $"(&(objectCategory=person)(objectClass=user)(employeeID={Escape(employeeId)}))",
-                sizeLimit: 1, props: new[] { "displayName", "distinguishedName", "employeeID" });
+                sizeLimit: 1, props: ["displayName", "distinguishedName", "employeeID"]);
             return ds.FindOne();
         }
 
@@ -46,7 +46,7 @@ namespace DSAMVVM.Core.Services.AD
             using var root = Bind(ldap);
             using var ds = NewSearcher(root,
                 $"(&(objectCategory=group)(member={Escape(userDn)})(cn=*MIM-DivisionRollup*))",
-                sizeLimit: 1, props: new[] { "cn" });
+                sizeLimit: 1, props: ["cn"]);
             return ds.FindOne();
         }
 
@@ -68,7 +68,7 @@ namespace DSAMVVM.Core.Services.AD
             using var root = Bind(ldap);
             using var ds = NewSearcher(root,
                 $"(&(objectCategory=group)(member={Escape(userDn)}))",
-                sizeLimit: 0, pageSize: 1000, props: new[] { "cn" });
+                sizeLimit: 0, pageSize: 1000, props: ["cn"]);
 
             var list = new List<string>();
             using var results = ds.FindAll();
@@ -76,7 +76,7 @@ namespace DSAMVVM.Core.Services.AD
             {
                 var cn = GetString(gr, "cn");
                 if (cn == null) continue;
-                if (string.IsNullOrEmpty(cnContains) || cn.IndexOf(cnContains, StringComparison.OrdinalIgnoreCase) >= 0)
+                if (string.IsNullOrEmpty(cnContains) || cn.Contains(cnContains, StringComparison.OrdinalIgnoreCase))
                     list.Add(cn);
             }
             return list;
@@ -98,7 +98,7 @@ namespace DSAMVVM.Core.Services.AD
             while (iters++ < maxIterations && members.Count < maxMembers)
             {
                 var ranged = $"member;range={start}-{start + chunk - 1}";
-                de.RefreshCache(new[] { ranged });
+                de.RefreshCache([ranged]);
 
                 var key = de.Properties.PropertyNames
                     .Cast<string>()
@@ -168,8 +168,8 @@ namespace DSAMVVM.Core.Services.AD
 
         public static IReadOnlyList<string> GetStrings(SearchResult r, string prop)
         {
-            if (!r.Properties.Contains(prop) || r.Properties[prop].Count == 0) return Array.Empty<string>();
-            return r.Properties[prop].Cast<object>().Select(o => o?.ToString() ?? string.Empty).ToArray();
+            if (!r.Properties.Contains(prop) || r.Properties[prop].Count == 0) return [];
+            return [.. r.Properties[prop].Cast<object>().Select(o => o?.ToString() ?? string.Empty)];
         }
 
         public static bool GetEnabledFromUac(SearchResult r)
@@ -182,7 +182,7 @@ namespace DSAMVVM.Core.Services.AD
 
         // ---- internals ----
 
-        public static DirectoryEntry Bind(string ldap) => new DirectoryEntry(ldap);
+        public static DirectoryEntry Bind(string ldap) => new(ldap);
 
         private static DirectorySearcher NewSearcher(DirectoryEntry root, string filter, int sizeLimit, int pageSize = 0, string[]? props = null)
         {
@@ -194,9 +194,9 @@ namespace DSAMVVM.Core.Services.AD
                 Asynchronous = true,
                 ServerTimeLimit = TimeSpan.FromSeconds(3),
                 SizeLimit = sizeLimit,
-                PageSize = pageSize
+                PageSize = pageSize,
+                ReferralChasing = ReferralChasingOption.None
             };
-            ds.ReferralChasing = ReferralChasingOption.None;
             if (props != null) foreach (var p in props) ds.PropertiesToLoad.Add(p);
             return ds;
         }

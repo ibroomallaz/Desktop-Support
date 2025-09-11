@@ -5,9 +5,9 @@ using System.Windows.Media;
 
 namespace DSAMVVM.Core.Services
 {
-    public sealed class FlowDocService : IFlowDocService
+    public sealed class FlowDocService(IOutputTextSettingsProvider textSettings) : IFlowDocService
     {
-        private readonly IOutputTextSettingsProvider _textSettings;
+        private readonly IOutputTextSettingsProvider _textSettings = textSettings ?? throw new ArgumentNullException(nameof(textSettings));
         private const double DefaultLineHeightRatio = 1.08;
 
         private static readonly IReadOnlyDictionary<string, Brush> DefaultColors =
@@ -21,11 +21,6 @@ namespace DSAMVVM.Core.Services
                 ["white"] = (Brush)new BrushConverter().ConvertFrom("#D0D3D6"),   // muted “white”
                 ["lightgray"] = (Brush)new BrushConverter().ConvertFrom("#B0B3B8")   //light gray
             };
-
-        public FlowDocService(IOutputTextSettingsProvider textSettings)
-        {
-            _textSettings = textSettings ?? throw new ArgumentNullException(nameof(textSettings));
-        }
 
         public FlowDocument BuildDocument(
             string fullText,
@@ -57,7 +52,7 @@ namespace DSAMVVM.Core.Services
             if (!string.IsNullOrEmpty(fullText))
             {
                 string[] lines = fullText.Split('\n');
-                bool endsWithNewline = fullText.EndsWith("\n", StringComparison.Ordinal);
+                bool endsWithNewline = fullText.EndsWith('\n');
 
                 for (int i = 0; i < lines.Length; i++)
                 {
@@ -79,19 +74,19 @@ namespace DSAMVVM.Core.Services
             while (index < line.Length)
             {
                 int open = line.IndexOf('[', index);
-                if (open < 0) { p.Inlines.Add(new Run(line.Substring(index))); break; }
+                if (open < 0) { p.Inlines.Add(new Run(line[index..])); break; }
 
-                if (open > index) p.Inlines.Add(new Run(line.Substring(index, open - index)));
+                if (open > index) p.Inlines.Add(new Run(line[index..open]));
 
                 int closeBracket = line.IndexOf(']', open + 1);
-                if (closeBracket < 0) { p.Inlines.Add(new Run(line.Substring(open))); break; }
+                if (closeBracket < 0) { p.Inlines.Add(new Run(line[open..])); break; }
 
-                string colorName = line.Substring(open + 1, closeBracket - (open + 1));
+                string colorName = line[(open + 1)..closeBracket];
                 string endTag = $"[/{colorName}]";
                 int end = line.IndexOf(endTag, closeBracket + 1, StringComparison.Ordinal);
-                if (end < 0) { p.Inlines.Add(new Run(line.Substring(open))); break; }
+                if (end < 0) { p.Inlines.Add(new Run(line[open..])); break; }
 
-                string inner = line.Substring(closeBracket + 1, end - (closeBracket + 1));
+                string inner = line[(closeBracket + 1)..end];
                 var run = new Run(inner)
                 {
                     Foreground = colors.TryGetValue(colorName.Trim(), out var brush) ? brush : Brushes.White

@@ -1,7 +1,6 @@
 ﻿using DSAMVVM.Core.Interfaces;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
-using System.Threading.Tasks;
 
 namespace DSAMVVM.Core.Services.AD
 {
@@ -27,9 +26,9 @@ namespace DSAMVVM.Core.Services.AD
         // Group
 
         public Task<ADGroupInfo> GetGroupAsync(string groupName)
-            => _groupService.GetGroupAsync(groupName);
+            => ADGroupService.GetGroupAsync(groupName);
 
         public Task<MimLookupResult> GetUserMimGroupsAsync(string netid)
-            => _groupService.GetUserMimGroupsAsync(netid);
+            => ADGroupService.GetUserMimGroupsAsync(netid);
     }
 }

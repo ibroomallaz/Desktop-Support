@@ -5,19 +5,14 @@ using DSAMVVM.Core.Logging;
 
 namespace DSAMVVM.Core.IO
 {
-    public sealed class JsonFileCache<T>
+    public sealed class JsonFileCache<T>(string path)
     {
-        private readonly string _path;
+        private readonly string _path = path ?? throw new ArgumentNullException(nameof(path));
         private static readonly JsonSerializerSettings Json = new()
         {
             MissingMemberHandling = MissingMemberHandling.Ignore,
             NullValueHandling = NullValueHandling.Include
         };
-
-        public JsonFileCache(string path)
-        {
-            _path = path ?? throw new ArgumentNullException(nameof(path));
-        }
 
         public async Task<T?> ReadAsync()
         {

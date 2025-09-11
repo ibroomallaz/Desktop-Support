@@ -5,7 +5,7 @@ namespace DSAMVVM.Core.Models
 {
     public sealed class StatusItemBuilder
     {
-        private readonly List<StatusSpan> _spans = new();
+        private readonly List<StatusSpan> _spans = [];
         private string _key = $"msg:{DateTime.UtcNow:yyyyMMddHHmmss-ffff}";
         private StatusLevel _level = StatusLevel.Info;
         private bool _sticky;

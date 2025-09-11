@@ -37,7 +37,7 @@ namespace DSAMVVM.Core.Utilities
                    Level: StatusLevel.Info,
                    Sticky: false,
                    Priority: priority,
-                   Spans: new[] { StatusSpans.Text(message) }
+                   Spans: [StatusSpans.Text(message)]
                ));
 
         // Error: logs Error, optional status bar echo, then MessageBox
@@ -54,7 +54,7 @@ namespace DSAMVVM.Core.Utilities
                     Level: StatusLevel.Error,
                     Sticky: true,
                     Priority: 2,
-                    Spans: new[] { StatusSpans.Bold($"{title}: {message}  (Ref: {code})") }
+                    Spans: [StatusSpans.Bold($"{title}: {message}  (Ref: {code})")]
                 ));
             }
 
@@ -81,7 +81,7 @@ namespace DSAMVVM.Core.Utilities
                 Level: StatusLevel.Warning,
                 Sticky: sticky,
                 Priority: 1,
-                Spans: new[] { StatusSpans.Text(message) }
+                Spans: [StatusSpans.Text(message)]
             ));
         }
 
@@ -96,7 +96,7 @@ namespace DSAMVVM.Core.Utilities
                     Level: StatusLevel.Info,
                     Sticky: false,
                     Priority: 0,
-                    Spans: new[] { StatusSpans.Text(message) }
+                    Spans: [StatusSpans.Text(message)]
                 ));
             }
         }
@@ -112,7 +112,7 @@ namespace DSAMVVM.Core.Utilities
                     Level: StatusLevel.Success,
                     Sticky: false,
                     Priority: 0,
-                    Spans: new[] { StatusSpans.Text(message) }
+                    Spans: [StatusSpans.Text(message)]
                 ));
             }
         }
@@ -205,6 +205,6 @@ namespace DSAMVVM.Core.Utilities
         }
 
         private static string NewRef(string prefix = "ref")
-            => $"{prefix}:{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}".Substring(0, 26);
+            => $"{prefix}:{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}"[..26];
     }
 }
