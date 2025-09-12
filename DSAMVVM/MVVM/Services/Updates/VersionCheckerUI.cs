@@ -10,7 +10,7 @@ namespace DSAMVVM.MVVM.Services.Updates
         private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
 
         private readonly string _installedVersion = Globals.g_AppVersion;
-        private readonly string _versionUrl = Globals.g_versionJSON;
+        private readonly string _versionUrl = Globals.g_VersionJSON;
 
         private const string StatusKey = "VersionCheck";
 
@@ -97,7 +97,7 @@ namespace DSAMVVM.MVVM.Services.Updates
             // Build links if we have valid URIs
             var links = new System.Collections.Generic.List<UiNotify.StatusLink>();
 
-            if (Uri.TryCreate(location ?? Globals.g_sharepointHome, UriKind.Absolute, out var downloadUri))
+            if (Uri.TryCreate(location ?? Globals.g_SharepointHome, UriKind.Absolute, out var downloadUri))
                 links.Add(UiNotify.Link.External("Download", downloadUri, "Get the update"));
 
             if (!string.IsNullOrWhiteSpace(changelog) && Uri.TryCreate(changelog, UriKind.Absolute, out var notesUri))

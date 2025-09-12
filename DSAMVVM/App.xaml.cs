@@ -12,7 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using System.Windows;
 using DSAMVVM.Core.Services.AD;
-using System.Threading;
 
 namespace DSAMVVM
 {
@@ -199,6 +198,7 @@ namespace DSAMVVM
             services.AddTransient<GroupViewModel>();
             services.AddTransient<ComputerViewModel>();
             services.AddTransient<LinksViewModel>();
+            services.AddSingleton<AboutViewModel>();
 
             // ViewModel factories for MainViewModel constructor
             services.AddTransient<Func<UserViewModel>>(sp => () => sp.GetRequiredService<UserViewModel>());
@@ -210,5 +210,6 @@ namespace DSAMVVM
 
             _serviceProvider = services.BuildServiceProvider();
         }
+
     }
 }
