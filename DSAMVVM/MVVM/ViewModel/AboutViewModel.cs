@@ -10,8 +10,8 @@ namespace DSAMVVM.MVVM.ViewModel
         public string AppVersion { get; }
         public IReadOnlyList<string> Developers { get; } = new[]
         {
-            "Isaac Broomall \t(Lead)",
-            "JJ Velasquez"
+            "Isaac Broomall (ibroomall)",
+            "JJ Velasquez (jjvelasquez)"
         };
 
         public ICommand OpenGitHubCommand { get; }
@@ -36,13 +36,14 @@ namespace DSAMVVM.MVVM.ViewModel
         private async Task CheckVersionAsync()
         {
             const string key = "VersionCheck";
+            _busy = true; (CheckVersionCommand as AsyncCommand)?.RaiseCanExecuteChanged();
+
             try
             {
-                _busy = true; (CheckVersionCommand as AsyncCommand)?.RaiseCanExecuteChanged();
                 UiNotify.Progress(UiNotify.ProgressOf(key), "Checking for updates…");
 
                 var checker = new VersionCheckerUI(_http);
-                await checker.CheckAsync(); // surfaces result via UiNotify
+                await checker.CheckAsync(showUpToDatePopup: true);
             }
             finally
             {
