@@ -2,6 +2,7 @@
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Schemas;
+using System.Windows;
 
 namespace DSAMVVM.MVVM.Services.Updates
 {
@@ -16,6 +17,11 @@ namespace DSAMVVM.MVVM.Services.Updates
 
         public async Task CheckAsync()
         {
+            await CheckAsync(showUpToDatePopup: false);
+        }
+
+        public async Task CheckAsync(bool showUpToDatePopup)
+        {
             var result = await VersionChecker.CheckVersionAsync(_versionUrl, _http);
 
             if (!result.Success)
@@ -28,8 +34,17 @@ namespace DSAMVVM.MVVM.Services.Updates
                 return;
             }
 
-            NotifyUser(result.Info!);
+            bool anyUpdateShown = NotifyUser(result.Info!, showUpToDatePopup);
             ReportSuccess();
+
+            if (!anyUpdateShown && showUpToDatePopup)
+            {
+                MessageBox.Show(
+                    "Application is up to date",
+                    "Check for Updates",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
         }
 
         private void ReportSuccess()
@@ -40,7 +55,7 @@ namespace DSAMVVM.MVVM.Services.Updates
                 key: StatusKey);
         }
 
-        private void NotifyUser(VersionInfo versionInfo)
+        private bool NotifyUser(VersionInfo versionInfo, bool showUpToDatePopup)
         {
             bool isBetaUser = _installedVersion.Contains("beta", StringComparison.OrdinalIgnoreCase)
                            || _installedVersion.Contains("alpha", StringComparison.OrdinalIgnoreCase);
@@ -56,6 +71,8 @@ namespace DSAMVVM.MVVM.Services.Updates
                                        && versionInfo.PreRelease?.Version != null
                                        && VersionChecker.IsNewerVersion(versionInfo.Current.Version, versionInfo.PreRelease.Version);
 
+            bool shown = false;
+
             if (isStableUpdate && !isBetaUser && versionInfo.Current != null)
             {
                 ShowUpdateNotice(
@@ -64,6 +81,7 @@ namespace DSAMVVM.MVVM.Services.Updates
                     location: versionInfo.Current.Location,
                     changelog: versionInfo.Current.Changelog,
                     isBeta: false);
+                shown = true;
             }
 
             if (isBetaUser)
@@ -76,17 +94,21 @@ namespace DSAMVVM.MVVM.Services.Updates
                         location: versionInfo.PreRelease.Location,
                         changelog: versionInfo.PreRelease.Changelog,
                         isBeta: true);
+                    shown = true;
                 }
                 else if (!isBetaHigherThanStable && isStableUpdate && versionInfo.Current != null)
                 {
                     ShowUpdateNotice(
                         title: "Stable Update Recommended",
                         newVersion: versionInfo.Current.Version!,
-                        location: versionInfo.Current.Location,
+                        location: versionInfo.Current.Changelog,
                         changelog: versionInfo.Current.Changelog,
                         isBeta: false);
+                    shown = true;
                 }
             }
+
+            return shown;
         }
 
         // Non-blocking status with actionable links
@@ -94,7 +116,6 @@ namespace DSAMVVM.MVVM.Services.Updates
         {
             var text = $"{title}: A new version ({newVersion}) is available — you’re on {_installedVersion}.";
 
-            // Build links if we have valid URIs
             var links = new System.Collections.Generic.List<UiNotify.StatusLink>();
 
             if (Uri.TryCreate(location ?? Globals.g_SharepointHome, UriKind.Absolute, out var downloadUri))
@@ -103,7 +124,6 @@ namespace DSAMVVM.MVVM.Services.Updates
             if (!string.IsNullOrWhiteSpace(changelog) && Uri.TryCreate(changelog, UriKind.Absolute, out var notesUri))
                 links.Add(UiNotify.Link.External("Release notes", notesUri, "View changes"));
 
-            // Surface as a warning-level, non-sticky status with links
             UiNotify.WarnWithLinks(
                 text,
                 sticky: false,
