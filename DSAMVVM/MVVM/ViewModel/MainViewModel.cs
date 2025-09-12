@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using DSAMVVM.Core.Models;
 using System.Windows;
 
+
 namespace DSAMVVM.MVVM.ViewModel
 {
     public class MainViewModel : ObeservableObject
@@ -37,7 +38,6 @@ namespace DSAMVVM.MVVM.ViewModel
         public RelayCommand ExecuteSearchCommand { get; private set; } = null!;
         public RelayCommand SettingsCommand { get; private set; } = null!;
 
-        // Current View
         private object? _currentView;
         public object? CurrentView
         {
@@ -52,7 +52,6 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        // Search Query
         private string? _searchQuery;
         public string? SearchQuery
         {
@@ -67,7 +66,6 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        // Search History (mirrors ISearchService)
         public ObservableCollection<string> SearchHistory { get; } = [];
 
         public MainViewModel(
@@ -78,7 +76,8 @@ namespace DSAMVVM.MVVM.ViewModel
             ILinksService linksService,
             Func<UserViewModel> userVMFactory,
             Func<ComputerViewModel> computerVMFactory,
-            Func<GroupViewModel> groupVMFactory)
+            Func<GroupViewModel> groupVMFactory,
+            AboutViewModel aboutVM)
         {
             try
             {
@@ -88,13 +87,12 @@ namespace DSAMVVM.MVVM.ViewModel
                 _linksService = linksService;
                 StatusBar = statusBar;
 
-                // Keep UI history list synced with service history
                 _searchService.HistoryChanged += OnHistoryChanged;
                 SyncHistoryFromService();
 
                 _ = InitializeAsync();
 
-                InitializeViewModels(userVMFactory, computerVMFactory, groupVMFactory);
+                InitializeViewModels(userVMFactory, computerVMFactory, groupVMFactory, aboutVM);
                 InitializeCommands();
 
                 CurrentView = HomeVM;
@@ -120,7 +118,8 @@ namespace DSAMVVM.MVVM.ViewModel
         private void InitializeViewModels(
             Func<UserViewModel> userVMFactory,
             Func<ComputerViewModel> computerVMFactory,
-            Func<GroupViewModel> groupVMFactory)
+            Func<GroupViewModel> groupVMFactory,
+            AboutViewModel aboutVM)
         {
             HomeVM = new HomeViewModel();
             UserVM = userVMFactory();
@@ -128,7 +127,7 @@ namespace DSAMVVM.MVVM.ViewModel
             GroupVM = groupVMFactory();
             EntraVM = new EntraViewModel();
             LinksVM = new LinksViewModel(_linksService);
-            AboutVM = new AboutViewModel();
+            AboutVM = aboutVM;
             SettingsVM = new SettingsViewModel();
         }
 
@@ -176,20 +175,17 @@ namespace DSAMVVM.MVVM.ViewModel
 
             try
             {
-                // The service handles history add/dedupe/cap and raises HistoryChanged.
                 var context = new SearchContextDTO(query);
                 await searchable.OnSearchUpdated(context, _searchService, target.Value);
 
                 UiNotify.Success("Search complete.", key: key);
-                SearchQuery = string.Empty; // clear after search
+                SearchQuery = string.Empty;
             }
             catch (Exception ex)
             {
                 UiNotify.Error("Search failed", ex.Message, ex, alsoStatusBar: true, key: key);
             }
         }
-
-        //History sync
 
         private void OnHistoryChanged(object? s, EventArgs e)
         {
@@ -200,7 +196,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private void SyncHistoryFromService()
         {
-            var snap = _searchService.GetHistorySnapshot(); // IReadOnlyList<string>
+            var snap = _searchService.GetHistorySnapshot();
             SearchHistory.Clear();
             foreach (var q in snap) SearchHistory.Add(q);
         }

@@ -1,28 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Microsoft.Extensions.DependencyInjection;
+using DSAMVVM.MVVM.ViewModel;
 
 namespace DSAMVVM.MVVM.View
 {
-    /// <summary>
-    /// Interaction logic for AboutView.xaml
-    /// </summary>
     public partial class AboutView : UserControl
     {
+        private readonly AboutViewModel _vm;
+
         public AboutView()
         {
             InitializeComponent();
+
+            // Resolve VM from DI and wire URL open
+            _vm = App.Services.GetRequiredService<AboutViewModel>();
+            _vm.OpenUrlRequested += (_, url) => TryOpenUrl(url);
+
+            DataContext = _vm;
+        }
+
+        // Optional passthroughs if XAML uses Click= handlers; otherwise bind to commands in XAML.
+        private void OnOpenGitHubClick(object sender, RoutedEventArgs e) => _vm.OpenGitHubCommand.Execute(null);
+        private void OnOpenSharePointClick(object sender, RoutedEventArgs e) => _vm.OpenSharePointCommand.Execute(null);
+        private void OnCheckVersionClick(object sender, RoutedEventArgs e) => _vm.CheckVersionCommand.Execute(null);
+
+        private static void TryOpenUrl(string url)
+        {
+            try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Unable to open: {url}\n\n{ex.Message}", "Open Link",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
