@@ -9,17 +9,24 @@ namespace DSAMVVM.Core.Services
     {
         private readonly IOutputTextSettingsProvider _textSettings = textSettings ?? throw new ArgumentNullException(nameof(textSettings));
         private const double DefaultLineHeightRatio = 1.08;
+        private const string DefaultPlaceholder = "Type in information in the search bar above and press enter to search";
+        private static readonly IReadOnlyDictionary<string, string> PlaceholderByView = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["UserView"] = "Enter a NetID above, then press Enter to search.",
+            ["ComputerView"] = "Enter a computer name above, then press Enter to search.",
+            ["GroupView"] = "Select \"User's MIM Groups\" to search by NetID, or \"Group Members\" for department number, then press Enter to search.",
+            ["EntraView"] = "Enter an Entra user or device above, then press Enter to search.",
+        };
 
         private static readonly IReadOnlyDictionary<string, Brush> DefaultColors =
             new Dictionary<string, Brush>(StringComparer.OrdinalIgnoreCase)
             {
-
-                ["red"] = (Brush)new BrushConverter().ConvertFrom("#E57373"),   // softer red
-                ["green"] = (Brush)new BrushConverter().ConvertFrom("#66BB6A"),   // softer green
-                ["yellow"] = (Brush)new BrushConverter().ConvertFrom("#FFD54F"),   // soft amber
-                ["cyan"] = (Brush)new BrushConverter().ConvertFrom("#81D4FA"),   // soft cyan
-                ["white"] = (Brush)new BrushConverter().ConvertFrom("#D0D3D6"),   // muted “white”
-                ["lightgray"] = (Brush)new BrushConverter().ConvertFrom("#B0B3B8")   //light gray
+                ["red"] = (Brush)new BrushConverter().ConvertFrom("#E57373"),
+                ["green"] = (Brush)new BrushConverter().ConvertFrom("#66BB6A"),
+                ["yellow"] = (Brush)new BrushConverter().ConvertFrom("#FFD54F"),
+                ["cyan"] = (Brush)new BrushConverter().ConvertFrom("#81D4FA"),
+                ["white"] = (Brush)new BrushConverter().ConvertFrom("#D0D3D6"),
+                ["lightgray"] = (Brush)new BrushConverter().ConvertFrom("#B0B3B8")
             };
 
         public FlowDocument BuildDocument(
@@ -29,7 +36,7 @@ namespace DSAMVVM.Core.Services
             IReadOnlyDictionary<string, Brush>? colorMap = null,
             string? viewName = null)
         {
-            double fs = fontSize ?? _textSettings.GetFontSize(viewName); // null => default/global
+            double fs = fontSize ?? _textSettings.GetFontSize(viewName);
             double lhr = lineHeightRatio ?? DefaultLineHeightRatio;
             var colors = colorMap ?? DefaultColors;
 
@@ -37,7 +44,7 @@ namespace DSAMVVM.Core.Services
             {
                 Foreground = Brushes.White,
                 Background = (Brush)new BrushConverter().ConvertFrom("#181818"),
-                PagePadding = new Thickness(10,10,0,0),
+                PagePadding = new Thickness(10, 10, 0, 0),
                 ColumnWidth = double.PositiveInfinity,
                 FontSize = fs
             };
@@ -49,19 +56,36 @@ namespace DSAMVVM.Core.Services
                 LineHeight = Math.Round(fs * lhr)
             };
 
-            if (!string.IsNullOrEmpty(fullText))
+            // --- Placeholder when no content yet ---
+            if (string.IsNullOrWhiteSpace(fullText))
             {
-                string[] lines = fullText.Split('\n');
-                bool endsWithNewline = fullText.EndsWith('\n');
+                var placeholderBrush =
+                    (colors.TryGetValue("lightgray", out var b) ? b : SystemColors.GrayTextBrush);
 
-                for (int i = 0; i < lines.Length; i++)
-                {
-                    string line = lines[i];
-                    if (line.Length > 0) AddColoredRuns(p, line, colors);
+                var placeholder = (viewName != null && PlaceholderByView.TryGetValue(viewName, out var msg))
+                    ? msg
+                    : DefaultPlaceholder;
 
-                    bool isLast = i == lines.Length - 1;
-                    if (!isLast || (isLast && endsWithNewline)) p.Inlines.Add(new LineBreak());
-                }
+                p.TextAlignment = TextAlignment.Center;
+                p.Inlines.Clear();
+                p.Inlines.Add(new Run(placeholder) { Foreground = placeholderBrush });
+
+                doc.Blocks.Add(p);
+                return doc;
+            }
+
+            // --------------------------------------
+
+            string[] lines = fullText.Split('\n');
+            bool endsWithNewline = fullText.EndsWith('\n');
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i];
+                if (line.Length > 0) AddColoredRuns(p, line, colors);
+
+                bool isLast = i == lines.Length - 1;
+                if (!isLast || (isLast && endsWithNewline)) p.Inlines.Add(new LineBreak());
             }
 
             doc.Blocks.Add(p);
