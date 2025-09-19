@@ -1,135 +1,98 @@
-﻿using DSAMVVM.Core.Interfaces;
+﻿using System;
+using System.Linq;
+using System.Windows;
+using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Schemas;
-using System.Windows;
+using DSAMVVM.Core.Logging;
+using DSAMVVM.MVVM.View.Dialogs;
 
 namespace DSAMVVM.MVVM.Services.Updates
 {
+    // Coordinates version retrieval and popup presentation
     public class VersionCheckerUI(IHttpService http)
     {
         private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
-
         private readonly string _installedVersion = Globals.g_AppVersion;
         private readonly string _versionUrl = Globals.g_VersionJSON;
 
-        private const string StatusKey = "VersionCheck";
+        private const string StatusKey = "VersionCheck.Status";
+        private const string Cat = "Version.UI";
 
-        public async Task CheckAsync()
-        {
-            await CheckAsync(showUpToDatePopup: false);
-        }
+        public async Task CheckAsync() => await CheckAsync(showUpToDatePopup: false);
 
         public async Task CheckAsync(bool showUpToDatePopup)
         {
-            var result = await VersionChecker.CheckVersionAsync(_versionUrl, _http);
+            Log.Info(Cat, $"check.start installed=\"{_installedVersion}\" url=\"{_versionUrl}\"");
 
-            if (!result.Success)
+            var res = await VersionChecker.CheckVersionAsync(_versionUrl, _http);
+            if (!res.Success && res.Info == null && !res.HasAnyStable && !res.HasAnyPre)
             {
-                UiNotify.Error(
-                    "Version check error",
-                    result.Error ?? "Unknown error",
-                    alsoStatusBar: true,
-                    key: StatusKey);
+                UiNotify.Error("Version check error", res.Error ?? "Unknown error", alsoStatusBar: true, key: StatusKey);
+                Log.Info(Cat, "check.error");
                 return;
             }
 
-            bool anyUpdateShown = NotifyUser(result.Info!, showUpToDatePopup);
-            ReportSuccess();
+            var stableVer = res.Info?.Current?.Version ?? res.StableVersion;
+            var stableLoc = res.Info?.Current?.Location ?? res.StableLocation;
+            var stableChg = res.Info?.Current?.Changelog ?? res.StableChangelog;
 
-            if (!anyUpdateShown && showUpToDatePopup)
+            var preExists = res.Info?.PreRelease?.Exists ?? res.PreExists;
+            var preVer = res.Info?.PreRelease?.Version ?? res.PreVersion;
+            var preLoc = res.Info?.PreRelease?.Location ?? res.PreLocation;
+            var preChg = res.Info?.PreRelease?.Changelog ?? res.PreChangelog;
+
+            Log.Info(Cat, $"check.info stable=\"{Val(stableVer)}\" pre=\"{Val(preVer)}\" pre.exists={(preExists ? "true" : "false")}");
+
+            bool showed = ShowPopupIfNewer(stableVer, stableLoc, stableChg, preExists, preVer, preLoc, preChg);
+
+            UiNotify.Info($"Version: {_installedVersion}.", showStatusBar: true, key: StatusKey);
+            Log.Debug(Cat, "report.success");
+
+            if (!showed && showUpToDatePopup)
             {
-                MessageBox.Show(
-                    "Application is up to date",
-                    "Check for Updates",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                UiNotify.Info("You’re up to date.", showStatusBar: true, key: StatusKey);
+                Log.Info(Cat, "check.up-to-date.shown");
             }
         }
 
-        private void ReportSuccess()
+        // Compares and displays the popup
+        private bool ShowPopupIfNewer(string? stableVer, string? stableLoc, string? stableChg,
+                                      bool preExists, string? preVer, string? preLoc, string? preChg)
         {
-            UiNotify.Info(
-                $"Version: {_installedVersion}.",
-                showStatusBar: true,
-                key: StatusKey);
-        }
+            bool newerStable = !string.IsNullOrWhiteSpace(stableVer) && VersionChecker.IsNewerVersion(_installedVersion, stableVer!);
+            bool newerPre = preExists && !string.IsNullOrWhiteSpace(preVer) && VersionChecker.IsNewerVersion(_installedVersion, preVer!);
 
-        private bool NotifyUser(VersionInfo versionInfo, bool showUpToDatePopup)
-        {
-            bool isBetaUser = _installedVersion.Contains("beta", StringComparison.OrdinalIgnoreCase)
-                           || _installedVersion.Contains("alpha", StringComparison.OrdinalIgnoreCase);
+            Log.Info(Cat, $"decide newer.stable={(newerStable ? "true" : "false")} newer.pre={(newerPre ? "true" : "false")}");
 
-            bool isStableUpdate = versionInfo.Current?.Version != null
-                               && VersionChecker.IsNewerVersion(_installedVersion, versionInfo.Current.Version);
+            var owner = GetPreferredOwner();
 
-            bool isBetaUpdate = versionInfo.PreRelease?.Exists == true
-                             && !string.IsNullOrWhiteSpace(versionInfo.PreRelease.Version)
-                             && VersionChecker.IsNewerVersion(_installedVersion, versionInfo.PreRelease.Version);
-
-            bool isBetaHigherThanStable = versionInfo.Current?.Version != null
-                                       && versionInfo.PreRelease?.Version != null
-                                       && VersionChecker.IsNewerVersion(versionInfo.Current.Version, versionInfo.PreRelease.Version);
-
-            bool shown = false;
-
-            if (isStableUpdate && !isBetaUser && versionInfo.Current != null)
+            if (newerStable)
             {
-                ShowUpdateNotice(
-                    title: "Update Available",
-                    newVersion: versionInfo.Current.Version!,
-                    location: versionInfo.Current.Location,
-                    changelog: versionInfo.Current.Changelog,
-                    isBeta: false);
-                shown = true;
+                VersionUpdateDialog.ShowFor(owner, _installedVersion, stableVer!, stableLoc, stableChg, isBeta: false);
+                Log.Info(Cat, "popup.stable.shown");
+                return true;
             }
 
-            if (isBetaUser)
+            if (newerPre)
             {
-                if (isBetaUpdate)
-                {
-                    ShowUpdateNotice(
-                        title: "PreRelease Update Available",
-                        newVersion: versionInfo.PreRelease!.Version!,
-                        location: versionInfo.PreRelease.Location,
-                        changelog: versionInfo.PreRelease.Changelog,
-                        isBeta: true);
-                    shown = true;
-                }
-                else if (!isBetaHigherThanStable && isStableUpdate && versionInfo.Current != null)
-                {
-                    ShowUpdateNotice(
-                        title: "Stable Update Recommended",
-                        newVersion: versionInfo.Current.Version!,
-                        location: versionInfo.Current.Changelog,
-                        changelog: versionInfo.Current.Changelog,
-                        isBeta: false);
-                    shown = true;
-                }
+                VersionUpdateDialog.ShowFor(owner, _installedVersion, preVer!, preLoc, preChg, isBeta: true);
+                Log.Info(Cat, "popup.pre.shown");
+                return true;
             }
 
-            return shown;
+            Log.Info(Cat, "popup.none");
+            return false;
         }
 
-        // Non-blocking status with actionable links
-        private void ShowUpdateNotice(string title, string newVersion, string? location, string? changelog, bool isBeta)
+        // Chooses an owner window for the popup
+        private static Window? GetPreferredOwner()
         {
-            var text = $"{title}: A new version ({newVersion}) is available — you’re on {_installedVersion}.";
-
-            var links = new System.Collections.Generic.List<UiNotify.StatusLink>();
-
-            if (Uri.TryCreate(location ?? Globals.g_SharepointHome, UriKind.Absolute, out var downloadUri))
-                links.Add(UiNotify.Link.External("Download", downloadUri, "Get the update"));
-
-            if (!string.IsNullOrWhiteSpace(changelog) && Uri.TryCreate(changelog, UriKind.Absolute, out var notesUri))
-                links.Add(UiNotify.Link.External("Release notes", notesUri, "View changes"));
-
-            UiNotify.WarnWithLinks(
-                text,
-                sticky: false,
-                priority: 1,
-                key: StatusKey,
-                [.. links]);
+            var active = Application.Current?.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+            return active ?? Application.Current?.MainWindow;
         }
+
+        private static string Val(string? s) => string.IsNullOrWhiteSpace(s) ? "(none)" : s!;
     }
 }

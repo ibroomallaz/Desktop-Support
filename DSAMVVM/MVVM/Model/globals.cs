@@ -24,6 +24,7 @@ namespace DSAMVVM.MVVM.Model
         // Links
         public const string g_SharepointHome = "https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/ProjectHome.aspx";
         public const string g_GitHubUrl = "https://github.com/ibroomallaz/Desktop-Support";
+        public const string g_ChangeLogURL = "https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/Change-Log.aspx";
 
         // App directories
         public static readonly string g_AppDir =
