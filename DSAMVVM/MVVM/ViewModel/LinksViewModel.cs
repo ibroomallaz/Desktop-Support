@@ -3,7 +3,6 @@ using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.Data;
 
 namespace DSAMVVM.MVVM.ViewModel;
-
 public class LinksViewModel : ObeservableObject
 {
     private readonly ILinksService _linksService;
@@ -19,91 +18,45 @@ public class LinksViewModel : ObeservableObject
     public List<TeamLinkGroup> TeamLinks
     {
         get => _teamLinks;
-        set
-        {
-            _teamLinks = value;
-            OnPropertyChanged();
-            RebuildTeamNames();
-            EnsureDefaultTeam();
-        }
-    }
-
-    private List<string> _teamNames = [];
-    public List<string> TeamNames
-    {
-        get => _teamNames;
-        private set { _teamNames = value; OnPropertyChanged(); }
-    }
-
-    private string? _selectedTeam;
-    public string? SelectedTeam
-    {
-        get => _selectedTeam;
-        set
-        {
-            if (_selectedTeam == value) return;
-            _selectedTeam = value;
-            OnPropertyChanged();
-            UpdateSelectedTeamLinks();
-        }
-    }
-
-    private List<Link> _selectedTeamLinks = [];
-    public List<Link> SelectedTeamLinks
-    {
-        get => _selectedTeamLinks;
-        private set { _selectedTeamLinks = value; OnPropertyChanged(); }
+        set { _teamLinks = value; OnPropertyChanged(); }
     }
 
     public LinksViewModel(ILinksService linksService)
     {
         _linksService = linksService;
-        _ = LoadAsync();
+        _ = LoadLinksAsync();
     }
 
-    private async Task LoadAsync()
+    private async Task LoadLinksAsync()
     {
+        // Check cache first
         var cached = _linksService.GetCachedLinksData();
-        if (cached != null) { Apply(cached); return; }
-
-        var data = await _linksService.LoadLinksDataAsync();
-        if (data != null) Apply(data);
-    }
-
-    private void Apply(LinksData data)
-    {
-        CommonLinks = data.CommonLinks ?? [];
-        TeamLinks = data.TeamLinks ?? [];
-        UpdateSelectedTeamLinks();
-    }
-
-    private void RebuildTeamNames()
-    {
-        TeamNames = TeamLinks?
-            .Select(t => (t?.Team ?? "").Trim())
-            .Where(s => !string.IsNullOrWhiteSpace(s))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
-            .ToList() ?? [];
-    }
-
-    private void EnsureDefaultTeam()
-    {
-        if (SelectedTeam == null && TeamNames.Count > 0)
-            SelectedTeam = TeamNames[0];
-    }
-
-    private void UpdateSelectedTeamLinks()
-    {
-        if (string.IsNullOrWhiteSpace(SelectedTeam))
+        if (cached != null)
         {
-            SelectedTeamLinks = [];
+            CommonLinks = cached.CommonLinks;
+            TeamLinks = cached.TeamLinks;
+
+            PrintCommonLinks(); // print immediately from cache
             return;
         }
 
-        var group = TeamLinks?.FirstOrDefault(g =>
-            string.Equals(g?.Team, SelectedTeam, StringComparison.OrdinalIgnoreCase));
+        // Load from source if cache is empty
+        var data = await _linksService.LoadLinksDataAsync();
+        if (data != null)
+        {
+            CommonLinks = data.CommonLinks;
+            TeamLinks = data.TeamLinks;
 
-        SelectedTeamLinks = group?.Links ?? [];
+            PrintCommonLinks(); // print after load
+        }
+    }
+
+    private void PrintCommonLinks()
+    {
+        System.Diagnostics.Debug.WriteLine("=== Common Links ===");
+        foreach (var link in CommonLinks)
+        {
+            System.Diagnostics.Debug.WriteLine($"{link.Name} - {link.URL}");
+        }
     }
 }
