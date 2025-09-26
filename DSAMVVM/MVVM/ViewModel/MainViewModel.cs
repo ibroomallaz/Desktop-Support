@@ -1,10 +1,9 @@
-﻿using DSAMVVM.Core.Enums;
-using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Utilities;
-using System.Collections.ObjectModel;
-using DSAMVVM.Core.Models;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
-
+using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Models;
+using DSAMVVM.Core.Utilities;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -14,7 +13,6 @@ namespace DSAMVVM.MVVM.ViewModel
         public IDepartmentService DeptService { get; } = null!;
         private readonly IADService _adService = null!;
         private readonly ISearchService _searchService = null!;
-        private readonly ILinksService _linksService = null!;
         public StatusBarViewModel StatusBar { get; } = null!;
 
         // ViewModels
@@ -73,10 +71,10 @@ namespace DSAMVVM.MVVM.ViewModel
             IADService adService,
             ISearchService searchService,
             StatusBarViewModel statusBar,
-            ILinksService linksService,
             Func<UserViewModel> userVMFactory,
             Func<ComputerViewModel> computerVMFactory,
             Func<GroupViewModel> groupVMFactory,
+            Func<LinksViewModel> linksVMFactory,
             AboutViewModel aboutVM)
         {
             try
@@ -84,7 +82,6 @@ namespace DSAMVVM.MVVM.ViewModel
                 DeptService = deptService;
                 _adService = adService;
                 _searchService = searchService;
-                _linksService = linksService;
                 StatusBar = statusBar;
 
                 _searchService.HistoryChanged += OnHistoryChanged;
@@ -92,7 +89,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
                 _ = InitializeAsync();
 
-                InitializeViewModels(userVMFactory, computerVMFactory, groupVMFactory, aboutVM);
+                InitializeViewModels(userVMFactory, computerVMFactory, groupVMFactory, linksVMFactory, aboutVM);
                 InitializeCommands();
 
                 CurrentView = HomeVM;
@@ -119,6 +116,7 @@ namespace DSAMVVM.MVVM.ViewModel
             Func<UserViewModel> userVMFactory,
             Func<ComputerViewModel> computerVMFactory,
             Func<GroupViewModel> groupVMFactory,
+            Func<LinksViewModel> linksVMFactory,
             AboutViewModel aboutVM)
         {
             HomeVM = new HomeViewModel();
@@ -126,7 +124,7 @@ namespace DSAMVVM.MVVM.ViewModel
             ComputerVM = computerVMFactory();
             GroupVM = groupVMFactory();
             EntraVM = new EntraViewModel();
-            LinksVM = new LinksViewModel(_linksService);
+            LinksVM = linksVMFactory(); // resolved via DI; brings ILinksService + ISettingsService
             AboutVM = aboutVM;
             SettingsVM = new SettingsViewModel();
         }
@@ -168,8 +166,8 @@ namespace DSAMVVM.MVVM.ViewModel
                 return;
             }
 
-            string displayName = target.Value.ToString();
-            string key = $"{target}_Search";
+            var displayName = target.Value.ToString();
+            var key = $"{target}_Search";
 
             UiNotify.Info($"Searching {displayName}...", showStatusBar: true, key: key);
 

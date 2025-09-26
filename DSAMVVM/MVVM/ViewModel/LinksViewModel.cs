@@ -1,5 +1,7 @@
 ﻿using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Utilities;
+using DSAMVVM.MVVM.Model;
+using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.Model.Data;
 
 namespace DSAMVVM.MVVM.ViewModel;
@@ -7,32 +9,53 @@ namespace DSAMVVM.MVVM.ViewModel;
 public class LinksViewModel : ObeservableObject
 {
     private readonly ILinksService _linksService;
+    private readonly ISettingsService _settingsService;
 
-    private List<Link> _commonLinks = [];
+    private AppSettings Settings => App.Settings;
+
+    public LinksViewModel(ILinksService linksService, ISettingsService settingsService)
+    {
+        _linksService = linksService ?? throw new ArgumentNullException(nameof(linksService));
+        _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+        _ = LoadAsync();
+    }
+
+    //Data
+
+    private List<Link> _commonLinks = new();
     public List<Link> CommonLinks
     {
         get => _commonLinks;
-        set { _commonLinks = value; OnPropertyChanged(); }
-    }
-
-    private List<TeamLinkGroup> _teamLinks = [];
-    public List<TeamLinkGroup> TeamLinks
-    {
-        get => _teamLinks;
-        set
+        private set
         {
-            _teamLinks = value;
+            _commonLinks = value ?? new List<Link>();
             OnPropertyChanged();
-            RebuildTeamNames();
-            EnsureDefaultTeam();
         }
     }
 
-    private List<string> _teamNames = [];
+    private List<TeamLinkGroup> _teamLinks = new();
+    public List<TeamLinkGroup> TeamLinks
+    {
+        get => _teamLinks;
+        private set
+        {
+            _teamLinks = value ?? new List<TeamLinkGroup>();
+            OnPropertyChanged();
+            RebuildTeamNames();
+            ChooseInitialTeam();
+            UpdateSelectedTeamLinks();
+        }
+    }
+
+    private List<string> _teamNames = new();
     public List<string> TeamNames
     {
         get => _teamNames;
-        private set { _teamNames = value; OnPropertyChanged(); }
+        private set
+        {
+            _teamNames = value ?? new List<string>();
+            OnPropertyChanged();
+        }
     }
 
     private string? _selectedTeam;
@@ -42,68 +65,152 @@ public class LinksViewModel : ObeservableObject
         set
         {
             if (_selectedTeam == value) return;
+
             _selectedTeam = value;
             OnPropertyChanged();
+
             UpdateSelectedTeamLinks();
+            PersistLastTeam();
         }
     }
 
-    private List<Link> _selectedTeamLinks = [];
+    private List<Link> _selectedTeamLinks = new();
     public List<Link> SelectedTeamLinks
     {
         get => _selectedTeamLinks;
-        private set { _selectedTeamLinks = value; OnPropertyChanged(); }
+        private set
+        {
+            _selectedTeamLinks = value ?? new List<Link>();
+            OnPropertyChanged();
+        }
     }
 
-    public LinksViewModel(ILinksService linksService)
+    //Public hook for settings UI
+    public void ReevaluateSelection()
     {
-        _linksService = linksService;
-        _ = LoadAsync();
+        ChooseInitialTeam();
+        UpdateSelectedTeamLinks();
     }
+
+    //Load & apply
 
     private async Task LoadAsync()
     {
-        var cached = _linksService.GetCachedLinksData();
-        if (cached != null) { Apply(cached); return; }
+        try
+        {
+            var cached = _linksService.GetCachedLinksData();
+            if (cached is not null) Apply(cached);
 
-        var data = await _linksService.LoadLinksDataAsync();
-        if (data != null) Apply(data);
+            var data = await _linksService.LoadLinksDataAsync().ConfigureAwait(false);
+            if (data is not null) Apply(data);
+        }
+        catch (Exception ex)
+        {
+            UiNotify.Warn($"Failed to load links: {ex.Message}");
+        }
     }
 
     private void Apply(LinksData data)
     {
-        CommonLinks = data.CommonLinks ?? [];
-        TeamLinks = data.TeamLinks ?? [];
-        UpdateSelectedTeamLinks();
+        CommonLinks = data?.CommonLinks ?? new List<Link>();
+        TeamLinks = data?.TeamLinks ?? new List<TeamLinkGroup>();
     }
 
     private void RebuildTeamNames()
     {
-        TeamNames = TeamLinks?
-            .Select(t => (t?.Team ?? "").Trim())
+        TeamNames = TeamLinks
+            .Select(t => (t?.Team ?? string.Empty).Trim())
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
-            .ToList() ?? [];
+            .ToList();
     }
 
-    private void EnsureDefaultTeam()
+    // Preference priority:
+    // 1) OverrideEnabled + valid OverrideTeam
+    // 2) OpenLastViewedFirst + valid LastTeam
+    // 3) First team
+    private void ChooseInitialTeam()
     {
-        if (SelectedTeam == null && TeamNames.Count > 0)
+        if (TeamNames.Count == 0)
+        {
+            SelectedTeam = null;
+            return;
+        }
+
+        var prefs = Settings.Ui.Links;
+
+        // 1) Override mode
+        if (prefs.OverrideEnabled)
+        {
+            var ov = (prefs.OverrideTeam ?? string.Empty).Trim();
+            if (!string.IsNullOrEmpty(ov))
+            {
+                var match = TeamNames.FirstOrDefault(n =>
+                    string.Equals(n, ov, StringComparison.OrdinalIgnoreCase));
+                if (!string.IsNullOrEmpty(match))
+                {
+                    SelectedTeam = match;
+                    return;
+                }
+            }
+
+            // If override is active but missing/invalid -> fall through to first
             SelectedTeam = TeamNames[0];
+            return;
+        }
+
+        // 2) Last viewed mode
+        if (prefs.OpenLastViewedFirst)
+        {
+            var last = (prefs.LastTeam ?? string.Empty).Trim();
+            if (!string.IsNullOrEmpty(last))
+            {
+                var match = TeamNames.FirstOrDefault(n =>
+                    string.Equals(n, last, StringComparison.OrdinalIgnoreCase));
+                if (!string.IsNullOrEmpty(match))
+                {
+                    SelectedTeam = match;
+                    return;
+                }
+            }
+
+            // If last viewed is missing/invalid -> fall through to first
+            SelectedTeam = TeamNames[0];
+            return;
+        }
+
+        // 3) Neither mode is enabled -> first team
+        SelectedTeam = TeamNames[0];
     }
 
     private void UpdateSelectedTeamLinks()
     {
         if (string.IsNullOrWhiteSpace(SelectedTeam))
         {
-            SelectedTeamLinks = [];
+            SelectedTeamLinks = new List<Link>();
             return;
         }
 
-        var group = TeamLinks?.FirstOrDefault(g =>
+        var group = TeamLinks.FirstOrDefault(g =>
             string.Equals(g?.Team, SelectedTeam, StringComparison.OrdinalIgnoreCase));
 
-        SelectedTeamLinks = group?.Links ?? [];
+        SelectedTeamLinks = group?.Links ?? new List<Link>();
+    }
+
+    private void PersistLastTeam()
+    {
+        // Always keep the last viewed up to date (useful when user switches to "Last viewed" later)
+        if (!string.IsNullOrWhiteSpace(SelectedTeam) &&
+            TeamNames.Any(n => string.Equals(n, SelectedTeam, StringComparison.OrdinalIgnoreCase)))
+        {
+            Settings.Ui.Links.LastTeam = SelectedTeam;
+        }
+        else
+        {
+            Settings.Ui.Links.LastTeam = null;
+        }
+
+        _settingsService.RequestSave(Settings, Globals.g_SettingsPath);
     }
 }

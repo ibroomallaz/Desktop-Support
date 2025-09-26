@@ -1,4 +1,5 @@
-﻿using DSAMVVM.Core.Enums;
+﻿using System.Text.RegularExpressions;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.MVVM.Model.Schemas;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -10,12 +11,11 @@ namespace DSAMVVM.MVVM.Model.Config
         public SettingsMeta Meta { get; set; } = new();
         public Paths Paths { get; set; } = new();
         public Ui Ui { get; set; } = new();
-        public LoggingSettings Logging { get; set; } = new LoggingSettings();
+        public LoggingSettings Logging { get; set; } = new();
 
         // Call after deserialization
         public void ApplyDefaultsAndClamp()
         {
-            // ensure Meta.LastUpdatedUtc is set when missing
             Meta?.Normalize();
 
             Ui?.Search?.Clamp();
@@ -25,20 +25,25 @@ namespace DSAMVVM.MVVM.Model.Config
             if (Ui?.ViewFontSizes != null &&
                 !ReferenceEquals(Ui.ViewFontSizes.Comparer, StringComparer.OrdinalIgnoreCase))
             {
-                Ui.ViewFontSizes = new Dictionary<string, ViewFontSetting>(Ui.ViewFontSizes, StringComparer.OrdinalIgnoreCase);
+                Ui.ViewFontSizes = new Dictionary<string, ViewFontSetting>(
+                    Ui.ViewFontSizes,
+                    StringComparer.OrdinalIgnoreCase);
             }
 
             if (Ui?.ViewFontSizes != null)
             {
                 foreach (var kvp in Ui.ViewFontSizes)
+                {
                     kvp.Value?.Clamp();
+                }
             }
 
-            // Normalize data locations
+            // New: normalize Links preferences
+            Ui?.Links?.Normalize();
+
             Paths?.DepartmentData?.Normalize();
             Paths?.LinksData?.Normalize();
 
-            // Clamp logging settings
             Logging?.Clamp();
         }
     }
@@ -52,22 +57,28 @@ namespace DSAMVVM.MVVM.Model.Config
 
     public class DataLocation
     {
-        public string Source { get; set; } = "web"; // "web" | "file"
-        public string Uri { get; set; } = "";       // URL or path
-        public string? FallbackFile { get; set; }   // relative to DataDir if not absolute
+        // "web" | "file"
+        public string Source { get; set; } = "web";
+
+        // URL or path
+        public string Uri { get; set; } = string.Empty;
+
+        // Relative to DataDir if not absolute
+        public string? FallbackFile { get; set; }
 
         public void Normalize()
         {
-            // Force Source to "web" or "file" only
             if (!Source.Equals("file", StringComparison.OrdinalIgnoreCase) &&
                 !Source.Equals("web", StringComparison.OrdinalIgnoreCase))
             {
                 Source = "web";
             }
 
-            // Null-safe fields
-            Uri ??= "";
-            if (string.IsNullOrWhiteSpace(FallbackFile)) FallbackFile = null;
+            Uri ??= string.Empty;
+            if (string.IsNullOrWhiteSpace(FallbackFile))
+            {
+                FallbackFile = null;
+            }
         }
     }
 
@@ -76,10 +87,51 @@ namespace DSAMVVM.MVVM.Model.Config
         public FontSettings Font { get; set; } = new();
 
         // Case-insensitive keys so "UserView" and "userview" don't duplicate
-        public Dictionary<string, ViewFontSetting> ViewFontSizes { get; set; }
-            = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, ViewFontSetting> ViewFontSizes { get; set; } =
+            new(StringComparer.OrdinalIgnoreCase);
 
         public SearchSettings Search { get; set; } = new();
+
+        // New: Links preferences
+        public LinksUiSettings Links { get; set; } = new();
+    }
+
+    // New: Links preferences + operational state
+    public sealed class LinksUiSettings
+    {
+        // Preferences
+        public bool OpenLastViewedFirst { get; set; } = true;
+        public bool OverrideEnabled { get; set; } = false;
+        public string? OverrideTeam { get; set; }
+
+        // Operational state used when OpenLastViewedFirst is true
+        public string? LastTeam { get; set; }
+
+        // Trim/collapse whitespace; disable override if team is empty
+        public void Normalize()
+        {
+            OverrideTeam = CleanName(OverrideTeam);
+            LastTeam = CleanName(LastTeam);
+
+            if (OverrideEnabled && string.IsNullOrEmpty(OverrideTeam))
+            {
+                OverrideEnabled = false;
+            }
+        }
+
+        private static readonly Regex s_wsCollapse = new(@"\s+", RegexOptions.Compiled);
+
+        private static string? CleanName(string? s)
+        {
+            if (string.IsNullOrWhiteSpace(s))
+            {
+                return null;
+            }
+
+            var t = s.Trim();
+            t = s_wsCollapse.Replace(t, " ");
+            return t.Length == 0 ? null : t;
+        }
     }
 
     public class FontSettings
@@ -110,8 +162,16 @@ namespace DSAMVVM.MVVM.Model.Config
 
         public static double ClampFontSize(double size)
         {
-            if (size < MinFontSize) return MinFontSize;
-            if (size > MaxFontSize) return MaxFontSize;
+            if (size < MinFontSize)
+            {
+                return MinFontSize;
+            }
+
+            if (size > MaxFontSize)
+            {
+                return MaxFontSize;
+            }
+
             return size;
         }
     }
@@ -119,15 +179,22 @@ namespace DSAMVVM.MVVM.Model.Config
     public class SearchSettings
     {
         public bool UseSavedSearchHistory { get; set; } = true;
-        public int MaxSearchHistory { get; set; } = 10; // default
+        public int MaxSearchHistory { get; set; } = 10;
 
         [JsonIgnore] public const int Min = 5;
         [JsonIgnore] public const int Max = 25;
 
         public void Clamp()
         {
-            if (MaxSearchHistory < Min) MaxSearchHistory = Min;
-            if (MaxSearchHistory > Max) MaxSearchHistory = Max;
+            if (MaxSearchHistory < Min)
+            {
+                MaxSearchHistory = Min;
+            }
+
+            if (MaxSearchHistory > Max)
+            {
+                MaxSearchHistory = Max;
+            }
         }
     }
 
@@ -140,9 +207,15 @@ namespace DSAMVVM.MVVM.Model.Config
 
         public void Clamp()
         {
-            if (RetentionDays < 1) RetentionDays = 1;
+            if (RetentionDays < 1)
+            {
+                RetentionDays = 1;
+            }
+
             if (!Enum.IsDefined(typeof(AppLogLevel), MinimumLevel))
+            {
                 MinimumLevel = AppLogLevel.Warn;
+            }
         }
     }
 }

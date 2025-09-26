@@ -1,47 +1,36 @@
-﻿using DSAMVVM.Core.Enums;
+﻿using System.Windows;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Services;
+using DSAMVVM.Core.Services.AD;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.Services.Status;
-using DSAMVVM.MVVM.ViewModel;
 using DSAMVVM.MVVM.Services.Updates;
+using DSAMVVM.MVVM.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
-using System.IO;
-using System.Windows;
-using DSAMVVM.Core.Services.AD;
 
 namespace DSAMVVM
 {
     public partial class App : Application
     {
         private IServiceProvider? _serviceProvider;
-        private string _settingsPath = string.Empty;
         private AppSettings? _settings;
+        private int _persistOnceFlag;
 
-        // Expose DI for behaviors (e.g., FlowDocBinder)
+        // DI for behaviors (e.g., FlowDocBinder)
         public static IServiceProvider Services { get; private set; } = default!;
 
-        // Expose the live in-memory settings object (used by view buttons, etc.)
+        // Live in-memory settings
         public static AppSettings Settings => ((App)Current)._settings ?? new AppSettings();
-
-        // Persist-once guard
-        private int _persistOnceFlag = 0;
 
         public App()
         {
-            // Last-ditch persistence on unexpected crashes
-            this.DispatcherUnhandledException += (s, e) =>
-            {
-                TryPersistSettingsOnce();
-                // Let default crash dialog show
-            };
-            AppDomain.CurrentDomain.UnhandledException += (_, __) =>
-            {
-                TryPersistSettingsOnce();
-            };
+            // Persist on unhandled exceptions
+            this.DispatcherUnhandledException += (_, __) => TryPersistSettingsOnce();
+            AppDomain.CurrentDomain.UnhandledException += (_, __) => TryPersistSettingsOnce();
         }
 
         protected override async void OnStartup(StartupEventArgs e)
@@ -49,9 +38,9 @@ namespace DSAMVVM
             base.OnStartup(e);
 
             ConfigureServices();
-            Services = _serviceProvider!; // make DI available app-wide
+            Services = _serviceProvider!;
 
-            // Ensure core dirs; if something is wrong, warn but continue
+            // Ensure core dirs (warn but continue on failure)
             if (!Globals.TryEnsureCoreDirs(out var ensureErr) && !string.IsNullOrWhiteSpace(ensureErr))
             {
                 MessageBox.Show(
@@ -61,57 +50,48 @@ namespace DSAMVVM
                     MessageBoxImage.Warning);
             }
 
-            _settingsPath = Path.Combine(Globals.g_AppDir, "settings.json");
-
-            // Initialize facades that need singletons from DI
+            // Initialize UiNotify and logging
             var bus = _serviceProvider!.GetRequiredService<StatusBus>();
             UiNotify.Initialize(bus.Report, bus.RemoveByKey, bus.Clear);
 
             Log.Initialize(_serviceProvider!.GetRequiredService<IAppLogger>(), min: AppLogLevel.Warn);
 
-            // Load settings (service is self-healing; creates/repairs as needed)
+            // Load settings
             var settingsSvc = _serviceProvider!.GetRequiredService<ISettingsService>();
             try
             {
-                _settings = await settingsSvc.LoadAsync(_settingsPath);
+                _settings = await settingsSvc.LoadAsync(Globals.g_SettingsPath).ConfigureAwait(true);
                 _settings.ApplyDefaultsAndClamp();
-
-                // Apply logging prefs (sets retention and enables cleanup)
                 Log.ApplySettings(_settings);
             }
             catch (Exception ex)
             {
-                // Non-fatal: continue with defaults
                 MessageBox.Show(
                     $"Settings could not be fully loaded. Using defaults.\n\nDetails: {ex.Message}",
                     "Settings Warning",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
 
-                // Make sure we still have a usable settings object
                 _settings ??= new AppSettings();
                 _settings.ApplyDefaultsAndClamp();
                 Log.ApplySettings(_settings);
             }
 
-            // Persist on OS logoff/shutdown as well
+            // Persist on OS logoff/shutdown
             this.SessionEnding += App_SessionEnding;
 
-            // Create and show main window
+            // Main window
             var mainVM = _serviceProvider.GetRequiredService<MainViewModel>();
             var mainWindow = new MainWindow { DataContext = mainVM };
             MainWindow = mainWindow;
-
-            // Also persist when the main window closes — gated to run only once
             mainWindow.Closed += (_, __) => TryPersistSettingsOnce();
-
             mainWindow.Show();
 
-            // Run version check in the background
+            // Background version check
             try
             {
                 var versionChecker = _serviceProvider.GetRequiredService<VersionCheckerUI>();
-                await versionChecker.CheckAsync();
+                await versionChecker.CheckAsync().ConfigureAwait(true);
             }
             catch (Exception ex)
             {
@@ -121,39 +101,49 @@ namespace DSAMVVM
 
         protected override void OnExit(ExitEventArgs e)
         {
-            // Flush any debounced saves first, then do a final persisted save (once)
+            // Flush debounced saves then persist once
             try { _serviceProvider?.GetService<ISettingsService>()?.FlushPendingSaves(); } catch { }
             TryPersistSettingsOnce();
 
-            // Flush/close log file
+            // Close log file
             if (_serviceProvider?.GetService<IAppLogger>() is FileLogger fl)
+            {
                 fl.Dispose();
+            }
 
             base.OnExit(e);
         }
 
         private void App_SessionEnding(object? sender, SessionEndingCancelEventArgs e)
         {
-            // Persist on user logoff or shutdown; swallow errors to not block shutdown
             try { TryPersistSettingsOnce(); } catch { }
         }
 
-        // Persist-once wrapper
+        // Persist-once guard
         private void TryPersistSettingsOnce()
         {
-            if (Interlocked.Exchange(ref _persistOnceFlag, 1) == 1) return;
+            if (Interlocked.Exchange(ref _persistOnceFlag, 1) == 1)
+            {
+                return;
+            }
+
             TryPersistSettings();
         }
 
+        // Final settings persist
         private void TryPersistSettings()
         {
             try
             {
-                if (_serviceProvider is null || string.IsNullOrWhiteSpace(_settingsPath) || _settings is null) return;
-                var settingsSvc = _serviceProvider.GetRequiredService<ISettingsService>();
-                settingsSvc.SaveAsync(_settings, _settingsPath).GetAwaiter().GetResult();
+                if (_serviceProvider is null || _settings is null)
+                {
+                    return;
+                }
 
-                // Notify any listeners (e.g., FlowDocBinder) that sizes may have changed
+                var settingsSvc = _serviceProvider.GetRequiredService<ISettingsService>();
+                settingsSvc.SaveAsync(_settings, Globals.g_SettingsPath).GetAwaiter().GetResult();
+
+                // Notify listeners that settings may have changed
                 _serviceProvider.GetService<IOutputTextSettingsProvider>()?.NotifyChanged();
             }
             catch (Exception ex)
@@ -166,10 +156,10 @@ namespace DSAMVVM
         {
             var services = new ServiceCollection();
 
-            // Logging sink (no cleanup until Log.ApplySettings runs)
+            // Logging sink
             services.AddSingleton<IAppLogger>(_ => new FileLogger(Globals.g_LogsDir));
 
-            // Status bus for single-line status bar + UiNotify
+            // Status bus for status bar + UiNotify
             services.AddSingleton<StatusBus>();
 
             // Core shared services
@@ -190,6 +180,7 @@ namespace DSAMVVM
                 new OutputTextSettingsProvider(
                     sp.GetRequiredService<ISettingsService>(),
                     () => _settings ?? new AppSettings()));
+
             services.AddSingleton<IFlowDocService, FlowDocService>();
 
             // ViewModels
@@ -200,16 +191,16 @@ namespace DSAMVVM
             services.AddTransient<LinksViewModel>();
             services.AddSingleton<AboutViewModel>();
 
-            // ViewModel factories for MainViewModel constructor
+            // ViewModel factories for MainViewModel
             services.AddTransient<Func<UserViewModel>>(sp => () => sp.GetRequiredService<UserViewModel>());
             services.AddTransient<Func<GroupViewModel>>(sp => () => sp.GetRequiredService<GroupViewModel>());
             services.AddTransient<Func<ComputerViewModel>>(sp => () => sp.GetRequiredService<ComputerViewModel>());
+            services.AddTransient<Func<LinksViewModel>>(sp => () => sp.GetRequiredService<LinksViewModel>());
 
             // Utilities
             services.AddTransient<VersionCheckerUI>();
 
             _serviceProvider = services.BuildServiceProvider();
         }
-
     }
 }
