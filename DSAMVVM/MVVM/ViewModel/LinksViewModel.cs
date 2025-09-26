@@ -71,8 +71,10 @@ public class LinksViewModel : ObeservableObject
         set
         {
             if (_selectedTeam == value) return;
+
             _selectedTeam = value;
             OnPropertyChanged();
+
             UpdateSelectedTeamLinks();
             PersistLastTeam();
         }
@@ -92,6 +94,8 @@ public class LinksViewModel : ObeservableObject
         ChooseInitialTeam();
         UpdateSelectedTeamLinks();
     }
+
+    //Load & apply
 
     private async Task LoadAsync()
     {

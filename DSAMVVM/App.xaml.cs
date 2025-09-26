@@ -113,10 +113,15 @@ namespace DSAMVVM
 
         private void TryPersistSettingsOnce()
         {
-            if (Interlocked.Exchange(ref _persistOnceFlag, 1) == 1) return;
+            if (Interlocked.Exchange(ref _persistOnceFlag, 1) == 1)
+            {
+                return;
+            }
+
             TryPersistSettings();
         }
 
+        // Final settings persist
         private void TryPersistSettings()
         {
             try
