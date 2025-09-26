@@ -1,7 +1,5 @@
 ﻿using DSAMVVM.Core.Utilities;
-using System;
 using System.IO;
-using System.Reflection;
 
 namespace DSAMVVM.MVVM.Model
 {
@@ -31,6 +29,10 @@ namespace DSAMVVM.MVVM.Model
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                          "UArizona", "DesktopSupportApp");
         public static readonly string g_DataDir = Path.Combine(g_AppDir, "data");
+
+        // Settings file (local)
+        public const string g_SettingsFileName = "settings.json";
+        public static readonly string g_SettingsPath = Path.Combine(g_AppDir, g_SettingsFileName);
 
         // Backup/cache files (local)
         public static readonly string g_DepartmentCachePath = Path.Combine(g_DataDir, "departments.json");

@@ -36,7 +36,11 @@
     </UserControl.Resources>
 
     <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="5,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Padding="5,0"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center">
             <StackPanel Margin="10,5,0,20" Orientation="Horizontal">
 
                 <!-- Common Links -->
@@ -54,7 +58,8 @@
                             Background="{DynamicResource Brush.Card.Alternate}"
                             BorderBrush="{DynamicResource Brush.Card.Border.Alternate}"
                             HorizontalAlignment="Center">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
                             <ItemsControl ItemsSource="{Binding CommonLinks}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
@@ -66,13 +71,31 @@
                                                    ToolTipService.ShowDuration="120000">
                                             <TextBlock.ToolTip>
                                                 <StackPanel MaxWidth="360">
-                                                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+                                                    <!-- Description if present -->
+                                                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap"/>
                                                 </StackPanel>
                                             </TextBlock.ToolTip>
+
+                                            <!-- Robust bindings: Title|Name and Url|URL|Uri|Href -->
                                             <Hyperlink Style="{StaticResource InlineLinkStyle}"
-                                                       NavigateUri="{Binding URL}"
                                                        RequestNavigate="Hyperlink_RequestNavigate">
-                                                <Run Text="{Binding Name}"/>
+                                                <Hyperlink.NavigateUri>
+                                                    <PriorityBinding>
+                                                        <Binding Path="Url"/>
+                                                        <Binding Path="URL"/>
+                                                        <Binding Path="Uri"/>
+                                                        <Binding Path="Href"/>
+                                                    </PriorityBinding>
+                                                </Hyperlink.NavigateUri>
+                                                <Run>
+                                                    <Run.Text>
+                                                        <PriorityBinding>
+                                                            <Binding Path="Title"/>
+                                                            <Binding Path="Name"/>
+                                                            <Binding Path="DisplayName"/>
+                                                        </PriorityBinding>
+                                                    </Run.Text>
+                                                </Run>
                                             </Hyperlink>
                                         </TextBlock>
                                     </DataTemplate>
@@ -107,7 +130,8 @@
                             VerticalAlignment="Center"
                             Background="{DynamicResource Brush.Card.Alternate}"
                             BorderBrush="{DynamicResource Brush.Card.Border.Alternate}">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
                             <ItemsControl ItemsSource="{Binding SelectedTeamLinks}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
@@ -119,13 +143,30 @@
                                                    ToolTipService.ShowDuration="120000">
                                             <TextBlock.ToolTip>
                                                 <StackPanel MaxWidth="360">
-                                                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+                                                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap"/>
                                                 </StackPanel>
                                             </TextBlock.ToolTip>
+
+                                            <!-- Robust bindings: Title|Name and Url|URL|Uri|Href -->
                                             <Hyperlink Style="{StaticResource InlineLinkStyle}"
-                                                       NavigateUri="{Binding URL}"
                                                        RequestNavigate="Hyperlink_RequestNavigate">
-                                                <Run Text="{Binding Name}"/>
+                                                <Hyperlink.NavigateUri>
+                                                    <PriorityBinding>
+                                                        <Binding Path="Url"/>
+                                                        <Binding Path="URL"/>
+                                                        <Binding Path="Uri"/>
+                                                        <Binding Path="Href"/>
+                                                    </PriorityBinding>
+                                                </Hyperlink.NavigateUri>
+                                                <Run>
+                                                    <Run.Text>
+                                                        <PriorityBinding>
+                                                            <Binding Path="Title"/>
+                                                            <Binding Path="Name"/>
+                                                            <Binding Path="DisplayName"/>
+                                                        </PriorityBinding>
+                                                    </Run.Text>
+                                                </Run>
                                             </Hyperlink>
                                         </TextBlock>
                                     </DataTemplate>

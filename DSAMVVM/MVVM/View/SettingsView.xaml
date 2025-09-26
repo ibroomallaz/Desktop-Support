@@ -3,16 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:app="clr-namespace:DSAMVVM"
              mc:Ignorable="d">
 
     <UserControl.Resources>
         <ResourceDictionary>
             <!-- Local helpers; global themed brushes come from App.xaml -->
             <SolidColorBrush x:Key="TextPrimBrush" Color="{DynamicResource Color.Text.Primary}"/>
+
             <Style x:Key="FieldLabel" TargetType="TextBlock">
                 <Setter Property="VerticalAlignment" Value="Center"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimBrush}"/>
             </Style>
+
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
             <!-- Label formatters for int-based ComboBoxes -->
@@ -237,6 +240,85 @@
                     </Grid>
                 </Border>
 
+                <!-- === LINKS CARD (RADIO MODE + DROPDOWN) === -->
+                <Border Padding="0" CornerRadius="12" Margin="0,0,0,16"
+                        Background="{StaticResource Brush.Surface.Hover}"
+                        BorderBrush="{StaticResource Brush.Border}" BorderThickness="1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="6"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left accent -->
+                        <Border Grid.Column="0"
+                                Background="{DynamicResource Brush.Accent}"
+                                CornerRadius="12,0,0,12"/>
+
+                        <StackPanel Grid.Column="1" Margin="16">
+                            <TextBlock Text="Links" FontSize="16" FontWeight="Bold"
+                                       Foreground="{StaticResource TextPrimBrush}" Margin="0,0,0,12"/>
+
+                            <!-- Mode selection: radio group -->
+                            <StackPanel Margin="0,0,0,8">
+                                <RadioButton x:Name="RB_LastViewed"
+                                             GroupName="LinksStartMode"
+                                             Content="Start with last viewed team"
+                                             Foreground="{StaticResource TextPrimBrush}"
+                                             IsChecked="{Binding Source={x:Static app:App.Settings}, Path=Ui.Links.OpenLastViewedFirst, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Checked="LinksMode_LastViewed_Checked"/>
+
+                                <RadioButton x:Name="RB_Override"
+                                             GroupName="LinksStartMode"
+                                             Content="Start with a specific team"
+                                             Foreground="{StaticResource TextPrimBrush}"
+                                             Margin="0,6,0,0"
+                                             IsChecked="{Binding Source={x:Static app:App.Settings}, Path=Ui.Links.OverrideEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Checked="LinksMode_Override_Checked"/>
+                            </StackPanel>
+
+                            <!-- Override team dropdown (visible only when Override is selected) -->
+                            <Grid Margin="0,0,0,8"
+      Visibility="{Binding Source={x:Static app:App.Settings}, Path=Ui.Links.OverrideEnabled, Converter={StaticResource BoolToVis}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <!-- Change from * to Auto so the dropdown doesn't stretch -->
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="Override team" Style="{StaticResource FieldLabel}"/>
+
+                                <ComboBox Grid.Column="2"
+                                          Style="{DynamicResource Combo.Links.Dropdown}"
+                                          Width="220"                  
+                                          Height="28"
+                                          HorizontalAlignment="Left"
+                                          Foreground="{StaticResource TextPrimBrush}"
+                                          ItemsSource="{Binding DataContext.LinksVM.TeamNames, RelativeSource={RelativeSource AncestorType=Window}}"
+                                          SelectedItem="{Binding Source={x:Static app:App.Settings}, Path=Ui.Links.OverrideTeam, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          IsSynchronizedWithCurrentItem="False">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       ToolTip="{Binding}"
+                                                       Foreground="{StaticResource TextPrimBrush}"
+                                                       FontSize="12"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </Grid>
+
+
+                            <!-- Description: now uses primary brush -->
+                            <TextBlock Text="Choose how the Links view selects its initial team. If Override is selected and the team exists, it opens to that team; otherwise it can open the last viewed team."
+                                       Foreground="{StaticResource TextPrimBrush}"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
                 <!-- === LOGS CARD === -->
                 <Border Padding="0" CornerRadius="12" Margin="0,0,0,16"
                         Background="{StaticResource Brush.Surface.Hover}"
@@ -372,7 +454,7 @@
 
                     <TextBlock Text="Changes are not saved until you click Apply."
                                VerticalAlignment="Center"
-                               Foreground="{DynamicResource Brush.Text.Primary}"/>
+                               Foreground="{StaticResource Brush.Text.Primary}"/>
 
                     <Button x:Name="BtnApply" Grid.Column="1"
                             Style="{DynamicResource Button.Rounded}"
