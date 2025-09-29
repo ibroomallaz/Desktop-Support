@@ -32,26 +32,26 @@ namespace DSAMVVM.MVVM.View
             }
         }
 
-        // --------- Existing size handlers (safe placeholders) ---------
+        // --------- size handlers ---------
 
         private void InitialSizeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Keep if you have extra logic; otherwise, persistence flows through Apply
+           
         }
 
         private void GeneralSizeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            // Keep if you have extra logic; otherwise, persistence flows through Apply
+           
         }
 
         private void UsePerViewCheck_Changed(object sender, RoutedEventArgs e)
         {
-            // Keep if you have extra logic; otherwise, persistence flows through Apply
+            
         }
 
         private void PerViewSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            // Keep if you have extra logic; otherwise, persistence flows through Apply
+            
         }
 
         // --------- Links mode radio group ---------

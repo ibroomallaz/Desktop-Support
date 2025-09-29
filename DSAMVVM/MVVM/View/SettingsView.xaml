@@ -312,7 +312,7 @@
 
 
                             <!-- Description: now uses primary brush -->
-                            <TextBlock Text="Choose how the Links view selects its initial team. If Override is selected and the team exists, it opens to that team; otherwise it can open the last viewed team."
+                            <TextBlock Text="Choose how Links opens. If ‘Start with a specific team’ is selected and that team exists, Links opens to it; otherwise it opens to your last viewed team"
                                        Foreground="{StaticResource TextPrimBrush}"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
