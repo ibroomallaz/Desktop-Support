@@ -43,6 +43,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -237,15 +245,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Desktop Support App"
-        "ProductCode" = "8:{3379B27B-CA79-4F73-8A62-0AF176EB8581}"
-        "PackageCode" = "8:{3D811A8C-7320-4F69-9BCA-E7F3DE76E4E5}"
+        "ProductCode" = "8:{F6818068-B186-4376-AB2F-6B1D2E0DF04E}"
+        "PackageCode" = "8:{3E72541C-6365-4E81-B199-EE6F041ADF26}"
         "UpgradeCode" = "8:{8C75EC73-37A1-4BEF-8ADF-CCF71E46450F}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.0.0"
+        "ProductVersion" = "8:4.0.1010"
         "Manufacturer" = "8:University of Arizona"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/ProjectHome.aspx"
