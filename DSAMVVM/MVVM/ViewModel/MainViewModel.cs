@@ -1,9 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Threading;
 using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -40,13 +42,30 @@ namespace DSAMVVM.MVVM.ViewModel
         public object? CurrentView
         {
             get => _currentView;
+            set { if (_currentView != value) { _currentView = value; OnPropertyChanged(); } }
+        }
+
+        private AppView _selectedView = AppView.Home;
+        public AppView SelectedView
+        {
+            get => _selectedView;
             set
             {
-                if (_currentView != value)
+                if (_selectedView == value) return;
+                _selectedView = value;
+                OnPropertyChanged();
+                CurrentView = value switch
                 {
-                    _currentView = value;
-                    OnPropertyChanged();
-                }
+                    AppView.Home => HomeVM,
+                    AppView.User => UserVM,
+                    AppView.Computer => ComputerVM,
+                    AppView.Group => GroupVM,
+                    AppView.Entra => EntraVM,
+                    AppView.Links => LinksVM,
+                    AppView.Settings => SettingsVM,
+                    AppView.About => AboutVM,
+                    _ => HomeVM
+                };
             }
         }
 
@@ -54,14 +73,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public string? SearchQuery
         {
             get => _searchQuery;
-            set
-            {
-                if (_searchQuery != value)
-                {
-                    _searchQuery = value;
-                    OnPropertyChanged();
-                }
-            }
+            set { if (_searchQuery != value) { _searchQuery = value; OnPropertyChanged(); } }
         }
 
         public ObservableCollection<string> SearchHistory { get; } = [];
@@ -77,27 +89,34 @@ namespace DSAMVVM.MVVM.ViewModel
             Func<LinksViewModel> linksVMFactory,
             AboutViewModel aboutVM)
         {
-            try
-            {
-                DeptService = deptService;
-                _adService = adService;
-                _searchService = searchService;
-                StatusBar = statusBar;
+            DeptService = deptService;
+            _adService = adService;
+            _searchService = searchService;
+            StatusBar = statusBar;
 
-                _searchService.HistoryChanged += OnHistoryChanged;
-                SyncHistoryFromService();
+            _searchService.HistoryChanged += OnHistoryChanged;
+            SyncHistoryFromService();
 
-                _ = InitializeAsync();
+            InitializeViewModels(userVMFactory, computerVMFactory, groupVMFactory, linksVMFactory, aboutVM);
+            InitializeCommands();
+        }
 
-                InitializeViewModels(userVMFactory, computerVMFactory, groupVMFactory, linksVMFactory, aboutVM);
-                InitializeCommands();
+        // Show Home immediately (content renders right away) and then sync the sidebar
+        public void BootstrapInitialView()
+        {
+            CurrentView = HomeVM; // immediate render
 
-                CurrentView = HomeVM;
-            }
-            catch (Exception ex)
-            {
-                UiNotify.Error("Initialization error", ex.Message, ex, alsoStatusBar: true);
-            }
+            var d = Application.Current?.Dispatcher;
+            if (d is not null)
+                d.BeginInvoke(() => SelectedView = AppView.Home, DispatcherPriority.Loaded);
+            else
+                SelectedView = AppView.Home;
+        }
+
+        // Call this after first render to run warmups without delaying startup
+        public void StartWarmup()
+        {
+            _ = InitializeAsync();
         }
 
         private async Task InitializeAsync()
@@ -119,39 +138,36 @@ namespace DSAMVVM.MVVM.ViewModel
             Func<LinksViewModel> linksVMFactory,
             AboutViewModel aboutVM)
         {
-            HomeVM = new HomeViewModel();
+            HomeVM = App.Services.GetRequiredService<HomeViewModel>();
             UserVM = userVMFactory();
             ComputerVM = computerVMFactory();
             GroupVM = groupVMFactory();
             EntraVM = new EntraViewModel();
-            LinksVM = linksVMFactory(); // resolved via DI; brings ILinksService + ISettingsService
+            LinksVM = linksVMFactory();
             AboutVM = aboutVM;
             SettingsVM = new SettingsViewModel();
         }
 
         private void InitializeCommands()
         {
-            HomeViewCommand = new RelayCommand(_ => CurrentView = HomeVM);
-            UserCommand = new RelayCommand(_ => CurrentView = UserVM);
-            ComputerCommand = new RelayCommand(_ => CurrentView = ComputerVM);
-            GroupCommand = new RelayCommand(_ => CurrentView = GroupVM);
-            EntraCommand = new RelayCommand(_ => CurrentView = EntraVM);
-            LinksCommand = new RelayCommand(_ => CurrentView = LinksVM);
-            AboutCommand = new RelayCommand(_ => CurrentView = AboutVM);
-            SettingsCommand = new RelayCommand(_ => CurrentView = SettingsVM);
+            HomeViewCommand = new RelayCommand(_ => SelectedView = AppView.Home);
+            UserCommand = new RelayCommand(_ => SelectedView = AppView.User);
+            ComputerCommand = new RelayCommand(_ => SelectedView = AppView.Computer);
+            GroupCommand = new RelayCommand(_ => SelectedView = AppView.Group);
+            EntraCommand = new RelayCommand(_ => SelectedView = AppView.Entra);
+            LinksCommand = new RelayCommand(_ => SelectedView = AppView.Links);
+            AboutCommand = new RelayCommand(_ => SelectedView = AppView.About);
+            SettingsCommand = new RelayCommand(_ => SelectedView = AppView.Settings);
             ExecuteSearchCommand = new RelayCommand(_ => TriggerSearch());
         }
 
-        private static SearchTarget? ResolveTargetFromView(object view)
+        private static SearchTarget? ResolveTargetFromView(object view) => view switch
         {
-            return view switch
-            {
-                UserViewModel => SearchTarget.User,
-                ComputerViewModel => SearchTarget.Computer,
-                GroupViewModel => SearchTarget.Group,
-                _ => null
-            };
-        }
+            UserViewModel => SearchTarget.User,
+            ComputerViewModel => SearchTarget.Computer,
+            GroupViewModel => SearchTarget.Group,
+            _ => null
+        };
 
         private async void TriggerSearch()
         {
@@ -166,16 +182,13 @@ namespace DSAMVVM.MVVM.ViewModel
                 return;
             }
 
-            var displayName = target.Value.ToString();
             var key = $"{target}_Search";
-
-            UiNotify.Info($"Searching {displayName}...", showStatusBar: true, key: key);
+            UiNotify.Info($"Searching {target}...", showStatusBar: true, key: key);
 
             try
             {
                 var context = new SearchContextDTO(query);
                 await searchable.OnSearchUpdated(context, _searchService, target.Value);
-
                 UiNotify.Success("Search complete.", key: key);
                 SearchQuery = string.Empty;
             }

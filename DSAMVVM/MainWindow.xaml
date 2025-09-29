@@ -6,6 +6,8 @@
         xmlns:local="clr-namespace:DSAMVVM"
         xmlns:viewModel="clr-namespace:DSAMVVM.MVVM.ViewModel"
         xmlns:view="clr-namespace:DSAMVVM.MVVM.View"
+        xmlns:enums="clr-namespace:DSAMVVM.Core.Enums"
+        xmlns:util="clr-namespace:DSAMVVM.Core.Utilities"
         mc:Ignorable="d"
         Height="600" Width="920"
         WindowStyle="None"
@@ -13,6 +15,10 @@
         Background="Transparent"
         AllowsTransparency="True"
         Title="Support App">
+
+    <Window.Resources>
+        <util:EnumEqualsConverter x:Key="EnumEqualsConverter"/>
+    </Window.Resources>
 
     <Border Background="{DynamicResource Brush.Surface}" CornerRadius="20" Padding="0">
         <Border.Effect>
@@ -33,7 +39,6 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Title (draggable area) -->
                 <TextBlock Text="Support App"
                            VerticalAlignment="Center"
                            FontSize="18"
@@ -41,7 +46,6 @@
                            Margin="20,0,0,0"
                            MouseLeftButtonDown="TitleBar_MouseLeftButtonDown" />
 
-                <!-- Window buttons -->
                 <StackPanel Orientation="Horizontal"
                             Grid.Column="1"
                             VerticalAlignment="Center"
@@ -68,32 +72,53 @@
                 <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <RadioButton Content="Home"     GroupName="MainMenu"
-                                     Style="{StaticResource Radio.Menu}" IsChecked="True"
-                                     Command="{Binding HomeViewCommand}" />
+                                     Style="{StaticResource Radio.Menu}"
+                                     Command="{Binding HomeViewCommand}"
+                                     IsChecked="{Binding SelectedView, Mode=TwoWay,
+                                                 Converter={StaticResource EnumEqualsConverter},
+                                                 ConverterParameter={x:Static enums:AppView.Home}}"/>
 
                         <RadioButton Content="User"     GroupName="MainMenu"
                                      Style="{StaticResource Radio.Menu}"
-                                     Command="{Binding UserCommand}" />
+                                     Command="{Binding UserCommand}"
+                                     IsChecked="{Binding SelectedView, Mode=TwoWay,
+                                                 Converter={StaticResource EnumEqualsConverter},
+                                                 ConverterParameter={x:Static enums:AppView.User}}"/>
 
                         <RadioButton Content="Computer" GroupName="MainMenu"
                                      Style="{StaticResource Radio.Menu}"
-                                     Command="{Binding ComputerCommand}" />
+                                     Command="{Binding ComputerCommand}"
+                                     IsChecked="{Binding SelectedView, Mode=TwoWay,
+                                                 Converter={StaticResource EnumEqualsConverter},
+                                                 ConverterParameter={x:Static enums:AppView.Computer}}"/>
 
                         <RadioButton Content="Groups"   GroupName="MainMenu"
                                      Style="{StaticResource Radio.Menu}"
-                                     Command="{Binding GroupCommand}" />
+                                     Command="{Binding GroupCommand}"
+                                     IsChecked="{Binding SelectedView, Mode=TwoWay,
+                                                 Converter={StaticResource EnumEqualsConverter},
+                                                 ConverterParameter={x:Static enums:AppView.Group}}"/>
 
                         <RadioButton Content="Entra"    GroupName="MainMenu"
                                      Style="{StaticResource Radio.Menu}"
-                                     Command="{Binding EntraCommand}" />
+                                     Command="{Binding EntraCommand}"
+                                     IsChecked="{Binding SelectedView, Mode=TwoWay,
+                                                 Converter={StaticResource EnumEqualsConverter},
+                                                 ConverterParameter={x:Static enums:AppView.Entra}}"/>
 
                         <RadioButton Content="Links"    GroupName="MainMenu"
                                      Style="{StaticResource Radio.Menu}"
-                                     Command="{Binding LinksCommand}" />
+                                     Command="{Binding LinksCommand}"
+                                     IsChecked="{Binding SelectedView, Mode=TwoWay,
+                                                 Converter={StaticResource EnumEqualsConverter},
+                                                 ConverterParameter={x:Static enums:AppView.Links}}"/>
 
                         <RadioButton Content="About"    GroupName="MainMenu"
                                      Style="{StaticResource Radio.Menu}"
-                                     Command="{Binding AboutCommand}" />
+                                     Command="{Binding AboutCommand}"
+                                     IsChecked="{Binding SelectedView, Mode=TwoWay,
+                                                 Converter={StaticResource EnumEqualsConverter},
+                                                 ConverterParameter={x:Static enums:AppView.About}}"/>
                     </StackPanel>
                 </ScrollViewer>
 
@@ -102,7 +127,10 @@
                              Content="Settings"
                              Style="{StaticResource Radio.Menu}"
                              Command="{Binding SettingsCommand}"
-                             Margin="0,0,0,10" />
+                             Margin="0,0,0,10"
+                             IsChecked="{Binding SelectedView, Mode=TwoWay,
+                                         Converter={StaticResource EnumEqualsConverter},
+                                         ConverterParameter={x:Static enums:AppView.Settings}}"/>
             </Grid>
 
             <!-- Main content -->
