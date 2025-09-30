@@ -169,7 +169,7 @@ namespace DSAMVVM.Core.Utilities
             try
             {
                 var token = JToken.Parse(json);
-                var root = token as JObject ?? new JObject();
+                var root = token as JObject ?? [];
 
                 // Support either top-level or wrapped {"Version": { ... }}
                 var versionObj = (Find(root, "Version") as JObject) ?? root;

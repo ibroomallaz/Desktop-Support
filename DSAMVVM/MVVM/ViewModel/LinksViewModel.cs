@@ -11,7 +11,7 @@ public class LinksViewModel : ObeservableObject
     private readonly ILinksService _linksService;
     private readonly ISettingsService _settingsService;
 
-    private AppSettings Settings => App.Settings;
+    private static AppSettings Settings => App.Settings;
 
     public LinksViewModel(ILinksService linksService, ISettingsService settingsService)
     {
@@ -22,24 +22,24 @@ public class LinksViewModel : ObeservableObject
 
     //Data
 
-    private List<Link> _commonLinks = new();
+    private List<Link> _commonLinks = [];
     public List<Link> CommonLinks
     {
         get => _commonLinks;
         private set
         {
-            _commonLinks = value ?? new List<Link>();
+            _commonLinks = value ?? [];
             OnPropertyChanged();
         }
     }
 
-    private List<TeamLinkGroup> _teamLinks = new();
+    private List<TeamLinkGroup> _teamLinks = [];
     public List<TeamLinkGroup> TeamLinks
     {
         get => _teamLinks;
         private set
         {
-            _teamLinks = value ?? new List<TeamLinkGroup>();
+            _teamLinks = value ?? [];
             OnPropertyChanged();
             RebuildTeamNames();
             ChooseInitialTeam();
@@ -47,13 +47,13 @@ public class LinksViewModel : ObeservableObject
         }
     }
 
-    private List<string> _teamNames = new();
+    private List<string> _teamNames = [];
     public List<string> TeamNames
     {
         get => _teamNames;
         private set
         {
-            _teamNames = value ?? new List<string>();
+            _teamNames = value ?? [];
             OnPropertyChanged();
         }
     }
@@ -74,13 +74,13 @@ public class LinksViewModel : ObeservableObject
         }
     }
 
-    private List<Link> _selectedTeamLinks = new();
+    private List<Link> _selectedTeamLinks = [];
     public List<Link> SelectedTeamLinks
     {
         get => _selectedTeamLinks;
         private set
         {
-            _selectedTeamLinks = value ?? new List<Link>();
+            _selectedTeamLinks = value ?? [];
             OnPropertyChanged();
         }
     }
@@ -112,18 +112,17 @@ public class LinksViewModel : ObeservableObject
 
     private void Apply(LinksData data)
     {
-        CommonLinks = data?.CommonLinks ?? new List<Link>();
-        TeamLinks = data?.TeamLinks ?? new List<TeamLinkGroup>();
+        CommonLinks = data?.CommonLinks ?? [];
+        TeamLinks = data?.TeamLinks ?? [];
     }
 
     private void RebuildTeamNames()
     {
-        TeamNames = TeamLinks
+        TeamNames = [.. TeamLinks
             .Select(t => (t?.Team ?? string.Empty).Trim())
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
-            .ToList();
+            .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)];
     }
 
     // Preference priority:
@@ -188,14 +187,14 @@ public class LinksViewModel : ObeservableObject
     {
         if (string.IsNullOrWhiteSpace(SelectedTeam))
         {
-            SelectedTeamLinks = new List<Link>();
+            SelectedTeamLinks = [];
             return;
         }
 
         var group = TeamLinks.FirstOrDefault(g =>
             string.Equals(g?.Team, SelectedTeam, StringComparison.OrdinalIgnoreCase));
 
-        SelectedTeamLinks = group?.Links ?? new List<Link>();
+        SelectedTeamLinks = group?.Links ?? [];
     }
 
     private void PersistLastTeam()

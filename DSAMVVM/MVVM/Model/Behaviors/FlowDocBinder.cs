@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 
-namespace DSAMVVM.MVVM.Behaviors
+namespace DSAMVVM.MVVM.Model.Behaviors
 {
     public static class FlowDocBinder
     {
@@ -99,7 +99,7 @@ namespace DSAMVVM.MVVM.Behaviors
             var current = (IOutputTextSettingsProvider?)viewer.GetValue(SubscribedProviderProperty);
             if (!ReferenceEquals(current, textSettings))
             {
-                void Handler(object? _, System.EventArgs __)
+                void Handler(object? _, EventArgs __)
                 {
                     viewer.Dispatcher.Invoke(() => Rebuild(viewer, flowSvc, forceBottom: false)); // settings change -> preserve pos
                 }

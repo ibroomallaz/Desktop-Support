@@ -72,7 +72,7 @@ namespace DSAMVVM
 
             this.SessionEnding += App_SessionEnding;
 
-            var mainVM = _serviceProvider.GetRequiredService<MainViewModel>();
+            MainViewModel mainVM = _serviceProvider.GetRequiredService<MainViewModel>();
             var mainWindow = new MainWindow { DataContext = mainVM };
             MainWindow = mainWindow;
 
