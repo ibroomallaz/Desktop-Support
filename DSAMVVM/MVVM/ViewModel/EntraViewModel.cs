@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Utilities;
+﻿using DSAMVVM.Core.Utilities;
 
 namespace DSAMVVM.MVVM.ViewModel
 {

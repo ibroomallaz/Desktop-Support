@@ -1,5 +1,4 @@
-﻿
-namespace DSAMVVM.MVVM.Model.AD
+﻿namespace DSAMVVM.MVVM.Model.AD
 {
     public class ADGroupInfo
     {

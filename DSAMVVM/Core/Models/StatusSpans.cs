@@ -1,5 +1,4 @@
-﻿
-namespace DSAMVVM.Core.Models
+﻿namespace DSAMVVM.Core.Models
 {
     public static class StatusSpans
     {

@@ -1,5 +1,4 @@
-﻿
-namespace DSAMVVM.MVVM.Model.Schemas
+﻿namespace DSAMVVM.MVVM.Model.Schemas
 
 {
     public sealed class SettingsMeta : JsonMetaBase
