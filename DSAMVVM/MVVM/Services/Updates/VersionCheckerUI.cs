@@ -1,10 +1,7 @@
-﻿using System;
-using System.Linq;
-using System.Windows;
+﻿using System.Windows;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
-using DSAMVVM.MVVM.Model.Schemas;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.View.Dialogs;
 

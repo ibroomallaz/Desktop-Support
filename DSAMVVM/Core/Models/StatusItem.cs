@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace DSAMVVM.Core.Models
+﻿namespace DSAMVVM.Core.Models
 {
     public enum StatusLevel { Info, Success, Warning, Error }
 

@@ -6,7 +6,6 @@ using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Data;
 using DSAMVVM.MVVM.Model.Schemas;
 using System.Diagnostics;
-using System.Linq;
 
 namespace DSAMVVM.Core.Services
 {

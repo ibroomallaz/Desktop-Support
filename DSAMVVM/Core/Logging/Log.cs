@@ -1,7 +1,6 @@
 ﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.MVVM.Model.Config;
-using System;
 
 namespace DSAMVVM.Core.Logging
 {

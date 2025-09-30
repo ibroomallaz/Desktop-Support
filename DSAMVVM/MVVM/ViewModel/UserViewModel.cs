@@ -5,10 +5,8 @@ using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
-using System;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
