@@ -36,14 +36,14 @@ public class LinksViewModel : ObeservableObject
         private set { _isReloading = value; OnPropertyChanged(); }
     }
 
-    private List<Link> _commonLinks = new();
+    private List<Link> _commonLinks = [];
     public List<Link> CommonLinks
     {
         get => _commonLinks;
         private set { _commonLinks = value ?? new(); OnPropertyChanged(); }
     }
 
-    private List<TeamLinkGroup> _teamLinks = new();
+    private List<TeamLinkGroup> _teamLinks = [];
     public List<TeamLinkGroup> TeamLinks
     {
         get => _teamLinks;
@@ -57,7 +57,7 @@ public class LinksViewModel : ObeservableObject
         }
     }
 
-    private List<string> _teamNames = new();
+    private List<string> _teamNames = [];
     public List<string> TeamNames
     {
         get => _teamNames;
@@ -80,7 +80,7 @@ public class LinksViewModel : ObeservableObject
         }
     }
 
-    private List<Link> _selectedTeamLinks = new();
+    private List<Link> _selectedTeamLinks = [];
     public List<Link> SelectedTeamLinks
     {
         get => _selectedTeamLinks;
@@ -179,12 +179,11 @@ public class LinksViewModel : ObeservableObject
 
     private void RebuildTeamNames()
     {
-        TeamNames = TeamLinks
+        TeamNames = [.. TeamLinks
             .Select(t => (t?.Team ?? string.Empty).Trim())
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
-            .ToList();
+            .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)];
     }
 
     private void ChooseInitialTeam()
