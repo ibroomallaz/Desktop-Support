@@ -8,11 +8,11 @@ namespace DSAMVVM.MVVM.ViewModel
     public sealed class AboutViewModel
     {
         public string AppVersion { get; }
-        public IReadOnlyList<string> Developers { get; } = new[]
-        {
+        public IReadOnlyList<string> Developers { get; } =
+        [
             "Isaac Broomall (ibroomall)",
             "JJ Velasquez (jjvelasquez)"
-        };
+        ];
 
         public ICommand OpenGitHubCommand { get; }
         public ICommand OpenSharePointCommand { get; }
@@ -52,22 +52,22 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        private sealed class RelayCommand : ICommand
+        private sealed class RelayCommand(Action<object?> exec, Func<bool>? can = null) : ICommand
         {
-            private readonly Action<object?> _exec;
-            private readonly Func<bool>? _can;
-            public RelayCommand(Action<object?> exec, Func<bool>? can = null) { _exec = exec; _can = can; }
+            private readonly Action<object?> _exec = exec;
+            private readonly Func<bool>? _can = can;
+
             public bool CanExecute(object? p) => _can?.Invoke() ?? true;
             public void Execute(object? p) => _exec(p);
             public event EventHandler? CanExecuteChanged;
             public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private sealed class AsyncCommand : ICommand
+        private sealed class AsyncCommand(Func<Task> exec, Func<bool>? can = null) : ICommand
         {
-            private readonly Func<Task> _exec;
-            private readonly Func<bool>? _can;
-            public AsyncCommand(Func<Task> exec, Func<bool>? can = null) { _exec = exec; _can = can; }
+            private readonly Func<Task> _exec = exec;
+            private readonly Func<bool>? _can = can;
+
             public bool CanExecute(object? p) => _can?.Invoke() ?? true;
             public async void Execute(object? p) => await _exec();
             public event EventHandler? CanExecuteChanged;

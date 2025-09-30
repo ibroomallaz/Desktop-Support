@@ -73,10 +73,10 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
         }
 
         // Minimal command helper
-        private sealed class RelayCommand : ICommand
+        private sealed class RelayCommand(Predicate<object?> can, Action<object?> run) : ICommand
         {
-            private readonly Predicate<object?> _can; private readonly Action<object?> _run;
-            public RelayCommand(Predicate<object?> can, Action<object?> run) { _can = can; _run = run; }
+            private readonly Predicate<object?> _can = can; private readonly Action<object?> _run = run;
+
             public bool CanExecute(object? p) => _can(p);
             public void Execute(object? p) => _run(p);
             public event EventHandler? CanExecuteChanged { add { } remove { } }
