@@ -157,10 +157,13 @@ namespace DSAMVVM.MVVM.ViewModel
                 if (user.Enabled == false)
                     AppendLabelValue("Enabled: ", "False", treatEmptyAsNone: false);
 
+                if (user.Locked == true)
+                    AppendLabelValue("Locked: ", "True", treatEmptyAsNone: false);
+
                 AppendLabelValue("O365 Licensing: ", user.License, treatEmptyAsNone: false);
 
                 Log.Info("UserView",
-                    $"User found: DisplayName='{user.DisplayName}', Affiliation='{user.EduAffiliation}', Division='{user.Division}', DeptName='{user.DepartmentName}', Enabled={user.Enabled}, License='{user.License}', DeptNum='{user.DepartmentNumber}'");
+                    $"User found: DisplayName='{user.DisplayName}', Affiliation='{user.EduAffiliation}', Division='{user.Division}', DeptName='{user.DepartmentName}', Enabled={user.Enabled}, Locked={(user.Locked.HasValue ? user.Locked.ToString() : "null")}, License='{user.License}', DeptNum='{user.DepartmentNumber}'");
 
                 if (!string.IsNullOrEmpty(user.DepartmentNumber))
                 {
