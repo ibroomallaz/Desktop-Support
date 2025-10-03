@@ -30,11 +30,14 @@ namespace DSAMVVM.Core.Services.AD
                     info.DisplayName = DirectoryUtility.GetString(r, "displayName") ?? "Unknown";
                     info.Enabled = DirectoryUtility.GetEnabledFromUac(r);
 
+                    //quick, informational lockout check (computed bit only)
+                    info.Locked = DirectoryUtility.GetLockedQuick(r);
+
                     var dept = DirectoryUtility.GetString(r, "department")
                                ?? DirectoryUtility.GetString(r, "Department")
                                ?? "None";
                     info.DepartmentName = dept;
-                    info.DepartmentNumber = dept?.Length >= 4 ? dept[..4] : null;
+                    info.DepartmentNumber = dept?.Length >= 4 ? dept[..4] : (string?)null;
 
                     info.EduAffiliation = DirectoryUtility.GetString(r, "eduPersonPrimaryAffiliation") ?? "Unknown";
 
@@ -76,7 +79,6 @@ namespace DSAMVVM.Core.Services.AD
 
         private static string ParseLicense(string license)
         {
-            // matches original semantics; returns human readable classification
             string pattern = "([om]{1}\\d{3})([A-Z]+)([AE]\\d{1})";
             var match = Regex.Match(license, pattern);
             if (match.Success)

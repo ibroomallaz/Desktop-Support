@@ -10,7 +10,7 @@ namespace DSAMVVM.Core.Services.AD
         private static readonly string[] UserProps = [
             "displayName","distinguishedName","userAccountControl",
             "department","Department","eduPersonPrimaryAffiliation","extensionAttribute15",
-            "memberOf"
+            "memberOf","msDS-User-Account-Control-Computed"
         ];
 
         // computer props used by UI and services
@@ -175,6 +175,19 @@ namespace DSAMVVM.Core.Services.AD
             var uac = Convert.ToInt32(r.Properties["userAccountControl"][0]);
             const int ACCOUNTDISABLE = 0x2;
             return (uac & ACCOUNTDISABLE) == 0;
+        }
+
+        // Quick lockout check, checks bit value only, not time-based policies
+        public static bool? GetLockedQuick(SearchResult r)
+        {
+            const int UF_LOCKOUT = 0x0010;
+            if (r.Properties.Contains("msDS-User-Account-Control-Computed") &&
+                r.Properties["msDS-User-Account-Control-Computed"].Count > 0)
+            {
+                var v = Convert.ToInt32(r.Properties["msDS-User-Account-Control-Computed"][0]);
+                return (v & UF_LOCKOUT) == UF_LOCKOUT;
+            }
+            return null;
         }
 
         // ---- internals ----

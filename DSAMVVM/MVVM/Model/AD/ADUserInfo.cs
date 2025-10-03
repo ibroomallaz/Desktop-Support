@@ -13,6 +13,7 @@
 
         public bool Exists { get; set; }
         public bool? Enabled { get; set; }
+        public bool? Locked { get; set; }
         public bool? MimGroupExists { get; set; }
 
         public List<string>? MimGroupsList { get; set; }
