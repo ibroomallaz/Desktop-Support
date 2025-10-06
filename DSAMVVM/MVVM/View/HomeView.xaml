@@ -61,7 +61,7 @@
 
             <!-- Heading -->
             <TextBlock Grid.Row="0"
-                       Text="Welcome"
+                       Text="{Binding Title}"
                        Foreground="{DynamicResource Brush.Text.Primary}"
                        FontSize="24"
                        Margin="0,0,0,8"/>

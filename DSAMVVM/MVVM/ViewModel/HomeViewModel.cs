@@ -15,7 +15,8 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly Action? _goAbout;
 
         // Header
-        public string Title { get; } = "Welcome";
+        public string Title { get; } = $"Welcome, {IdentityUtility.GetFirstName()}";
+
         public string Subtitle { get; } = "Jump into common tasks.";
         public static string AppVersion => $"Version: {Globals.g_AppVersion}";
 
