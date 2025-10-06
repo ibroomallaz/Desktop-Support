@@ -36,14 +36,14 @@ public class LinksViewModel : ObeservableObject
         private set { _isReloading = value; OnPropertyChanged(); }
     }
 
-    private List<Link> _commonLinks = [];
+    private List<Link> _commonLinks = new();
     public List<Link> CommonLinks
     {
         get => _commonLinks;
         private set { _commonLinks = value ?? new(); OnPropertyChanged(); }
     }
 
-    private List<TeamLinkGroup> _teamLinks = [];
+    private List<TeamLinkGroup> _teamLinks = new();
     public List<TeamLinkGroup> TeamLinks
     {
         get => _teamLinks;
@@ -57,7 +57,7 @@ public class LinksViewModel : ObeservableObject
         }
     }
 
-    private List<string> _teamNames = [];
+    private List<string> _teamNames = new();
     public List<string> TeamNames
     {
         get => _teamNames;
@@ -71,16 +71,14 @@ public class LinksViewModel : ObeservableObject
         set
         {
             if (_selectedTeam == value) return;
-
             _selectedTeam = value;
             OnPropertyChanged();
-
             UpdateSelectedTeamLinks();
             PersistLastTeam();
         }
     }
 
-    private List<Link> _selectedTeamLinks = [];
+    private List<Link> _selectedTeamLinks = new();
     public List<Link> SelectedTeamLinks
     {
         get => _selectedTeamLinks;
@@ -94,8 +92,6 @@ public class LinksViewModel : ObeservableObject
         ChooseInitialTeam();
         UpdateSelectedTeamLinks();
     }
-
-    //Load & apply
 
     private async Task LoadAsync()
     {
@@ -179,11 +175,12 @@ public class LinksViewModel : ObeservableObject
 
     private void RebuildTeamNames()
     {
-        TeamNames = [.. TeamLinks
+        TeamNames = TeamLinks
             .Select(t => (t?.Team ?? string.Empty).Trim())
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)];
+            .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     private void ChooseInitialTeam()
