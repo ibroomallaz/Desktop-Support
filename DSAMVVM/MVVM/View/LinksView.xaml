@@ -36,6 +36,7 @@
     </UserControl.Resources>
 
     <Grid>
+        <!-- Main content -->
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
                       Padding="5,0"
@@ -178,5 +179,25 @@
 
             </StackPanel>
         </ScrollViewer>
+
+        <!-- Bottom-right Reload button (overlay) -->
+        <Button Content="Reload Links"
+                Command="{Binding ReloadLinksCommand}"
+                ToolTip="Force refresh links data"
+                MinHeight="28"
+                Padding="10,4"
+                Margin="12"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom">
+            <Button.Style>
+                <Style TargetType="Button" BasedOn="{StaticResource Button.Rounded}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsReloading}" Value="True">
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
     </Grid>
 </UserControl>
