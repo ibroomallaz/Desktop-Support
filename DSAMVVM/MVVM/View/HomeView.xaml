@@ -82,10 +82,12 @@
                                FontSize="22" FontWeight="SemiBold"
                                Margin="0,2,0,6"
                                TextTrimming="CharacterEllipsis"/>
-                    <TextBlock Text="Use the header search to jump quickly."
+                    <!-- subtext can go here-->
+                    <TextBlock Text=""
                                Foreground="{DynamicResource Brush.Text.OnAccent}"
                                FontSize="13"/>
-                    <TextBlock Text="News can display here."
+                    <!-- news can display here -->
+                    <TextBlock Text=""
                                Foreground="{DynamicResource Brush.Text.OnAccent}"
                                FontSize="13" Margin="0,2,0,0"/>
                 </StackPanel>

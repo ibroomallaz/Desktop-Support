@@ -43,6 +43,13 @@ namespace DSAMVVM.MVVM.ViewModel
             private set { _isLoading = value; OnPropertyChanged(nameof(IsLoading)); }
         }
 
+        private bool _isRefreshing;
+        public bool IsRefreshing
+        {
+            get => _isRefreshing;
+            private set { _isRefreshing = value; OnPropertyChanged(nameof(IsRefreshing)); }
+        }
+
         private string _searchLog = string.Empty;
         public string SearchLog
         {
@@ -93,7 +100,7 @@ namespace DSAMVVM.MVVM.ViewModel
             AppendRaw($"[cyan]{label}[/cyan][red]{finalValue}[/red]");
         }
 
-        // Search entry point for this view
+        // Search entry point
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
             Error = null;
@@ -213,11 +220,52 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
+        // Refresh department JSON: status bar + view log + app log
+        public async Task RefreshDepartmentDataAsync()
+        {
+            const string StatusKey = "DeptRefresh";
+            if (IsRefreshing)
+            {
+                AppendRaw("[cyan]Busy: department refresh already in progress.[/cyan]");
+                return;
+            }
+
+            IsRefreshing = true;
+            var sw = Stopwatch.StartNew();
+
+            try
+            {
+                AppendRaw("[green]Refreshing department data…[/green]");
+                UiNotify.Info("Refreshing department data…", showStatusBar: true, key: StatusKey);
+                Log.Info("UserView", "Department refresh started.");
+
+                await _deptService.ReloadDataAsync();
+
+                sw.Stop();
+                var msg = $"Department data refresh completed in {sw.ElapsedMilliseconds} ms.";
+                AppendRaw($"[green]{msg}[/green]");
+                UiNotify.Info(msg, showStatusBar: true, key: StatusKey);
+                Log.Info("UserView", msg);
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                var em = $"Department data refresh failed: {ex.Message}";
+                AppendRaw($"[red]{em}[/red]");
+                UiNotify.Error("Department data refresh failed", ex.Message, alsoStatusBar: true, key: StatusKey);
+                Log.Error("UserView", em, ex);
+            }
+            finally
+            {
+                IsRefreshing = false;
+            }
+        }
+
         public Task<string?> LookupNameByID(string id) => _adService.LookupNameByEmployeeID(id);
 
         public void ClearLog() => SearchLog = string.Empty;
 
-        // Font control actions; respects per-view override setting
+        // Font controls
         public void AdjustFont(int delta)
         {
             var s = App.Settings;

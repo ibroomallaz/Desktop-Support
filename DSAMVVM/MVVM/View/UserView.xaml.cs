@@ -92,5 +92,11 @@ namespace DSAMVVM.MVVM.View
         private void IncreaseFont_Click(object sender, RoutedEventArgs e) => _vm?.AdjustFont(+1);
         private void DecreaseFont_Click(object sender, RoutedEventArgs e) => _vm?.AdjustFont(-1);
         private void ResetFont_Click(object sender, RoutedEventArgs e) => _vm?.ResetFont();
+
+        private async void RefreshDept_Click(object sender, RoutedEventArgs e)
+        {
+            if (_vm != null)
+                await _vm.RefreshDepartmentDataAsync();
+        }
     }
 }
