@@ -100,6 +100,45 @@ namespace DSAMVVM.MVVM.ViewModel
             AppendRaw($"[cyan]{label}[/cyan][red]{finalValue}[/red]");
         }
 
+        // -> Labeled link helper (File Repository, etc.)
+        private void AppendLabeledLink(string labelPrefix, string labelText, string pathOrUrl)
+        {
+            if (string.IsNullOrWhiteSpace(pathOrUrl))
+            {
+                AppendRaw($"[cyan]{labelPrefix}[/cyan][red]None[/red]");
+                return;
+            }
+
+            string linkTarget;
+
+            // Accept http/https/file absolute URIs (including UNC as file://)
+            if (Uri.TryCreate(pathOrUrl, UriKind.Absolute, out var u))
+            {
+                // If it's an absolute URI, use its AbsoluteUri (covers http, https, file, and UNC strings like \\server\share)
+                linkTarget = u.AbsoluteUri;
+            }
+            else if (pathOrUrl.StartsWith(@"\\") || Path.IsPathRooted(pathOrUrl))
+            {
+                // UNC or rooted path -> file://
+                try
+                {
+                    var fu = new Uri(pathOrUrl, UriKind.Absolute);
+                    linkTarget = fu.AbsoluteUri;
+                }
+                catch
+                {
+                    linkTarget = pathOrUrl; // fallback; FlowDocService will still catch raw http(s)
+                }
+            }
+            else
+            {
+                linkTarget = pathOrUrl;
+            }
+
+            // Cyan label prefix, red clickable label via markdown [label](url)
+            AppendRaw($"[cyan]{labelPrefix}[/cyan][red][{labelText}]({linkTarget})[/red]");
+        }
+
         // Search entry point
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
@@ -188,7 +227,8 @@ namespace DSAMVVM.MVVM.ViewModel
 
                         var repoPath = await _deptService.GetFileRepoPathAsync(dept.Number);
                         if (!string.IsNullOrWhiteSpace(repoPath))
-                            AppendLabelValue("File Repository: ", repoPath, treatEmptyAsNone: false);
+                            AppendLabeledLink("File Repository: ", "Open File Repository", repoPath);
+
 
                         if (!string.IsNullOrEmpty(dept.Notes))
                             AppendLabelValue("Notes: ", dept.Notes, treatEmptyAsNone: false);
@@ -255,6 +295,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 UiNotify.Error("Department data refresh failed", ex.Message, alsoStatusBar: true, key: StatusKey);
                 Log.Error("UserView", em, ex);
             }
+
             finally
             {
                 IsRefreshing = false;
