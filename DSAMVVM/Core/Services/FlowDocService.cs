@@ -6,11 +6,10 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Navigation;
 
 namespace DSAMVVM.Core.Services
 {
-    public sealed class FlowDocService(IOutputTextSettingsProvider textSettings) : IFlowDocService
+    public sealed partial class FlowDocService(IOutputTextSettingsProvider textSettings) : IFlowDocService
     {
         private readonly IOutputTextSettingsProvider _textSettings = textSettings ?? throw new ArgumentNullException(nameof(textSettings));
         private const double DefaultLineHeightRatio = 1.08;
@@ -42,13 +41,10 @@ namespace DSAMVVM.Core.Services
                 ["lightgray"] = FrozenBrush("#B0B3B8")
             };
 
-        private static readonly Regex UrlRegex =
-            new(@"(?:https?|file)://[^\s)\]}>,\""]*[^\s)\]}>,\.\""]",
-                RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex UrlRegex = URLRegex();
 
-        private static readonly Regex MarkdownLinkRegex =
-            new(@"\[(?<label>[^\]]+)\]\((?<url>(?:https?|file)://[^\s)\]}>,\""]*[^\s)\]}>,\.\""])\)",
-                RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        // renamed to avoid clash with the GeneratedRegex method name
+        private static readonly Regex MarkdownLinkPattern = MarkdownLinkRegex();
 
         private static TextDecoration BuildUnderlineForBrush(Brush brush)
         {
@@ -172,7 +168,7 @@ namespace DSAMVVM.Core.Services
 
             while (pos < text.Length)
             {
-                var md = MarkdownLinkRegex.Match(text, pos);
+                var md = MarkdownLinkPattern.Match(text, pos);
                 var raw = UrlRegex.Match(text, pos);
 
                 Match? next = null;
@@ -212,7 +208,7 @@ namespace DSAMVVM.Core.Services
                 }
             }
 
-            return parts.ToArray();
+            return [.. parts];
         }
 
         private static Hyperlink MakeLink(string url, Brush? foreground, string? visibleText = null)
@@ -227,10 +223,9 @@ namespace DSAMVVM.Core.Services
             {
                 NavigateUri = Uri.TryCreate(url, UriKind.Absolute, out var u) ? u : null,
                 ToolTip = url,
-                Foreground = baseTextBrush
+                Foreground = baseTextBrush,
+                TextDecorations = [BuildUnderlineForBrush(baseTextBrush)]
             };
-
-            link.TextDecorations = new TextDecorationCollection { BuildUnderlineForBrush(baseTextBrush) };
 
             link.RequestNavigate += (_, e) =>
             {
@@ -263,5 +258,11 @@ namespace DSAMVVM.Core.Services
 
             return link;
         }
+
+        [GeneratedRegex(@"(?:https?|file)://[^\s)\]}>,\""]*[^\s)\]}>,\.\""]", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
+        private static partial Regex URLRegex();
+
+        [GeneratedRegex(@"\[(?<label>[^\]]+)\]\((?<url>(?:https?|file)://[^\s)\]}>,\""]*[^\s)\]}>,\.\""])\)", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
+        private static partial Regex MarkdownLinkRegex();
     }
 }
