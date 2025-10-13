@@ -124,7 +124,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public void ClearLog() => SearchLog = string.Empty;
 
-        // Search entry point for this view
+        // Search entry point
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService _search, SearchTarget target)
         {
             Error = null;

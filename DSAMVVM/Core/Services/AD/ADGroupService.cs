@@ -53,6 +53,9 @@ namespace DSAMVVM.Core.Services.AD
                     var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                     groups = [.. groups.Where(seen.Add)];
 
+                    // alphabetize for display consistency
+                    groups = [.. groups.OrderBy(g => g, StringComparer.OrdinalIgnoreCase)];
+
                     return new MimLookupResult
                     {
                         Exists = true,
@@ -113,6 +116,9 @@ namespace DSAMVVM.Core.Services.AD
                     foreach (var dn in membersDn)
                         if (!string.IsNullOrEmpty(dn)) members.Add(DnToCn(dn)); // CN=Foo,OU=Bar -> Foo
 
+                    // alphabetize members for display consistency
+                    members.Sort(StringComparer.OrdinalIgnoreCase);
+
                     info.Exists = true;
                     info.GroupMembers = members;
                     info.MemberCount = members.Count;
@@ -146,7 +152,6 @@ namespace DSAMVVM.Core.Services.AD
 
         private static string DnToCn(string dn)
         {
-            // DN -> CN
             var i = dn.IndexOf("CN=", StringComparison.OrdinalIgnoreCase);
             if (i < 0) return dn;
             var rest = dn[(i + 3)..];
