@@ -36,20 +36,20 @@ public class LinksViewModel : ObeservableObject
         private set { _isReloading = value; OnPropertyChanged(); }
     }
 
-    private List<Link> _commonLinks = new();
+    private List<Link> _commonLinks = [];
     public List<Link> CommonLinks
     {
         get => _commonLinks;
-        private set { _commonLinks = value ?? new(); OnPropertyChanged(); }
+        private set { _commonLinks = value ?? []; OnPropertyChanged(); }
     }
 
-    private List<TeamLinkGroup> _teamLinks = new();
+    private List<TeamLinkGroup> _teamLinks = [];
     public List<TeamLinkGroup> TeamLinks
     {
         get => _teamLinks;
         private set
         {
-            _teamLinks = value ?? new();
+            _teamLinks = value ?? [];
             OnPropertyChanged();
             RebuildTeamNames();
             ChooseInitialTeam();
@@ -57,11 +57,11 @@ public class LinksViewModel : ObeservableObject
         }
     }
 
-    private List<string> _teamNames = new();
+    private List<string> _teamNames = [];
     public List<string> TeamNames
     {
         get => _teamNames;
-        private set { _teamNames = value ?? new(); OnPropertyChanged(); }
+        private set { _teamNames = value ?? []; OnPropertyChanged(); }
     }
 
     private string? _selectedTeam;
@@ -78,11 +78,11 @@ public class LinksViewModel : ObeservableObject
         }
     }
 
-    private List<Link> _selectedTeamLinks = new();
+    private List<Link> _selectedTeamLinks = [];
     public List<Link> SelectedTeamLinks
     {
         get => _selectedTeamLinks;
-        private set { _selectedTeamLinks = value ?? new(); OnPropertyChanged(); }
+        private set { _selectedTeamLinks = value ?? []; OnPropertyChanged(); }
     }
 
     public ICommand ReloadLinksCommand { get; }
@@ -168,19 +168,18 @@ public class LinksViewModel : ObeservableObject
 
     private void Apply(LinksData data)
     {
-        CommonLinks = data?.CommonLinks ?? new();
-        TeamLinks = data?.TeamLinks ?? new();
+        CommonLinks = data?.CommonLinks ?? [];
+        TeamLinks = data?.TeamLinks ?? [];
         Log.Debug(Tag, $"apply: common={CommonLinks.Count} teams={TeamLinks.Count}");
     }
 
     private void RebuildTeamNames()
     {
-        TeamNames = TeamLinks
+        TeamNames = [.. TeamLinks
             .Select(t => (t?.Team ?? string.Empty).Trim())
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
-            .ToList();
+            .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)];
     }
 
     private void ChooseInitialTeam()
@@ -210,12 +209,12 @@ public class LinksViewModel : ObeservableObject
 
     private void UpdateSelectedTeamLinks()
     {
-        if (string.IsNullOrWhiteSpace(SelectedTeam)) { SelectedTeamLinks = new(); return; }
+        if (string.IsNullOrWhiteSpace(SelectedTeam)) { SelectedTeamLinks = []; return; }
 
         var group = TeamLinks.FirstOrDefault(g =>
             string.Equals(g?.Team, SelectedTeam, StringComparison.OrdinalIgnoreCase));
 
-        SelectedTeamLinks = group?.Links ?? new();
+        SelectedTeamLinks = group?.Links ?? [];
     }
 
     private void PersistLastTeam()
