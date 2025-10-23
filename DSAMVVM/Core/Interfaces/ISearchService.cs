@@ -1,8 +1,5 @@
 ﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace DSAMVVM.Core.Interfaces
 {

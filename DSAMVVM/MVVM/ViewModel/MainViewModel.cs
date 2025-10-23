@@ -6,6 +6,7 @@ using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
 using Microsoft.Extensions.DependencyInjection;
+using DSAMVVM.MVVM.View.Resources;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -38,6 +39,24 @@ namespace DSAMVVM.MVVM.ViewModel
         public RelayCommand ExecuteSearchCommand { get; private set; } = null!;
         public RelayCommand SettingsCommand { get; private set; } = null!;
 
+        // Navigation collection and selection
+        public ObservableCollection<NavItem> NavItems { get; } = new();
+        private NavItem? _selectedNav;
+        public NavItem? SelectedNav
+        {
+            get => _selectedNav;
+            set
+            {
+                if (_selectedNav == value) return;
+                _selectedNav = value;
+                OnPropertyChanged();
+                if (value is null) return;
+                SelectedView = value.View; // keep enum in sync
+                value.Command?.Execute(null);
+            }
+        }
+
+        // Current content view and selected enum
         private object? _currentView;
         public object? CurrentView
         {
@@ -69,15 +88,16 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
+        // Search binding and history
         private string? _searchQuery;
         public string? SearchQuery
         {
             get => _searchQuery;
             set { if (_searchQuery != value) { _searchQuery = value; OnPropertyChanged(); } }
         }
-
         public ObservableCollection<string> SearchHistory { get; } = [];
 
+        // ctor
         public MainViewModel(
             IDepartmentService deptService,
             IADService adService,
@@ -99,21 +119,36 @@ namespace DSAMVVM.MVVM.ViewModel
 
             InitializeViewModels(userVMFactory, computerVMFactory, groupVMFactory, linksVMFactory, aboutVM);
             InitializeCommands();
+            InitializeNavigation();
         }
 
-        // Show Home immediately (content renders right away) and then sync the sidebar
+        // Build nav items for sidebar
+        private void InitializeNavigation()
+        {
+            NavItems.Clear();
+            NavItems.Add(new NavItem { Title = "Home", Glyph = Glyphs.Home, View = AppView.Home, Command = HomeViewCommand });
+            NavItems.Add(new NavItem { Title = "User", Glyph = Glyphs.User, View = AppView.User, Command = UserCommand });
+            NavItems.Add(new NavItem { Title = "Computer", Glyph = Glyphs.Computer, View = AppView.Computer, Command = ComputerCommand });
+            NavItems.Add(new NavItem { Title = "Group", Glyph = Glyphs.Group, View = AppView.Group, Command = GroupCommand });
+            NavItems.Add(new NavItem { Title = "Entra", Glyph = Glyphs.Entra, View = AppView.Entra, Command = EntraCommand });
+            NavItems.Add(new NavItem { Title = "Links", Glyph = Glyphs.Links, View = AppView.Links, Command = LinksCommand });
+            NavItems.Add(new NavItem { Title = "About", Glyph = Glyphs.About, View = AppView.About, Command = AboutCommand });
+            NavItems.Add(new NavItem { Title = "Settings", Glyph = Glyphs.Settings, View = AppView.Settings, Command = SettingsCommand });
+        }
+
+        // initial view bootstrap
         public void BootstrapInitialView()
         {
-            CurrentView = HomeVM; // immediate render
-
+            CurrentView = HomeVM;
             var d = Application.Current?.Dispatcher;
             if (d is not null)
                 d.BeginInvoke(() => SelectedView = AppView.Home, DispatcherPriority.Loaded);
             else
                 SelectedView = AppView.Home;
+            SelectedNav = NavItems.FirstOrDefault(n => n.View == AppView.Home);
         }
 
-        // Call this after first render to run warmups without delaying startup
+        // warmup tasks
         public void StartWarmup()
         {
             _ = InitializeAsync();
@@ -121,16 +156,11 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private async Task InitializeAsync()
         {
-            try
-            {
-                await DeptService.PreCacheDataAsync();
-            }
-            catch (Exception ex)
-            {
-                UiNotify.Warn($"Failed to load department data: {ex.Message}", sticky: true);
-            }
+            try { await DeptService.PreCacheDataAsync(); }
+            catch (Exception ex) { UiNotify.Warn($"Failed to load department data: {ex.Message}", sticky: true); }
         }
 
+        // vm factories
         private void InitializeViewModels(
             Func<UserViewModel> userVMFactory,
             Func<ComputerViewModel> computerVMFactory,
@@ -148,6 +178,7 @@ namespace DSAMVVM.MVVM.ViewModel
             SettingsVM = new SettingsViewModel();
         }
 
+        // command setup
         private void InitializeCommands()
         {
             HomeViewCommand = new RelayCommand(_ => SelectedView = AppView.Home);
@@ -161,6 +192,7 @@ namespace DSAMVVM.MVVM.ViewModel
             ExecuteSearchCommand = new RelayCommand(_ => TriggerSearch());
         }
 
+        // search helpers
         private static SearchTarget? ResolveTargetFromView(object view) => view switch
         {
             UserViewModel => SearchTarget.User,

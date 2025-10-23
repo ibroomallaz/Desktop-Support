@@ -7,8 +7,6 @@ using DSAMVVM.MVVM.Model;
 using System.Diagnostics;
 using System.IO;
 
-
-
 namespace DSAMVVM.MVVM.ViewModel
 {
     public class GroupViewModel : ObeservableObject, ISearchableViewModel, IDisposable
@@ -277,9 +275,22 @@ namespace DSAMVVM.MVVM.ViewModel
             return s;
         }
 
+        // Dispose pattern
+        private bool _disposed;
         public void Dispose()
         {
-            _notifier.Changed -= OnFontSettingsChanged;
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                _notifier.Changed -= OnFontSettingsChanged;
+            }
+            _disposed = true;
         }
     }
 }

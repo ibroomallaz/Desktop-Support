@@ -6,16 +6,14 @@ using System.Net.Http;
 namespace DSAMVVM.Core.Services
 {
     // Shared HTTP utility. HttpClient is reused app-wide.
-    public class HttpService : IHttpService, IDisposable
+    public sealed class HttpService : IHttpService, IDisposable
     {
         private readonly HttpClient _client;
+        private bool _disposed;
 
         public HttpService()
         {
-            // One shared client
             _client = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
-            //User Agent
-            //TODO: proper version detection
             _client.DefaultRequestHeaders.UserAgent.ParseAdd("DesktopSupportApp/4.0");
         }
 
@@ -27,7 +25,6 @@ namespace DSAMVVM.Core.Services
 
         public async Task DownloadFileAsync(string url, string filePath, CancellationToken ct = default)
         {
-            // Ensure target directory exists.
             var dir = Path.GetDirectoryName(filePath);
             if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
 
@@ -36,7 +33,6 @@ namespace DSAMVVM.Core.Services
 
             try
             {
-                // Stream response without buffering entire content.
                 using var resp = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
                 resp.EnsureSuccessStatusCode();
 
@@ -44,7 +40,6 @@ namespace DSAMVVM.Core.Services
                 await using (var dst = new FileStream(tmp, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
                     await src.CopyToAsync(dst, ct);
 
-                // Atomic move: replace if exists, else move into place.
                 if (File.Exists(filePath))
                     File.Replace(tmp, filePath, destinationBackupFileName: null);
                 else
@@ -54,7 +49,6 @@ namespace DSAMVVM.Core.Services
             }
             catch
             {
-                // Clean up temp on failure.
                 if (File.Exists(tmp)) File.Delete(tmp);
                 throw;
             }
@@ -68,7 +62,6 @@ namespace DSAMVVM.Core.Services
         {
             try
             {
-                // UseShellExecute = true lets Windows choose the default handler.
                 Process.Start(new ProcessStartInfo { FileName = target, UseShellExecute = true });
                 error = null;
                 return true;
@@ -80,6 +73,21 @@ namespace DSAMVVM.Core.Services
             }
         }
 
-        public void Dispose() => _client.Dispose();
+        // Dispose pattern for a sealed type
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                _client.Dispose();
+            }
+            _disposed = true;
+        }
     }
 }

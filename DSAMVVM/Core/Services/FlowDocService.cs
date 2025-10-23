@@ -15,7 +15,7 @@ namespace DSAMVVM.Core.Services
         private const double DefaultLineHeightRatio = 1.08;
         private const string DefaultPlaceholder = "Type in information in the search bar above and press enter to search";
 
-        private static readonly IReadOnlyDictionary<string, string> PlaceholderByView = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        private static readonly Dictionary<string, string> PlaceholderByView = new(StringComparer.OrdinalIgnoreCase)
         {
             ["UserView"] = "Enter a NetID above, then press Enter to search.",
             ["ComputerView"] = "Enter a computer name above, then press Enter to search.",
@@ -30,8 +30,8 @@ namespace DSAMVVM.Core.Services
             return b;
         }
 
-        private static readonly IReadOnlyDictionary<string, Brush> DefaultColors =
-            new Dictionary<string, Brush>(StringComparer.OrdinalIgnoreCase)
+        private static readonly Dictionary<string, Brush> DefaultColors =
+            new(StringComparer.OrdinalIgnoreCase)
             {
                 ["red"] = FrozenBrush("#E57373"),
                 ["green"] = FrozenBrush("#66BB6A"),
@@ -43,7 +43,6 @@ namespace DSAMVVM.Core.Services
 
         private static readonly Regex UrlRegex = URLRegex();
 
-        // renamed to avoid clash with the GeneratedRegex method name
         private static readonly Regex MarkdownLinkPattern = MarkdownLinkRegex();
 
         private static TextDecoration BuildUnderlineForBrush(Brush brush)
@@ -74,7 +73,7 @@ namespace DSAMVVM.Core.Services
             var doc = new FlowDocument
             {
                 Foreground = Brushes.White,
-                Background = (Brush)new BrushConverter().ConvertFrom("#181818"),
+                Background = FrozenBrush("#181818"),
                 PagePadding = new Thickness(10, 10, 0, 0),
                 ColumnWidth = double.PositiveInfinity,
                 FontSize = fs
@@ -217,7 +216,10 @@ namespace DSAMVVM.Core.Services
             var run = new Run(display);
             if (foreground != null) run.Foreground = foreground;
 
-            var baseTextBrush = foreground ?? (Brush)(Application.Current?.Resources["Brush.Text"] ?? Brushes.White);
+            //avoid casting object? to Brush directly to satisfy nullable analysis
+            var baseTextBrush = foreground
+                ?? (Application.Current?.Resources["Brush.Text"] as Brush)
+                ?? Brushes.White;
 
             var link = new Hyperlink(run)
             {

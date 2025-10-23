@@ -100,7 +100,6 @@ namespace DSAMVVM.MVVM.ViewModel
             AppendRaw($"[cyan]{label}[/cyan][red]{finalValue}[/red]");
         }
 
-        // -> Labeled link helper (File Repository, etc.)
         private void AppendLabeledLink(string labelPrefix, string labelText, string pathOrUrl)
         {
             if (string.IsNullOrWhiteSpace(pathOrUrl))
@@ -111,15 +110,12 @@ namespace DSAMVVM.MVVM.ViewModel
 
             string linkTarget;
 
-            // Accept http/https/file absolute URIs (including UNC as file://)
             if (Uri.TryCreate(pathOrUrl, UriKind.Absolute, out var u))
             {
-                // If it's an absolute URI, use its AbsoluteUri (covers http, https, file, and UNC strings like \\server\share)
                 linkTarget = u.AbsoluteUri;
             }
             else if (pathOrUrl.StartsWith(@"\\") || Path.IsPathRooted(pathOrUrl))
             {
-                // UNC or rooted path -> file://
                 try
                 {
                     var fu = new Uri(pathOrUrl, UriKind.Absolute);
@@ -127,7 +123,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 }
                 catch
                 {
-                    linkTarget = pathOrUrl; // fallback; FlowDocService will still catch raw http(s)
+                    linkTarget = pathOrUrl;
                 }
             }
             else
@@ -135,7 +131,6 @@ namespace DSAMVVM.MVVM.ViewModel
                 linkTarget = pathOrUrl;
             }
 
-            // Cyan label prefix, red clickable label via markdown [label](url)
             AppendRaw($"[cyan]{labelPrefix}[/cyan][red][{labelText}]({linkTarget})[/red]");
         }
 
@@ -229,7 +224,6 @@ namespace DSAMVVM.MVVM.ViewModel
                         if (!string.IsNullOrWhiteSpace(repoPath))
                             AppendLabeledLink("File Repository: ", "Open File Repository", repoPath);
 
-
                         if (!string.IsNullOrEmpty(dept.Notes))
                             AppendLabelValue("Notes: ", dept.Notes, treatEmptyAsNone: false);
 
@@ -293,9 +287,8 @@ namespace DSAMVVM.MVVM.ViewModel
                 var em = $"Department data refresh failed: {ex.Message}";
                 AppendRaw($"[red]{em}[/red]");
                 UiNotify.Error("Department data refresh failed", ex.Message, alsoStatusBar: true, key: StatusKey);
-                Log.Error("UserView", em, ex);
+                Log.Error("UserView", "Department refresh failed", ex);
             }
-
             finally
             {
                 IsRefreshing = false;
@@ -327,9 +320,22 @@ namespace DSAMVVM.MVVM.ViewModel
             _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
         }
 
+        // Dispose pattern
+        private bool _disposed;
         public void Dispose()
         {
-            _notifier.Changed -= OnFontSettingsChanged;
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                _notifier.Changed -= OnFontSettingsChanged;
+            }
+            _disposed = true;
         }
     }
 }

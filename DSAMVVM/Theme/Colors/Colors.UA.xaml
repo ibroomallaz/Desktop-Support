@@ -40,7 +40,7 @@
 
     <!-- Control neutral -->
     <Color x:Key="Color.Control.Normal">#A9A9A9</Color>
-    
+
     <!-- Alternate Card colors -->
     <Color x:Key="Color.Card.Alternate">#3A4B6E</Color>
     <Color x:Key="Color.Card.Border.Alternate">#44536F</Color>
@@ -80,6 +80,18 @@
                      Color="{DynamicResource Color.Card.Alternate}"/>
     <SolidColorBrush x:Key="Brush.Card.Border.Alternate"
                      Color="{DynamicResource Color.Card.Border.Alternate}"/>
-    <!-- Back-compat alias -->
+
+    <!-- ==== Backward-compatibility aliases ==== -->
+    <!-- Accent Copper / Red / Blue -->
+    <SolidColorBrush x:Key="Brush.Accent.Copper" Color="#B87333"/>
+    <SolidColorBrush x:Key="Brush.Accent.Red"    Color="#B11226"/>
+    <SolidColorBrush x:Key="Brush.Accent.Blue"   Color="#001F3F"/>
+
+    <!-- Text Aliases -->
+    <SolidColorBrush x:Key="Brush.Text.Secondary" Color="{DynamicResource Color.Text.Muted}"/>
+    <SolidColorBrush x:Key="Brush.Text.Disabled"  Color="#88FFFFFF"/>
+
+    <!-- Legacy naming -->
     <SolidColorBrush x:Key="MenuTextPrimaryBrush"  Color="{DynamicResource Color.Text.Primary}"/>
+
 </ResourceDictionary>

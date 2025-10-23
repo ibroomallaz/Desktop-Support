@@ -13,25 +13,25 @@ namespace DSAMVVM.MVVM.ViewModel
 {
     public class ComputerViewModel : ObeservableObject, ISearchableViewModel, IDisposable
     {
-        // -> Services
+        // Services
         private readonly IADService _ad;
         private readonly ISettingsService _settingsSvc;
         private readonly IOutputTextSettingsProvider _notifier;
 
         private const string ViewKey = "ComputerView";
 
-        // -> Errors / state
+        // Errors / state
         private string? _error;
         public string? Error { get => _error; private set { _error = value; OnPropertyChanged(nameof(Error)); } }
 
         private bool _isLoading;
         public bool IsLoading { get => _isLoading; private set { _isLoading = value; OnPropertyChanged(nameof(IsLoading)); } }
 
-        // -> FlowDoc text (bound to viewer)
+        // FlowDoc text (bound to viewer)
         private string _searchLog = string.Empty;
         public string SearchLog { get => _searchLog; private set { _searchLog = value; OnPropertyChanged(nameof(SearchLog)); } }
 
-        // -> Effective output font size for this view (the View listens and applies it to FlowDocument)
+        // Effective output font size for this view (the View listens and applies it to FlowDocument)
         private double _effectiveOutputFontSize;
         public double EffectiveOutputFontSize
         {
@@ -39,7 +39,7 @@ namespace DSAMVVM.MVVM.ViewModel
             private set { _effectiveOutputFontSize = value; OnPropertyChanged(nameof(EffectiveOutputFontSize)); }
         }
 
-        // -> Commands
+        // Commands
         public ICommand ClearLogCommand { get; }
         public ICommand IncreaseFontCommand { get; }
         public ICommand DecreaseFontCommand { get; }
@@ -51,13 +51,9 @@ namespace DSAMVVM.MVVM.ViewModel
             _settingsSvc = settingsSvc ?? throw new ArgumentNullException(nameof(settingsSvc));
             _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
 
-            // Init effective size from provider
             RefreshEffectiveFont();
-
-            // Listen for global/per-view changes -> update EffectiveOutputFontSize
             _notifier.Changed += OnOutputFontSettingsChanged;
 
-            // Wire commands
             ClearLogCommand = new RelayCommand(_ => ClearLog());
             IncreaseFontCommand = new RelayCommand(_ => AdjustFont(+1));
             DecreaseFontCommand = new RelayCommand(_ => AdjustFont(-1));
@@ -68,7 +64,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private void RefreshEffectiveFont()
         {
-            // single source of truth -> provider
             EffectiveOutputFontSize = _notifier.GetFontSize(ViewKey);
         }
 
@@ -80,7 +75,7 @@ namespace DSAMVVM.MVVM.ViewModel
             _ = _settingsSvc.AdjustOutputFontSize(s, preferPerView ? ViewKey : null, delta, preferPerView);
             _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
 
-            _notifier.NotifyChanged(); // -> triggers RefreshEffectiveFont via event
+            _notifier.NotifyChanged();
         }
 
         private void ResetFont()
@@ -91,7 +86,7 @@ namespace DSAMVVM.MVVM.ViewModel
             _settingsSvc.ResetOutputFontSize(s, preferPerView ? ViewKey : null, preferPerView, defaultSize: 14);
             _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
 
-            _notifier.NotifyChanged(); // -> triggers RefreshEffectiveFont via event
+            _notifier.NotifyChanged();
         }
 
         // FlowDoc helpers
@@ -118,7 +113,6 @@ namespace DSAMVVM.MVVM.ViewModel
         // Search flow
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
-            // reset per-search state (preserve SearchLog history)
             Error = null;
 
             if (!string.IsNullOrEmpty(SearchLog))
@@ -166,7 +160,6 @@ namespace DSAMVVM.MVVM.ViewModel
                     return;
                 }
 
-                // Write results to FlowDoc
                 AppendRaw(string.Empty);
                 AppendTitle(comp.Name);
 
@@ -205,9 +198,22 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public void ClearLog() => SearchLog = string.Empty;
 
+        // Dispose pattern for non-sealed type
+        private bool _disposed;
         public void Dispose()
         {
-            _notifier.Changed -= OnOutputFontSettingsChanged;
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                _notifier.Changed -= OnOutputFontSettingsChanged;
+            }
+            _disposed = true;
         }
     }
 }

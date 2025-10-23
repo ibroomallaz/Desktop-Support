@@ -8,12 +8,14 @@
         xmlns:view="clr-namespace:DSAMVVM.MVVM.View"
         xmlns:enums="clr-namespace:DSAMVVM.Core.Enums"
         xmlns:util="clr-namespace:DSAMVVM.Core.Utilities"
+        xmlns:res="clr-namespace:DSAMVVM.MVVM.View.Resources"
         mc:Ignorable="d"
         Height="600" Width="920"
         WindowStyle="None"
         ResizeMode="NoResize"
         Background="Transparent"
         AllowsTransparency="True"
+        UseLayoutRounding="True"
         Title="Support App">
 
     <Window.Resources>
@@ -22,21 +24,21 @@
 
     <Border Background="{DynamicResource Brush.Surface}" CornerRadius="20" Padding="0">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.5" />
+            <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.5"/>
         </Border.Effect>
 
         <DockPanel LastChildFill="True">
 
-            <!-- Status Bar -->
+            <!-- Status bar -->
             <view:StatusBarView DockPanel.Dock="Bottom"
                                  DataContext="{Binding StatusBar}"
-                                 Margin="10,0,10,10" />
+                                 Margin="10,0,10,10"/>
 
             <!-- Header -->
             <Grid DockPanel.Dock="Top" Height="40" Background="Transparent">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Text="Support App"
@@ -44,7 +46,7 @@
                            FontSize="18"
                            Foreground="{DynamicResource Brush.Text.Primary}"
                            Margin="20,0,0,0"
-                           MouseLeftButtonDown="TitleBar_MouseLeftButtonDown" />
+                           MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"/>
 
                 <StackPanel Orientation="Horizontal"
                             Grid.Column="1"
@@ -54,93 +56,117 @@
                     <Button Style="{StaticResource Button.Rounded.Small}"
                             Content="—"
                             Click="Minimize_Click"
-                            Margin="0,0,5,0" />
+                            Margin="0,0,5,0"/>
                     <Button Style="{StaticResource Button.Rounded.Small}"
                             Content="X"
-                            Click="Close_Click" />
+                            Click="Close_Click"/>
                 </StackPanel>
             </Grid>
 
             <!-- Sidebar -->
-            <Grid DockPanel.Dock="Left" Width="200" Background="Transparent" Margin="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+            <Border DockPanel.Dock="Left"
+                    Width="200"
+                    Background="{DynamicResource Brush.Gradient.Sidebar}"
+                    Padding="0,8,6,8"
+                    SnapsToDevicePixels="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                <!-- Top nav (scrollable) -->
-                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <RadioButton Content="Home"     GroupName="MainMenu"
-                                     Style="{StaticResource Radio.Menu}"
-                                     Command="{Binding HomeViewCommand}"
-                                     IsChecked="{Binding SelectedView, Mode=TwoWay,
-                                                 Converter={StaticResource EnumEqualsConverter},
-                                                 ConverterParameter={x:Static enums:AppView.Home}}"/>
+                    <ScrollViewer Grid.Row="0"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  Margin="0">
+                        <StackPanel Margin="0,0,0,4">
+                            <RadioButton Content="Home"
+                                         Tag="{x:Static res:Glyphs.Home}"
+                                         GroupName="MainMenu"
+                                         Style="{StaticResource Radio.Menu}"
+                                         Command="{Binding HomeViewCommand}"
+                                         IsChecked="{Binding SelectedView, Mode=TwoWay,
+                                                     Converter={StaticResource EnumEqualsConverter},
+                                                     ConverterParameter={x:Static enums:AppView.Home}}"/>
 
-                        <RadioButton Content="User"     GroupName="MainMenu"
-                                     Style="{StaticResource Radio.Menu}"
-                                     Command="{Binding UserCommand}"
-                                     IsChecked="{Binding SelectedView, Mode=TwoWay,
-                                                 Converter={StaticResource EnumEqualsConverter},
-                                                 ConverterParameter={x:Static enums:AppView.User}}"/>
+                            <RadioButton Content="User"
+                                         Tag="{x:Static res:Glyphs.User}"
+                                         GroupName="MainMenu"
+                                         Style="{StaticResource Radio.Menu}"
+                                         Command="{Binding UserCommand}"
+                                         IsChecked="{Binding SelectedView, Mode=TwoWay,
+                                                     Converter={StaticResource EnumEqualsConverter},
+                                                     ConverterParameter={x:Static enums:AppView.User}}"/>
 
-                        <RadioButton Content="Computer" GroupName="MainMenu"
-                                     Style="{StaticResource Radio.Menu}"
-                                     Command="{Binding ComputerCommand}"
-                                     IsChecked="{Binding SelectedView, Mode=TwoWay,
-                                                 Converter={StaticResource EnumEqualsConverter},
-                                                 ConverterParameter={x:Static enums:AppView.Computer}}"/>
+                            <RadioButton Content="Computer"
+                                         Tag="{x:Static res:Glyphs.Computer}"
+                                         GroupName="MainMenu"
+                                         Style="{StaticResource Radio.Menu}"
+                                         Command="{Binding ComputerCommand}"
+                                         IsChecked="{Binding SelectedView, Mode=TwoWay,
+                                                     Converter={StaticResource EnumEqualsConverter},
+                                                     ConverterParameter={x:Static enums:AppView.Computer}}"/>
 
-                        <RadioButton Content="Groups"   GroupName="MainMenu"
-                                     Style="{StaticResource Radio.Menu}"
-                                     Command="{Binding GroupCommand}"
-                                     IsChecked="{Binding SelectedView, Mode=TwoWay,
-                                                 Converter={StaticResource EnumEqualsConverter},
-                                                 ConverterParameter={x:Static enums:AppView.Group}}"/>
+                            <RadioButton Content="Groups"
+                                         Tag="{x:Static res:Glyphs.Group}"
+                                         GroupName="MainMenu"
+                                         Style="{StaticResource Radio.Menu}"
+                                         Command="{Binding GroupCommand}"
+                                         IsChecked="{Binding SelectedView, Mode=TwoWay,
+                                                     Converter={StaticResource EnumEqualsConverter},
+                                                     ConverterParameter={x:Static enums:AppView.Group}}"/>
 
-                        <RadioButton Content="Entra"    GroupName="MainMenu"
-                                     Style="{StaticResource Radio.Menu}"
-                                     Command="{Binding EntraCommand}"
-                                     IsChecked="{Binding SelectedView, Mode=TwoWay,
-                                                 Converter={StaticResource EnumEqualsConverter},
-                                                 ConverterParameter={x:Static enums:AppView.Entra}}"/>
+                            <RadioButton Content="Entra"
+                                         Tag="{x:Static res:Glyphs.Entra}"
+                                         GroupName="MainMenu"
+                                         Style="{StaticResource Radio.Menu}"
+                                         Command="{Binding EntraCommand}"
+                                         IsChecked="{Binding SelectedView, Mode=TwoWay,
+                                                     Converter={StaticResource EnumEqualsConverter},
+                                                     ConverterParameter={x:Static enums:AppView.Entra}}"/>
 
-                        <RadioButton Content="Links"    GroupName="MainMenu"
-                                     Style="{StaticResource Radio.Menu}"
-                                     Command="{Binding LinksCommand}"
-                                     IsChecked="{Binding SelectedView, Mode=TwoWay,
-                                                 Converter={StaticResource EnumEqualsConverter},
-                                                 ConverterParameter={x:Static enums:AppView.Links}}"/>
+                            <RadioButton Content="Links"
+                                         Tag="{x:Static res:Glyphs.Links}"
+                                         GroupName="MainMenu"
+                                         Style="{StaticResource Radio.Menu}"
+                                         Command="{Binding LinksCommand}"
+                                         IsChecked="{Binding SelectedView, Mode=TwoWay,
+                                                     Converter={StaticResource EnumEqualsConverter},
+                                                     ConverterParameter={x:Static enums:AppView.Links}}"/>
 
-                        <RadioButton Content="About"    GroupName="MainMenu"
-                                     Style="{StaticResource Radio.Menu}"
-                                     Command="{Binding AboutCommand}"
-                                     IsChecked="{Binding SelectedView, Mode=TwoWay,
-                                                 Converter={StaticResource EnumEqualsConverter},
-                                                 ConverterParameter={x:Static enums:AppView.About}}"/>
-                    </StackPanel>
-                </ScrollViewer>
+                            <RadioButton Content="About"
+                                         Tag="{x:Static res:Glyphs.About}"
+                                         GroupName="MainMenu"
+                                         Style="{StaticResource Radio.Menu}"
+                                         Command="{Binding AboutCommand}"
+                                         IsChecked="{Binding SelectedView, Mode=TwoWay,
+                                                     Converter={StaticResource EnumEqualsConverter},
+                                                     ConverterParameter={x:Static enums:AppView.About}}"/>
+                        </StackPanel>
+                    </ScrollViewer>
 
-                <!-- Bottom pinned -->
-                <RadioButton Grid.Row="1" GroupName="MainMenu"
-                             Content="Settings"
-                             Style="{StaticResource Radio.Menu}"
-                             Command="{Binding SettingsCommand}"
-                             Margin="0,0,0,10"
-                             IsChecked="{Binding SelectedView, Mode=TwoWay,
-                                         Converter={StaticResource EnumEqualsConverter},
-                                         ConverterParameter={x:Static enums:AppView.Settings}}"/>
-            </Grid>
+                    <RadioButton Grid.Row="1"
+                                 Content="Settings"
+                                 Tag="{x:Static res:Glyphs.Settings}"
+                                 GroupName="MainMenu"
+                                 Style="{StaticResource Radio.Menu}"
+                                 Command="{Binding SettingsCommand}"
+                                 Margin="0,12,0,6"
+                                 IsChecked="{Binding SelectedView, Mode=TwoWay,
+                                             Converter={StaticResource EnumEqualsConverter},
+                                             ConverterParameter={x:Static enums:AppView.Settings}}"/>
+                </Grid>
+            </Border>
+
+            <Border DockPanel.Dock="Left" Width="1" Background="#3A4A60"/>
 
             <!-- Main content -->
             <Grid Margin="10">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- Search Box -->
                 <ComboBox Width="250"
                           Margin="5"
                           VerticalAlignment="Top"
@@ -153,14 +179,15 @@
                           PreviewMouseDown="SearchBox_ShowHistory"
                           PreviewTextInput="SearchBox_PreviewTextInput">
                     <ComboBox.InputBindings>
-                        <KeyBinding Key="Enter" Command="{Binding ExecuteSearchCommand}" />
+                        <KeyBinding Key="Enter" Command="{Binding ExecuteSearchCommand}"/>
                     </ComboBox.InputBindings>
                 </ComboBox>
 
                 <ContentControl Grid.Row="1"
-                                Content="{Binding CurrentView}" />
+                                Content="{Binding CurrentView}"
+                                CacheMode="BitmapCache"
+                                Style="{StaticResource Fx.SlideFadeHost}"/>
             </Grid>
-
         </DockPanel>
     </Border>
 </Window>

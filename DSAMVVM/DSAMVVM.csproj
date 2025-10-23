@@ -7,12 +7,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>False</UseWindowsForms>
-    <ApplicationIcon>img\lilyface.ico</ApplicationIcon>
+    <ApplicationIcon>img\MainIcon.ico</ApplicationIcon>
     <RepositoryUrl>https://github.com/ibroomallaz/Desktop-Support</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <AssemblyVersion>4.0.0</AssemblyVersion>
-    <FileVersion>4.0.1030</FileVersion>
-    <Version>4.0.0-Beta-3</Version>
+    <FileVersion>4.0.1100</FileVersion>
+    <Version>4.0.0</Version>
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Title>Desktop Support App</Title>
@@ -25,11 +25,17 @@
 
   <ItemGroup>
     <None Remove="img\fileicon.png" />
+    <None Remove="img\icons\DSACatOnlyIcon.png" />
+    <None Remove="img\icons\HomeIcon.png" />
+    <None Remove="img\icons\QuickLinksInfo.png" />
+    <None Remove="img\icons\SettingsIcon.png" />
+    <None Remove="img\icons\UserViewIcon.png" />
     <None Remove="MVVM\View\fileicon.png" />
   </ItemGroup>
 
+
   <ItemGroup>
-    <Content Include="img\lilyface.ico" />
+    <Content Include="img\MainIcon.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,6 +45,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="img\MainIcon.ico" />
     <Resource Include="img\fileicon.png" />
+    <Resource Include="img\icons\DSACatOnlyIcon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="MVVM\Model\Schemas\News\" />
   </ItemGroup>
 </Project>

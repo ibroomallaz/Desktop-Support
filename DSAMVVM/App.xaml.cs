@@ -16,7 +16,7 @@ namespace DSAMVVM
 {
     public partial class App : Application
     {
-        private IServiceProvider? _serviceProvider;
+        private IServiceProvider _serviceProvider = null!;
         private AppSettings? _settings;
         private int _persistOnceFlag;
 
@@ -34,7 +34,7 @@ namespace DSAMVVM
             base.OnStartup(e);
 
             ConfigureServices();
-            Services = _serviceProvider!;
+            Services = _serviceProvider;
 
             if (!Globals.TryEnsureCoreDirs(out var ensureErr) && !string.IsNullOrWhiteSpace(ensureErr))
             {
@@ -45,12 +45,12 @@ namespace DSAMVVM
                     MessageBoxImage.Warning);
             }
 
-            var bus = _serviceProvider!.GetRequiredService<StatusBus>();
+            var bus = _serviceProvider.GetRequiredService<StatusBus>();
             UiNotify.Initialize(bus.Report, bus.RemoveByKey, bus.Clear);
 
-            Log.Initialize(_serviceProvider!.GetRequiredService<IAppLogger>(), min: AppLogLevel.Warn);
+            Log.Initialize(_serviceProvider.GetRequiredService<IAppLogger>(), min: AppLogLevel.Warn);
 
-            var settingsSvc = _serviceProvider!.GetRequiredService<ISettingsService>();
+            var settingsSvc = _serviceProvider.GetRequiredService<ISettingsService>();
             try
             {
                 _settings = await settingsSvc.LoadAsync(Globals.g_SettingsPath).ConfigureAwait(true);
@@ -72,7 +72,7 @@ namespace DSAMVVM
 
             this.SessionEnding += App_SessionEnding;
 
-            MainViewModel mainVM = _serviceProvider.GetRequiredService<MainViewModel>();
+            var mainVM = _serviceProvider.GetRequiredService<MainViewModel>();
             var mainWindow = new MainWindow { DataContext = mainVM };
             MainWindow = mainWindow;
 
@@ -95,10 +95,10 @@ namespace DSAMVVM
 
         protected override void OnExit(ExitEventArgs e)
         {
-            try { _serviceProvider?.GetService<ISettingsService>()?.FlushPendingSaves(); } catch { }
+            try { _serviceProvider.GetService<ISettingsService>()?.FlushPendingSaves(); } catch { }
             TryPersistSettingsOnce();
 
-            if (_serviceProvider?.GetService<IAppLogger>() is FileLogger fl)
+            if (_serviceProvider.GetService<IAppLogger>() is FileLogger fl)
             {
                 fl.Dispose();
             }
@@ -121,7 +121,7 @@ namespace DSAMVVM
         {
             try
             {
-                if (_serviceProvider is null || _settings is null) return;
+                if (_settings is null) return;
 
                 var settingsSvc = _serviceProvider.GetRequiredService<ISettingsService>();
                 settingsSvc.SaveAsync(_settings, Globals.g_SettingsPath).GetAwaiter().GetResult();

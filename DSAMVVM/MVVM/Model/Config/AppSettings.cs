@@ -212,7 +212,7 @@ namespace DSAMVVM.MVVM.Model.Config
                 RetentionDays = 1;
             }
 
-            if (!Enum.IsDefined(typeof(AppLogLevel), MinimumLevel))
+            if (!Enum.IsDefined(MinimumLevel))
             {
                 MinimumLevel = AppLogLevel.Warn;
             }
