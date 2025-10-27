@@ -9,6 +9,7 @@
         xmlns:enums="clr-namespace:DSAMVVM.Core.Enums"
         xmlns:util="clr-namespace:DSAMVVM.Core.Utilities"
         xmlns:res="clr-namespace:DSAMVVM.MVVM.View.Resources"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Height="600" Width="920"
         WindowStyle="None"
@@ -19,15 +20,28 @@
         Title="Support App">
 
     <Window.Resources>
-        <util:EnumEqualsConverter x:Key="EnumEqualsConverter"/>
+        <ResourceDictionary>
+            <!-- geometry -->
+            <sys:Double x:Key="AppCornerValue">20</sys:Double>
+            <CornerRadius x:Key="AppCorner.All">20</CornerRadius>
+            <!-- sidebar: round top-right as requested -->
+            <CornerRadius x:Key="AppCorner.Sidebar">20,20,0,20</CornerRadius>
+
+            <util:EnumEqualsConverter x:Key="EnumEqualsConverter"/>
+        </ResourceDictionary>
     </Window.Resources>
 
-    <Border Background="{DynamicResource Brush.Surface}" CornerRadius="20" Padding="0">
+    <!-- Outer shell: blue ramp with soft shadow -->
+    <Border Background="{StaticResource AppGradient.Window.Blue}"
+            CornerRadius="{StaticResource AppCorner.All}"
+            Padding="0"
+            ClipToBounds="True"
+            SnapsToDevicePixels="True">
         <Border.Effect>
             <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.5"/>
         </Border.Effect>
 
-        <DockPanel LastChildFill="True">
+        <DockPanel LastChildFill="True" UseLayoutRounding="True" SnapsToDevicePixels="True">
 
             <!-- Status bar -->
             <view:StatusBarView DockPanel.Dock="Bottom"
@@ -63,12 +77,16 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Sidebar -->
+            <!-- Sidebar: top-right rounded + single right-edge separator -->
             <Border DockPanel.Dock="Left"
+                    Panel.ZIndex="1"
                     Width="200"
-                    Background="{DynamicResource Brush.Gradient.Sidebar}"
-                    Padding="0,8,6,8"
-                    SnapsToDevicePixels="True">
+                    Background="{StaticResource AppGradient.Sidebar.Background}"
+                    Padding="0,8,0,8"
+                    SnapsToDevicePixels="True"
+                    CornerRadius="{StaticResource AppCorner.Sidebar}"
+                    BorderThickness="0,0,3,0"
+                    BorderBrush="{StaticResource AppGradient.Sidebar.Separator}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -77,8 +95,7 @@
 
                     <ScrollViewer Grid.Row="0"
                                   VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled"
-                                  Margin="0">
+                                  HorizontalScrollBarVisibility="Disabled">
                         <StackPanel Margin="0,0,0,4">
                             <RadioButton Content="Home"
                                          Tag="{x:Static res:Glyphs.Home}"
@@ -158,7 +175,7 @@
                 </Grid>
             </Border>
 
-            <Border DockPanel.Dock="Left" Width="1" Background="#3A4A60"/>
+            <!-- NOTE: separator Border removed to eliminate the second line -->
 
             <!-- Main content -->
             <Grid Margin="10">

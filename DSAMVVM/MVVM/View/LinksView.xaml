@@ -7,36 +7,80 @@
              d:DesignHeight="450"
              d:DesignWidth="800">
 
+    <!-- resources -->
     <UserControl.Resources>
+
+        <!-- link hover (local safe defaults + alias) -->
+        <SolidColorBrush x:Key="Brush.Links.LinkHover.UARed"  Color="#FF8C1D40"/>
+        <SolidColorBrush x:Key="Brush.Links.LinkHover.Indigo" Color="#FF7FA0FF"/>
+        <StaticResource x:Key="Brush.Links.LinkHover" ResourceKey="Brush.Links.LinkHover.UARed"/>
+
         <TextDecorationCollection x:Key="Underline.Hover">
             <TextDecoration Location="Underline">
                 <TextDecoration.Pen>
-                    <Pen Brush="{DynamicResource Brush.Accent}" Thickness="1.25"/>
+                    <Pen Brush="{StaticResource Brush.Links.LinkHover}" Thickness="1.25"/>
                 </TextDecoration.Pen>
                 <TextDecoration.PenThicknessUnit>FontRecommended</TextDecoration.PenThicknessUnit>
             </TextDecoration>
         </TextDecorationCollection>
 
         <Style x:Key="InlineLinkStyle" TargetType="Hyperlink">
-            <Setter Property="Foreground"      Value="{DynamicResource MenuTextPrimaryBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource MenuTextPrimaryBrush}"/>
             <Setter Property="TextDecorations" Value="{x:Null}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground"      Value="{DynamicResource Brush.Accent}"/>
+                    <Setter Property="Foreground" Value="{StaticResource Brush.Links.LinkHover}"/>
                     <Setter Property="TextDecorations" Value="{StaticResource Underline.Hover}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
         <DataTemplate x:Key="TeamNameTemplate">
-            <TextBlock Text="{Binding}"
-                       TextTrimming="CharacterEllipsis"
-                       ToolTip="{Binding}"/>
+            <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" ToolTip="{Binding}"/>
         </DataTemplate>
+
+        <!-- links card container using your new gradients -->
+        <CornerRadius x:Key="Links.Card.Radius.Inner">10</CornerRadius>
+        <CornerRadius x:Key="Links.Card.Radius.Outer">12</CornerRadius>
+
+        <Style x:Key="LinksCard" TargetType="ContentControl">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContentControl">
+                        <Grid>
+                            <!-- outer rim -->
+                            <Border CornerRadius="{StaticResource Links.Card.Radius.Outer}"
+                                    Background="Transparent"
+                                    BorderBrush="{DynamicResource BorderGradient.Links.Rim}"
+                                    BorderThickness="1.25"/>
+
+                            <!-- inner card -->
+                            <Border x:Name="Card"
+                                    CornerRadius="{StaticResource Links.Card.Radius.Inner}"
+                                    Background="{DynamicResource CardGradient.Links.Surface}"
+                                    BorderBrush="{DynamicResource Brush.Links.Card.Border}"
+                                    BorderThickness="1">
+                                <ContentPresenter/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <!-- hover lift -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Card"
+                                        Property="Background"
+                                        Value="{DynamicResource CardGradient.Links.Surface.Hover}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </UserControl.Resources>
 
+    <!-- layout -->
     <Grid>
-        <!-- Main content -->
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
                       Padding="5,0"
@@ -44,7 +88,7 @@
                       VerticalAlignment="Center">
             <StackPanel Margin="10,5,0,20" Orientation="Horizontal">
 
-                <!-- Common Links -->
+                <!-- common links -->
                 <StackPanel Margin="10" Orientation="Vertical">
                     <Label Content="Common Links"
                            FontSize="20"
@@ -52,13 +96,9 @@
                            Foreground="{DynamicResource MenuTextPrimaryBrush}"
                            HorizontalAlignment="Center"/>
 
-                    <Border Width="300"
-                            Height="250"
-                            CornerRadius="10"
-                            VerticalAlignment="Top"
-                            Background="{DynamicResource Brush.Card.Alternate}"
-                            BorderBrush="{DynamicResource Brush.Card.Border.Alternate}"
-                            HorizontalAlignment="Center">
+                    <ContentControl Style="{StaticResource LinksCard}"
+                                    Width="300" Height="250"
+                                    HorizontalAlignment="Center">
                         <ScrollViewer VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled">
                             <ItemsControl ItemsSource="{Binding CommonLinks}">
@@ -72,12 +112,9 @@
                                                    ToolTipService.ShowDuration="120000">
                                             <TextBlock.ToolTip>
                                                 <StackPanel MaxWidth="360">
-                                                    <!-- Description if present -->
                                                     <TextBlock Text="{Binding Description}" TextWrapping="Wrap"/>
                                                 </StackPanel>
                                             </TextBlock.ToolTip>
-
-                                            <!-- Robust bindings: Title|Name and Url|URL|Uri|Href -->
                                             <Hyperlink Style="{StaticResource InlineLinkStyle}"
                                                        RequestNavigate="Hyperlink_RequestNavigate">
                                                 <Hyperlink.NavigateUri>
@@ -103,10 +140,10 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
-                    </Border>
+                    </ContentControl>
                 </StackPanel>
 
-                <!-- Team Links -->
+                <!-- team links -->
                 <StackPanel Margin="10" Orientation="Vertical">
                     <Label Content="Team Links"
                            FontSize="20"
@@ -124,13 +161,9 @@
                               IsSynchronizedWithCurrentItem="False"
                               ItemTemplate="{StaticResource TeamNameTemplate}"/>
 
-                    <Border Width="300"
-                            Height="215"
-                            CornerRadius="10"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Background="{DynamicResource Brush.Card.Alternate}"
-                            BorderBrush="{DynamicResource Brush.Card.Border.Alternate}">
+                    <ContentControl Style="{StaticResource LinksCard}"
+                                    Width="300" Height="215"
+                                    HorizontalAlignment="Center">
                         <ScrollViewer VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled">
                             <ItemsControl ItemsSource="{Binding SelectedTeamLinks}">
@@ -147,8 +180,6 @@
                                                     <TextBlock Text="{Binding Description}" TextWrapping="Wrap"/>
                                                 </StackPanel>
                                             </TextBlock.ToolTip>
-
-                                            <!-- Robust bindings: Title|Name and Url|URL|Uri|Href -->
                                             <Hyperlink Style="{StaticResource InlineLinkStyle}"
                                                        RequestNavigate="Hyperlink_RequestNavigate">
                                                 <Hyperlink.NavigateUri>
@@ -174,13 +205,13 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
-                    </Border>
+                    </ContentControl>
                 </StackPanel>
 
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Bottom-right Reload button (overlay) -->
+        <!-- reload -->
         <Button Content="Reload Links"
                 Command="{Binding ReloadLinksCommand}"
                 ToolTip="Force refresh links data"

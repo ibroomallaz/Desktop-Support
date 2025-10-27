@@ -2,53 +2,75 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Style x:Key="ComboBox.Search" TargetType="{x:Type ComboBox}">
-        <Setter Property="Foreground" Value="#CFCFCF" />
-        <Setter Property="Background" Value="#353340" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="IsEditable" Value="True" />
-        <Setter Property="Height" Value="40" />
-        <Setter Property="Width" Value="200" />
-        <Setter Property="Padding" Value="0" />
+        <!-- sizing/behavior -->
+        <Setter Property="IsEditable" Value="True"/>
+        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="MinWidth" Value="200"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+
+        <!-- colors -->
+        <Setter Property="Foreground" Value="#CFCFCF"/>
+        <Setter Property="Background" Value="#353340"/>
 
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ComboBox}">
-                    <Border Background="{TemplateBinding Background}"
-                        CornerRadius="10">
+                    <Border x:Name="Chrome"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="10"
+                            BorderBrush="Transparent"
+                            BorderThickness="1">
                         <Grid>
+                            <!-- Make the whole control clickable to open the list -->
+                            <ToggleButton x:Name="PART_DropDownToggle"
+                                          Background="Transparent"
+                                          BorderThickness="0"
+                                          Focusable="False"
+                                          IsTabStop="False"
+                                          Cursor="Hand"
+                                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+
                             <!-- Placeholder -->
-                            <TextBlock Text="Search"
-                                   Foreground="DarkGray"
-                                   FontSize="11"
-                                   Margin="10,0,0,0"
-                                   VerticalAlignment="Center"
-                                   IsHitTestVisible="False"
-                                   x:Name="Placeholder"
-                                   Visibility="Hidden" />
+                            <TextBlock x:Name="Placeholder"
+                                       Text="Search"
+                                       Foreground="DarkGray"
+                                       FontSize="11"
+                                       Margin="10,0,32,0"
+                                       VerticalAlignment="Center"
+                                       IsHitTestVisible="False"
+                                       Visibility="Collapsed"/>
 
                             <!-- Editable text area -->
-                            <TextBox x:Name="PART_EditableTextBox"
-                                 Background="Transparent"
-                                 BorderThickness="0"
-                                 Foreground="{TemplateBinding Foreground}"
-                                 CaretBrush="White"
-                                 Padding="10,0,0,0"
-                                 VerticalContentAlignment="Center"
-                                 FontSize="12"
-                                 Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <ScrollViewer x:Name="PART_EditableTextBoxSite">
+                                <TextBox x:Name="PART_EditableTextBox"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         Padding="10,0,32,0"
+                                         VerticalContentAlignment="Center"
+                                         FontSize="12"
+                                         CaretBrush="White"
+                                         Foreground="{TemplateBinding Foreground}"
+                                         Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </ScrollViewer>
 
                             <!-- Dropdown popup -->
                             <Popup x:Name="PART_Popup"
-                               Placement="Bottom"
-                               IsOpen="{TemplateBinding IsDropDownOpen}"
-                               AllowsTransparency="True"
-                               Focusable="False"
-                               PopupAnimation="Slide">
-                                <Border Background="#353340"
-                                    CornerRadius="5"
-                                    BorderThickness="0">
-                                    <ScrollViewer>
-                                        <ItemsPresenter />
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Slide"
+                                   StaysOpen="False">
+                                <Border CornerRadius="8"
+                                        BorderThickness="0"
+                                        Background="#353340"
+                                        SnapsToDevicePixels="True"
+                                        Width="{Binding PlacementTarget.ActualWidth, RelativeSource={RelativeSource AncestorType=Popup}}">
+                                    <ScrollViewer MaxHeight="320"
+                                                  HorizontalScrollBarVisibility="Disabled">
+                                        <ItemsPresenter/>
                                     </ScrollViewer>
                                 </Border>
                             </Popup>
@@ -56,13 +78,36 @@
                     </Border>
 
                     <ControlTemplate.Triggers>
-                        <!-- Show placeholder when empty -->
-                        <Trigger SourceName="PART_EditableTextBox" Property="Text" Value="">
-                            <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
+                        <!-- Hover border -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="#30FFFFFF"/>
                         </Trigger>
-                        <!-- Hide placeholder when focused -->
+
+                        <!-- Keyboard focus border -->
                         <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                            <Setter TargetName="Placeholder" Property="Visibility" Value="Hidden" />
+                            <!-- UA accent -->
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="#8C1D40"/>
+                        </Trigger>
+
+                        <!-- Disabled -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="#808080"/>
+                            <Setter TargetName="Chrome" Property="Opacity" Value="0.6"/>
+                            <Setter Property="Cursor" Value="Arrow"/>
+                        </Trigger>
+
+                        <!-- Watermark when empty and no selection -->
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition SourceName="PART_EditableTextBox" Property="Text" Value=""/>
+                                <Condition Property="SelectedIndex" Value="-1"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                        </MultiTrigger>
+
+                        <!-- Hide watermark on focus (extra safety) -->
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter TargetName="Placeholder" Property="Visibility" Value="Collapsed"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

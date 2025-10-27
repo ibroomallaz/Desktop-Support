@@ -1,34 +1,231 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- ACCENT (UA burgundy) — use this for the hero/main card -->
-    <LinearGradientBrush x:Key="CardGradient.Accent" StartPoint="0,0" EndPoint="1,1">
-        <!-- hard-coded to avoid missing-color keys; swap to theme colors later if you like -->
-        <GradientStop Color="#5E1A1F" Offset="0.00"/>
-        <GradientStop Color="#421214" Offset="1.00"/>
+    <!-- accent -->
+    <LinearGradientBrush x:Key="CardGradient.Accent" StartPoint="0,0" EndPoint="1,0.06">
+        <GradientStop Color="#4B0F1E" Offset="0.00"/>
+        <GradientStop Color="#8C1D40" Offset="0.60"/>
+        <GradientStop Color="#B34A63" Offset="1.00"/>
     </LinearGradientBrush>
 
-    <!-- INFO ( old blue “Accent”) -->
+    <!-- info -->
     <LinearGradientBrush x:Key="CardGradient.Info" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Color="{DynamicResource Color.Info.Light}" Offset="0.00"/>
-        <GradientStop Color="{DynamicResource Color.Info}"       Offset="1.00"/>
+        <GradientStop Color="{DynamicResource Color.Info}" Offset="1.00"/>
     </LinearGradientBrush>
 
-    <!-- Mixed surface (gold → blue) -->
-    <LinearGradientBrush x:Key="CardGradient.Surface" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="{DynamicResource Color.Warning}" Offset="0.00"/>
-        <GradientStop Color="{DynamicResource Color.Info}"    Offset="1.00"/>
+    <!-- app backgrounds -->
+    <LinearGradientBrush x:Key="AppGradient.Window.Blue" StartPoint="0.12,0" EndPoint="1.12,0.06">
+        <GradientStop Color="#081427" Offset="0.00"/>
+        <GradientStop Color="#0E1E34" Offset="0.60"/>
+        <GradientStop Color="#13253C" Offset="1.00"/>
     </LinearGradientBrush>
 
-    <!-- Purple -->
-    <LinearGradientBrush x:Key="CardGradient.Purple" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="{DynamicResource Color.Purple}"       Offset="0.00"/>
-        <GradientStop Color="{DynamicResource Color.Purple.Hover}" Offset="1.00"/>
+    <LinearGradientBrush x:Key="AppGradient.Sidebar.Background" StartPoint="0.12,0" EndPoint="1.12,0.06">
+        <GradientStop Color="#081427" Offset="0.00"/>
+        <GradientStop Color="#0E1E34" Offset="0.60"/>
+        <GradientStop Color="#13253C" Offset="1.00"/>
     </LinearGradientBrush>
 
-    <!-- Green -->
-    <LinearGradientBrush x:Key="CardGradient.Success" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="{DynamicResource Color.Success}"       Offset="0.00"/>
-        <GradientStop Color="{DynamicResource Color.Success.Hover}" Offset="1.00"/>
+    <LinearGradientBrush x:Key="AppGradient.Sidebar.Separator" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#00FFFFFF" Offset="0.00"/>
+        <GradientStop Color="#18AFC7FF" Offset="0.50"/>
+        <GradientStop Color="#00FFFFFF" Offset="1.00"/>
+    </LinearGradientBrush>
+
+    <!-- circular variants -->
+    <RadialGradientBrush x:Key="AppGradient.Window.Blue.Circular"
+                         MappingMode="RelativeToBoundingBox"
+                         Center="0.32,0.26"
+                         GradientOrigin="0.24,0.20"
+                         RadiusX="0.62" RadiusY="0.62">
+        <GradientStop Color="#142740" Offset="0.00"/>
+        <GradientStop Color="#0F2138" Offset="0.38"/>
+        <GradientStop Color="#0B1B30" Offset="0.68"/>
+        <GradientStop Color="#071427" Offset="1.00"/>
+    </RadialGradientBrush>
+
+    <RadialGradientBrush x:Key="AppGradient.Sidebar.Background.Circular"
+                         MappingMode="RelativeToBoundingBox"
+                         Center="0.32,0.26"
+                         GradientOrigin="0.24,0.20"
+                         RadiusX="0.62" RadiusY="0.62">
+        <GradientStop Color="#142740" Offset="0.00"/>
+        <GradientStop Color="#0F2138" Offset="0.38"/>
+        <GradientStop Color="#0B1B30" Offset="0.68"/>
+        <GradientStop Color="#071427" Offset="1.00"/>
+    </RadialGradientBrush>
+
+    <RadialGradientBrush x:Key="CardGradient.Accent.Circular"
+                         MappingMode="RelativeToBoundingBox"
+                         Center="0.58,0.40"
+                         GradientOrigin="0.48,0.34"
+                         RadiusX="0.55" RadiusY="0.55">
+        <GradientStop Color="#9E244C" Offset="0.00"/>
+        <GradientStop Color="#7A1A3A" Offset="0.40"/>
+        <GradientStop Color="#531328" Offset="0.72"/>
+        <GradientStop Color="#340B19" Offset="1.00"/>
+    </RadialGradientBrush>
+
+    <!-- overlays -->
+    <RadialGradientBrush x:Key="Overlay.Vignette.Strong"
+                         MappingMode="RelativeToBoundingBox"
+                         Center="0.5,0.5" GradientOrigin="0.5,0.5"
+                         RadiusX="0.88" RadiusY="0.88">
+        <GradientStop Color="#00000000" Offset="0.42"/>
+        <GradientStop Color="#88000000" Offset="1.00"/>
+    </RadialGradientBrush>
+
+    <RadialGradientBrush x:Key="Overlay.Vignette.Soft"
+                         MappingMode="RelativeToBoundingBox"
+                         Center="0.5,0.5" GradientOrigin="0.5,0.5"
+                         RadiusX="0.90" RadiusY="0.90">
+        <GradientStop Color="#00000000" Offset="0.55"/>
+        <GradientStop Color="#44000000" Offset="1.00"/>
+    </RadialGradientBrush>
+
+    <RadialGradientBrush x:Key="Overlay.Highlight.Top"
+                         MappingMode="RelativeToBoundingBox"
+                         Center="0.20,-0.12" GradientOrigin="0.20,-0.12"
+                         RadiusX="0.70" RadiusY="0.70" Opacity="0.18">
+        <GradientStop Color="#FFFFFFFF" Offset="0.00"/>
+        <GradientStop Color="#00FFFFFF" Offset="1.00"/>
+    </RadialGradientBrush>
+
+    <!-- surfaces / cards -->
+    <LinearGradientBrush x:Key="CardGradient.Surface.L1"
+                         StartPoint="0,0" EndPoint="1,0.06"
+                         ColorInterpolationMode="ScRgbLinearInterpolation">
+        <GradientStop Color="#141A22" Offset="0.00"/>
+        <GradientStop Color="#1E252F" Offset="1.00"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="CardGradient.Surface.Hover"
+                         StartPoint="0,0" EndPoint="1,0.06"
+                         ColorInterpolationMode="ScRgbLinearInterpolation">
+        <GradientStop Color="#18202A" Offset="0.00"/>
+        <GradientStop Color="#222A36" Offset="1.00"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="CardGradient.Surface.Pressed"
+                         StartPoint="0,0" EndPoint="1,0.06"
+                         ColorInterpolationMode="ScRgbLinearInterpolation">
+        <GradientStop Color="#8C1D40" Offset="0.00"/>
+        <GradientStop Color="#B66A3A" Offset="1.00"/>
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="Brush.Card.Border" Color="#3A4555"/>
+
+    <LinearGradientBrush x:Key="BorderGradient.AccentEdge"
+                         StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#00FFFFFF" Offset="0.00"/>
+        <GradientStop Color="#18AFC7FF" Offset="0.50"/>
+        <GradientStop Color="#00FFFFFF" Offset="1.00"/>
+    </LinearGradientBrush>
+    <!-- links cards: noticeable grey gradient (cool-neutral) -->
+    <LinearGradientBrush x:Key="CardGradient.Links.Surface"
+                     StartPoint="0,0" EndPoint="1,0.06"
+                     ColorInterpolationMode="ScRgbLinearInterpolation">
+        <GradientStop Color="#2E3843" Offset="0.00"/>
+        <GradientStop Color="#26313A" Offset="0.55"/>
+        <GradientStop Color="#1D252C" Offset="1.00"/>
+    </LinearGradientBrush>
+
+    <!-- links cards: hover (slightly brighter) -->
+    <LinearGradientBrush x:Key="CardGradient.Links.Surface.Hover"
+                     StartPoint="0,0" EndPoint="1,0.06"
+                     ColorInterpolationMode="ScRgbLinearInterpolation">
+        <GradientStop Color="#34414E" Offset="0.00"/>
+        <GradientStop Color="#2B3843" Offset="0.55"/>
+        <GradientStop Color="#222B33" Offset="1.00"/>
+    </LinearGradientBrush>
+
+    <!-- links cards: pressed (keeps grey; adds gentle depth) -->
+    <LinearGradientBrush x:Key="CardGradient.Links.Surface.Pressed"
+                     StartPoint="0,0" EndPoint="1,0.06"
+                     ColorInterpolationMode="ScRgbLinearInterpolation">
+        <GradientStop Color="#29333D" Offset="0.00"/>
+        <GradientStop Color="#222B33" Offset="0.55"/>
+        <GradientStop Color="#1A2127" Offset="1.00"/>
+    </LinearGradientBrush>
+
+    <!-- links cards: thin inner border -->
+    <SolidColorBrush x:Key="Brush.Links.Card.Border" Color="#3A4550"/>
+
+    <!-- links cards: outer rim/outline (light TL → shade BR) -->
+    <LinearGradientBrush x:Key="BorderGradient.Links.Rim"
+                     StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#44FFFFFF" Offset="0.00"/>
+        <GradientStop Color="#00FFFFFF" Offset="0.55"/>
+        <GradientStop Color="#33000000" Offset="1.00"/>
+    </LinearGradientBrush>
+
+
+    <!-- inputs -->
+    <LinearGradientBrush x:Key="InputGradient.Field"
+                         StartPoint="0,0" EndPoint="1,0.06"
+                         ColorInterpolationMode="ScRgbLinearInterpolation">
+        <GradientStop Color="#1A2536" Offset="0.00"/>
+        <GradientStop Color="#1F2C40" Offset="0.70"/>
+        <GradientStop Color="#22314A" Offset="1.00"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="InputGradient.Field.Focused"
+                         StartPoint="0,0" EndPoint="1,0.06"
+                         ColorInterpolationMode="ScRgbLinearInterpolation">
+        <GradientStop Color="#22314A" Offset="0.00"/>
+        <GradientStop Color="#273854" Offset="0.70"/>
+        <GradientStop Color="#2C3E5E" Offset="1.00"/>
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="Input.FocusRing" Color="#66AFC7FF"/>
+    <SolidColorBrush x:Key="Input.Placeholder" Color="#88FFFFFF"/>
+
+    <!-- buttons -->
+    <LinearGradientBrush x:Key="ButtonGradient.Primary"
+                         StartPoint="0,0" EndPoint="1,0.06"
+                         ColorInterpolationMode="ScRgbLinearInterpolation">
+        <GradientStop Color="#4B0F1E" Offset="0.00"/>
+        <GradientStop Color="#8C1D40" Offset="0.60"/>
+        <GradientStop Color="#B34A63" Offset="1.00"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="ButtonGradient.Primary.Hover"
+                         StartPoint="0,0" EndPoint="1,0.06"
+                         ColorInterpolationMode="ScRgbLinearInterpolation">
+        <GradientStop Color="#5A1427" Offset="0.00"/>
+        <GradientStop Color="#9A2348" Offset="0.55"/>
+        <GradientStop Color="#C15772" Offset="1.00"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="ButtonGradient.Neutral"
+                         StartPoint="0,0" EndPoint="1,0.06"
+                         ColorInterpolationMode="ScRgbLinearInterpolation">
+        <GradientStop Color="#1B2A3D" Offset="0.00"/>
+        <GradientStop Color="#1F3148" Offset="0.65"/>
+        <GradientStop Color="#233855" Offset="1.00"/>
+    </LinearGradientBrush>
+    <!-- grey gradient for large button default -->
+    <LinearGradientBrush x:Key="Brush.Gradient.Grey" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#596273" Offset="0.00"/>
+        <GradientStop Color="#3D4758" Offset="0.55"/>
+        <GradientStop Color="#263042" Offset="1.00"/>
+    </LinearGradientBrush>
+    <!-- Hover: UA blue sweep (cool, slightly brighter than inputs) -->
+    <LinearGradientBrush x:Key="Brush.Gradient.Blue"
+                     StartPoint="0,0" EndPoint="1,0.06"
+                     ColorInterpolationMode="ScRgbLinearInterpolation">
+        <GradientStop Color="#37527A" Offset="0.00"/>
+        <GradientStop Color="#2E466C" Offset="0.55"/>
+        <GradientStop Color="#263C5F" Offset="1.00"/>
+    </LinearGradientBrush>
+
+    <!-- Pressed: UA red sweep — match ButtonGradient.Primary -->
+    <LinearGradientBrush x:Key="Brush.Gradient.Red"
+                     StartPoint="0,0" EndPoint="1,0.06"
+                     ColorInterpolationMode="ScRgbLinearInterpolation">
+        <GradientStop Color="#4B0F1E" Offset="0.00"/>
+        <GradientStop Color="#8C1D40" Offset="0.60"/>
+        <GradientStop Color="#B34A63" Offset="1.00"/>
     </LinearGradientBrush>
 </ResourceDictionary>

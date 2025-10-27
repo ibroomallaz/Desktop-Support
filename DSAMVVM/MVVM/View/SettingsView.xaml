@@ -8,19 +8,53 @@
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <!-- Local helpers; global themed brushes come from App.xaml -->
-            <SolidColorBrush x:Key="TextPrimBrush" Color="{DynamicResource Color.Text.Primary}"/>
+            <!-- Match About: same global theme dictionaries -->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Theme/Colors/Colors.UA.xaml"/>
+                <ResourceDictionary Source="/Theme/Decor/Gradient.UA.xaml"/>
+                <ResourceDictionary Source="/Theme/Controls/Button.Rounded.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
+            <!-- Card container style (same pattern used in About) -->
+            <Style x:Key="Card.Container" TargetType="Border">
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Margin" Value="0,0,0,16"/>
+                <Setter Property="Background" Value="{DynamicResource Brush.Surface.Hover}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <!-- Use the same hover background token as About -->
+                        <Setter Property="Background" Value="{DynamicResource CardGradient.Surface.Hover}"/>
+                    </Trigger>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Opacity" Value="0.7"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- Compact rounded button to match About small CTAs -->
+            <Style x:Key="Button.Rounded.Compact" TargetType="Button" BasedOn="{StaticResource Button.Rounded}">
+                <Setter Property="Padding"   Value="8,2"/>
+                <Setter Property="MinHeight" Value="26"/>
+                <Setter Property="Height"    Value="28"/>
+                <Setter Property="MinWidth"  Value="0"/>
+            </Style>
+
+            <!-- Local helpers -->
             <Style x:Key="FieldLabel" TargetType="TextBlock">
                 <Setter Property="VerticalAlignment" Value="Center"/>
-                <Setter Property="Foreground" Value="{StaticResource TextPrimBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}"/>
+                <Setter Property="FontSize" Value="12"/>
             </Style>
 
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
             <!-- Label formatters for int-based ComboBoxes -->
             <DataTemplate x:Key="HistoryItemTemplate">
-                <TextBlock>
+                <TextBlock Foreground="{DynamicResource Brush.Text.Primary}">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Text" Value="{Binding StringFormat={}{0} items}"/>
@@ -38,7 +72,7 @@
             </DataTemplate>
 
             <DataTemplate x:Key="DaysItemTemplate">
-                <TextBlock>
+                <TextBlock Foreground="{DynamicResource Brush.Text.Primary}">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Text" Value="{Binding StringFormat={}{0} days}"/>
@@ -56,7 +90,7 @@
             </DataTemplate>
 
             <DataTemplate x:Key="PtItemTemplate">
-                <TextBlock>
+                <TextBlock Foreground="{DynamicResource Brush.Text.Primary}">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Text" Value="{Binding StringFormat={}{0} pt}"/>
@@ -81,23 +115,21 @@
             <StackPanel Margin="16" Orientation="Vertical">
 
                 <!-- === SEARCH TEXT CARD === -->
-                <Border Padding="0" CornerRadius="12" Margin="0,0,0,16"
-                        Background="{StaticResource Brush.Surface.Hover}"
-                        BorderBrush="{StaticResource Brush.Border}" BorderThickness="1">
+                <Border Style="{StaticResource Card.Container}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="6"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Left accent -->
+                        <!-- Left gradient accent -->
                         <Border Grid.Column="0"
-                                Background="{DynamicResource Brush.Accent}"
+                                Background="{DynamicResource CardGradient.Accent}"
                                 CornerRadius="12,0,0,12"/>
 
                         <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Search text" FontSize="16" FontWeight="Bold"
-                                       Foreground="{StaticResource TextPrimBrush}" Margin="0,0,0,12"/>
+                            <TextBlock Text="Search text" FontSize="16" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
 
                             <!-- Default size at launch -->
                             <Grid Margin="0,0,0,12">
@@ -109,7 +141,6 @@
 
                                 <TextBlock Text="Default search size at launch" Style="{StaticResource FieldLabel}"/>
 
-                                <!-- Bind to InitialFontSizeOptions + DefaultFontSize -->
                                 <ComboBox x:Name="InitialSizeCombo" Grid.Column="2"
                                           Style="{DynamicResource Combo.Links.Dropdown}"
                                           ItemsSource="{Binding InitialFontSizeOptions}"
@@ -131,7 +162,6 @@
 
                                 <TextBlock Text="Default search text size" Style="{StaticResource FieldLabel}"/>
 
-                                <!-- Bind to DefaultFontSize -->
                                 <Slider x:Name="GeneralSizeSlider" Grid.Column="2"
                                         Minimum="8" Maximum="24" TickFrequency="1"
                                         IsSnapToTickEnabled="True"
@@ -145,7 +175,7 @@
 
                             <!-- Per-tab toggle -->
                             <CheckBox x:Name="UsePerViewCheck"
-                                      Foreground="{StaticResource TextPrimBrush}"
+                                      Foreground="{DynamicResource Brush.Text.Primary}"
                                       Content="Enable per-tab search size (override default)"
                                       Margin="0,0,0,8"
                                       IsChecked="{Binding UsePerViewOverride, Mode=TwoWay}"
@@ -156,7 +186,7 @@
                             <StackPanel x:Name="PerViewPanel"
                                         Visibility="{Binding ElementName=UsePerViewCheck, Path=IsChecked, Converter={StaticResource BoolToVis}}">
                                 <TextBlock Text="Per-tab search text sizes" FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimBrush}" Margin="0,0,0,8"/>
+                                           Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,8"/>
 
                                 <UniformGrid Columns="2" Rows="2">
                                     <!-- User -->
@@ -241,37 +271,34 @@
                 </Border>
 
                 <!-- === LINKS CARD (RADIO MODE + DROPDOWN) === -->
-                <Border Padding="0" CornerRadius="12" Margin="0,0,0,16"
-                        Background="{StaticResource Brush.Surface.Hover}"
-                        BorderBrush="{StaticResource Brush.Border}" BorderThickness="1">
+                <Border Style="{StaticResource Card.Container}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="6"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Left accent -->
                         <Border Grid.Column="0"
-                                Background="{DynamicResource Brush.Accent}"
+                                Background="{DynamicResource CardGradient.Accent}"
                                 CornerRadius="12,0,0,12"/>
 
                         <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Links" FontSize="16" FontWeight="Bold"
-                                       Foreground="{StaticResource TextPrimBrush}" Margin="0,0,0,12"/>
+                            <TextBlock Text="Links" FontSize="16" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
 
                             <!-- Mode selection: radio group -->
                             <StackPanel Margin="0,0,0,8">
                                 <RadioButton x:Name="RB_LastViewed"
                                              GroupName="LinksStartMode"
                                              Content="Start with last viewed team"
-                                             Foreground="{StaticResource TextPrimBrush}"
+                                             Foreground="{DynamicResource Brush.Text.Primary}"
                                              IsChecked="{Binding Source={x:Static app:App.Settings}, Path=Ui.Links.OpenLastViewedFirst, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                              Checked="LinksMode_LastViewed_Checked"/>
 
                                 <RadioButton x:Name="RB_Override"
                                              GroupName="LinksStartMode"
                                              Content="Start with a specific team"
-                                             Foreground="{StaticResource TextPrimBrush}"
+                                             Foreground="{DynamicResource Brush.Text.Primary}"
                                              Margin="0,6,0,0"
                                              IsChecked="{Binding Source={x:Static app:App.Settings}, Path=Ui.Links.OverrideEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                              Checked="LinksMode_Override_Checked"/>
@@ -279,11 +306,10 @@
 
                             <!-- Override team dropdown (visible only when Override is selected) -->
                             <Grid Margin="0,0,0,8"
-      Visibility="{Binding Source={x:Static app:App.Settings}, Path=Ui.Links.OverrideEnabled, Converter={StaticResource BoolToVis}}">
+                                  Visibility="{Binding Source={x:Static app:App.Settings}, Path=Ui.Links.OverrideEnabled, Converter={StaticResource BoolToVis}}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="12"/>
-                                    <!-- Change from * to Auto so the dropdown doesn't stretch -->
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
@@ -291,10 +317,10 @@
 
                                 <ComboBox Grid.Column="2"
                                           Style="{DynamicResource Combo.Links.Dropdown}"
-                                          Width="220"                  
+                                          Width="220"                   
                                           Height="28"
                                           HorizontalAlignment="Left"
-                                          Foreground="{StaticResource TextPrimBrush}"
+                                          Foreground="{DynamicResource Brush.Text.Primary}"
                                           ItemsSource="{Binding DataContext.LinksVM.TeamNames, RelativeSource={RelativeSource AncestorType=Window}}"
                                           SelectedItem="{Binding Source={x:Static app:App.Settings}, Path=Ui.Links.OverrideTeam, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                           IsSynchronizedWithCurrentItem="False">
@@ -303,26 +329,22 @@
                                             <TextBlock Text="{Binding}"
                                                        TextTrimming="CharacterEllipsis"
                                                        ToolTip="{Binding}"
-                                                       Foreground="{StaticResource TextPrimBrush}"
+                                                       Foreground="{DynamicResource Brush.Text.Primary}"
                                                        FontSize="12"/>
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
                             </Grid>
 
-
-                            <!-- Description: now uses primary brush -->
                             <TextBlock Text="Choose how Links opens. If ‘Start with a specific team’ is selected and that team exists, Links opens to it; otherwise it opens to your last viewed team"
-                                       Foreground="{StaticResource TextPrimBrush}"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
                     </Grid>
                 </Border>
 
                 <!-- === LOGS CARD === -->
-                <Border Padding="0" CornerRadius="12" Margin="0,0,0,16"
-                        Background="{StaticResource Brush.Surface.Hover}"
-                        BorderBrush="{StaticResource Brush.Border}" BorderThickness="1">
+                <Border Style="{StaticResource Card.Container}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="6"/>
@@ -330,12 +352,12 @@
                         </Grid.ColumnDefinitions>
 
                         <Border Grid.Column="0"
-                                Background="{DynamicResource Brush.Accent}"
+                                Background="{DynamicResource CardGradient.Accent}"
                                 CornerRadius="12,0,0,12"/>
 
                         <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Logs" FontSize="16" FontWeight="Bold"
-                                       Foreground="{StaticResource TextPrimBrush}" Margin="0,0,0,12"/>
+                            <TextBlock Text="Logs" FontSize="16" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
 
                             <!-- Log level -->
                             <Grid Margin="0,0,0,12">
@@ -366,15 +388,15 @@
                                           ItemTemplate="{StaticResource DaysItemTemplate}"/>
                             </Grid>
 
-                            <!-- Action -->
-                            <WrapPanel ItemHeight="32" ItemWidth="220" Orientation="Horizontal">
+                            <WrapPanel Orientation="Horizontal">
                                 <Button x:Name="BtnOpenLogsFolder"
-                                        Style="{DynamicResource Button.Rounded}"
+                                        Style="{StaticResource Button.Rounded.Compact}"
                                         Click="BtnOpenLogsFolder_Click">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <Image Source="pack://application:,,,/img/fileicon.png"
                                                Width="18" Height="18" Margin="0,0,8,0"/>
-                                        <TextBlock Text="Open logs folder"/>
+                                        <TextBlock Text="Open logs folder"
+                                                   Foreground="{DynamicResource Brush.Text.Primary}"/>
                                     </StackPanel>
                                 </Button>
                             </WrapPanel>
@@ -383,9 +405,7 @@
                 </Border>
 
                 <!-- === SEARCH CARD (history) === -->
-                <Border Padding="0" CornerRadius="12" Margin="0,0,0,16"
-                        Background="{StaticResource Brush.Surface.Hover}"
-                        BorderBrush="{StaticResource Brush.Border}" BorderThickness="1">
+                <Border Style="{StaticResource Card.Container}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="6"/>
@@ -393,12 +413,12 @@
                         </Grid.ColumnDefinitions>
 
                         <Border Grid.Column="0"
-                                Background="{DynamicResource Brush.Accent}"
+                                Background="{DynamicResource CardGradient.Accent}"
                                 CornerRadius="12,0,0,12"/>
 
                         <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Search" FontSize="16" FontWeight="Bold"
-                                       Foreground="{StaticResource TextPrimBrush}" Margin="0,0,0,12"/>
+                            <TextBlock Text="Search" FontSize="16" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
 
                             <Grid Margin="0,0,0,12">
                                 <Grid.ColumnDefinitions>
@@ -409,7 +429,6 @@
 
                                 <TextBlock Text="History size" Style="{StaticResource FieldLabel}"/>
 
-                                <!-- Bind to HistorySizeOptions + MaxSearchHistory -->
                                 <ComboBox x:Name="HistorySizeCombo" Grid.Column="2"
                                           Style="{DynamicResource Combo.Links.Dropdown}"
                                           ItemsSource="{Binding HistorySizeOptions}"
@@ -424,28 +443,11 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- FIXED BOTTOM BAR — Outline glow -->
+        <!-- FIXED BOTTOM BAR -->
         <Grid Grid.Row="1" Margin="16,0,16,16">
-            <!-- Glow ring (behind) -->
-            <Border x:Name="GlowRing"
-                    IsHitTestVisible="False"
-                    Background="Transparent"
-                    BorderBrush="{DynamicResource Brush.Accent.Hover}"
-                    BorderThickness="1.25"
-                    CornerRadius="12">
-                <Border.Effect>
-                    <!-- Outer glow that follows your accent color -->
-                    <DropShadowEffect ShadowDepth="0"
-                                      BlurRadius="24"
-                                      Opacity="0.35"
-                                      Color="{Binding BorderBrush.(SolidColorBrush.Color), ElementName=GlowRing}"/>
-                </Border.Effect>
-            </Border>
-
-            <!-- Actual footer card -->
             <Border Background="{DynamicResource Brush.Surface.Hover}"
                     BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1"
-                    CornerRadius="12" Margin="1">
+                    CornerRadius="12">
                 <Grid Margin="12,8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -454,15 +456,15 @@
 
                     <TextBlock Text="Changes are not saved until you click Apply."
                                VerticalAlignment="Center"
-                               Foreground="{StaticResource Brush.Text.Primary}"/>
+                               Foreground="{DynamicResource Brush.Text.Primary}"/>
 
                     <Button x:Name="BtnApply" Grid.Column="1"
-                            Style="{DynamicResource Button.Rounded}"
+                            Style="{StaticResource Button.Rounded}"
                             Click="BtnApply_Click"
                             MinHeight="32" Height="36" MinWidth="92" Padding="14,6"
                             Margin="12,0,0,0"
                             BorderBrush="{DynamicResource Brush.Accent}" BorderThickness="1.25">
-                        <TextBlock Text="Apply"/>
+                        <TextBlock Text="Apply" Foreground="{DynamicResource Brush.Text.Primary}"/>
                     </Button>
                 </Grid>
             </Border>

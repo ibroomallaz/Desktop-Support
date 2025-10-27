@@ -15,7 +15,7 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_D0C6111E916C438C8889E53E7AADA166"
+        "MsmKey" = "8:_5DC7706E8AEC40E2B25C648A99AEB12B"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -122,10 +122,10 @@
         }
         "File"
         {
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D0C6111E916C438C8889E53E7AADA166"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5DC7706E8AEC40E2B25C648A99AEB12B"
             {
-            "SourcePath" = "8:..\\DSAMVVM\\img\\lilyface.ico"
-            "TargetName" = "8:lilyface.ico"
+            "SourcePath" = "8:..\\DSAMVVM\\img\\MainIcon.ico"
+            "TargetName" = "8:MainIcon.ico"
             "Tag" = "8:"
             "Folder" = "8:_138FD39A77A1472D8428710CD68671B5"
             "Condition" = "8:"
@@ -253,15 +253,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Desktop Support App"
-        "ProductCode" = "8:{22D400E4-1D9E-4224-ADF8-07C17C1D7407}"
-        "PackageCode" = "8:{EC19A7E9-B0EE-4AE3-A397-6EDA40DBCB37}"
+        "ProductCode" = "8:{1CD4213B-5B93-43D9-A3AB-5AB08E6E1107}"
+        "PackageCode" = "8:{0A91A359-1071-47D5-99E2-882A62692C60}"
         "UpgradeCode" = "8:{8C75EC73-37A1-4BEF-8ADF-CCF71E46450F}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:4.0.1020"
+        "ProductVersion" = "8:4.0.1100"
         "Manufacturer" = "8:University of Arizona"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/ProjectHome.aspx"
@@ -271,7 +271,7 @@
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:"
         "ARPURLINFOABOUT" = "8:"
-        "ARPPRODUCTICON" = "8:_D0C6111E916C438C8889E53E7AADA166"
+        "ARPPRODUCTICON" = "8:"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
@@ -385,7 +385,7 @@
             "Target" = "8:_E0768B0D1B8A4C9B8AFA904CF9613D47"
             "Folder" = "8:_846B13170A5A496EA89F9936CE4749F8"
             "WorkingFolder" = "8:_0D37022F8F7C4A6AB7ADD7AFBFDCEB18"
-            "Icon" = "8:_D0C6111E916C438C8889E53E7AADA166"
+            "Icon" = "8:"
             "Feature" = "8:"
             }
         }

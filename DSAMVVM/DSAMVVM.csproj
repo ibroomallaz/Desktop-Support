@@ -25,7 +25,6 @@
 
   <ItemGroup>
     <None Remove="img\fileicon.png" />
-    <None Remove="img\icons\DSACatOnlyIcon.png" />
     <None Remove="img\icons\HomeIcon.png" />
     <None Remove="img\icons\QuickLinksInfo.png" />
     <None Remove="img\icons\SettingsIcon.png" />
@@ -47,10 +46,10 @@
   <ItemGroup>
     <Resource Include="img\MainIcon.ico" />
     <Resource Include="img\fileicon.png" />
-    <Resource Include="img\icons\DSACatOnlyIcon.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="img\icons\" />
     <Folder Include="MVVM\Model\Schemas\News\" />
   </ItemGroup>
 </Project>

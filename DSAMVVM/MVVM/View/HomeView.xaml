@@ -7,8 +7,8 @@
              d:DesignHeight="450"
              d:DesignWidth="800">
 
-    <!-- Tile hover/press overlay style -->
     <UserControl.Resources>
+        <!-- hover/press overlay for whole tiles -->
         <Style x:Key="TileOverlayButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -18,18 +18,14 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <!-- Transparent by default; becomes a subtle overlay on hover/press -->
-                        <Border x:Name="Overlay"
-                                Background="{TemplateBinding Background}"
-                                Opacity="0"
-                                CornerRadius="0"/>
+                        <Border x:Name="Overlay" Background="{TemplateBinding Background}" Opacity="0"/>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Overlay" Property="Background" Value="{DynamicResource Brush.Surface.Hover}"/>
+                                <Setter TargetName="Overlay" Property="Background" Value="{DynamicResource CardGradient.Surface.Hover}"/>
                                 <Setter TargetName="Overlay" Property="Opacity" Value="0.25"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Overlay" Property="Background" Value="{DynamicResource Brush.Surface.Hover}"/>
+                                <Setter TargetName="Overlay" Property="Background" Value="{DynamicResource CardGradient.Surface.Pressed}"/>
                                 <Setter TargetName="Overlay" Property="Opacity" Value="0.35"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
@@ -47,31 +43,27 @@
             SnapsToDevicePixels="True"
             UseLayoutRounding="True">
 
-        <Grid>
+        <Grid VerticalAlignment="Top">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <!-- heading -->
                 <RowDefinition Height="Auto"/>
-                <!-- hero -->
                 <RowDefinition Height="Auto"/>
-                <!-- quick panels -->
                 <RowDefinition Height="Auto"/>
-                <!-- tiles -->
             </Grid.RowDefinitions>
 
-            <!-- Heading -->
+            <!-- title -->
             <TextBlock Grid.Row="0"
                        Text="{Binding Title}"
                        Foreground="{DynamicResource Brush.Text.Primary}"
                        FontSize="24"
-                       Margin="0,0,0,8"/>
+                       Margin="0,0,0,6"/>
 
-            <!-- HERO  -->
+            <!-- version banner -->
             <Border Grid.Row="1"
-                    MinHeight="140"
+                    MinHeight="128"
                     CornerRadius="12"
                     Background="{DynamicResource CardGradient.Accent}"
-                    Margin="0,0,0,8"
+                    Margin="0,0,0,6"
                     Padding="12">
                 <StackPanel>
                     <TextBlock Text="Version"
@@ -80,33 +72,33 @@
                     <TextBlock Text="{Binding AppVersion}"
                                Foreground="{DynamicResource Brush.Text.OnAccent}"
                                FontSize="22" FontWeight="SemiBold"
-                               Margin="0,2,0,6"
+                               Margin="0,2,0,4"
                                TextTrimming="CharacterEllipsis"/>
-                    <!-- subtext can go here-->
                     <TextBlock Text=""
                                Foreground="{DynamicResource Brush.Text.OnAccent}"
                                FontSize="13"/>
-                    <!-- news can display here -->
                     <TextBlock Text=""
                                Foreground="{DynamicResource Brush.Text.OnAccent}"
                                FontSize="13" Margin="0,2,0,0"/>
                 </StackPanel>
             </Border>
 
-            <!-- QUICK PANELS -->
-            <Grid Grid.Row="2" Margin="0,0,0,8">
+            <!-- quick lookups -->
+            <Grid Grid.Row="2" Margin="0,0,0,6">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
 
-                <!-- User -->
+                <!-- user lookup -->
                 <Border Grid.Column="0"
-                        MinHeight="110"
+                        MinHeight="104"
                         CornerRadius="12"
-                        Background="{DynamicResource Brush.Surface.Hover}"
-                        Padding="12"
-                        Margin="0,0,6,0">
+                        Background="{DynamicResource CardGradient.Surface.L1}"
+                        Padding="10"
+                        Margin="0,0,5,0"
+                        BorderBrush="{DynamicResource Brush.Card.Border}"
+                        BorderThickness="1">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="25*"/>
@@ -126,8 +118,10 @@
 
                         <Border Grid.Row="1"
                                 CornerRadius="12"
-                                Background="{DynamicResource Brush.Surface}"
-                                Padding="8,0" Height="34" Grid.ColumnSpan="2">
+                                Background="#12FFFFFF"
+                                BorderBrush="#30FFFFFF"
+                                BorderThickness="1"
+                                Padding="8,0" Height="32" Grid.ColumnSpan="2">
                             <TextBox Background="Transparent"
                                      BorderThickness="0"
                                      Foreground="{DynamicResource Brush.Text.Primary}"
@@ -138,26 +132,28 @@
                                      ToolTip="NetID, or email"/>
                         </Border>
 
-                        <Rectangle Grid.Row="2" Height="0" Grid.ColumnSpan="2" Margin="0,0,0,36" Grid.RowSpan="2"/>
+                        <Rectangle Grid.Row="2" Height="0" Grid.ColumnSpan="2" Margin="0,0,0,28" Grid.RowSpan="2"/>
 
                         <Button Grid.Row="3"
                                 Content="Open User"
-                                MinWidth="110"
+                                MinWidth="108"
                                 HorizontalAlignment="Right"
                                 Style="{DynamicResource Button.Rounded}"
-                                Margin="0,8,0,0"
+                                Margin="0,6,0,0"
                                 Grid.Column="1"
                                 Command="{Binding OpenUserCommand}"/>
                     </Grid>
                 </Border>
 
-                <!-- Computer -->
+                <!-- computer lookup -->
                 <Border Grid.Column="1"
-                        MinHeight="110"
+                        MinHeight="104"
                         CornerRadius="12"
-                        Background="{DynamicResource Brush.Surface.Hover}"
-                        Padding="12"
-                        Margin="6,0,0,0">
+                        Background="{DynamicResource CardGradient.Surface.L1}"
+                        Padding="10"
+                        Margin="5,0,0,0"
+                        BorderBrush="{DynamicResource Brush.Card.Border}"
+                        BorderThickness="1">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="49*"/>
@@ -177,8 +173,10 @@
 
                         <Border Grid.Row="1"
                                 CornerRadius="12"
-                                Background="{DynamicResource Brush.Surface}"
-                                Padding="8,0" Height="34" Grid.ColumnSpan="2">
+                                Background="#12FFFFFF"
+                                BorderBrush="#30FFFFFF"
+                                BorderThickness="1"
+                                Padding="8,0" Height="32" Grid.ColumnSpan="2">
                             <TextBox Background="Transparent"
                                      BorderThickness="0"
                                      Foreground="{DynamicResource Brush.Text.Primary}"
@@ -189,57 +187,57 @@
                                      ToolTip="Hostname"/>
                         </Border>
 
-                        <Rectangle Grid.Row="2" Height="0" Grid.ColumnSpan="2" Margin="0,0,0,36" Grid.RowSpan="2"/>
+                        <Rectangle Grid.Row="2" Height="0" Grid.ColumnSpan="2" Margin="0,0,0,28" Grid.RowSpan="2"/>
 
                         <Button Grid.Row="3"
                                 Content="Open Computer"
-                                MinWidth="132"
+                                MinWidth="128"
                                 HorizontalAlignment="Right"
                                 Style="{DynamicResource Button.Rounded}"
-                                Margin="0,8,0,0"
+                                Margin="0,6,0,0"
                                 Grid.Column="1"
                                 Command="{Binding OpenComputerCommand}"/>
                     </Grid>
                 </Border>
             </Grid>
 
-            <!-- LOWER TILES (wrap text) -->
-            <UniformGrid Grid.Row="3" Columns="4">
-                <!-- Tile 1: Groups -->
-                <Border Height="80" CornerRadius="12"
-                        Background="{DynamicResource Brush.Surface.Hover}"
-                        Margin="0,0,8,0" Padding="0">
+            <!-- tiles -->
+            <UniformGrid Grid.Row="3" Columns="4" Margin="0,0,0,8">
+
+                <!-- Groups -->
+                <Border Height="82" CornerRadius="12"
+                        Background="{DynamicResource CardGradient.Surface.L1}"
+                        Margin="0,0,6,0" Padding="0"
+                        BorderBrush="{DynamicResource Brush.Card.Border}" BorderThickness="1">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="4"/>
+                            <ColumnDefinition Width="8"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-
-                        <Border Grid.Column="0" Background="{DynamicResource Brush.Accent}" CornerRadius="12,0,0,12"/>
-
+                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
                         <StackPanel Grid.Column="1" Margin="12,8,12,8">
                             <TextBlock Text="Groups" Foreground="{DynamicResource Brush.Text.Primary}" FontSize="15"/>
                             <TextBlock Text="Search group memberships"
                                        Foreground="{DynamicResource Brush.Text.Muted}" FontSize="13"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
-
                         <Button Grid.Column="1"
                                 Style="{StaticResource TileOverlayButton}"
                                 Command="{Binding GoGroupsCommand}"/>
                     </Grid>
                 </Border>
 
-                <!-- Tile 2: Entra -->
-                <Border Height="80" CornerRadius="12"
-                        Background="{DynamicResource Brush.Surface.Hover}"
-                        Margin="8,0,8,0" Padding="0">
+                <!-- Entra -->
+                <Border Height="82" CornerRadius="12"
+                        Background="{DynamicResource CardGradient.Surface.L1}"
+                        Margin="6,0,6,0" Padding="0"
+                        BorderBrush="{DynamicResource Brush.Card.Border}" BorderThickness="1">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="4"/>
+                            <ColumnDefinition Width="8"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource Brush.Accent}" CornerRadius="12,0,0,12"/>
+                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
                         <StackPanel Grid.Column="1" Margin="12,8,12,8">
                             <TextBlock Text="Entra" Foreground="{DynamicResource Brush.Text.Primary}" FontSize="15"/>
                             <TextBlock Text="Coming soon..."
@@ -252,16 +250,17 @@
                     </Grid>
                 </Border>
 
-                <!-- Tile 3: Links -->
-                <Border Height="80" CornerRadius="12"
-                        Background="{DynamicResource Brush.Surface.Hover}"
-                        Margin="8,0,8,0" Padding="0">
+                <!-- Links -->
+                <Border Height="82" CornerRadius="12"
+                        Background="{DynamicResource CardGradient.Surface.L1}"
+                        Margin="6,0,6,0" Padding="0"
+                        BorderBrush="{DynamicResource Brush.Card.Border}" BorderThickness="1">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="4"/>
+                            <ColumnDefinition Width="8"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource Brush.Accent}" CornerRadius="12,0,0,12"/>
+                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
                         <StackPanel Grid.Column="1" Margin="12,8,12,8">
                             <TextBlock Text="Links" Foreground="{DynamicResource Brush.Text.Primary}" FontSize="15"/>
                             <TextBlock Text="Intranet · ServiceNow"
@@ -274,16 +273,17 @@
                     </Grid>
                 </Border>
 
-                <!-- Tile 4: About -->
-                <Border Height="80" CornerRadius="12"
-                        Background="{DynamicResource Brush.Surface.Hover}"
-                        Margin="8,0,0,0" Padding="0">
+                <!-- About -->
+                <Border Height="82" CornerRadius="12"
+                        Background="{DynamicResource CardGradient.Surface.L1}"
+                        Margin="6,0,0,0" Padding="0"
+                        BorderBrush="{DynamicResource Brush.Card.Border}" BorderThickness="1">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="4"/>
+                            <ColumnDefinition Width="8"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource Brush.Accent}" CornerRadius="12,0,0,12"/>
+                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
                         <StackPanel Grid.Column="1" Margin="12,8,12,8">
                             <TextBlock Text="About" Foreground="{DynamicResource Brush.Text.Primary}" FontSize="15"/>
                             <TextBlock Text="Version, source, credits"
@@ -295,6 +295,7 @@
                                 Command="{Binding GoAboutCommand}"/>
                     </Grid>
                 </Border>
+
             </UniformGrid>
 
         </Grid>

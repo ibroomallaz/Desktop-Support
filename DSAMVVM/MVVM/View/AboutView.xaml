@@ -9,17 +9,34 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Theme/Colors/Colors.UA.xaml"/>
+                <ResourceDictionary Source="/Theme/Decor/Gradient.UA.xaml"/>
+                <ResourceDictionary Source="/Theme/Controls/Button.Rounded.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Compact variant for text buttons -->
-            <Style x:Key="Button.Rounded.Compact"
-                   TargetType="Button"
-                   BasedOn="{StaticResource Button.Rounded}">
+            <!-- card container style -->
+            <Style x:Key="Card.Surface" TargetType="Border">
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Background" Value="{DynamicResource CardGradient.Surface.L1}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Card.Border}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource CardGradient.Surface.Hover}"/>
+                    </Trigger>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Opacity" Value="0.7"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- compact button -->
+            <Style x:Key="Button.Rounded.Compact" TargetType="Button" BasedOn="{StaticResource Button.Rounded}">
                 <Setter Property="Padding"   Value="8,2"/>
                 <Setter Property="MinHeight" Value="26"/>
                 <Setter Property="FontSize"  Value="12"/>
                 <Setter Property="MinWidth"  Value="120"/>
-                <Setter Property="Margin"    Value="0,0,6,0"/>
+                <Setter Property="Margin"    Value="0,0,8,8"/>
             </Style>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -27,26 +44,22 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="16" Orientation="Vertical">
 
-            <!-- Title -->
             <TextBlock Text="About"
                        FontSize="20"
                        FontWeight="SemiBold"
                        Foreground="{DynamicResource Brush.Text.Primary}"
-                       Margin="0,0,0,8"/>
+                       Margin="0,0,0,12"/>
 
-            <!-- === APPLICATION (first) === -->
-            <Border Padding="0" CornerRadius="12" Margin="0,0,0,16"
-                    Background="{DynamicResource Brush.Surface.Hover}"
-                    BorderBrush="{DynamicResource Brush.Border}"
-                    BorderThickness="1">
+            <!-- Application -->
+            <Border Style="{StaticResource Card.Surface}" Margin="0,0,0,16">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="6"/>
+                        <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Column="0"
-                            Background="{DynamicResource Brush.Accent}"
+                            Background="{DynamicResource CardGradient.Accent}"
                             CornerRadius="12,0,0,12"/>
 
                     <StackPanel Grid.Column="1" Margin="16">
@@ -54,16 +67,10 @@
                                    FontSize="16" FontWeight="Bold"
                                    Foreground="{DynamicResource Brush.Text.Primary}"
                                    Margin="0,0,0,12"/>
-
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                            <TextBlock Text="Version: "
-                                       Foreground="{DynamicResource Brush.Text.Muted}"
-                                       Margin="0,0,6,0"/>
-                            <TextBlock Text="{Binding AppVersion}"
-                                       Foreground="{DynamicResource Brush.Text.Primary}"
-                                       FontWeight="Medium"/>
+                            <TextBlock Text="Version:" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,0,6,0"/>
+                            <TextBlock Text="{Binding AppVersion}" Foreground="{DynamicResource Brush.Text.Primary}" FontWeight="Medium"/>
                         </StackPanel>
-
                         <WrapPanel>
                             <Button Style="{StaticResource Button.Rounded.Compact}"
                                     Content="Check for Update"
@@ -73,19 +80,16 @@
                 </Grid>
             </Border>
 
-            <!-- === DEVELOPERS (second) === -->
-            <Border Padding="0" CornerRadius="12" Margin="0,0,0,16"
-                    Background="{DynamicResource Brush.Surface.Hover}"
-                    BorderBrush="{DynamicResource Brush.Border}"
-                    BorderThickness="1">
+            <!-- Developers -->
+            <Border Style="{StaticResource Card.Surface}" Margin="0,0,0,16">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="6"/>
+                        <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Column="0"
-                            Background="{DynamicResource Brush.Accent}"
+                            Background="{DynamicResource CardGradient.Accent}"
                             CornerRadius="12,0,0,12"/>
 
                     <StackPanel Grid.Column="1" Margin="16">
@@ -93,16 +97,12 @@
                                    FontSize="16" FontWeight="Bold"
                                    Foreground="{DynamicResource Brush.Text.Primary}"
                                    Margin="0,0,0,12"/>
-
                         <ItemsControl ItemsSource="{Binding Developers}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
-                                        <TextBlock Text="•"
-                                                   Margin="0,0,6,0"
-                                                   Foreground="{DynamicResource Brush.Text.Muted}"/>
-                                        <TextBlock Text="{Binding}"
-                                                   Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                        <TextBlock Text="•" Margin="0,0,6,0" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                        <TextBlock Text="{Binding}" Foreground="{DynamicResource Brush.Text.Primary}"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -111,19 +111,16 @@
                 </Grid>
             </Border>
 
-            <!-- === LINKS (last) === -->
-            <Border Padding="0" CornerRadius="12" Margin="0,0,0,0"
-                    Background="{DynamicResource Brush.Surface.Hover}"
-                    BorderBrush="{DynamicResource Brush.Border}"
-                    BorderThickness="1">
+            <!-- Links -->
+            <Border Style="{StaticResource Card.Surface}">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="6"/>
+                        <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Column="0"
-                            Background="{DynamicResource Brush.Accent}"
+                            Background="{DynamicResource CardGradient.Accent}"
                             CornerRadius="12,0,0,12"/>
 
                     <StackPanel Grid.Column="1" Margin="16">
@@ -131,7 +128,6 @@
                                    FontSize="16" FontWeight="Bold"
                                    Foreground="{DynamicResource Brush.Text.Primary}"
                                    Margin="0,0,0,12"/>
-
                         <WrapPanel>
                             <Button Style="{StaticResource Button.Rounded.Compact}"
                                     Content="Open GitHub"
