@@ -1,90 +1,110 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- tokens -->
     <CornerRadius x:Key="GroupRadio.CornerRadius">12</CornerRadius>
 
+    <!-- effects -->
+    <DropShadowEffect x:Key="Fx.ActiveGlow"
+                      BlurRadius="12" ShadowDepth="0"
+                      Opacity="0.35" Color="#A22C45"
+                      x:Shared="False"/>
+
+    <!-- template -->
+    <ControlTemplate x:Key="Tpl.Radio.GroupView" TargetType="RadioButton">
+        <Border x:Name="Root"
+                SnapsToDevicePixels="True"
+                UseLayoutRounding="True"
+                CornerRadius="{TemplateBinding Tag}"
+                Background="{TemplateBinding Background}"
+                BorderBrush="Transparent" BorderThickness="0">
+            <ContentPresenter x:Name="ContentHost"
+                              Margin="{TemplateBinding Padding}"
+                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RecognizesAccessKey="True"
+                              TextElement.Foreground="{TemplateBinding Foreground}"/>
+        </Border>
+
+        <ControlTemplate.Triggers>
+            <!-- hover (unchecked) -->
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsMouseOver" Value="True"/>
+                    <Condition Property="IsChecked" Value="False"/>
+                </MultiTrigger.Conditions>
+                <Setter TargetName="Root" Property="Background" Value="{DynamicResource ButtonGradient.Neutral}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Text.OnAccent}"/>
+            </MultiTrigger>
+
+            <!-- press (unchecked) -->
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsPressed" Value="True"/>
+                    <Condition Property="IsChecked" Value="False"/>
+                </MultiTrigger.Conditions>
+                <Setter TargetName="Root" Property="Background" Value="{DynamicResource ButtonGradient.Primary}"/>
+                <Setter TargetName="Root" Property="Effect" Value="{StaticResource Fx.ActiveGlow}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Text.OnAccent}"/>
+            </MultiTrigger>
+
+            <!-- checked -->
+            <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="Root" Property="Background" Value="{DynamicResource ButtonGradient.Primary}"/>
+                <Setter TargetName="Root" Property="Effect" Value="{StaticResource Fx.ActiveGlow}"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Text.OnAccent}"/>
+            </Trigger>
+
+            <!-- checked + hover -->
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsChecked" Value="True"/>
+                    <Condition Property="IsMouseOver" Value="True"/>
+                </MultiTrigger.Conditions>
+                <Setter TargetName="Root" Property="Background" Value="{DynamicResource ButtonGradient.Primary}"/>
+                <Setter TargetName="Root" Property="Effect" Value="{StaticResource Fx.ActiveGlow}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Text.OnAccent}"/>
+            </MultiTrigger>
+
+            <!-- checked + press -->
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsChecked" Value="True"/>
+                    <Condition Property="IsPressed" Value="True"/>
+                </MultiTrigger.Conditions>
+                <Setter TargetName="Root" Property="Background" Value="{DynamicResource ButtonGradient.Primary}"/>
+                <Setter TargetName="Root" Property="Effect" Value="{StaticResource Fx.ActiveGlow}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Text.OnAccent}"/>
+            </MultiTrigger>
+
+            <!-- disabled -->
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="Root" Property="Background" Value="Transparent"/>
+                <Setter TargetName="Root" Property="Effect" Value="{x:Null}"/>
+                <Setter Property="Foreground" Value="Transparent"/>
+                <Setter TargetName="ContentHost" Property="Opacity" Value="0"/>
+                <Setter Property="Cursor" Value="Arrow"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <!-- style -->
     <Style x:Key="Radio.GroupView" TargetType="RadioButton">
-        <!-- Pull text color from Colors.UA -->
-        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}"/>
-        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.OnAccent}"/>
+        <Setter Property="Background" Value="{DynamicResource Brush.Gradient.Grey}"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="14,8"/>
         <Setter Property="MinHeight" Value="36"/>
+        <Setter Property="MinWidth" Value="64"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Cursor" Value="Hand"/>
-
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="RadioButton">
-                    <Border x:Name="Root"
-                            Background="{TemplateBinding Background}"
-                            CornerRadius="{DynamicResource GroupRadio.CornerRadius}">
-                        <ContentPresenter Margin="{TemplateBinding Padding}"
-                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                          RecognizesAccessKey="True"/>
-                    </Border>
-
-                    <ControlTemplate.Triggers>
-                        <!-- Hover -->
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Root" Property="Background"
-                                    Value="{DynamicResource Brush.Surface.Hover}"/>
-                            <Setter Property="Foreground"
-                                    Value="{DynamicResource Brush.Text.Primary}"/>
-                        </Trigger>
-
-                        <!-- Pressed (wins over hover) -->
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Root" Property="Background"
-                                    Value="{DynamicResource Brush.Accent.Pressed}"/>
-                            <Setter Property="Foreground"
-                                    Value="{DynamicResource Brush.Text.Primary}"/>
-                        </Trigger>
-
-                        <!-- Checked base -->
-                        <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Root" Property="Background"
-                                    Value="{DynamicResource Brush.Accent}"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="Foreground"
-                                    Value="{DynamicResource Brush.Text.Primary}"/>
-                        </Trigger>
-
-                        <!-- Checked + Hover -->
-                        <MultiTrigger>
-                            <MultiTrigger.Conditions>
-                                <Condition Property="IsChecked" Value="True"/>
-                                <Condition Property="IsMouseOver" Value="True"/>
-                            </MultiTrigger.Conditions>
-                            <Setter TargetName="Root" Property="Background"
-                                    Value="{DynamicResource Brush.Accent.Hover}"/>
-                            <Setter Property="Foreground"
-                                    Value="{DynamicResource Brush.Text.Primary}"/>
-                        </MultiTrigger>
-
-                        <!-- Checked + Pressed -->
-                        <MultiTrigger>
-                            <MultiTrigger.Conditions>
-                                <Condition Property="IsChecked" Value="True"/>
-                                <Condition Property="IsPressed" Value="True"/>
-                            </MultiTrigger.Conditions>
-                            <Setter TargetName="Root" Property="Background"
-                                    Value="{DynamicResource Brush.Accent.Pressed}"/>
-                            <Setter Property="Foreground"
-                                    Value="{DynamicResource Brush.Text.Primary}"/>
-                        </MultiTrigger>
-
-                        <!-- Disabled -->
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Opacity" Value="0.45"/>
-                            <Setter Property="Foreground"
-                                    Value="{DynamicResource Brush.Text.Muted}"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Tag" Value="{StaticResource GroupRadio.CornerRadius}"/>
+        <Setter Property="Template" Value="{StaticResource Tpl.Radio.GroupView}"/>
     </Style>
+
 </ResourceDictionary>
