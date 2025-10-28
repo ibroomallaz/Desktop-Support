@@ -66,9 +66,6 @@
                     Margin="0,0,0,6"
                     Padding="12">
                 <StackPanel>
-                    <TextBlock Text="Version"
-                               Foreground="{DynamicResource Brush.Text.OnAccent}"
-                               FontSize="13" Opacity="0.9"/>
                     <TextBlock Text="{Binding AppVersion}"
                                Foreground="{DynamicResource Brush.Text.OnAccent}"
                                FontSize="22" FontWeight="SemiBold"
