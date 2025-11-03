@@ -4,6 +4,7 @@ using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Services;
 using DSAMVVM.Core.Services.AD;
+using DSAMVVM.Core.Services.Updates;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
@@ -33,6 +34,8 @@ namespace DSAMVVM
         {
             base.OnStartup(e);
 
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
             ConfigureServices();
             Services = _serviceProvider;
 
@@ -50,53 +53,73 @@ namespace DSAMVVM
 
             Log.Initialize(_serviceProvider.GetRequiredService<IAppLogger>(), min: AppLogLevel.Warn);
 
+            // -> load settings before creating MainWindow / BootstrapInitialView
             var settingsSvc = _serviceProvider.GetRequiredService<ISettingsService>();
             try
             {
-                _settings = await settingsSvc.LoadAsync(Globals.g_SettingsPath).ConfigureAwait(true);
+                _settings = settingsSvc.LoadAsync(Globals.g_SettingsPath).GetAwaiter().GetResult();
                 _settings.ApplyDefaultsAndClamp();
                 Log.ApplySettings(_settings);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Settings could not be fully loaded. Using defaults.\n\nDetails: {ex.Message}",
-                    "Settings Warning",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-
-                _settings ??= new AppSettings();
+                Log.Warn("Settings", $"Early settings load failed, using defaults: {ex.Message}");
+                _settings = new AppSettings();
                 _settings.ApplyDefaultsAndClamp();
                 Log.ApplySettings(_settings);
             }
 
             this.SessionEnding += App_SessionEnding;
 
+            // -> enforce required gate before showing MainWindow
+            try
+            {
+                var gate = _serviceProvider.GetRequiredService<VersionCheckerUI>();
+                await gate.EnforceRequiredAsync().ConfigureAwait(true); // may shutdown if outdated                                                     
+                if (this.Dispatcher.HasShutdownStarted || this.Dispatcher.HasShutdownFinished) return;  // bail if shutdown was initiated by the gate
+
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("VersionCheck", $"Required gate failed to run: {ex.Message}");
+            }
+
+            // -> create VM/window and show
             var mainVM = _serviceProvider.GetRequiredService<MainViewModel>();
             var mainWindow = new MainWindow { DataContext = mainVM };
             MainWindow = mainWindow;
 
             mainVM.BootstrapInitialView();
-            mainWindow.ContentRendered += (_, __) => mainVM.StartWarmup();
+            mainWindow.ContentRendered += (_, __) =>
+            {
+                try { mainVM.StartWarmup(); } catch (Exception ex) { Log.Warn("Warmup", ex.Message); }
+                Log.Info("Startup", $"first frame @ {sw.ElapsedMilliseconds} ms");
+            };
 
             mainWindow.Closed += (_, __) => TryPersistSettingsOnce();
             mainWindow.Show();
 
+            // -> start background scheduler (6h cadence, no idle duplicate)
             try
             {
-                var versionChecker = _serviceProvider.GetRequiredService<VersionCheckerUI>();
-                await versionChecker.CheckAsync().ConfigureAwait(true);
+                var scheduler = _serviceProvider.GetRequiredService<VersionUpdateScheduler>();
+                scheduler.Start(TimeSpan.FromHours(6), runImmediately: false);
             }
             catch (Exception ex)
             {
-                Log.Warn("VersionCheck", $"Version check failed: {ex.Message}");
+                Log.Warn("VersionScheduler", $"Startup schedule failed: {ex.Message}");
             }
+
+            Log.Info("Startup", $"window shown @ {sw.ElapsedMilliseconds} ms");
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
             try { _serviceProvider.GetService<ISettingsService>()?.FlushPendingSaves(); } catch { }
             TryPersistSettingsOnce();
+
+            // -> stop background scheduler
+            (_serviceProvider.GetService<VersionUpdateScheduler>() as IDisposable)?.Dispose();
 
             if (_serviceProvider.GetService<IAppLogger>() is FileLogger fl)
             {
@@ -169,13 +192,21 @@ namespace DSAMVVM
                     {
                         var main = Services.GetRequiredService<MainViewModel>();
                         main.SelectedView = AppView.User;
-                        if (!string.IsNullOrWhiteSpace(q)) { main.SearchQuery = q; main.ExecuteSearchCommand.Execute(null); }
+                        if (!string.IsNullOrWhiteSpace(q))
+                        {
+                            main.SearchQuery = q;
+                            main.ExecuteSearchCommand.Execute(null);
+                        }
                     },
                     openComputer: q =>
                     {
                         var main = Services.GetRequiredService<MainViewModel>();
                         main.SelectedView = AppView.Computer;
-                        if (!string.IsNullOrWhiteSpace(q)) { main.SearchQuery = q; main.ExecuteSearchCommand.Execute(null); }
+                        if (!string.IsNullOrWhiteSpace(q))
+                        {
+                            main.SearchQuery = q;
+                            main.ExecuteSearchCommand.Execute(null);
+                        }
                     },
                     goGroups: () => Services.GetRequiredService<MainViewModel>().SelectedView = AppView.Group,
                     goEntra: () => Services.GetRequiredService<MainViewModel>().SelectedView = AppView.Entra,
@@ -189,7 +220,11 @@ namespace DSAMVVM
             services.AddTransient<Func<ComputerViewModel>>(sp => () => sp.GetRequiredService<ComputerViewModel>());
             services.AddTransient<Func<LinksViewModel>>(sp => () => sp.GetRequiredService<LinksViewModel>());
 
-            services.AddTransient<VersionCheckerUI>();
+            // -> version update infrastructure
+            services.AddSingleton<VersionCheckerUI>();                     // concrete
+            services.AddSingleton<IVersionCheckHandler>(sp =>              // interface -> UI
+                sp.GetRequiredService<VersionCheckerUI>());
+            services.AddSingleton<VersionUpdateScheduler>();               // core scheduler
 
             _serviceProvider = services.BuildServiceProvider();
         }

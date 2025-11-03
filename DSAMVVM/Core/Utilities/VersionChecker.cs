@@ -23,6 +23,10 @@ namespace DSAMVVM.Core.Utilities
         public string? PreLocation { get; set; }
         public string? PreChangelog { get; set; }
 
+        // Required (raw) fields (top-level in your manifest)
+        public string? RequiredMinVersion { get; set; }
+        public string? RequiredMessage { get; set; }
+
         // Error info
         public string? Error { get; set; }
 
@@ -51,20 +55,45 @@ namespace DSAMVVM.Core.Utilities
 
                 Log.Info(Cat, $"fetch.ok bytes={json.Length}");
 
-                // Extract raw fields directly from JSON
+                // Extract raw fields directly from JSON (case-insensitive)
                 var res = ExtractRawFields(json);
                 Log.Info(Cat,
                     $"peek.current version=\"{Val(res.StableVersion)}\" location=\"{Val(res.StableLocation)}\" changelog=\"{Val(res.StableChangelog)}\"");
                 Log.Info(Cat,
                     $"peek.prerelease exists={(res.PreExists ? "true" : "false")} version=\"{Val(res.PreVersion)}\" location=\"{Val(res.PreLocation)}\" changelog=\"{Val(res.PreChangelog)}\"");
+                Log.Info(Cat,
+                    $"peek.required min=\"{Val(res.RequiredMinVersion)}\" message=\"{Val(res.RequiredMessage)}\"");
 
-                // Attempt to deserialize into expected model types (best-effort)
+                // Try the canonical schema first: VersionManifest (top-level Required + Version)
                 VersionInfo? info = null;
-                try { info = JsonConvert.DeserializeObject<VersionInfo>(json); } catch { /* ignore */ }
+                try
+                {
+                    var manifest = JsonConvert.DeserializeObject<VersionManifest>(json);
+                    if (manifest != null)
+                    {
+                        info = manifest.Version;
+                        // Prefer strongly-typed Required when available
+                        if (!string.IsNullOrWhiteSpace(manifest.Required?.MinVersion))
+                            res.RequiredMinVersion = manifest.Required!.MinVersion;
+                        if (!string.IsNullOrWhiteSpace(manifest.Required?.Message))
+                            res.RequiredMessage = manifest.Required!.Message;
+                    }
+                }
+                catch { /* ignore */ }
+
+                // Fallbacks for older shapes you support
                 if (info == null)
                 {
-                    var wrapper = JsonConvert.DeserializeObject<VersionWrapper>(json);
-                    info = wrapper?.Version;
+                    try { info = JsonConvert.DeserializeObject<VersionInfo>(json); } catch { /* ignore */ }
+                }
+                if (info == null)
+                {
+                    try
+                    {
+                        var wrapper = JsonConvert.DeserializeObject<VersionWrapper>(json);
+                        info = wrapper?.Version;
+                    }
+                    catch { /* ignore */ }
                 }
 
                 if (info != null)
@@ -177,6 +206,9 @@ namespace DSAMVVM.Core.Utilities
                 var current = Find(versionObj, "Current") as JObject;
                 var pre = Find(versionObj, "PreRelease") as JObject;
 
+                // Required can be either next to Version (preferred) or inside it (legacy)
+                var req = (Find(root, "Required") as JObject) ?? (Find(versionObj, "Required") as JObject);
+
                 r.StableVersion = ReadString(current, "version");
                 r.StableLocation = ReadString(current, "location");
                 r.StableChangelog = ReadString(current, "changelog");
@@ -185,6 +217,9 @@ namespace DSAMVVM.Core.Utilities
                 r.PreVersion = ReadString(pre, "version");
                 r.PreLocation = ReadString(pre, "location");
                 r.PreChangelog = ReadString(pre, "changelog");
+
+                r.RequiredMinVersion = ReadString(req, "minVersion");
+                r.RequiredMessage = ReadString(req, "message");
             }
             catch (Exception ex)
             {

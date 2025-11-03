@@ -2,11 +2,16 @@
 
 namespace DSAMVVM.MVVM.Model.Schemas
 {
-    // Top-level JSON object (rename from "Root" for clarity)
-    public sealed class VersionResponse
+    public sealed class VersionManifest : JsonMetaBase
     {
-        [JsonProperty(nameof(Version))]
+        [JsonProperty("$schema", NullValueHandling = NullValueHandling.Ignore)]
+        public string? Schema { get; set; }
+
+        [JsonProperty(nameof(Version), NullValueHandling = NullValueHandling.Ignore)]
         public VersionInfo? Version { get; set; }
+
+        [JsonProperty(nameof(Required), NullValueHandling = NullValueHandling.Ignore)]
+        public RequiredUpdate? Required { get; set; }
     }
 
     public sealed class VersionInfo
@@ -43,5 +48,14 @@ namespace DSAMVVM.MVVM.Model.Schemas
 
         [JsonProperty("changelog", NullValueHandling = NullValueHandling.Ignore)]
         public string? Changelog { get; set; }
+    }
+
+    public sealed class RequiredUpdate
+    {
+        [JsonProperty("minVersion", NullValueHandling = NullValueHandling.Ignore)]
+        public string? MinVersion { get; set; }
+
+        [JsonProperty("message", NullValueHandling = NullValueHandling.Ignore)]
+        public string? Message { get; set; }
     }
 }
