@@ -49,7 +49,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Core\Utilities\NewFolder\" />
     <Folder Include="img\icons\" />
     <Folder Include="MVVM\Model\Schemas\News\" />
   </ItemGroup>

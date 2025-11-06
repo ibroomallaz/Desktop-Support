@@ -57,7 +57,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public RelayCommand SettingsCommand { get; private set; } = null!;
 
         // Navigation collection and selection
-        public ObservableCollection<NavItem> NavItems { get; } = new();
+        public ObservableCollection<NavItem> NavItems { get; } = [];
         private NavItem? _selectedNav;
         public NavItem? SelectedNav
         {

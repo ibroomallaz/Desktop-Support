@@ -8,9 +8,9 @@ using DSAMVVM.MVVM.View.Dialogs;
 namespace DSAMVVM.MVVM.Services.Updates
 {
     // Fetches once per cycle; enforces required; prompts once per version; implements scheduler handler
-    public class VersionCheckerUI : IVersionCheckHandler
+    public class VersionCheckerUI(IHttpService http) : IVersionCheckHandler
     {
-        private readonly IHttpService _http;
+        private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
         private readonly string _installedVersion = Globals.g_AppVersion;
         private readonly string _versionUrl = Globals.g_VersionJSON;
 
@@ -24,11 +24,6 @@ namespace DSAMVVM.MVVM.Services.Updates
         private readonly TimeSpan _cacheWindow = TimeSpan.FromMinutes(2);
         private string? _lastPromptedStable;
         private string? _lastPromptedPre;
-
-        public VersionCheckerUI(IHttpService http)
-        {
-            _http = http ?? throw new ArgumentNullException(nameof(http));
-        }
 
         // -> required gate (uses single fetch)
         public async Task EnforceRequiredAsync()

@@ -36,7 +36,7 @@ namespace DSAMVVM
         {
             base.OnStartup(e);
 
-            // splash appears immediately; hides on first render
+            // Splash appears immediately; hides on first render
             _splash = new SplashWindow();
             _splash.SourceInitialized += (_, __) =>
             {
@@ -69,13 +69,13 @@ namespace DSAMVVM
                     MessageBoxImage.Warning);
             }
 
-            // logging + UI notify bus ready before any early logs
+            // Logging + UI notify before early logs
             var bus = _serviceProvider.GetRequiredService<StatusBus>();
             UiNotify.Initialize(bus.Report, bus.RemoveByKey, bus.Clear);
             Log.Initialize(_serviceProvider.GetRequiredService<IAppLogger>(), min: AppLogLevel.Debug);
             Mark("Logger ready");
 
-            // load settings on the UI context; clamps + apply to logging
+            // Load settings on UI thread; clamp + apply to logging
             var settingsSvc = _serviceProvider.GetRequiredService<ISettingsService>();
             try
             {
@@ -96,8 +96,7 @@ namespace DSAMVVM
 
             this.SessionEnding += App_SessionEnding;
 
-            // short update check probe with deferral if slow
-            bool updateCheckCompleted = false;
+            // Required update probe with short deferral if slow
             try
             {
                 var updateUi = _serviceProvider.GetRequiredService<VersionCheckerUI>();
@@ -109,14 +108,24 @@ namespace DSAMVVM
 
                 if (firstChance == updateTask)
                 {
-                    updateCheckCompleted = true;
                     await updateTask.ConfigureAwait(true);
                     if (this.Dispatcher.HasShutdownStarted || this.Dispatcher.HasShutdownFinished) return;
                     Mark("Update check done");
                 }
                 else
                 {
-                    Log.Warn("UpdateCheck", "Update check exceeded 3s; completing after first render.");
+                    // If it takes longer, finish it while splash is still visible before main window
+                    Log.Warn("UpdateCheck", "Update check exceeded 3s; finishing while splash is visible.");
+                    try
+                    {
+                        await updateTask.ConfigureAwait(true);
+                        if (this.Dispatcher.HasShutdownStarted || this.Dispatcher.HasShutdownFinished) return;
+                        Mark("Update check done");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn("UpdateCheck", $"Required update check (post-timeout) failed: {ex.Message}");
+                    }
                 }
             }
             catch (Exception ex)
@@ -124,44 +133,35 @@ namespace DSAMVVM
                 Log.Warn("UpdateCheck", $"Required update check failed to run: {ex.Message}");
             }
 
-            // main window wiring; pre-select a home view to avoid heavy constructors
+            // Main window wiring
             var mainVM = _serviceProvider.GetRequiredService<MainViewModel>();
             var mainWindow = new MainWindow { DataContext = mainVM };
             MainWindow = mainWindow;
             try { mainVM.SelectedView = AppView.Home; } catch { }
 
-            // first paint must not await work; deferred tasks are dispatched
             mainWindow.ContentRendered += (_, __) =>
             {
                 Mark("First window rendered");
 
-                // close splash once the first frame is visible
                 try { _splash?.Close(); _splash = null; } catch { }
 
-                // finish update check without blocking UI
-                if (!updateCheckCompleted)
+                // Run only non-enforced popup after render
+                this.Dispatcher.BeginInvoke(async () =>
                 {
-                    this.Dispatcher.BeginInvoke(async () =>
+                    try
                     {
-                        try
-                        {
-                            var updateUi = _serviceProvider.GetRequiredService<VersionCheckerUI>();
-                            await updateUi.EnforceRequiredAsync().ConfigureAwait(true);
-                            if (this.Dispatcher.HasShutdownStarted || this.Dispatcher.HasShutdownFinished) return;
-                            Log.Debug("Startup", "Update check done (deferred)");
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Warn("UpdateCheck", $"Deferred update check failed: {ex.Message}");
-                        }
-                    }, System.Windows.Threading.DispatcherPriority.Background);
-                }
+                        var updateUi = _serviceProvider.GetRequiredService<VersionCheckerUI>();
+                        await updateUi.CheckAsync().ConfigureAwait(true);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn("UpdateCheck", $"Optional update check failed: {ex.Message}");
+                    }
+                }, System.Windows.Threading.DispatcherPriority.Background);
 
-                // bootstrap + warmups; non-blocking
                 try { mainVM.BootstrapInitialView(); } catch (Exception ex) { Log.Warn("Bootstrap", ex.Message); }
                 try { mainVM.StartWarmup(); } catch (Exception ex) { Log.Warn("Warmup", ex.Message); }
 
-                // post-paint Links warmup; skip if already on Links
                 this.Dispatcher.BeginInvoke(async () =>
                 {
                     try
@@ -173,7 +173,7 @@ namespace DSAMVVM
                 }, System.Windows.Threading.DispatcherPriority.Background);
             };
 
-            // show window and start background scheduler off the critical path
+            // Show window and start background scheduler
             mainWindow.Closed += (_, __) => TryPersistSettingsOnce();
             mainWindow.Show();
             Mark("Window shown");
@@ -189,6 +189,7 @@ namespace DSAMVVM
                 Log.Warn("UpdateScheduler", $"Startup schedule failed: {ex.Message}");
             }
         }
+
 
         protected override void OnExit(ExitEventArgs e)
         {
