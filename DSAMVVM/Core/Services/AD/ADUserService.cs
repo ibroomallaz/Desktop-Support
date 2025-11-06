@@ -79,23 +79,40 @@ namespace DSAMVVM.Core.Services.AD
 
         private static string ParseLicense(string license)
         {
-            string pattern = "([om]{1}\\d{3})([A-Z]+)([AE]\\d{1})";
-            var match = Regex.Match(license, pattern);
-            if (match.Success)
+            // Guard: avoid null/empty and wasted work
+            if (string.IsNullOrWhiteSpace(license)) return "No valid O365 license found";
+
+            // Find an O/M + 3 digits, then role code, then tier (A#, E#, or EXP#)
+            // Not anchored, allows separators/whitespace and extra text around the token.
+            var m = Regex.Match(license,
+                @"([om]\d{3})\s*([A-Za-z]+)\s*[-_ ]*\s*(A\d+|E\d+|EXP\d+)",
+                RegexOptions.IgnoreCase);
+
+            if (m.Success)
             {
-                string group2 = match.Groups[2].Value;
-                string group3 = match.Groups[3].Value;
-                return group2.ToLower() switch
+                string role = m.Groups[2].Value.ToLowerInvariant();
+                string tier = m.Groups[3].Value.ToUpperInvariant();
+
+                string roleText = role switch
                 {
-                    "stuw" => $"Student Worker {group3}",
-                    "emp" => $"Employee {group3}",
-                    "stu" => $"Student {group3}",
-                    _ => $"Unknown {group3}"
+                    "stuw" => "Student Worker",
+                    "emp" => "Employee",
+                    "stu" => "Student",
+                    "dc" => "Alumni",
+                    _ => "Unknown"
                 };
+
+                string tierText = tier.StartsWith("EXP", StringComparison.Ordinal)
+                    ? $"Exchange P{tier.Substring(3)}"   // EXP1 -> Exchange P1
+                    : tier;                              // A1 / E3, etc.
+
+                return $"{roleText} {tierText}".Trim();
             }
 
+            // Fallback
             foreach (var segment in license.Split('(', ')'))
-                if (segment.Contains("365")) return segment + " (Unknown License Type)";
+                if (segment.IndexOf("365", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return segment.Trim() + " (Unknown License Type)";
 
             return "No valid O365 license found";
         }
