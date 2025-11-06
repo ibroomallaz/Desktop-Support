@@ -11,6 +11,7 @@ using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.Services.Status;
 using DSAMVVM.MVVM.Services.Updates;
 using DSAMVVM.MVVM.ViewModel;
+using DSAMVVM.MVVM.View;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DSAMVVM
@@ -20,6 +21,7 @@ namespace DSAMVVM
         private IServiceProvider _serviceProvider = null!;
         private AppSettings? _settings;
         private int _persistOnceFlag;
+        private SplashWindow? _splash;
 
         public static IServiceProvider Services { get; private set; } = default!;
         public static AppSettings Settings => ((App)Current)._settings ?? new AppSettings();
@@ -34,10 +36,29 @@ namespace DSAMVVM
         {
             base.OnStartup(e);
 
+            // splash appears immediately; hides on first render
+            _splash = new SplashWindow();
+            _splash.SourceInitialized += (_, __) =>
+            {
+                var area = SystemParameters.WorkArea;
+                _splash.Left = area.Left + (area.Width - _splash.Width) / 2;
+                _splash.Top = area.Top + (area.Height - _splash.Height) / 2;
+            };
+            _splash.Show();
+            _splash.UpdateStatus("Starting…");
+
             var sw = System.Diagnostics.Stopwatch.StartNew();
+            long Mark(string label)
+            {
+                var ms = sw.ElapsedMilliseconds;
+                Log.Debug("Startup", $"{label} @ {ms} ms");
+                _splash?.UpdateStatus(label + "…");
+                return ms;
+            }
 
             ConfigureServices();
             Services = _serviceProvider;
+            Mark("Loading services");
 
             if (!Globals.TryEnsureCoreDirs(out var ensureErr) && !string.IsNullOrWhiteSpace(ensureErr))
             {
@@ -48,18 +69,21 @@ namespace DSAMVVM
                     MessageBoxImage.Warning);
             }
 
+            // logging + UI notify bus ready before any early logs
             var bus = _serviceProvider.GetRequiredService<StatusBus>();
             UiNotify.Initialize(bus.Report, bus.RemoveByKey, bus.Clear);
+            Log.Initialize(_serviceProvider.GetRequiredService<IAppLogger>(), min: AppLogLevel.Debug);
+            Mark("Logger ready");
 
-            Log.Initialize(_serviceProvider.GetRequiredService<IAppLogger>(), min: AppLogLevel.Warn);
-
-            // -> load settings before creating MainWindow / BootstrapInitialView
+            // load settings on the UI context; clamps + apply to logging
             var settingsSvc = _serviceProvider.GetRequiredService<ISettingsService>();
             try
             {
-                _settings = settingsSvc.LoadAsync(Globals.g_SettingsPath).GetAwaiter().GetResult();
+                _ = Mark("Loading settings");
+                _settings = await settingsSvc.LoadAsync(Globals.g_SettingsPath).ConfigureAwait(true);
                 _settings.ApplyDefaultsAndClamp();
                 Log.ApplySettings(_settings);
+                Mark("Settings loaded");
             }
             catch (Exception ex)
             {
@@ -67,50 +91,103 @@ namespace DSAMVVM
                 _settings = new AppSettings();
                 _settings.ApplyDefaultsAndClamp();
                 Log.ApplySettings(_settings);
+                Mark("Using default settings");
             }
 
             this.SessionEnding += App_SessionEnding;
 
-            // -> enforce required gate before showing MainWindow
+            // short update check probe with deferral if slow
+            bool updateCheckCompleted = false;
             try
             {
-                var gate = _serviceProvider.GetRequiredService<VersionCheckerUI>();
-                await gate.EnforceRequiredAsync().ConfigureAwait(true); // may shutdown if outdated                                                     
-                if (this.Dispatcher.HasShutdownStarted || this.Dispatcher.HasShutdownFinished) return;  // bail if shutdown was initiated by the gate
+                var updateUi = _serviceProvider.GetRequiredService<VersionCheckerUI>();
+                _splash.UpdateStatus("Checking for updates");
+                _ = Mark("Update check start");
 
+                var updateTask = updateUi.EnforceRequiredAsync();
+                var firstChance = await Task.WhenAny(updateTask, Task.Delay(TimeSpan.FromSeconds(3))).ConfigureAwait(true);
+
+                if (firstChance == updateTask)
+                {
+                    updateCheckCompleted = true;
+                    await updateTask.ConfigureAwait(true);
+                    if (this.Dispatcher.HasShutdownStarted || this.Dispatcher.HasShutdownFinished) return;
+                    Mark("Update check done");
+                }
+                else
+                {
+                    Log.Warn("UpdateCheck", "Update check exceeded 3s; completing after first render.");
+                }
             }
             catch (Exception ex)
             {
-                Log.Warn("VersionCheck", $"Required gate failed to run: {ex.Message}");
+                Log.Warn("UpdateCheck", $"Required update check failed to run: {ex.Message}");
             }
 
-            // -> create VM/window and show
+            // main window wiring; pre-select a home view to avoid heavy constructors
             var mainVM = _serviceProvider.GetRequiredService<MainViewModel>();
             var mainWindow = new MainWindow { DataContext = mainVM };
             MainWindow = mainWindow;
+            try { mainVM.SelectedView = AppView.Home; } catch { }
 
-            mainVM.BootstrapInitialView();
+            // first paint must not await work; deferred tasks are dispatched
             mainWindow.ContentRendered += (_, __) =>
             {
+                Mark("First window rendered");
+
+                // close splash once the first frame is visible
+                try { _splash?.Close(); _splash = null; } catch { }
+
+                // finish update check without blocking UI
+                if (!updateCheckCompleted)
+                {
+                    this.Dispatcher.BeginInvoke(async () =>
+                    {
+                        try
+                        {
+                            var updateUi = _serviceProvider.GetRequiredService<VersionCheckerUI>();
+                            await updateUi.EnforceRequiredAsync().ConfigureAwait(true);
+                            if (this.Dispatcher.HasShutdownStarted || this.Dispatcher.HasShutdownFinished) return;
+                            Log.Debug("Startup", "Update check done (deferred)");
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Warn("UpdateCheck", $"Deferred update check failed: {ex.Message}");
+                        }
+                    }, System.Windows.Threading.DispatcherPriority.Background);
+                }
+
+                // bootstrap + warmups; non-blocking
+                try { mainVM.BootstrapInitialView(); } catch (Exception ex) { Log.Warn("Bootstrap", ex.Message); }
                 try { mainVM.StartWarmup(); } catch (Exception ex) { Log.Warn("Warmup", ex.Message); }
-                Log.Info("Startup", $"first frame @ {sw.ElapsedMilliseconds} ms");
+
+                // post-paint Links warmup; skip if already on Links
+                this.Dispatcher.BeginInvoke(async () =>
+                {
+                    try
+                    {
+                        if (mainVM.SelectedView == AppView.Links) return;
+                        await mainVM.LinksVM.EnsureLoadedAsync().ConfigureAwait(true);
+                    }
+                    catch (Exception ex) { Log.Warn("LinksWarmup", ex.Message); }
+                }, System.Windows.Threading.DispatcherPriority.Background);
             };
 
+            // show window and start background scheduler off the critical path
             mainWindow.Closed += (_, __) => TryPersistSettingsOnce();
             mainWindow.Show();
+            Mark("Window shown");
 
-            // -> start background scheduler (6h cadence, no idle duplicate)
             try
             {
                 var scheduler = _serviceProvider.GetRequiredService<VersionUpdateScheduler>();
                 scheduler.Start(TimeSpan.FromHours(6), runImmediately: false);
+                Mark("Background update scheduler started");
             }
             catch (Exception ex)
             {
-                Log.Warn("VersionScheduler", $"Startup schedule failed: {ex.Message}");
+                Log.Warn("UpdateScheduler", $"Startup schedule failed: {ex.Message}");
             }
-
-            Log.Info("Startup", $"window shown @ {sw.ElapsedMilliseconds} ms");
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -118,7 +195,6 @@ namespace DSAMVVM
             try { _serviceProvider.GetService<ISettingsService>()?.FlushPendingSaves(); } catch { }
             TryPersistSettingsOnce();
 
-            // -> stop background scheduler
             (_serviceProvider.GetService<VersionUpdateScheduler>() as IDisposable)?.Dispose();
 
             if (_serviceProvider.GetService<IAppLogger>() is FileLogger fl)
@@ -220,11 +296,9 @@ namespace DSAMVVM
             services.AddTransient<Func<ComputerViewModel>>(sp => () => sp.GetRequiredService<ComputerViewModel>());
             services.AddTransient<Func<LinksViewModel>>(sp => () => sp.GetRequiredService<LinksViewModel>());
 
-            // -> version update infrastructure
-            services.AddSingleton<VersionCheckerUI>();                     // concrete
-            services.AddSingleton<IVersionCheckHandler>(sp =>              // interface -> UI
-                sp.GetRequiredService<VersionCheckerUI>());
-            services.AddSingleton<VersionUpdateScheduler>();               // core scheduler
+            services.AddSingleton<VersionCheckerUI>();
+            services.AddSingleton<IVersionCheckHandler>(sp => sp.GetRequiredService<VersionCheckerUI>());
+            services.AddSingleton<VersionUpdateScheduler>();
 
             _serviceProvider = services.BuildServiceProvider();
         }

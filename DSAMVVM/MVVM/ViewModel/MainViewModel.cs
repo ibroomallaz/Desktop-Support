@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿// MainViewModel.cs
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Threading;
 using DSAMVVM.Core.Enums;
@@ -18,13 +19,29 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly ISearchService _searchService = null!;
         public StatusBarViewModel StatusBar { get; } = null!;
 
-        // ViewModels
+        // VM factories (lazy)
+        private readonly Func<UserViewModel> _userVMFactory;
+        private readonly Func<ComputerViewModel> _computerVMFactory;
+        private readonly Func<GroupViewModel> _groupVMFactory;
+        private readonly Func<LinksViewModel> _linksVMFactory;
+
+        // ViewModels (Home/About eager; others lazy)
         public HomeViewModel HomeVM { get; private set; } = null!;
-        public ComputerViewModel ComputerVM { get; private set; } = null!;
-        public UserViewModel UserVM { get; private set; } = null!;
-        public GroupViewModel GroupVM { get; private set; } = null!;
-        public EntraViewModel EntraVM { get; private set; } = null!;
-        public LinksViewModel LinksVM { get; private set; } = null!;
+        private UserViewModel? _userVM;
+        public UserViewModel UserVM => _userVM ??= _userVMFactory();
+
+        private ComputerViewModel? _computerVM;
+        public ComputerViewModel ComputerVM => _computerVM ??= _computerVMFactory();
+
+        private GroupViewModel? _groupVM;
+        public GroupViewModel GroupVM => _groupVM ??= _groupVMFactory();
+
+        private EntraViewModel? _entraVM;
+        public EntraViewModel EntraVM => _entraVM ??= new EntraViewModel();
+
+        private LinksViewModel? _linksVM;
+        public LinksViewModel LinksVM => _linksVM ??= _linksVMFactory();
+
         public AboutViewModel AboutVM { get; private set; } = null!;
         public SettingsViewModel SettingsVM { get; private set; } = null!;
 
@@ -51,7 +68,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 _selectedNav = value;
                 OnPropertyChanged();
                 if (value is null) return;
-                SelectedView = value.View; // keep enum in sync
+                SelectedView = value.View;
                 value.Command?.Execute(null);
             }
         }
@@ -114,10 +131,15 @@ namespace DSAMVVM.MVVM.ViewModel
             _searchService = searchService;
             StatusBar = statusBar;
 
+            _userVMFactory = userVMFactory;
+            _computerVMFactory = computerVMFactory;
+            _groupVMFactory = groupVMFactory;
+            _linksVMFactory = linksVMFactory;
+
             _searchService.HistoryChanged += OnHistoryChanged;
             SyncHistoryFromService();
 
-            InitializeViewModels(userVMFactory, computerVMFactory, groupVMFactory, linksVMFactory, aboutVM);
+            InitializeViewModels(aboutVM);
             InitializeCommands();
             InitializeNavigation();
         }
@@ -160,20 +182,10 @@ namespace DSAMVVM.MVVM.ViewModel
             catch (Exception ex) { UiNotify.Warn($"Failed to load department data: {ex.Message}", sticky: true); }
         }
 
-        // vm factories
-        private void InitializeViewModels(
-            Func<UserViewModel> userVMFactory,
-            Func<ComputerViewModel> computerVMFactory,
-            Func<GroupViewModel> groupVMFactory,
-            Func<LinksViewModel> linksVMFactory,
-            AboutViewModel aboutVM)
+        // eager setup: Home/About/Settings only
+        private void InitializeViewModels(AboutViewModel aboutVM)
         {
             HomeVM = App.Services.GetRequiredService<HomeViewModel>();
-            UserVM = userVMFactory();
-            ComputerVM = computerVMFactory();
-            GroupVM = groupVMFactory();
-            EntraVM = new EntraViewModel();
-            LinksVM = linksVMFactory();
             AboutVM = aboutVM;
             SettingsVM = new SettingsViewModel();
         }

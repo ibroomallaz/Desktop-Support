@@ -19,6 +19,8 @@ public class LinksViewModel : ObeservableObject
 
     private static AppSettings Settings => App.Settings;
 
+    private int _loadedFlag; // 0 = not loaded, 1 = loaded (or in-flight first load)
+
     public LinksViewModel(ILinksService linksService, ISettingsService settingsService)
     {
         _linksService = linksService ?? throw new ArgumentNullException(nameof(linksService));
@@ -26,7 +28,37 @@ public class LinksViewModel : ObeservableObject
 
         ReloadLinksCommand = new RelayCommand(async _ => await ReloadAsync());
 
-        _ = LoadAsync();
+        //no implicit loading here. Call EnsureLoadedAsync() after first paint.
+        // this avoids slower startup times if loading is slow.
+    }
+
+    public async Task EnsureLoadedAsync()
+    {
+        if (Interlocked.Exchange(ref _loadedFlag, 1) == 1) return; // already loaded or loading
+
+        var sw = Stopwatch.StartNew();
+        Log.Debug(Tag, "initial_load: begin");
+
+        try
+        {
+            var cached = _linksService.GetCachedLinksData();
+            Log.Debug(Tag, $"initial_load: cached_present={(cached != null)}");
+            if (cached is not null) Apply(cached);
+
+            var data = await _linksService.LoadLinksDataAsync().ConfigureAwait(false);
+            if (data is not null) Apply(data);
+
+            sw.Stop();
+            Log.Debug(Tag, $"initial_load: success duration_ms={sw.ElapsedMilliseconds} teams={TeamNames.Count} common={CommonLinks.Count}");
+        }
+        catch (Exception ex)
+        {
+            sw.Stop();
+            Log.Error(Tag, $"initial_load: failed duration_ms={sw.ElapsedMilliseconds}", ex);
+            UiNotify.Warn($"Failed to load links: {ex.Message}");
+            // allow reattempt on next call
+            Interlocked.Exchange(ref _loadedFlag, 0);
+        }
     }
 
     private bool _isReloading;
@@ -93,31 +125,6 @@ public class LinksViewModel : ObeservableObject
         UpdateSelectedTeamLinks();
     }
 
-    private async Task LoadAsync()
-    {
-        var sw = Stopwatch.StartNew();
-        Log.Info(Tag, "initial_load: begin");
-
-        try
-        {
-            var cached = _linksService.GetCachedLinksData();
-            Log.Debug(Tag, $"initial_load: cached_present={(cached != null)}");
-            if (cached is not null) Apply(cached);
-
-            var data = await _linksService.LoadLinksDataAsync().ConfigureAwait(false);
-            if (data is not null) Apply(data);
-
-            sw.Stop();
-            Log.Info(Tag, $"initial_load: success duration_ms={sw.ElapsedMilliseconds} teams={TeamNames.Count} common={CommonLinks.Count}");
-        }
-        catch (Exception ex)
-        {
-            sw.Stop();
-            Log.Error(Tag, $"initial_load: failed duration_ms={sw.ElapsedMilliseconds}", ex);
-            UiNotify.Warn($"Failed to load links: {ex.Message}");  // also logs via UiNotify
-        }
-    }
-
     private async Task ReloadAsync()
     {
         if (IsReloading) { Log.Debug(Tag, "reload: skipped (busy)"); return; }
@@ -126,7 +133,7 @@ public class LinksViewModel : ObeservableObject
         var sw = Stopwatch.StartNew();
         IsReloading = true;
 
-        Log.Info(Tag, $"reload: begin prevTeam='{previousTeam}'");
+        Log.Debug(Tag, $"reload: begin prevTeam='{previousTeam}'");
 
         try
         {
@@ -137,7 +144,6 @@ public class LinksViewModel : ObeservableObject
 
             if (data is not null) Apply(data);
 
-            // try to restore selection
             if (!string.IsNullOrWhiteSpace(previousTeam) &&
                 TeamNames.Any(n => string.Equals(n, previousTeam, StringComparison.OrdinalIgnoreCase)))
             {
@@ -150,7 +156,7 @@ public class LinksViewModel : ObeservableObject
             }
 
             sw.Stop();
-            Log.Info(Tag, $"reload: success duration_ms={sw.ElapsedMilliseconds} teams={TeamNames.Count} common={CommonLinks.Count} selected='{SelectedTeam ?? ""}' teamLinkCount={SelectedTeamLinks.Count}");
+            Log.Debug(Tag, $"reload: success duration_ms={sw.ElapsedMilliseconds} teams={TeamNames.Count} common={CommonLinks.Count} selected='{SelectedTeam ?? ""}' teamLinkCount={SelectedTeamLinks.Count}");
 
             UiNotify.Success("Links reloaded.", showStatusBar: true, key: StatusKey);
         }

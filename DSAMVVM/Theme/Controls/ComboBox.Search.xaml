@@ -23,14 +23,23 @@
                             BorderBrush="Transparent"
                             BorderThickness="1">
                         <Grid>
-                            <!-- Make the whole control clickable to open the list -->
+                            <!-- Whole-control click target to open list (no visual states) -->
                             <ToggleButton x:Name="PART_DropDownToggle"
                                           Background="Transparent"
                                           BorderThickness="0"
                                           Focusable="False"
                                           IsTabStop="False"
                                           Cursor="Hand"
-                                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+                                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                          FocusVisualStyle="{x:Null}"
+                                          OverridesDefaultStyle="True">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                        <!-- No visuals; just a hit-test surface -->
+                                        <Border Background="Transparent"/>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
 
                             <!-- Placeholder -->
                             <TextBlock x:Name="Placeholder"
@@ -52,7 +61,17 @@
                                          FontSize="12"
                                          CaretBrush="White"
                                          Foreground="{TemplateBinding Foreground}"
-                                         Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                         SelectionBrush="Transparent"
+                                         SelectionOpacity="0"
+                                         Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    <!-- Also remove any OS highlight fallback -->
+                                    <TextBox.Resources>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#CFCFCF"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#CFCFCF"/>
+                                    </TextBox.Resources>
+                                </TextBox>
                             </ScrollViewer>
 
                             <!-- Dropdown popup -->
@@ -83,9 +102,8 @@
                             <Setter TargetName="Chrome" Property="BorderBrush" Value="#30FFFFFF"/>
                         </Trigger>
 
-                        <!-- Keyboard focus border -->
+                        <!-- Keep UA red on keyboard focus -->
                         <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                            <!-- UA accent -->
                             <Setter TargetName="Chrome" Property="BorderBrush" Value="#8C1D40"/>
                         </Trigger>
 
