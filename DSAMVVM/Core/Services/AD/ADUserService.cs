@@ -103,7 +103,7 @@ namespace DSAMVVM.Core.Services.AD
                 };
 
                 string tierText = tier.StartsWith("EXP", StringComparison.Ordinal)
-                    ? $"Exchange P{tier.Substring(3)}"   // EXP1 -> Exchange P1
+                    ? $"Exchange P{tier[3..]}"   // EXP1 -> Exchange P1
                     : tier;                              // A1 / E3, etc.
 
                 return $"{roleText} {tierText}".Trim();
@@ -111,7 +111,7 @@ namespace DSAMVVM.Core.Services.AD
 
             // Fallback
             foreach (var segment in license.Split('(', ')'))
-                if (segment.IndexOf("365", StringComparison.OrdinalIgnoreCase) >= 0)
+                if (segment.Contains("365", StringComparison.OrdinalIgnoreCase))
                     return segment.Trim() + " (Unknown License Type)";
 
             return "No valid O365 license found";

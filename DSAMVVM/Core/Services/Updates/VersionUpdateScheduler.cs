@@ -8,7 +8,7 @@ namespace DSAMVVM.Core.Services.Updates
     {
         private readonly IVersionCheckHandler _handler;
         private readonly SemaphoreSlim _singleFlight = new(1, 1); // -> prevent overlap
-        private readonly object _gate = new();                    // -> swap timer/cts safely
+        private readonly Lock _gate = new();                    // -> swap timer/cts safely
 
         private CancellationTokenSource? _cts;
         private PeriodicTimer? _timer;

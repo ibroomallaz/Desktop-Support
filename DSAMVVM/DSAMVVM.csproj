@@ -10,9 +10,9 @@
     <ApplicationIcon>img\MainIcon.ico</ApplicationIcon>
     <RepositoryUrl>https://github.com/ibroomallaz/Desktop-Support</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>4.0.1</AssemblyVersion>
-    <FileVersion>4.0.1200</FileVersion>
-    <Version>4.0.1</Version>
+    <AssemblyVersion>4.0.2</AssemblyVersion>
+    <FileVersion>4.0.1300</FileVersion>
+    <Version>4.0.2</Version>
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Title>Desktop Support App</Title>
