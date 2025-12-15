@@ -84,10 +84,10 @@
             "ComponentsUrl" = "8:"
                 "Items"
                 {
-                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.NetCore.DesktopRuntime.9.0.x64"
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.NetCore.DesktopRuntime.10.0.x64"
                     {
-                    "Name" = "8:.NET Desktop Runtime 9.0.8 (x64)"
-                    "ProductCode" = "8:Microsoft.NetCore.DesktopRuntime.9.0.x64"
+                    "Name" = "8:.NET Desktop Runtime 10.0.0 (x64)"
+                    "ProductCode" = "8:Microsoft.NetCore.DesktopRuntime.10.0.x64"
                     }
                 }
             }
@@ -789,7 +789,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_E0768B0D1B8A4C9B8AFA904CF9613D47"
             {
-            "SourcePath" = "8:..\\DSAMVVM\\obj\\Release\\net9.0-windows10.0.26100.0\\apphost.exe"
+            "SourcePath" = "8:..\\DSAMVVM\\obj\\Release\\net10.0-windows10.0.26100.0\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_0D37022F8F7C4A6AB7ADD7AFBFDCEB18"
