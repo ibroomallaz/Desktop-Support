@@ -17,6 +17,7 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IDepartmentService _deptService;
         private readonly ISettingsService _settingsSvc;
         private readonly IOutputTextSettingsProvider _notifier;
+        private readonly IFlowDocService _flowDoc;
 
         // Per-view font context
         private const string ViewKey = "UserView";
@@ -58,18 +59,34 @@ namespace DSAMVVM.MVVM.ViewModel
         }
 
         public UserViewModel(
-            IADService adService,
-            IDepartmentService deptService,
-            ISettingsService settingsSvc,
-            IOutputTextSettingsProvider notifier)
+                    IADService adService,
+                    IDepartmentService deptService,
+                    ISettingsService settingsSvc,
+                    IOutputTextSettingsProvider notifier,
+                    IFlowDocService flowDoc) // Inject
         {
             _adService = adService ?? throw new ArgumentNullException(nameof(adService));
             _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
             _settingsSvc = settingsSvc ?? throw new ArgumentNullException(nameof(settingsSvc));
             _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
+            _flowDoc = flowDoc ?? throw new ArgumentNullException(nameof(flowDoc));
 
             _notifier.Changed += OnFontSettingsChanged;
+
+            // Subscribe to Link Clicks
+            _flowDoc.LinkClicked += OnLinkClicked;
+
             RefreshEffectiveFontSize();
+        }
+
+        private async void OnLinkClicked(object? sender, string url)
+        {
+            if (url.StartsWith("dsa://team/", StringComparison.OrdinalIgnoreCase))
+            {
+                var encodedName = url.Substring("dsa://team/".Length);
+                var teamName = Uri.UnescapeDataString(encodedName);
+                await ShowTeamInfoAsync(teamName);
+            }
         }
 
         private void OnFontSettingsChanged(object? sender, EventArgs e) => RefreshEffectiveFontSize();
@@ -132,6 +149,50 @@ namespace DSAMVVM.MVVM.ViewModel
             }
 
             AppendRaw($"[cyan]{labelPrefix}[/cyan][red][{labelText}]({linkTarget})[/red]");
+        }
+
+        private async Task ShowTeamInfoAsync(string teamName)
+        {
+            AppendRaw(string.Empty);
+            AppendRaw($"[green]Fetching info for team: {teamName}...[/green]");
+
+            var team = await _deptService.GetSupportTeamAsync(teamName);
+
+            if (team == null)
+            {
+                AppendRaw($"[red]Team details not found.[/red]");
+                return;
+            }
+
+            AppendTitle($"Team: {team.SupportTeamName}");
+
+            if (!string.IsNullOrWhiteSpace(team.ManagerName))
+            {
+                var mgr = team.ManagerName;
+                if (!string.IsNullOrWhiteSpace(team.ManagerNetID)) mgr += $" ({team.ManagerNetID})";
+                AppendLabelValue("Manager: ", mgr);
+            }
+
+            if (team.SupportedDivisions != null && team.SupportedDivisions.Count > 0)
+            {
+                AppendRaw("[cyan]Supported Divisions:[/cyan]");
+
+                // Sort: Abbrev first, then Name
+                var sortedDivs = team.SupportedDivisions
+                    .OrderBy(d => d.DivAbbrev)
+                    .ThenBy(d => d.DivFullName);
+
+                foreach (var div in sortedDivs)
+                {
+                    // Format: Abbrev - Name (Gray)
+                    AppendRaw($"[lightgray]   • {div.DivAbbrev} - {div.DivFullName}[/lightgray]");
+                }
+            }
+            else
+            {
+                AppendRaw("[gray](No specific divisions listed)[/gray]");
+            }
+            AppendRaw(string.Empty);
         }
 
         // Search entry point
@@ -216,9 +277,14 @@ namespace DSAMVVM.MVVM.ViewModel
                         var teamName = string.IsNullOrWhiteSpace(team) ? null : team.Trim();
 
                         if (!string.IsNullOrWhiteSpace(teamName))
-                            AppendLabelValue("Support Team: ", teamName);
+                        {
+                            var url = $"dsa://team/{Uri.EscapeDataString(teamName)}";
+                            AppendRaw($"[cyan]Support Team: [/cyan][red][{teamName}]({url})[/red]");
+                        }
                         else
+                        {
                             AppendLabelValue("Teams: ", "None", treatEmptyAsNone: false);
+                        }
 
                         var repoPath = await _deptService.GetFileRepoPathAsync(dept.Number);
                         if (!string.IsNullOrWhiteSpace(repoPath))
@@ -334,6 +400,7 @@ namespace DSAMVVM.MVVM.ViewModel
             if (disposing)
             {
                 _notifier.Changed -= OnFontSettingsChanged;
+                _flowDoc.LinkClicked -= OnLinkClicked;
             }
             _disposed = true;
         }

@@ -20,12 +20,24 @@ namespace DSAMVVM.Core.Services
         private List<IDepartment>? _departments;
         private DepartmentMeta? _meta;
 
+        // Class-level dictionary for fast Team lookups
+        private Dictionary<string, SupportTeam> _teamMap = [];
+
         public async Task PreCacheDataAsync() => await EnsureDataLoaded();
 
         public async Task<IDepartment?> GetDepartmentAsync(string departmentNumber)
         {
             await EnsureDataLoaded();
             return _departments?.FirstOrDefault(d => d.Number == departmentNumber);
+        }
+
+        //Support Team Lookup
+        public async Task<SupportTeam?> GetSupportTeamAsync(string teamName)
+        {
+            await EnsureDataLoaded();
+            if (string.IsNullOrWhiteSpace(teamName)) return null;
+            _teamMap.TryGetValue(teamName.Trim(), out var team);
+            return team;
         }
 
         public async Task<string?> GetTeamAsync(string departmentNumber)
@@ -62,7 +74,7 @@ namespace DSAMVVM.Core.Services
             }
             finally { _lock.Release(); }
         }
-
+        //Department JSON Global used here
         private async Task LoadDepartmentsInternalAsync(bool isReload)
         {
             var key = isReload ? "DeptData.Reload" : "DeptData.Load";
@@ -75,7 +87,7 @@ namespace DSAMVVM.Core.Services
                 // Loader: web-first; write backup when web stamp is newer (or no local); fallback to local on web failure.
                 var wrapper = await RemoteWithBackUpLoader.LoadAsync(
                     _http,
-                    Globals.g_DepartmentJSONURL,
+                    Globals.g_DepartmentTestJSONURL,
                     _fileCache,
                     StampSelector,
                     ct: default,
@@ -83,7 +95,23 @@ namespace DSAMVVM.Core.Services
                     normalize: w => w.Meta?.Normalize(),
                     log: msg => Log.Info("Dept.Loader", msg)) ?? throw new InvalidOperationException("No department data available from web or local cache.");
                 _meta = wrapper.Meta;
-                _departments = [.. (wrapper.DepartmentList ?? []).Select(d => new DepartmentAdapter(d))];
+
+                // Populate class-level Dictionary
+                _teamMap = wrapper.SupportTeams?
+                    .Where(t => !string.IsNullOrWhiteSpace(t.SupportTeamName))
+                    .ToDictionary(t => t.SupportTeamName.Trim(), StringComparer.OrdinalIgnoreCase)
+                    ?? [];
+
+                // Map Departments and Link Support Teams
+                _departments = [.. (wrapper.DepartmentList ?? []).Select(d =>
+                {
+                    SupportTeam? matchedTeam = null;
+                    if (!string.IsNullOrWhiteSpace(d.Team) && _teamMap.TryGetValue(d.Team.Trim(), out var t))
+                    {
+                        matchedTeam = t;
+                    }
+                    return new DepartmentAdapter(d, matchedTeam);
+                })];
 
                 sw.Stop();
                 UiNotify.RemoveKey(progressKey);
@@ -105,14 +133,20 @@ namespace DSAMVVM.Core.Services
         private static DateTime? StampSelector(DepartmentListWrapper w) => w.Meta?.LastUpdatedUtc;
 
         // Thin adapter to keep UI decoupled from transport DTOs.
-        private sealed class DepartmentAdapter(Department source) : IDepartment
+        private sealed class DepartmentAdapter(Department source, SupportTeam? teamInfo) : IDepartment
         {
             private readonly Department _source = source;
+            private readonly SupportTeam? _teamInfo = teamInfo;
+
             public string Number => _source.Number;
             public bool SupportKnown => _source.SupportKnown;
             public string? Team => string.IsNullOrWhiteSpace(_source.Team) ? null : _source.Team.Trim();
             public string? Notes => _source.Notes;
             public string? FileRepoPath => string.IsNullOrWhiteSpace(_source.FileRepoPath) ? null : _source.FileRepoPath;
+
+            public string? ManagerName => _teamInfo?.ManagerName;
+            public string? ManagerNetId => _teamInfo?.ManagerNetID;
+            public List<SupportedDivs>? SupportedDivisions => _teamInfo?.SupportedDivisions;
         }
     }
 }

@@ -15,6 +15,8 @@ namespace DSAMVVM.Core.Services
         private const double DefaultLineHeightRatio = 1.08;
         private const string DefaultPlaceholder = "Type in information in the search bar above and press enter to search";
 
+        public event EventHandler<string>? LinkClicked;
+
         private static readonly Dictionary<string, string> PlaceholderByView = new(StringComparer.OrdinalIgnoreCase)
         {
             ["UserView"] = "Enter a NetID above, then press Enter to search.",
@@ -113,7 +115,7 @@ namespace DSAMVVM.Core.Services
             return doc;
         }
 
-        private static void AddColoredRuns(Paragraph p, string line, IReadOnlyDictionary<string, Brush> colors)
+        private void AddColoredRuns(Paragraph p, string line, IReadOnlyDictionary<string, Brush> colors)
         {
             int index = 0;
             while (index < line.Length)
@@ -160,7 +162,7 @@ namespace DSAMVVM.Core.Services
             }
         }
 
-        private static Inline[] SplitTextIntoInlines(string text, Brush? foreground)
+        private Inline[] SplitTextIntoInlines(string text, Brush? foreground)
         {
             var parts = new List<Inline>();
             int pos = 0;
@@ -210,11 +212,12 @@ namespace DSAMVVM.Core.Services
             return [.. parts];
         }
 
-        private static Hyperlink MakeLink(string url, Brush? foreground, string? visibleText = null)
+        private Hyperlink MakeLink(string url, Brush? foreground, string? visibleText = null)
         {
             var display = string.IsNullOrWhiteSpace(visibleText) ? url : visibleText;
             var run = new Run(display);
             if (foreground != null) run.Foreground = foreground;
+
 
             //avoid casting object? to Brush directly to satisfy nullable analysis
             var baseTextBrush = foreground
@@ -229,9 +232,18 @@ namespace DSAMVVM.Core.Services
                 TextDecorations = [BuildUnderlineForBrush(baseTextBrush)]
             };
 
+            //Intercept 'dsa://' links and fire event
             link.RequestNavigate += (_, e) =>
             {
-                try { Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true }); } catch { }
+                if (e.Uri.Scheme.Equals("dsa", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Fire the instance event so the ViewModel knows a team was clicked
+                    LinkClicked?.Invoke(this, e.Uri.OriginalString);
+                }
+                else
+                {
+                    try { Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true }); } catch { }
+                }
                 e.Handled = true;
             };
 
@@ -261,10 +273,10 @@ namespace DSAMVVM.Core.Services
             return link;
         }
 
-        [GeneratedRegex(@"(?:https?|file)://[^\s)\]}>,\""]*[^\s)\]}>,\.\""]", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
+        [GeneratedRegex(@"(?:https?|file|dsa)://[^\s)\]}>,\""]*[^\s)\]}>,\.\""]", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
         private static partial Regex URLRegex();
 
-        [GeneratedRegex(@"\[(?<label>[^\]]+)\]\((?<url>(?:https?|file)://[^\s)\]}>,\""]*[^\s)\]}>,\.\""])\)", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
+        [GeneratedRegex(@"\[(?<label>[^\]]+)\]\((?<url>(?:https?|file|dsa)://[^\s)\]}>,\""]*[^\s)\]}>,\.\""])\)", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
         private static partial Regex MarkdownLinkRegex();
     }
 }

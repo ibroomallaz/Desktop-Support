@@ -11,5 +11,7 @@ namespace DSAMVVM.Core.Interfaces
             double? lineHeightRatio = null,
             IReadOnlyDictionary<string, Brush>? colorMap = null,
             string? viewName = null);
+
+        event EventHandler<string>? LinkClicked;
     }
 }
