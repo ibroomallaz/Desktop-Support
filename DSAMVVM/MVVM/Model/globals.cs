@@ -45,7 +45,7 @@ namespace DSAMVVM.MVVM.Model
 
         // Schema versions
         public const int g_SettingsSchema = 1;
-        public const int g_DepartmentJSONSchema = 2;
+        public const int g_DepartmentJSONSchema = 3;
         public const int g_LinkJSONSchema = 2;
         public const int g_VersionSchema = 2;
 

@@ -83,7 +83,7 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             if (url.StartsWith("dsa://team/", StringComparison.OrdinalIgnoreCase))
             {
-                var encodedName = url.Substring("dsa://team/".Length);
+                var encodedName = url["dsa://team/".Length..];
                 var teamName = Uri.UnescapeDataString(encodedName);
                 await ShowTeamInfoAsync(teamName);
             }
