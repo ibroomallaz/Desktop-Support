@@ -102,18 +102,41 @@ namespace DSAMVVM.Core.Services
                     .ToDictionary(t => t.SupportTeamName.Trim(), StringComparer.OrdinalIgnoreCase)
                     ?? [];
 
+                // LOGGING: Confirm team count
+                Log.Info("Dept.Loader", $"Loaded {_teamMap.Count} support team definitions.");
+
                 // Map Departments and Link Support Teams
+                int linkedCount = 0;
                 _departments = [.. (wrapper.DepartmentList ?? []).Select(d =>
+        {
+            SupportTeam? matchedTeam = null;
+            
+            // Check if department has a team assignment
+            if (!string.IsNullOrWhiteSpace(d.Team))
+            {
+                var teamName = d.Team.Trim();
+                
+                // Try to find the team
+                if (_teamMap.TryGetValue(teamName, out var t))
                 {
-                    SupportTeam? matchedTeam = null;
-                    if (!string.IsNullOrWhiteSpace(d.Team) && _teamMap.TryGetValue(d.Team.Trim(), out var t))
-                    {
-                        matchedTeam = t;
-                    }
-                    return new DepartmentAdapter(d, matchedTeam);
-                })];
+                    matchedTeam = t;
+                    linkedCount++;
+                }
+                else
+                {
+                    // LOGGING: Warn about broken links
+                    Log.Warn("Dept.Loader", $"Department '{d.Number}' references unknown team '{teamName}'. Check JSON spelling.");
+                }
+            }
+
+            return new DepartmentAdapter(d, matchedTeam);
+        })];
 
                 sw.Stop();
+
+                // LOGGING: Summary of linking
+                Log.Info("Dept.Loader", $"Mapped {linkedCount} departments to their support teams out of {_departments.Count} total.");
+
                 UiNotify.RemoveKey(progressKey);
                 UiNotify.Success($"{(isReload ? "Refreshed" : "Loaded")} {_departments.Count} departments in {sw.ElapsedMilliseconds} ms.",
                                  showStatusBar: true, key: key);
@@ -126,6 +149,9 @@ namespace DSAMVVM.Core.Services
                     $"Failed to {(isReload ? "refresh" : "load")} department data: {e.Message}",
                     sticky: true, priority: 3, key: key,
                     UiNotify.Link.Action("Retry", async () => await ReloadDataAsync(), "Try the download again"));
+
+                // Ensure error is logged to disk as well
+                Log.Error("Dept.Loader", "Fatal error loading department data", e);
             }
         }
 

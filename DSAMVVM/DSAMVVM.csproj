@@ -12,7 +12,7 @@
     <RepositoryType>git</RepositoryType>
     <AssemblyVersion>4.0.2</AssemblyVersion>
     <FileVersion>4.0.1300</FileVersion>
-    <Version>4.0.2</Version>
+    <Version>4.1.0-beta</Version>
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Title>Desktop Support App</Title>
