@@ -38,7 +38,7 @@ namespace DSAMVVM.MVVM.Model.Config
                 }
             }
 
-            // New: normalize Links preferences
+            // Normalize Links preferences
             Ui?.Links?.Normalize();
 
             Paths?.DepartmentData?.Normalize();
@@ -57,6 +57,9 @@ namespace DSAMVVM.MVVM.Model.Config
 
     public class DataLocation
     {
+        // Master toggle for this override
+        public bool UseCustomSource { get; set; } = false;
+
         // "web" | "file"
         public string Source { get; set; } = "web";
 
@@ -79,6 +82,12 @@ namespace DSAMVVM.MVVM.Model.Config
             {
                 FallbackFile = null;
             }
+
+            // Safety: If enabled but no URI provided, auto-disable to prevent errors
+            if (UseCustomSource && string.IsNullOrWhiteSpace(Uri))
+            {
+                UseCustomSource = false;
+            }
         }
     }
 
@@ -92,11 +101,10 @@ namespace DSAMVVM.MVVM.Model.Config
 
         public SearchSettings Search { get; set; } = new();
 
-        // New: Links preferences
+        // Links preferences
         public LinksUiSettings Links { get; set; } = new();
     }
 
-    // New: Links preferences + operational state
     public sealed class LinksUiSettings
     {
         // Preferences

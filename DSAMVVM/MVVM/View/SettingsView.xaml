@@ -4,18 +4,18 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:app="clr-namespace:DSAMVVM"
-             mc:Ignorable="d">
+             xmlns:vm="clr-namespace:DSAMVVM.MVVM.ViewModel"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}">
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <!-- Match About: same global theme dictionaries -->
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Theme/Colors/Colors.UA.xaml"/>
                 <ResourceDictionary Source="/Theme/Decor/Gradient.UA.xaml"/>
                 <ResourceDictionary Source="/Theme/Controls/Button.Rounded.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Card container style (same pattern used in About) -->
             <Style x:Key="Card.Container" TargetType="Border">
                 <Setter Property="Padding" Value="0"/>
                 <Setter Property="CornerRadius" Value="12"/>
@@ -26,7 +26,6 @@
                 <Setter Property="SnapsToDevicePixels" Value="True"/>
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <!-- Use the same hover background token as About -->
                         <Setter Property="Background" Value="{DynamicResource CardGradient.Surface.Hover}"/>
                     </Trigger>
                     <Trigger Property="IsEnabled" Value="False">
@@ -35,7 +34,6 @@
                 </Style.Triggers>
             </Style>
 
-            <!-- Compact rounded button to match About small CTAs -->
             <Style x:Key="Button.Rounded.Compact" TargetType="Button" BasedOn="{StaticResource Button.Rounded}">
                 <Setter Property="Padding"   Value="8,2"/>
                 <Setter Property="MinHeight" Value="26"/>
@@ -43,16 +41,36 @@
                 <Setter Property="MinWidth"  Value="0"/>
             </Style>
 
-            <!-- Local helpers -->
             <Style x:Key="FieldLabel" TargetType="TextBlock">
                 <Setter Property="VerticalAlignment" Value="Center"/>
                 <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}"/>
                 <Setter Property="FontSize" Value="12"/>
             </Style>
 
+            <Style x:Key="TextBox.Settings" TargetType="TextBox">
+                <Setter Property="Height" Value="28"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Padding" Value="4,0"/>
+                <Setter Property="Background" Value="{DynamicResource Brush.Surface.1}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TextBox">
+                            <Border Background="{TemplateBinding Background}" 
+                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                    BorderThickness="{TemplateBinding BorderThickness}" 
+                                    CornerRadius="4">
+                                <ScrollViewer x:Name="PART_ContentHost"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
-            <!-- Label formatters for int-based ComboBoxes -->
             <DataTemplate x:Key="HistoryItemTemplate">
                 <TextBlock Foreground="{DynamicResource Brush.Text.Primary}">
                     <TextBlock.Style>
@@ -102,19 +120,16 @@
     </UserControl.Resources>
 
     <Grid Background="{DynamicResource Brush.Surface.0}">
-        <!-- Row 0 = scrollable content, Row 1 = fixed bottom bar -->
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- SCROLLABLE CONTENT -->
         <ScrollViewer Grid.Row="0"
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="16" Orientation="Vertical">
 
-                <!-- === SEARCH TEXT CARD === -->
                 <Border Style="{StaticResource Card.Container}">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -122,35 +137,27 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Left gradient accent -->
-                        <Border Grid.Column="0"
-                                Background="{DynamicResource CardGradient.Accent}"
-                                CornerRadius="12,0,0,12"/>
+                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
 
                         <StackPanel Grid.Column="1" Margin="16">
                             <TextBlock Text="Search text" FontSize="16" FontWeight="SemiBold"
                                        Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
 
-                            <!-- Default size at launch -->
                             <Grid Margin="0,0,0,12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="12"/>
                                     <ColumnDefinition Width="240"/>
                                 </Grid.ColumnDefinitions>
-
                                 <TextBlock Text="Default search size at launch" Style="{StaticResource FieldLabel}"/>
-
                                 <ComboBox x:Name="InitialSizeCombo" Grid.Column="2"
                                           Style="{DynamicResource Combo.Links.Dropdown}"
                                           ItemsSource="{Binding InitialFontSizeOptions}"
                                           SelectedValue="{Binding DefaultFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                           SelectedValuePath="."
-                                          ItemTemplate="{StaticResource PtItemTemplate}"
-                                          SelectionChanged="InitialSizeCombo_SelectionChanged"/>
+                                          ItemTemplate="{StaticResource PtItemTemplate}"/>
                             </Grid>
 
-                            <!-- Default (app-wide) search size -->
                             <Grid Margin="0,0,0,12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -159,37 +166,28 @@
                                     <ColumnDefinition Width="12"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-
                                 <TextBlock Text="Default search text size" Style="{StaticResource FieldLabel}"/>
-
                                 <Slider x:Name="GeneralSizeSlider" Grid.Column="2"
                                         Minimum="8" Maximum="24" TickFrequency="1"
                                         IsSnapToTickEnabled="True"
-                                        Value="{Binding DefaultFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        ValueChanged="GeneralSizeSlider_ValueChanged"/>
+                                        Value="{Binding DefaultFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                 <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
-                                    <Run Text="{Binding ElementName=GeneralSizeSlider, Path=Value, StringFormat=F0}"/>
-                                    <Run Text=" pt"/>
+                                    <Run Text="{Binding ElementName=GeneralSizeSlider, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
                                 </TextBlock>
                             </Grid>
 
-                            <!-- Per-tab toggle -->
                             <CheckBox x:Name="UsePerViewCheck"
                                       Foreground="{DynamicResource Brush.Text.Primary}"
                                       Content="Enable per-tab search size (override default)"
                                       Margin="0,0,0,8"
-                                      IsChecked="{Binding UsePerViewOverride, Mode=TwoWay}"
-                                      Checked="UsePerViewCheck_Changed"
-                                      Unchecked="UsePerViewCheck_Changed"/>
+                                      IsChecked="{Binding UsePerViewOverride, Mode=TwoWay}"/>
 
-                            <!-- Per-tab sliders -->
                             <StackPanel x:Name="PerViewPanel"
                                         Visibility="{Binding ElementName=UsePerViewCheck, Path=IsChecked, Converter={StaticResource BoolToVis}}">
                                 <TextBlock Text="Per-tab search text sizes" FontWeight="SemiBold"
                                            Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,8"/>
 
                                 <UniformGrid Columns="2" Rows="2">
-                                    <!-- User -->
                                     <Grid Margin="0,0,12,8">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
@@ -201,14 +199,11 @@
                                         <TextBlock Text="User" Style="{StaticResource FieldLabel}"/>
                                         <Slider x:Name="UserSize" Grid.Column="2" Minimum="8" Maximum="24"
                                                 TickFrequency="1" IsSnapToTickEnabled="True"
-                                                Value="{Binding UserFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                ValueChanged="PerViewSize_ValueChanged"/>
+                                                Value="{Binding UserFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                         <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
                                             <Run Text="{Binding ElementName=UserSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
                                         </TextBlock>
                                     </Grid>
-
-                                    <!-- Computer -->
                                     <Grid Margin="0,0,12,8">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
@@ -220,14 +215,11 @@
                                         <TextBlock Text="Computer" Style="{StaticResource FieldLabel}"/>
                                         <Slider x:Name="ComputerSize" Grid.Column="2" Minimum="8" Maximum="24"
                                                 TickFrequency="1" IsSnapToTickEnabled="True"
-                                                Value="{Binding ComputerFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                ValueChanged="PerViewSize_ValueChanged"/>
+                                                Value="{Binding ComputerFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                         <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
                                             <Run Text="{Binding ElementName=ComputerSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
                                         </TextBlock>
                                     </Grid>
-
-                                    <!-- Group -->
                                     <Grid Margin="0,0,12,8">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
@@ -239,14 +231,11 @@
                                         <TextBlock Text="Group" Style="{StaticResource FieldLabel}"/>
                                         <Slider x:Name="GroupSize" Grid.Column="2" Minimum="8" Maximum="24"
                                                 TickFrequency="1" IsSnapToTickEnabled="True"
-                                                Value="{Binding GroupFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                ValueChanged="PerViewSize_ValueChanged"/>
+                                                Value="{Binding GroupFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                         <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
                                             <Run Text="{Binding ElementName=GroupSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
                                         </TextBlock>
                                     </Grid>
-
-                                    <!-- Entra -->
                                     <Grid Margin="0,0,12,8">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
@@ -258,8 +247,7 @@
                                         <TextBlock Text="Entra" Style="{StaticResource FieldLabel}"/>
                                         <Slider x:Name="EntraSize" Grid.Column="2" Minimum="8" Maximum="24"
                                                 TickFrequency="1" IsSnapToTickEnabled="True"
-                                                Value="{Binding EntraFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                ValueChanged="PerViewSize_ValueChanged"/>
+                                                Value="{Binding EntraFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                         <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
                                             <Run Text="{Binding ElementName=EntraSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
                                         </TextBlock>
@@ -270,7 +258,6 @@
                     </Grid>
                 </Border>
 
-                <!-- === LINKS CARD (RADIO MODE + DROPDOWN) === -->
                 <Border Style="{StaticResource Card.Container}">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -278,33 +265,109 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="0"
-                                Background="{DynamicResource CardGradient.Accent}"
-                                CornerRadius="12,0,0,12"/>
+                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
 
                         <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Links" FontSize="16" FontWeight="SemiBold"
+                            <TextBlock Text="Data Management" FontSize="16" FontWeight="SemiBold"
                                        Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
 
-                            <!-- Mode selection: radio group -->
+                            <TextBlock Text="Department Data" FontWeight="SemiBold" Margin="0,0,0,8" 
+                                       Foreground="{DynamicResource Brush.Text.Primary}" FontSize="13"/>
+
+                            <CheckBox Content="Override Default Location" 
+                                      IsChecked="{Binding UseCustomDept}"
+                                      Foreground="{DynamicResource Brush.Text.Primary}"
+                                      Margin="0,0,0,12"/>
+
+                            <Grid Margin="0,0,0,16" Visibility="{Binding UseCustomDept, Converter={StaticResource BoolToVis}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="12"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Source" Style="{StaticResource FieldLabel}"/>
+                                <ComboBox Grid.Row="0" Grid.Column="2" 
+                                          ItemsSource="{Binding DataSourceOptions}"
+                                          SelectedItem="{Binding DeptSource}"
+                                          Style="{DynamicResource Combo.Links.Dropdown}"
+                                          HorizontalAlignment="Left" Width="140"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Location" Style="{StaticResource FieldLabel}"/>
+                                <TextBox Grid.Row="2" Grid.Column="2" 
+                                         Text="{Binding DeptUri, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource TextBox.Settings}"
+                                         ToolTip="Enter Web URL (https://...) or Local File Path"/>
+                            </Grid>
+
+                            <TextBlock Text="Links Data" FontWeight="SemiBold" Margin="0,0,0,8" 
+                                       Foreground="{DynamicResource Brush.Text.Primary}" FontSize="13"/>
+
+                            <CheckBox Content="Override Default Location" 
+                                      IsChecked="{Binding UseCustomLinks}"
+                                      Foreground="{DynamicResource Brush.Text.Primary}"
+                                      Margin="0,0,0,12"/>
+
+                            <Grid Visibility="{Binding UseCustomLinks, Converter={StaticResource BoolToVis}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="12"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Source" Style="{StaticResource FieldLabel}"/>
+                                <ComboBox Grid.Row="0" Grid.Column="2" 
+                                          ItemsSource="{Binding DataSourceOptions}"
+                                          SelectedItem="{Binding LinksSource}"
+                                          Style="{DynamicResource Combo.Links.Dropdown}"
+                                          HorizontalAlignment="Left" Width="140"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Location" Style="{StaticResource FieldLabel}"/>
+                                <TextBox Grid.Row="2" Grid.Column="2" 
+                                         Text="{Binding LinksUri, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource TextBox.Settings}"
+                                         ToolTip="Enter Web URL (https://...) or Local File Path"/>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Card.Container}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="6"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
+
+                        <StackPanel Grid.Column="1" Margin="16">
+                            <TextBlock Text="Links Start Mode" FontSize="16" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+
                             <StackPanel Margin="0,0,0,8">
-                                <RadioButton x:Name="RB_LastViewed"
-                                             GroupName="LinksStartMode"
+                                <RadioButton x:Name="RB_LastViewed" GroupName="LinksStartMode"
                                              Content="Start with last viewed team"
                                              Foreground="{DynamicResource Brush.Text.Primary}"
-                                             IsChecked="{Binding Source={x:Static app:App.Settings}, Path=Ui.Links.OpenLastViewedFirst, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                             Checked="LinksMode_LastViewed_Checked"/>
+                                             IsChecked="{Binding Source={x:Static app:App.Settings}, Path=Ui.Links.OpenLastViewedFirst, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-                                <RadioButton x:Name="RB_Override"
-                                             GroupName="LinksStartMode"
+                                <RadioButton x:Name="RB_Override" GroupName="LinksStartMode"
                                              Content="Start with a specific team"
                                              Foreground="{DynamicResource Brush.Text.Primary}"
                                              Margin="0,6,0,0"
-                                             IsChecked="{Binding Source={x:Static app:App.Settings}, Path=Ui.Links.OverrideEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                             Checked="LinksMode_Override_Checked"/>
+                                             IsChecked="{Binding Source={x:Static app:App.Settings}, Path=Ui.Links.OverrideEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </StackPanel>
 
-                            <!-- Override team dropdown (visible only when Override is selected) -->
                             <Grid Margin="0,0,0,8"
                                   Visibility="{Binding Source={x:Static app:App.Settings}, Path=Ui.Links.OverrideEnabled, Converter={StaticResource BoolToVis}}">
                                 <Grid.ColumnDefinitions>
@@ -317,8 +380,7 @@
 
                                 <ComboBox Grid.Column="2"
                                           Style="{DynamicResource Combo.Links.Dropdown}"
-                                          Width="220"                   
-                                          Height="28"
+                                          Width="220" Height="28"
                                           HorizontalAlignment="Left"
                                           Foreground="{DynamicResource Brush.Text.Primary}"
                                           ItemsSource="{Binding DataContext.LinksVM.TeamNames, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -326,24 +388,19 @@
                                           IsSynchronizedWithCurrentItem="False">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding}"
-                                                       TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding}"
-                                                       Foreground="{DynamicResource Brush.Text.Primary}"
-                                                       FontSize="12"/>
+                                            <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" ToolTip="{Binding}"
+                                                       Foreground="{DynamicResource Brush.Text.Primary}" FontSize="12"/>
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
                             </Grid>
 
                             <TextBlock Text="Choose how Links opens. If ‘Start with a specific team’ is selected and that team exists, Links opens to it; otherwise it opens to your last viewed team"
-                                       Foreground="{DynamicResource Brush.Text.Primary}"
-                                       TextWrapping="Wrap"/>
+                                       Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Grid>
                 </Border>
 
-                <!-- === LOGS CARD === -->
                 <Border Style="{StaticResource Card.Container}">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -351,15 +408,12 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="0"
-                                Background="{DynamicResource CardGradient.Accent}"
-                                CornerRadius="12,0,0,12"/>
+                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
 
                         <StackPanel Grid.Column="1" Margin="16">
                             <TextBlock Text="Logs" FontSize="16" FontWeight="SemiBold"
                                        Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
 
-                            <!-- Log level -->
                             <Grid Margin="0,0,0,12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -373,7 +427,6 @@
                                           SelectedItem="{Binding MinimumLogLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </Grid>
 
-                            <!-- Retention -->
                             <Grid Margin="0,0,0,12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -391,7 +444,7 @@
                             <WrapPanel Orientation="Horizontal">
                                 <Button x:Name="BtnOpenLogsFolder"
                                         Style="{StaticResource Button.Rounded.Compact}"
-                                        Click="BtnOpenLogsFolder_Click">
+                                        Command="{Binding OpenLogsCommand}">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <Image Source="pack://application:,,,/img/fileicon.png"
                                                Width="18" Height="18" Margin="0,0,8,0"/>
@@ -404,7 +457,6 @@
                     </Grid>
                 </Border>
 
-                <!-- === SEARCH CARD (history) === -->
                 <Border Style="{StaticResource Card.Container}">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -412,9 +464,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="0"
-                                Background="{DynamicResource CardGradient.Accent}"
-                                CornerRadius="12,0,0,12"/>
+                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
 
                         <StackPanel Grid.Column="1" Margin="16">
                             <TextBlock Text="Search" FontSize="16" FontWeight="SemiBold"
@@ -443,7 +493,6 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- FIXED BOTTOM BAR -->
         <Grid Grid.Row="1" Margin="16,0,16,16">
             <Border Background="{DynamicResource Brush.Surface.Hover}"
                     BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1"
@@ -460,7 +509,7 @@
 
                     <Button x:Name="BtnApply" Grid.Column="1"
                             Style="{StaticResource Button.Rounded}"
-                            Click="BtnApply_Click"
+                            Command="{Binding ApplyCommand}"
                             MinHeight="32" Height="36" MinWidth="92" Padding="14,6"
                             Margin="12,0,0,0"
                             BorderBrush="{DynamicResource Brush.Accent}" BorderThickness="1.25">
