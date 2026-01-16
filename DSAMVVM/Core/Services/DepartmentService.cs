@@ -89,7 +89,7 @@ namespace DSAMVVM.Core.Services
 
             // Default to Global
             string source = "web";
-            string targetUri = Globals.g_DepartmentTestJSONURL;
+            string targetUri = Globals.g_DepartmentJSONURL;
 
             // Check if user has enabled override
             if (settings != null && settings.UseCustomSource && !string.IsNullOrWhiteSpace(settings.Uri))
