@@ -40,6 +40,8 @@ namespace DSAMVVM.MVVM.Model.Data
         [JsonProperty(nameof(ManagerNetID))]
         public string ManagerNetID { get; set; } = string.Empty;
 
+        public string? PhoneNumber { get; set; }
+
         [JsonProperty("SupportedDivs")]
         public List<SupportedDivs> SupportedDivisions { get; set; } = [];
     }

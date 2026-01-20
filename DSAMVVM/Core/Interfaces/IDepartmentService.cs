@@ -12,6 +12,7 @@ namespace DSAMVVM.Core.Interfaces
 
         string? ManagerName { get; }
         string? ManagerNetId { get; }
+        string? SupportPhoneNumber { get; }
         List<SupportedDivs>? SupportedDivisions { get; }
     }
 

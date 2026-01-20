@@ -173,6 +173,11 @@ namespace DSAMVVM.MVVM.ViewModel
                 AppendLabelValue("Manager: ", mgr);
             }
 
+            if (!string.IsNullOrWhiteSpace(team.PhoneNumber))
+            {
+                AppendLabelValue("Phone: ", team.PhoneNumber);
+            }
+
             if (team.SupportedDivisions != null && team.SupportedDivisions.Count > 0)
             {
                 AppendRaw("[cyan]Supported Divisions:[/cyan]");

@@ -33,7 +33,7 @@ namespace DSAMVVM.Core.Services
             return _departments?.FirstOrDefault(d => d.Number == departmentNumber);
         }
 
-        //Support Team Lookup
+        // Support Team Lookup
         public async Task<SupportTeam?> GetSupportTeamAsync(string teamName)
         {
             await EnsureDataLoaded();
@@ -239,6 +239,12 @@ namespace DSAMVVM.Core.Services
 
             public string? ManagerName => _teamInfo?.ManagerName;
             public string? ManagerNetId => _teamInfo?.ManagerNetID;
+
+            public string? SupportPhoneNumber =>
+                string.IsNullOrWhiteSpace(_teamInfo?.PhoneNumber)
+                    ? null
+                    : _teamInfo.PhoneNumber.Trim();
+
             public List<SupportedDivs>? SupportedDivisions => _teamInfo?.SupportedDivisions;
         }
     }
