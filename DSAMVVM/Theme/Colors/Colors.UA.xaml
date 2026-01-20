@@ -48,6 +48,7 @@
 
     <!-- ==== Brush wrappers ==== -->
     <SolidColorBrush x:Key="Brush.Surface"         Color="{DynamicResource Color.Surface.0}"/>
+    <SolidColorBrush x:Key="Brush.Surface.1"       Color="{DynamicResource Color.Surface.1}"/>
     <SolidColorBrush x:Key="Brush.Surface.Hover"   Color="{DynamicResource Color.Surface.Hover}"/>
     <SolidColorBrush x:Key="Brush.Surface.Pressed" Color="{DynamicResource Color.Surface.Pressed}"/>
 

@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
 using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
@@ -20,30 +21,38 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private readonly AppSettings _settings;
 
-        // Options for bindings
+        // --- Commands ---
+        public ICommand ApplyCommand { get; }
+        public ICommand OpenLogsCommand { get; }
+        public ICommand BrowseDeptCommand { get; }
+        public ICommand BrowseLinksCommand { get; }
+
+        // --- Collections ---
         public IReadOnlyList<AppLogLevel> LogLevels { get; } =
             [AppLogLevel.Off, AppLogLevel.Debug, AppLogLevel.Info, AppLogLevel.Warn, AppLogLevel.Error];
 
         public IReadOnlyList<int> RetentionOptions { get; } =
-            [7, 14, 30, 90, 180, 365, -1]; // -1 = forever
+            [7, 14, 30, 90, 180, 365, -1];
 
-        // Allow insertion of custom/saved values before selection occurs
-        public List<int> HistorySizeOptions { get; } = [0, 5, 10, 15, 20, 25]; // 0 = off
+        public List<int> HistorySizeOptions { get; } = [0, 5, 10, 15, 20, 25];
 
         public IReadOnlyList<double> InitialFontSizeOptions { get; } =
             [10d, 12d, 14d, 16d, 18d, 20d, 22d];
 
-        // Dropdown options for Data Sources
-        public ObservableCollection<string> DataSourceOptions { get; } = ["web", "file"];
+        public ObservableCollection<string> DataSourceOptions { get; } = ["Web", "File"];
 
-        // UI state
+        // --- Exposed Sub-Settings ---
+
+        public LinksUiSettings LinksSettings => _settings.Ui.Links;
+        public SearchSettings SearchSettings => _settings.Ui.Search;
+
+        // --- UI State Properties ---
         private double _defaultFontSize;
         public double DefaultFontSize
         {
             get => _defaultFontSize;
             set
             {
-                // Clamp using the helper in AppSettings
                 var v = UiLimits.ClampFontSize(value);
                 if (Set(ref _defaultFontSize, v) && !UsePerViewOverride)
                     SyncPerViewToDefault();
@@ -79,7 +88,7 @@ namespace DSAMVVM.MVVM.ViewModel
         private int _maxSearchHistory;
         public int MaxSearchHistory { get => _maxSearchHistory; set => Set(ref _maxSearchHistory, Math.Max(0, value)); }
 
-        // Data source state
+        // --- Data Source State ---
         private bool _useCustomDept;
         public bool UseCustomDept { get => _useCustomDept; set => Set(ref _useCustomDept, value); }
 
@@ -98,20 +107,21 @@ namespace DSAMVVM.MVVM.ViewModel
         private string _linksUri = string.Empty;
         public string LinksUri { get => _linksUri; set => Set(ref _linksUri, value); }
 
-        // Commands
-        public ICommand ApplyCommand { get; }
-        public ICommand OpenLogsCommand { get; }
-
-        // Constructors
+        // --- Constructors ---
         public SettingsViewModel()
             : this(App.Services.GetRequiredService<ISettingsService>(),
                    App.Services.GetService<IOutputTextSettingsProvider>(),
-                   App.Services.GetService<ISearchService>())
+                   App.Services.GetService<ISearchService>(),
+                   App.Services.GetService<IDepartmentService>(),
+                   App.Services.GetService<ILinksService>())
         { }
 
-        public SettingsViewModel(ISettingsService settingsSvc,
-                                 IOutputTextSettingsProvider? notifier,
-                                 ISearchService? searchSvc)
+        public SettingsViewModel(
+            ISettingsService settingsSvc,
+            IOutputTextSettingsProvider? notifier,
+            ISearchService? searchSvc,
+            IDepartmentService? deptService = null,
+            ILinksService? linksService = null)
         {
             _settingsSvc = settingsSvc;
             _notifier = notifier;
@@ -120,7 +130,7 @@ namespace DSAMVVM.MVVM.ViewModel
             _settings = App.Settings ?? new AppSettings();
             _settings.ApplyDefaultsAndClamp();
 
-            // load -> vm
+            // Load Values -> VM
             DefaultFontSize = _settings.Ui.Font.DefaultSize;
             UsePerViewOverride = _settings.Ui.Font.ViewFontSizeOverride;
             UserFontSize = GetViewSize("UserView", DefaultFontSize);
@@ -133,10 +143,10 @@ namespace DSAMVVM.MVVM.ViewModel
 
             UseSavedSearchHistory = _settings.Ui.Search.UseSavedSearchHistory;
             var savedMax = _settings.Ui.Search.MaxSearchHistory;
-            EnsureHistoryOption(savedMax); // <- make sure the saved value exists in ItemsSource
+            EnsureHistoryOption(savedMax);
             MaxSearchHistory = savedMax;
 
-            // load data sources (fallback to Defaults if empty, but don't force populate fields if unused)
+            // Load Data Sources
             var dept = _settings.Paths.DepartmentData;
             UseCustomDept = dept.UseCustomSource;
             DeptSource = dept.Source;
@@ -147,17 +157,33 @@ namespace DSAMVVM.MVVM.ViewModel
             LinksSource = links.Source;
             LinksUri = links.Uri;
 
-            // ensure runtime policy on open
-            _searchSvc?.ConfigureHistory(UseSavedSearchHistory, MaxSearchHistory);
-
-            ApplyCommand = new RelayCommand(_ => Apply());
+            // Configure Commands
+            ApplyCommand = new RelayCommand(_ => Apply(deptService, linksService));
             OpenLogsCommand = new RelayCommand(_ => OpenLogsFolder());
+
+            // Browse Commands
+            BrowseDeptCommand = new RelayCommand(_ => BrowseForFile(path => DeptUri = path));
+            BrowseLinksCommand = new RelayCommand(_ => BrowseForFile(path => LinksUri = path));
+
+            // Runtime policy
+            _searchSvc?.ConfigureHistory(UseSavedSearchHistory, MaxSearchHistory);
         }
 
-        // Actions
-        private void Apply()
+        // --- Logic ---
+
+        private void Apply(IDepartmentService? deptService, ILinksService? linksService)
         {
-            // vm -> model
+            var deptSettings = _settings.Paths.DepartmentData;
+            bool deptChanged = deptSettings.UseCustomSource != UseCustomDept ||
+                               !string.Equals(deptSettings.Source, DeptSource) ||
+                               !string.Equals(deptSettings.Uri, DeptUri);
+
+            var linkSettings = _settings.Paths.LinksData;
+            bool linksChanged = linkSettings.UseCustomSource != UseCustomLinks ||
+                                !string.Equals(linkSettings.Source, LinksSource) ||
+                                !string.Equals(linkSettings.Uri, LinksUri);
+
+            // VM -> Model
             _settings.Ui.Font.DefaultSize = DefaultFontSize;
             _settings.Ui.Font.ViewFontSizeOverride = UsePerViewOverride;
 
@@ -168,7 +194,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
             _settings.Logging.MinimumLevel = MinimumLogLevel;
 
-            // Validate retention
             var days = RetentionDays;
             if (days == -1) days = 36500;
             if (days < 1) days = 1;
@@ -183,11 +208,10 @@ namespace DSAMVVM.MVVM.ViewModel
             else
             {
                 _settings.Ui.Search.UseSavedSearchHistory = UseSavedSearchHistory;
-                EnsureHistoryOption(MaxSearchHistory); // keep options list consistent if custom value chosen
+                EnsureHistoryOption(MaxSearchHistory);
                 _settings.Ui.Search.MaxSearchHistory = MaxSearchHistory;
             }
 
-            // save data sources
             var dept = _settings.Paths.DepartmentData;
             dept.UseCustomSource = UseCustomDept;
             dept.Source = DeptSource;
@@ -198,19 +222,18 @@ namespace DSAMVVM.MVVM.ViewModel
             links.Source = LinksSource;
             links.Uri = LinksUri;
 
-            // Uses AppSettings logic to normalize inputs
             _settings.ApplyDefaultsAndClamp();
-
-            // persist
             var path = Path.Combine(Globals.g_AppDir, "settings.json");
             _settingsSvc.RequestSave(_settings, path);
             TryFlushPendingSaves(_settingsSvc);
 
-            // apply runtime policies
             Log.ApplySettings(_settings);
             _searchSvc?.ConfigureHistory(_settings.Ui.Search.UseSavedSearchHistory, _settings.Ui.Search.MaxSearchHistory);
             if (!_settings.Ui.Search.UseSavedSearchHistory)
                 _searchSvc?.ClearHistory();
+
+            if (deptChanged) _ = deptService?.ReloadDataAsync();
+            if (linksChanged) _ = linksService?.ReloadLinksDataAsync();
 
             _notifier?.NotifyChanged();
         }
@@ -221,7 +244,23 @@ namespace DSAMVVM.MVVM.ViewModel
             try { Process.Start(new ProcessStartInfo(dir) { UseShellExecute = true }); } catch { }
         }
 
-        // Helpers
+        private void BrowseForFile(Action<string> onPathSelected)
+        {
+            var dlg = new OpenFileDialog
+            {
+                Filter = "JSON Data (*.json)|*.json|All Files (*.*)|*.*",
+                Title = "Select Data File",
+                CheckFileExists = true
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                onPathSelected(dlg.FileName);
+            }
+        }
+
+        // --- Helpers ---
+
         private void SyncPerViewToDefault()
         {
             UserFontSize = DefaultFontSize;
@@ -268,7 +307,6 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             try
             {
-                // Reflection: Check if the service supports the newer "ResolveLogDir" method
                 var methodInfo = svc.GetType().GetMethod("ResolveLogDir", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
                 if (methodInfo != null)
                 {
