@@ -175,7 +175,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
             if (!string.IsNullOrWhiteSpace(team.PhoneNumber))
             {
-                AppendLabelValue("Phone: ", team.PhoneNumber);
+                AppendLabelValue("Support Phone: ", team.PhoneNumber);
             }
 
             if (team.SupportedDivisions != null && team.SupportedDivisions.Count > 0)

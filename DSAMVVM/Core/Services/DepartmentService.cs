@@ -5,19 +5,19 @@ using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Data;
 using DSAMVVM.MVVM.Model.Schemas;
+using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
-using Newtonsoft.Json;
+using System.Net.Http;
 
 namespace DSAMVVM.Core.Services
 {
-    // Remote-first with local JSON fallback + conditional backup refresh.
+    // Loads Department data using a Remote-First strategy with local offline fallback.
     public class DepartmentService(IHttpService http) : IDepartmentService
     {
         private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
-        private readonly SemaphoreSlim _lock = new(1, 1);                     // single-flight load/reload
-        private readonly JsonFileCache<DepartmentListWrapper> _fileCache =
-            new(Globals.g_DepartmentCachePath);
+        private readonly SemaphoreSlim _lock = new(1, 1);                   // single-flight load/reload
+        private readonly string _cachePath = Globals.g_DepartmentCachePath;
 
         private List<IDepartment>? _departments;
         private DepartmentMeta? _meta;
@@ -33,7 +33,6 @@ namespace DSAMVVM.Core.Services
             return _departments?.FirstOrDefault(d => d.Number == departmentNumber);
         }
 
-        // Support Team Lookup
         public async Task<SupportTeam?> GetSupportTeamAsync(string teamName)
         {
             await EnsureDataLoaded();
@@ -42,17 +41,10 @@ namespace DSAMVVM.Core.Services
             return team;
         }
 
-        public async Task<string?> GetTeamAsync(string departmentNumber)
-            => (await GetDepartmentAsync(departmentNumber))?.Team;
-
-        public async Task<string?> GetNotesAsync(string departmentNumber)
-            => (await GetDepartmentAsync(departmentNumber))?.Notes;
-
-        public async Task<bool?> IsSupportKnownAsync(string departmentNumber)
-            => (await GetDepartmentAsync(departmentNumber))?.SupportKnown;
-
-        public async Task<string?> GetFileRepoPathAsync(string departmentNumber)
-            => (await GetDepartmentAsync(departmentNumber))?.FileRepoPath;
+        public async Task<string?> GetTeamAsync(string departmentNumber) => (await GetDepartmentAsync(departmentNumber))?.Team;
+        public async Task<string?> GetNotesAsync(string departmentNumber) => (await GetDepartmentAsync(departmentNumber))?.Notes;
+        public async Task<bool?> IsSupportKnownAsync(string departmentNumber) => (await GetDepartmentAsync(departmentNumber))?.SupportKnown;
+        public async Task<string?> GetFileRepoPathAsync(string departmentNumber) => (await GetDepartmentAsync(departmentNumber))?.FileRepoPath;
 
         public async Task ReloadDataAsync()
         {
@@ -77,21 +69,18 @@ namespace DSAMVVM.Core.Services
             finally { _lock.Release(); }
         }
 
-        // Department JSON Global used here
+        // Core logic for fetching, caching, and parsing data.
         private async Task LoadDepartmentsInternalAsync(bool isReload)
         {
             var key = isReload ? "DeptData.Reload" : "DeptData.Load";
             var progressKey = UiNotify.ProgressOf(key);
             UiNotify.Progress(key, isReload ? "Refreshing department data…" : "Loading department data…", priority: 0);
 
-            // Resolve effective settings
+            // Resolve source, defaulting to global web URL unless a valid custom source is enabled.
             var settings = App.Settings?.Paths?.DepartmentData;
-
-            // Default to Global
-            string source = "web";
+            string source = "Web";
             string targetUri = Globals.g_DepartmentJSONURL;
 
-            // Check if user has enabled override
             if (settings != null && settings.UseCustomSource && !string.IsNullOrWhiteSpace(settings.Uri))
             {
                 source = settings.Source;
@@ -99,133 +88,137 @@ namespace DSAMVVM.Core.Services
             }
 
             var sw = Stopwatch.StartNew();
+            string jsonContent = string.Empty;
+            bool loadedFromCache = false;
+
             try
             {
-                DepartmentListWrapper? wrapper = null;
-
-                // Switch on source type
-                if (source.Equals("file", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(source, "Web", StringComparison.OrdinalIgnoreCase))
                 {
-                    // File Mode
-                    Log.Info("Dept.Loader", $"Loading from local file: {targetUri}");
+                    Log.Info("Dept.Loader", $"Fetching web data from: {targetUri}");
 
-                    if (File.Exists(targetUri))
+                    // Web Strategy: Always fetch fresh content to avoid stale data.
+                    using var client = new HttpClient();
+                    client.Timeout = TimeSpan.FromSeconds(5);
+                    var webContent = await client.GetStringAsync(targetUri);
+
+                    // Check existing cache.
+                    string cachedContent = string.Empty;
+                    if (File.Exists(_cachePath))
                     {
-                        var json = await File.ReadAllTextAsync(targetUri);
-                        wrapper = JsonConvert.DeserializeObject<DepartmentListWrapper>(json);
+                        cachedContent = await File.ReadAllTextAsync(_cachePath);
+                    }
 
-                        // Intelligent Cache Update: Only update if local file is newer than current cache
-                        if (wrapper != null)
-                        {
-                            var cached = await _fileCache.ReadAsync();
-                            var fileStamp = wrapper.Meta?.LastUpdatedUtc;
-                            var cacheStamp = cached?.Meta?.LastUpdatedUtc;
-
-                            bool shouldCache =
-                                cached == null ||
-                                (fileStamp.HasValue && (!cacheStamp.HasValue || fileStamp > cacheStamp));
-
-                            if (shouldCache)
-                            {
-                                try
-                                {
-                                    await _fileCache.WriteAsync(wrapper);
-                                    Log.Info("Dept.Loader", "Local file was newer than cache. Cache updated.");
-                                }
-                                catch (Exception ex)
-                                {
-                                    Log.Warn("Dept.Loader", $"Failed to update cache from local file: {ex.Message}");
-                                }
-                            }
-                        }
+                    // Write-on-Change: Only overwrite disk cache if content differs.
+                    if (!string.Equals(webContent, cachedContent, StringComparison.Ordinal))
+                    {
+                        EnsureDirectory(_cachePath);
+                        await File.WriteAllTextAsync(_cachePath, webContent);
+                        Log.Info("Dept.Loader", "Remote data changed. Cache updated.");
                     }
                     else
                     {
-                        throw new FileNotFoundException($"Configured data file not found: {targetUri}");
+                        Log.Info("Dept.Loader", "Remote data identical to cache. Skipping disk write.");
+                    }
+
+                    jsonContent = webContent;
+                }
+                else if (string.Equals(source, "File", StringComparison.OrdinalIgnoreCase))
+                {
+                    // File Strategy: Read directly. Do not backup to cache to prevent dev/test files from polluting production fallback.
+                    Log.Info("Dept.Loader", $"Loading local file: {targetUri}");
+
+                    if (File.Exists(targetUri))
+                    {
+                        jsonContent = await File.ReadAllTextAsync(targetUri);
+                    }
+                    else
+                    {
+                        throw new FileNotFoundException($"Custom file not found: {targetUri}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("Dept.Loader", $"Primary load failed ({source}): {ex.Message}");
+
+                // Fallback: If web request fails (offline/timeout), load last known good state from cache.
+                if (string.Equals(source, "Web", StringComparison.OrdinalIgnoreCase) && File.Exists(_cachePath))
+                {
+                    Log.Info("Dept.Loader", "Falling back to local cache.");
+                    try
+                    {
+                        jsonContent = await File.ReadAllTextAsync(_cachePath);
+                        loadedFromCache = true;
+                    }
+                    catch (Exception cacheEx)
+                    {
+                        Log.Error("Dept.Loader", $"Cache read failed: {cacheEx.Message}");
                     }
                 }
                 else
                 {
-                    // Web Mode (Standard)
-                    wrapper = await RemoteWithBackUpLoader.LoadAsync(
-                        _http,
-                        targetUri,
-                        _fileCache,
-                        StampSelector,
-                        ct: default,
-                        jsonSettings: null,
-                        normalize: w => w.Meta?.Normalize(),
-                        log: msg => Log.Info("Dept.Loader", msg));
+                    // Irrecoverable error (File mode missing or no offline cache).
+                    throw;
                 }
-
-                if (wrapper == null)
-                    throw new InvalidOperationException($"No department data available from source '{source}'.");
-
-                _meta = wrapper.Meta;
-
-                // Populate class-level Dictionary
-                _teamMap = wrapper.SupportTeams?
-                    .Where(t => !string.IsNullOrWhiteSpace(t.SupportTeamName))
-                    .ToDictionary(t => t.SupportTeamName.Trim(), StringComparer.OrdinalIgnoreCase)
-                    ?? [];
-
-                // LOGGING: Confirm team count
-                Log.Info("Dept.Loader", $"Loaded {_teamMap.Count} support team definitions.");
-
-                // Map Departments and Link Support Teams
-                int linkedCount = 0;
-                _departments = [.. (wrapper.DepartmentList ?? []).Select(d =>
-                {
-                    SupportTeam? matchedTeam = null;
-
-                    // Check if department has a team assignment
-                    if (!string.IsNullOrWhiteSpace(d.Team))
-                    {
-                        var teamName = d.Team.Trim();
-
-                        // Try to find the team
-                        if (_teamMap.TryGetValue(teamName, out var t))
-                        {
-                            matchedTeam = t;
-                            linkedCount++;
-                        }
-                        else
-                        {
-                            // LOGGING: Warn about broken links
-                            Log.Warn("Dept.Loader", $"Department '{d.Number}' references unknown team '{teamName}'. Check JSON spelling.");
-                        }
-                    }
-
-                    return new DepartmentAdapter(d, matchedTeam);
-                })];
-
-                sw.Stop();
-
-                // LOGGING: Summary of linking
-                Log.Info("Dept.Loader", $"Mapped {linkedCount} departments to their support teams out of {_departments.Count} total.");
-
-                UiNotify.RemoveKey(progressKey);
-                UiNotify.Success($"{(isReload ? "Refreshed" : "Loaded")} {_departments.Count} departments from {source}.",
-                                 showStatusBar: true, key: key);
             }
-            catch (Exception e)
-            {
-                sw.Stop();
-                UiNotify.RemoveKey(progressKey);
-                UiNotify.WarnWithLinks(
-                    $"Failed to {(isReload ? "refresh" : "load")} department data: {e.Message}",
-                    sticky: true, priority: 3, key: key,
-                    UiNotify.Link.Action("Retry", async () => await ReloadDataAsync(), "Try the download again"));
 
-                // Ensure error is logged to disk as well
-                Log.Error("Dept.Loader", "Fatal error loading department data", e);
+            // Parse and map data
+            if (!string.IsNullOrEmpty(jsonContent))
+            {
+                try
+                {
+                    var wrapper = JsonConvert.DeserializeObject<DepartmentListWrapper>(jsonContent) ?? throw new Exception("Deserialized data was null.");
+                    _meta = wrapper.Meta;
+
+                    // Build fast lookup dictionary for Support Teams.
+                    _teamMap = wrapper.SupportTeams?
+                        .Where(t => !string.IsNullOrWhiteSpace(t.SupportTeamName))
+                        .ToDictionary(t => t.SupportTeamName.Trim(), StringComparer.OrdinalIgnoreCase)
+                        ?? [];
+
+                    Log.Info("Dept.Loader", $"Loaded {_teamMap.Count} support team definitions.");
+
+                    // Hydrate Departments and link to Support Teams.
+                    _departments = [.. (wrapper.DepartmentList ?? []).Select(d =>
+                    {
+                        SupportTeam? matchedTeam = null;
+                        if (!string.IsNullOrWhiteSpace(d.Team))
+                        {
+                            if (_teamMap.TryGetValue(d.Team.Trim(), out var t)) matchedTeam = t;
+                        }
+                        return new DepartmentAdapter(d, matchedTeam);
+                    })];
+
+                    sw.Stop();
+                    UiNotify.RemoveKey(progressKey);
+
+                    string statusMsg = isReload ? "Refreshed" : "Loaded";
+                    string sourceMsg = loadedFromCache ? "Cache (Offline)" : source;
+
+                    UiNotify.Success($"{statusMsg} {_departments.Count} departments from {sourceMsg}.",
+                                     showStatusBar: true, key: key);
+                }
+                catch (Exception e)
+                {
+                    sw.Stop();
+                    UiNotify.RemoveKey(progressKey);
+                    Log.Error("Dept.Loader", "Fatal error parsing department data", e);
+
+                    UiNotify.WarnWithLinks(
+                        $"Failed to parse department data: {e.Message}",
+                        sticky: true, priority: 3, key: key,
+                        UiNotify.Link.Action("Retry", async () => await ReloadDataAsync(), "Try again"));
+                }
             }
         }
 
-        // UTC stamp used for backup refresh decisions.
-        private static DateTime? StampSelector(DepartmentListWrapper w) => w.Meta?.LastUpdatedUtc;
+        private static void EnsureDirectory(string filePath)
+        {
+            var dir = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+        }
 
-        // Thin adapter to keep UI decoupled from transport DTOs.
         private sealed class DepartmentAdapter(Department source, SupportTeam? teamInfo) : IDepartment
         {
             private readonly Department _source = source;
@@ -241,9 +234,7 @@ namespace DSAMVVM.Core.Services
             public string? ManagerNetId => _teamInfo?.ManagerNetID;
 
             public string? SupportPhoneNumber =>
-                string.IsNullOrWhiteSpace(_teamInfo?.PhoneNumber)
-                    ? null
-                    : _teamInfo.PhoneNumber.Trim();
+                string.IsNullOrWhiteSpace(_teamInfo?.PhoneNumber) ? null : _teamInfo.PhoneNumber.Trim();
 
             public List<SupportedDivs>? SupportedDivisions => _teamInfo?.SupportedDivisions;
         }

@@ -39,10 +39,10 @@ namespace DSAMVVM.MVVM.ViewModel
         public IReadOnlyList<double> InitialFontSizeOptions { get; } =
             [10d, 12d, 14d, 16d, 18d, 20d, 22d];
 
+        // Capitalized display options
         public ObservableCollection<string> DataSourceOptions { get; } = ["Web", "File"];
 
         // --- Exposed Sub-Settings ---
-
         public LinksUiSettings LinksSettings => _settings.Ui.Links;
         public SearchSettings SearchSettings => _settings.Ui.Search;
 
@@ -92,7 +92,7 @@ namespace DSAMVVM.MVVM.ViewModel
         private bool _useCustomDept;
         public bool UseCustomDept { get => _useCustomDept; set => Set(ref _useCustomDept, value); }
 
-        private string _deptSource = "web";
+        private string _deptSource = "Web";
         public string DeptSource { get => _deptSource; set => Set(ref _deptSource, value); }
 
         private string _deptUri = string.Empty;
@@ -101,7 +101,7 @@ namespace DSAMVVM.MVVM.ViewModel
         private bool _useCustomLinks;
         public bool UseCustomLinks { get => _useCustomLinks; set => Set(ref _useCustomLinks, value); }
 
-        private string _linksSource = "web";
+        private string _linksSource = "Web";
         public string LinksSource { get => _linksSource; set => Set(ref _linksSource, value); }
 
         private string _linksUri = string.Empty;
@@ -149,19 +149,19 @@ namespace DSAMVVM.MVVM.ViewModel
             // Load Data Sources
             var dept = _settings.Paths.DepartmentData;
             UseCustomDept = dept.UseCustomSource;
-            DeptSource = dept.Source;
+            // Match loaded value ("web"/"file") to capitalized options ("Web"/"File")
+            DeptSource = MatchSourceOption(dept.Source);
             DeptUri = dept.Uri;
 
             var links = _settings.Paths.LinksData;
             UseCustomLinks = links.UseCustomSource;
-            LinksSource = links.Source;
+            // Match loaded value ("web"/"file") to capitalized options ("Web"/"File")
+            LinksSource = MatchSourceOption(links.Source);
             LinksUri = links.Uri;
 
             // Configure Commands
             ApplyCommand = new RelayCommand(_ => Apply(deptService, linksService));
             OpenLogsCommand = new RelayCommand(_ => OpenLogsFolder());
-
-            // Browse Commands
             BrowseDeptCommand = new RelayCommand(_ => BrowseForFile(path => DeptUri = path));
             BrowseLinksCommand = new RelayCommand(_ => BrowseForFile(path => LinksUri = path));
 
@@ -173,14 +173,15 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private void Apply(IDepartmentService? deptService, ILinksService? linksService)
         {
+            // Use case-insensitive comparison for dirty check
             var deptSettings = _settings.Paths.DepartmentData;
             bool deptChanged = deptSettings.UseCustomSource != UseCustomDept ||
-                               !string.Equals(deptSettings.Source, DeptSource) ||
+                               !string.Equals(deptSettings.Source, DeptSource, StringComparison.OrdinalIgnoreCase) ||
                                !string.Equals(deptSettings.Uri, DeptUri);
 
             var linkSettings = _settings.Paths.LinksData;
             bool linksChanged = linkSettings.UseCustomSource != UseCustomLinks ||
-                                !string.Equals(linkSettings.Source, LinksSource) ||
+                                !string.Equals(linkSettings.Source, LinksSource, StringComparison.OrdinalIgnoreCase) ||
                                 !string.Equals(linkSettings.Uri, LinksUri);
 
             // VM -> Model
@@ -260,6 +261,12 @@ namespace DSAMVVM.MVVM.ViewModel
         }
 
         // --- Helpers ---
+
+        // Matches "web" -> "Web", "file" -> "File"
+        private string MatchSourceOption(string input)
+        {
+            return DataSourceOptions.FirstOrDefault(x => x.Equals(input, StringComparison.OrdinalIgnoreCase)) ?? "Web";
+        }
 
         private void SyncPerViewToDefault()
         {
