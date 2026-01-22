@@ -8,6 +8,7 @@
         public string? DisplayName { get; set; }
         public string? EduAffiliation { get; set; }
         public string? License { get; set; }
+        public string? RawLicense { get; set; }
         public string? Division { get; set; }
         public string? ErrorMessage { get; set; }
 

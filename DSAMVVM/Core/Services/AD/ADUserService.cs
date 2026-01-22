@@ -17,7 +17,7 @@ namespace DSAMVVM.Core.Services.AD
 
                 try
                 {
-                    // single, tight user search with required attributes preloaded
+                    // Single, tight user search with required attributes preloaded
                     var r = DirectoryUtility.FindUserBySam(_ldap, netid);
                     if (r == null)
                     {
@@ -30,7 +30,7 @@ namespace DSAMVVM.Core.Services.AD
                     info.DisplayName = DirectoryUtility.GetString(r, "displayName") ?? "Unknown";
                     info.Enabled = DirectoryUtility.GetEnabledFromUac(r);
 
-                    //quick, informational lockout check (computed bit only)
+                    // Quick, informational lockout check (computed bit only)
                     info.Locked = DirectoryUtility.GetLockedQuick(r);
 
                     var dept = DirectoryUtility.GetString(r, "department")
@@ -41,10 +41,12 @@ namespace DSAMVVM.Core.Services.AD
 
                     info.EduAffiliation = DirectoryUtility.GetString(r, "eduPersonPrimaryAffiliation") ?? "Unknown";
 
+                    // Capture raw to return to UI if "unknown"
                     var rawLicense = DirectoryUtility.GetString(r, "extensionAttribute15") ?? "";
+                    info.RawLicense = rawLicense;
                     info.License = ParseLicense(rawLicense);
 
-                    // second query only if needed to resolve Division rollup group
+                    // Second query only if needed to resolve Division rollup group
                     var userDn = DirectoryUtility.GetString(r, "distinguishedName");
                     var result = !string.IsNullOrWhiteSpace(userDn)
                         ? DirectoryUtility.FindDivisionRollupGroup(_ldap, userDn!)
@@ -79,11 +81,8 @@ namespace DSAMVVM.Core.Services.AD
 
         private static string ParseLicense(string license)
         {
-            // Guard: avoid null/empty and wasted work
             if (string.IsNullOrWhiteSpace(license)) return "No valid O365 license found";
 
-            // Find an O/M + 3 digits, then role code, then tier (A#, E#, or EXP#)
-            // Not anchored, allows separators/whitespace and extra text around the token.
             var m = Regex.Match(license,
                 @"([om]\d{3})\s*([A-Za-z]+)\s*[-_ ]*\s*(A\d+|E\d+|EXP\d+)",
                 RegexOptions.IgnoreCase);
@@ -99,20 +98,20 @@ namespace DSAMVVM.Core.Services.AD
                     "emp" => "Employee",
                     "stu" => "Student",
                     "dc" => "Alumni",
+                    "admit" => "Admit",
                     _ => "Unknown"
                 };
 
                 string tierText = tier.StartsWith("EXP", StringComparison.Ordinal)
-                    ? $"Exchange P{tier[3..]}"   // EXP1 -> Exchange P1
-                    : tier;                              // A1 / E3, etc.
+                    ? $"Exchange P{tier[3..]}"
+                    : tier;
 
                 return $"{roleText} {tierText}".Trim();
             }
 
-            // Fallback
             foreach (var segment in license.Split('(', ')'))
                 if (segment.Contains("365", StringComparison.OrdinalIgnoreCase))
-                    return segment.Trim() + " (Unknown License Type)";
+                    return segment.Trim() + " (Unknown Type)";
 
             return "No valid O365 license found";
         }

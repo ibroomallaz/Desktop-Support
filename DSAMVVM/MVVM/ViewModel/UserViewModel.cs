@@ -22,6 +22,9 @@ namespace DSAMVVM.MVVM.ViewModel
         // Per-view font context
         private const string ViewKey = "UserView";
 
+        // State for linking
+        private string? _currentRawLicense;
+
         // UI state
         private double _effectiveFontSize = 14;
         public double EffectiveFontSize
@@ -86,6 +89,21 @@ namespace DSAMVVM.MVVM.ViewModel
                 var encodedName = url["dsa://team/".Length..];
                 var teamName = Uri.UnescapeDataString(encodedName);
                 await ShowTeamInfoAsync(teamName);
+            }
+            else if (url.Equals("dsa://license/show", StringComparison.OrdinalIgnoreCase))
+            {
+                // Show raw license info
+                if (!string.IsNullOrWhiteSpace(_currentRawLicense))
+                {
+                    AppendRaw(string.Empty);
+                    AppendRaw("[yellow]Raw AD License Attribute:[/yellow]");
+                    AppendRaw($"[lightgray]{_currentRawLicense}[/lightgray]");
+                    AppendRaw(string.Empty);
+                }
+                else
+                {
+                    AppendRaw("[red]No raw license data available.[/red]");
+                }
             }
         }
 
@@ -204,6 +222,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
             Error = null;
+            _currentRawLicense = null; // Reset previous raw data
 
             if (!string.IsNullOrEmpty(SearchLog))
             {
@@ -249,6 +268,9 @@ namespace DSAMVVM.MVVM.ViewModel
                     return;
                 }
 
+                // Store raw license for linking
+                _currentRawLicense = user.RawLicense;
+
                 AppendRaw(string.Empty);
                 AppendTitle(user.DisplayName);
 
@@ -267,7 +289,16 @@ namespace DSAMVVM.MVVM.ViewModel
                 if (user.Locked == true)
                     AppendLabelValue("Locked: ", "True", treatEmptyAsNone: false);
 
-                AppendLabelValue("O365 Licensing: ", user.License, treatEmptyAsNone: false);
+                // --- License Output with Link ---
+                if (!string.IsNullOrWhiteSpace(user.RawLicense))
+                {
+                    // Render as a clickable link to show raw data
+                    AppendRaw($"[cyan]O365 Licensing: [/cyan][red][{user.License}](dsa://license/show)[/red]");
+                }
+                else
+                {
+                    AppendLabelValue("O365 Licensing: ", user.License, treatEmptyAsNone: false);
+                }
 
                 Log.Info("UserView",
                     $"User found: DisplayName='{user.DisplayName}', Affiliation='{user.EduAffiliation}', Division='{user.Division}', DeptName='{user.DepartmentName}', Enabled={user.Enabled}, Locked={(user.Locked.HasValue ? user.Locked.ToString() : "null")}, License='{user.License}', DeptNum='{user.DepartmentNumber}'");
@@ -300,7 +331,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
                         Log.Info("UserView",
                             $"Dept info: Number='{dept.Number}', SupportKnown={dept.SupportKnown}, Team='{teamName ?? "(none)"}', Repo='{(string.IsNullOrWhiteSpace(repoPath) ? "(none)" : repoPath)}'");
-                        Log.Debug("UserView", $"Dept notes length={(dept.Notes?.Length ?? 0)}");
                     }
                     else
                     {
