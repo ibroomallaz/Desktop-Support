@@ -25,7 +25,12 @@
             <RadioButton Content="Group Members"
                          GroupName="Mode"
                          IsChecked="{Binding IsGroupMembers}"
+                         Margin="0,0,16,0"
                          Style="{StaticResource Radio.GroupView}"/>
+            <RadioButton Content="Dept Support Search"
+                         GroupName="Mode"
+                         IsChecked="{Binding IsDeptSearch}"
+                         Style="{StaticResource Radio.GroupView}"/> 
         </StackPanel>
 
         <!-- FlowDocument viewer -->

@@ -13,34 +13,55 @@ namespace DSAMVVM.MVVM.ViewModel
     {
         // Services
         private readonly IADService _ad;
+        private readonly IDepartmentService _deptService;
         private readonly ISettingsService _settingsSvc;
         private readonly IOutputTextSettingsProvider _notifier;
 
         // Mode state
-        private bool _isUserMim = true;
+        public enum GroupSearchMode
+        {
+            UserMim,
+            GroupMembers,
+            Department
+        }
+
+        private GroupSearchMode _searchMode = GroupSearchMode.UserMim;
+
         public bool IsUserMim
         {
-            get => _isUserMim;
-            set
-            {
-                if (_isUserMim == value) return;
-                _isUserMim = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(IsGroupMembers));
-            }
+            get => _searchMode == GroupSearchMode.UserMim;
+            set { if (value) UpdateMode(GroupSearchMode.UserMim); }
         }
 
         public bool IsGroupMembers
         {
-            get => !_isUserMim;
-            set
-            {
-                if (value == IsGroupMembers) return;
-                _isUserMim = !value;
-                OnPropertyChanged(nameof(IsUserMim));
-                OnPropertyChanged();
-            }
+            get => _searchMode == GroupSearchMode.GroupMembers;
+            set { if (value) UpdateMode(GroupSearchMode.GroupMembers); }
         }
+
+        public bool IsDeptSearch
+        {
+            get => _searchMode == GroupSearchMode.Department;
+            set { if (value) UpdateMode(GroupSearchMode.Department); }
+        }
+
+        // Core logic to handle exclusive switching
+        private void UpdateMode(GroupSearchMode newMode)
+        {
+            if (_searchMode == newMode) return;
+
+            _searchMode = newMode;
+
+            OnPropertyChanged(nameof(IsUserMim));
+            OnPropertyChanged(nameof(IsGroupMembers));
+            OnPropertyChanged(nameof(IsDeptSearch));
+
+            OnPropertyChanged(nameof(QueryPlaceholder));
+        }
+
+        public string QueryPlaceholder => IsUserMim ? "Enter a NetID..." :
+                                          IsDeptSearch ? "Enter Department Number..." :
+                                          "Enter Group Name or 4-digit Dept#...";
 
         // UI state
         private double _effectiveFontSize = 14;
@@ -71,7 +92,6 @@ namespace DSAMVVM.MVVM.ViewModel
             private set { _error = value; OnPropertyChanged(); }
         }
 
-        // Output log
         private string _searchLog = string.Empty;
         public string SearchLog
         {
@@ -81,10 +101,12 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public GroupViewModel(
             IADService adService,
+            IDepartmentService deptService,
             ISettingsService settingsSvc,
             IOutputTextSettingsProvider notifier)
         {
             _ad = adService ?? throw new ArgumentNullException(nameof(adService));
+            _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
             _settingsSvc = settingsSvc ?? throw new ArgumentNullException(nameof(settingsSvc));
             _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
 
@@ -122,7 +144,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public void ClearLog() => SearchLog = string.Empty;
 
-        // Search entry point
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService _search, SearchTarget target)
         {
             Error = null;
@@ -130,13 +151,10 @@ namespace DSAMVVM.MVVM.ViewModel
             if (!string.IsNullOrEmpty(SearchLog))
             {
                 AppendRaw("\n[cyan]────────── New Search ──────────[/cyan]\n");
-                if (!string.IsNullOrWhiteSpace(context?.Query))
-                    AppendRaw($"[cyan]Query:[/cyan] [red]{context.Query}[/red]");
             }
-            else if (!string.IsNullOrWhiteSpace(context?.Query))
-            {
+
+            if (!string.IsNullOrWhiteSpace(context?.Query))
                 AppendRaw($"[cyan]Query:[/cyan] [red]{context.Query}[/red]");
-            }
 
             if (target != SearchTarget.Group)
             {
@@ -156,8 +174,7 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             if (string.IsNullOrWhiteSpace(Query))
             {
-                AppendRaw($"[cyan]Enter {(IsUserMim ? "a NetID" : "a group name or 4-digit dept#")} in the main search.[/cyan]");
-                Log.Info("GroupView", "Aborted: empty query");
+                AppendRaw($"[cyan]{QueryPlaceholder}[/cyan]");
                 return;
             }
 
@@ -166,93 +183,159 @@ namespace DSAMVVM.MVVM.ViewModel
 
             try
             {
-                AppendRaw("[green]Starting group search...[/green]");
-                Log.Debug("GroupView", $"Dispatching lookup. Mode={(IsUserMim ? "UserMIM" : "GroupMembers")}, Query='{Query}'");
+                AppendRaw("[green]Starting search...[/green]");
+                Log.Debug("GroupView", $"Mode={_searchMode}, Query='{Query}'");
 
-                if (IsUserMim)
+                switch (_searchMode)
                 {
-                    AppendTitle($"MIM groups for user '{Query}'");
-                    var r = await _ad.GetUserMimGroupsAsync(Query);
-
-                    if (!r.Exists)
-                    {
-                        Error = string.IsNullOrWhiteSpace(r.Error) ? $"'{Query}' is not a valid NetID." : r.Error;
-                        AppendRaw($"[red]{Error}[/red]");
-                        Log.Info("GroupView", $"UserMIM not found. Error='{Error}'");
-                        return;
-                    }
-
-                    if (r.Enabled == false)
-                        AppendLabelValue("Enabled: ", "False", treatEmptyAsNone: false);
-
-                    AppendLabelValue("Total MIM groups: ", r.Groups?.Count.ToString() ?? "0", treatEmptyAsNone: false);
-
-                    if (r.Groups is { Count: > 0 })
-                    {
-                        foreach (var g in r.Groups)
-                            AppendRaw($"[lightgray] • {g}[/lightgray]");
-                    }
-                    else
-                    {
-                        AppendRaw("[cyan]No valid MIM groups found.[/cyan]");
-                    }
-
-                    Log.Info("GroupView", $"UserMIM success: Count={r.Groups?.Count ?? 0}, Enabled={r.Enabled}");
+                    case GroupSearchMode.UserMim:
+                        await SearchUserMimGroups(Query);
+                        break;
+                    case GroupSearchMode.GroupMembers:
+                        await SearchGroupMembers(Query);
+                        break;
+                    case GroupSearchMode.Department:
+                        await SearchDepartmentSupport(Query);
+                        break;
                 }
-                else
-                {
-                    var groupName = NormalizeGroupName(Query);
-                    AppendTitle($"Members of group '{groupName}'");
-
-                    var info = await _ad.GetGroupAsync(groupName);
-
-                    if (info.Exists && info.MemberCount is int c)
-                    {
-                        AppendLabelValue("Total members: ", c.ToString(), treatEmptyAsNone: false);
-
-                        if (c == 0)
-                        {
-                            AppendRaw("[cyan]No group members exist.[/cyan]");
-                        }
-                        else
-                        {
-                            if (info.GroupMembers is not null)
-                                foreach (var m in info.GroupMembers)
-                                    AppendRaw($"[lightgray] • {m}[/lightgray]");
-                        }
-
-                        Log.Info("GroupView", $"Group found: '{groupName}', Members={c}");
-                    }
-                    else
-                    {
-                        Error = info.ErrorMessage ?? "Group not found or lookup failed.";
-                        AppendRaw($"[red]{Error}[/red]");
-                        Log.Info("GroupView", $"Group not found: '{groupName}', Error='{Error}'");
-                    }
-                }
-
-                AppendRaw(string.Empty);
-                Log.Info("GroupView", "Search completed");
             }
             catch (Exception ex)
             {
                 Error = $"Search failed: {ex.Message}";
-                AppendRaw($"[red]Exception during group search: {ex}[/red]");
+                AppendRaw($"[red]Exception during search: {ex.Message}[/red]");
                 Log.Error("GroupView", "Search failed", ex);
             }
             finally
             {
                 IsLoading = false;
-                AppendRaw("[green]Group search process completed.[/green]\n");
+                AppendRaw("[green]Search completed.[/green]\n");
             }
         }
 
-        // Font control actions; respects per-view override setting
+        // Logic: User MIM Groups
+        private async Task SearchUserMimGroups(string query)
+        {
+            AppendRaw(string.Empty);
+
+            AppendTitle($"MIM groups for user '{query}'");
+            var r = await _ad.GetUserMimGroupsAsync(query);
+
+            if (!r.Exists)
+            {
+                Error = string.IsNullOrWhiteSpace(r.Error) ? $"'{query}' is not a valid NetID." : r.Error;
+                AppendRaw($"[red]{Error}[/red]");
+                return;
+            }
+
+            if (r.Enabled == false)
+                AppendLabelValue("Enabled: ", "False", treatEmptyAsNone: false);
+
+            AppendLabelValue("Total MIM groups: ", r.Groups?.Count.ToString() ?? "0", treatEmptyAsNone: false);
+
+            if (r.Groups is { Count: > 0 })
+            {
+                foreach (var g in r.Groups)
+                    AppendRaw($"[lightgray] • {g}[/lightgray]");
+            }
+            else
+            {
+                AppendRaw("[cyan]No valid MIM groups found.[/cyan]");
+            }
+
+            AppendRaw(string.Empty);
+        }
+
+        // Logic: Group Members
+        private async Task SearchGroupMembers(string query)
+        {
+            AppendRaw(string.Empty);
+
+            var groupName = NormalizeGroupName(query);
+            AppendTitle($"Members of group '{groupName}'");
+
+            var info = await _ad.GetGroupAsync(groupName);
+
+            if (info.Exists && info.MemberCount is int c)
+            {
+                AppendLabelValue("Total members: ", c.ToString(), treatEmptyAsNone: false);
+
+                if (c == 0)
+                {
+                    AppendRaw("[cyan]No group members exist.[/cyan]");
+                }
+                else
+                {
+                    if (info.GroupMembers is not null)
+                        foreach (var m in info.GroupMembers)
+                            AppendRaw($"[lightgray] • {m}[/lightgray]");
+                }
+            }
+            else
+            {
+                Error = info.ErrorMessage ?? "Group not found or lookup failed.";
+                AppendRaw($"[red]{Error}[/red]");
+            }
+
+            AppendRaw(string.Empty);
+        }
+
+        // Logic: Department Support
+        private async Task SearchDepartmentSupport(string deptNumber)
+        {
+            AppendRaw($"[gray]Looking up department '{deptNumber}'...[/gray]");
+
+            var dept = await _deptService.GetDepartmentAsync(deptNumber);
+
+            if (dept == null)
+            {
+                Error = $"Department '{deptNumber}' not found in configuration.";
+                AppendRaw($"[red]{Error}[/red]");
+                return;
+            }
+
+            AppendRaw(string.Empty);
+
+            AppendTitle($"Department: {dept.Number}");
+
+            if (!string.IsNullOrWhiteSpace(dept.Notes))
+                AppendLabelValue("Notes: ", dept.Notes);
+
+            var teamName = await _deptService.GetTeamAsync(dept.Number);
+            if (!string.IsNullOrWhiteSpace(teamName))
+            {
+                AppendRaw($"[cyan]Assigned Team: [/cyan][red]{teamName}[/red]");
+
+                var teamInfo = await _deptService.GetSupportTeamAsync(teamName);
+                if (teamInfo != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(teamInfo.ManagerName))
+                    {
+                        var mgr = teamInfo.ManagerName;
+                        if (!string.IsNullOrWhiteSpace(teamInfo.ManagerNetID)) mgr += $" ({teamInfo.ManagerNetID})";
+                        AppendLabelValue("Manager: ", mgr);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(teamInfo.PhoneNumber))
+                        AppendLabelValue("Support Phone: ", teamInfo.PhoneNumber);
+                }
+            }
+            else
+            {
+                AppendLabelValue("Assigned Team: ", "None", treatEmptyAsNone: false);
+            }
+
+            if (!string.IsNullOrWhiteSpace(dept.FileRepoPath))
+            {
+                AppendRaw($"[cyan]File Repository: [/cyan][red][Open Location]({dept.FileRepoPath})[/red]");
+            }
+
+            AppendRaw(string.Empty);
+        }
+
         public void AdjustFont(int delta)
         {
             var s = App.Settings;
             bool perView = s.Ui.Font.ViewFontSizeOverride;
-
             _ = _settingsSvc.AdjustOutputFontSize(s, perView ? "GroupView" : null, delta, perView);
             _notifier.NotifyChanged();
             _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
@@ -262,7 +345,6 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             var s = App.Settings;
             bool perView = s.Ui.Font.ViewFontSizeOverride;
-
             _settingsSvc.ResetOutputFontSize(s, perView ? "GroupView" : null, perView, 14);
             _notifier.NotifyChanged();
             _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
@@ -275,7 +357,6 @@ namespace DSAMVVM.MVVM.ViewModel
             return s;
         }
 
-        // Dispose pattern
         private bool _disposed;
         public void Dispose()
         {
