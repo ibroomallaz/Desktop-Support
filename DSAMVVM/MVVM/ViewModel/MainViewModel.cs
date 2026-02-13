@@ -1,5 +1,4 @@
-﻿// MainViewModel.cs
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Threading;
 using DSAMVVM.Core.Enums;
@@ -144,6 +143,66 @@ namespace DSAMVVM.MVVM.ViewModel
             InitializeNavigation();
         }
 
+        // --- Argument Processing (Jump List / Startup) ---
+        public void ProcessArgs(string[] args)
+        {
+            if (args == null || args.Length == 0) return;
+
+            // 1. Extract Mode
+            string? mode = GetArgValue(args, "--mode");
+
+            if (!string.IsNullOrEmpty(mode))
+            {
+                switch (mode.ToLowerInvariant())
+                {
+                    case "user":
+                        SelectedView = AppView.User;
+                        break;
+                    case "computer":
+                        SelectedView = AppView.Computer;
+                        break;
+                    case "group":
+                        SelectedView = AppView.Group;
+                        break;
+                    case "settings":
+                        SelectedView = AppView.Settings;
+                        break;
+                    case "links":
+                        SelectedView = AppView.Links;
+                        break;
+                    case "entra":
+                        SelectedView = AppView.Entra;
+                        break;
+                    case "about":
+                        SelectedView = AppView.About;
+                        break;
+                }
+            }
+
+            // 2. Extract Query (Optional)
+            string? query = GetArgValue(args, "--query");
+            if (!string.IsNullOrEmpty(query))
+            {
+                SearchQuery = query;
+                if (ExecuteSearchCommand.CanExecute(null))
+                {
+                    ExecuteSearchCommand.Execute(null);
+                }
+            }
+        }
+
+        private string? GetArgValue(string[] args, string key)
+        {
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i].Equals(key, StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    return args[i + 1];
+                }
+            }
+            return null;
+        }
+
         // Build nav items for sidebar
         private void InitializeNavigation()
         {
@@ -161,13 +220,19 @@ namespace DSAMVVM.MVVM.ViewModel
         // initial view bootstrap
         public void BootstrapInitialView()
         {
-            CurrentView = HomeVM;
-            var d = Application.Current?.Dispatcher;
-            if (d is not null)
-                d.BeginInvoke(() => SelectedView = AppView.Home, DispatcherPriority.Loaded);
-            else
-                SelectedView = AppView.Home;
-            SelectedNav = NavItems.FirstOrDefault(n => n.View == AppView.Home);
+            // Note: If ProcessArgs set the view already, don't overwrite it with Home.
+            // Only set to Home if the CurrentView is null or explicitly Home.
+            if (CurrentView == null || SelectedView == AppView.Home)
+            {
+                CurrentView = HomeVM;
+                var d = Application.Current?.Dispatcher;
+                if (d is not null)
+                    d.BeginInvoke(() => SelectedView = AppView.Home, DispatcherPriority.Loaded);
+                else
+                    SelectedView = AppView.Home;
+
+                SelectedNav = NavItems.FirstOrDefault(n => n.View == AppView.Home);
+            }
         }
 
         // warmup tasks

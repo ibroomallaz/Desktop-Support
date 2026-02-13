@@ -1,4 +1,8 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.IO;
+using System.IO.Pipes;
+using System.Windows;
+using System.Windows.Shell;
 using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
@@ -10,8 +14,8 @@ using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.Services.Status;
 using DSAMVVM.MVVM.Services.Updates;
-using DSAMVVM.MVVM.ViewModel;
 using DSAMVVM.MVVM.View;
+using DSAMVVM.MVVM.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DSAMVVM
@@ -23,8 +27,16 @@ namespace DSAMVVM
         private int _persistOnceFlag;
         private SplashWindow? _splash;
 
+        // Single Instance Identifiers
+        private const string UniqueMutexName = "DSAMVVM_Mutex_Global_v1";
+        private const string PipeName = "DSAMVVM_Pipe_Channel_v1";
+        private Mutex? _mutex;
+
         public static IServiceProvider Services { get; private set; } = default!;
         public static AppSettings Settings => ((App)Current)._settings ?? new AppSettings();
+
+        // Stores command-line arguments passed during application startup
+        public static string[] StartupArgs { get; private set; } = [];
 
         public App()
         {
@@ -34,9 +46,31 @@ namespace DSAMVVM
 
         protected override async void OnStartup(StartupEventArgs e)
         {
+            // 1. Single Instance Check
+            bool isNewInstance;
+            _mutex = new Mutex(true, UniqueMutexName, out isNewInstance);
+
+            if (!isNewInstance)
+            {
+                // App is already running. Send args to the existing instance and shut down.
+                await SendArgsToFirstInstanceAsync(e.Args);
+                Shutdown();
+                return;
+            }
+
+            // 2. Start listening for arguments from future instances (Jump List clicks)
+            _ = Task.Run(() => ListenForArgumentsAsync());
+
             base.OnStartup(e);
 
-            // Splash appears immediately; hides on first render
+            // Capture initial arguments
+            if (e.Args != null && e.Args.Length > 0)
+            {
+                StartupArgs = e.Args;
+            }
+            ConfigureJumpList();
+
+            // 3. Normal Startup Sequence
             _splash = new SplashWindow();
             _splash.SourceInitialized += (_, __) =>
             {
@@ -69,13 +103,11 @@ namespace DSAMVVM
                     MessageBoxImage.Warning);
             }
 
-            // Logging + UI notify before early logs
             var bus = _serviceProvider.GetRequiredService<StatusBus>();
             UiNotify.Initialize(bus.Report, bus.RemoveByKey, bus.Clear);
             Log.Initialize(_serviceProvider.GetRequiredService<IAppLogger>(), min: AppLogLevel.Debug);
             Mark("Logger ready");
 
-            // Load settings on UI thread; clamp + apply to logging
             var settingsSvc = _serviceProvider.GetRequiredService<ISettingsService>();
             try
             {
@@ -96,7 +128,6 @@ namespace DSAMVVM
 
             this.SessionEnding += App_SessionEnding;
 
-            // Required update probe with short deferral if slow
             try
             {
                 var updateUi = _serviceProvider.GetRequiredService<VersionCheckerUI>();
@@ -114,7 +145,6 @@ namespace DSAMVVM
                 }
                 else
                 {
-                    // If it takes longer, finish it while splash is still visible before main window
                     Log.Warn("UpdateCheck", "Update check exceeded 3s; finishing while splash is visible.");
                     try
                     {
@@ -133,11 +163,20 @@ namespace DSAMVVM
                 Log.Warn("UpdateCheck", $"Required update check failed to run: {ex.Message}");
             }
 
-            // Main window wiring
             var mainVM = _serviceProvider.GetRequiredService<MainViewModel>();
             var mainWindow = new MainWindow { DataContext = mainVM };
             MainWindow = mainWindow;
-            try { mainVM.SelectedView = AppView.Home; } catch { }
+
+            // Handle initial view routing
+            if (StartupArgs.Length > 0)
+            {
+                mainVM.ProcessArgs(StartupArgs);
+            }
+            else
+            {
+                // Default view if no arguments provided
+                mainVM.SelectedView = AppView.Home;
+            }
 
             mainWindow.ContentRendered += (_, __) =>
             {
@@ -145,7 +184,6 @@ namespace DSAMVVM
 
                 try { _splash?.Close(); _splash = null; } catch { }
 
-                // Run only non-enforced popup after render
                 this.Dispatcher.BeginInvoke(async () =>
                 {
                     try
@@ -173,7 +211,6 @@ namespace DSAMVVM
                 }, System.Windows.Threading.DispatcherPriority.Background);
             };
 
-            // Show window and start background scheduler
             mainWindow.Closed += (_, __) => TryPersistSettingsOnce();
             mainWindow.Show();
             Mark("Window shown");
@@ -190,6 +227,146 @@ namespace DSAMVVM
             }
         }
 
+        // --- SINGLE INSTANCE LOGIC: CLIENT ---
+        private async Task SendArgsToFirstInstanceAsync(string[] args)
+        {
+            if (args.Length == 0) return;
+
+            try
+            {
+                using var client = new NamedPipeClientStream(".", PipeName, PipeDirection.Out);
+                await client.ConnectAsync(1000);
+
+                using var writer = new StreamWriter(client) { AutoFlush = true };
+                await writer.WriteLineAsync(string.Join(" ", args));
+            }
+            catch (Exception)
+            {
+                // Silently fail if connection drops; app will just exit
+            }
+        }
+
+        // --- SINGLE INSTANCE LOGIC: SERVER ---
+        private async Task ListenForArgumentsAsync()
+        {
+            while (true)
+            {
+                try
+                {
+                    using var server = new NamedPipeServerStream(PipeName, PipeDirection.In);
+                    await server.WaitForConnectionAsync();
+
+                    using var reader = new StreamReader(server);
+                    var line = await reader.ReadLineAsync();
+
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        var args = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                        Application.Current.Dispatcher.Invoke(() => HandleExternalArgs(args));
+                    }
+                }
+                catch
+                {
+                    // Ignore pipe errors to keep server alive
+                }
+            }
+        }
+
+        // --- SINGLE INSTANCE LOGIC: HANDLER ---
+        private void HandleExternalArgs(string[] args)
+        {
+            // Update static args for context
+            StartupArgs = args;
+
+            // Force window to front
+            if (MainWindow is Window w)
+            {
+                if (w.WindowState == WindowState.Minimized)
+                    w.WindowState = WindowState.Normal;
+
+                w.Activate();
+                w.Topmost = true;
+                w.Topmost = false;
+                w.Focus();
+            }
+
+            // Delegate routing to ViewModel
+            var mainVM = Services.GetService<MainViewModel>();
+            if (mainVM != null)
+            {
+                mainVM.ProcessArgs(args);
+            }
+        }
+
+        private void ConfigureJumpList()
+        {
+            try
+            {
+                var exePath = Process.GetCurrentProcess().MainModule?.FileName;
+
+                var jumpList = new JumpList();
+                jumpList.ShowFrequentCategory = false;
+                jumpList.ShowRecentCategory = false;
+
+                // --- Search Items ---
+                jumpList.JumpItems.Add(new JumpTask
+                {
+                    Title = "Search Users",
+                    Description = "Lookup user attributes, licenses, and groups",
+                    Arguments = "--mode user",
+                    CustomCategory = "Search",
+                    IconResourcePath = exePath
+                });
+
+                jumpList.JumpItems.Add(new JumpTask
+                {
+                    Title = "Search Computers",
+                    Description = "Lookup device details",
+                    Arguments = "--mode computer",
+                    CustomCategory = "Search",
+                    IconResourcePath = exePath
+                });
+
+                jumpList.JumpItems.Add(new JumpTask
+                {
+                    Title = "Search Groups",
+                    Description = "Lookup MIM groups and Dept Support",
+                    Arguments = "--mode group",
+                    CustomCategory = "Search",
+                    IconResourcePath = exePath
+                });
+                // --- "Resources" Item ---
+                jumpList.JumpItems.Add(new JumpTask
+                {
+                    Title = "Quick Links",
+                    Description = "Helpful Links and locations",
+                    Arguments = "--mode links",
+                    CustomCategory = "Resources",
+                    IconResourcePath = exePath
+                });
+
+                // --- Settings Item ---
+                jumpList.JumpItems.Add(new JumpTask
+                {
+                    Title = "Settings",
+                    Description = "Configure application preferences",
+                    Arguments = "--mode settings",
+                    CustomCategory = "Application",
+                    IconResourcePath = exePath
+                });
+
+                JumpList.SetJumpList(Application.Current, jumpList);
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("JumpList", $"Failed to configure Jump List: {ex.Message}");
+            }
+        }
+
+        public static bool HasArg(string arg)
+        {
+            return StartupArgs.Any(a => a.Equals(arg, StringComparison.OrdinalIgnoreCase));
+        }
 
         protected override void OnExit(ExitEventArgs e)
         {
@@ -202,6 +379,9 @@ namespace DSAMVVM
             {
                 fl.Dispose();
             }
+
+            // Release Mutex on exit
+            _mutex?.Dispose();
 
             base.OnExit(e);
         }
