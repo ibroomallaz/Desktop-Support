@@ -42,12 +42,12 @@ namespace DSAMVVM.MVVM.View
         private void HookVm(GroupViewModel? vm)
         {
             _vm = vm;
-            if (_vm != null) _vm.PropertyChanged += OnVmPropertyChanged;
+            _vm?.PropertyChanged += OnVmPropertyChanged;
         }
 
         private void UnhookVm(GroupViewModel? vm)
         {
-            if (vm != null) vm.PropertyChanged -= OnVmPropertyChanged;
+            vm?.PropertyChanged -= OnVmPropertyChanged;
         }
 
         private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)

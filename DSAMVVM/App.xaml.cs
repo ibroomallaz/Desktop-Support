@@ -47,8 +47,7 @@ namespace DSAMVVM
         protected override async void OnStartup(StartupEventArgs e)
         {
             // 1. Single Instance Check
-            bool isNewInstance;
-            _mutex = new Mutex(true, UniqueMutexName, out isNewInstance);
+            _mutex = new Mutex(true, UniqueMutexName, out bool isNewInstance);
 
             if (!isNewInstance)
             {
@@ -292,10 +291,7 @@ namespace DSAMVVM
 
             // Delegate routing to ViewModel
             var mainVM = Services.GetService<MainViewModel>();
-            if (mainVM != null)
-            {
-                mainVM.ProcessArgs(args);
-            }
+            mainVM?.ProcessArgs(args);
         }
 
         private void ConfigureJumpList()
@@ -304,9 +300,11 @@ namespace DSAMVVM
             {
                 var exePath = Process.GetCurrentProcess().MainModule?.FileName;
 
-                var jumpList = new JumpList();
-                jumpList.ShowFrequentCategory = false;
-                jumpList.ShowRecentCategory = false;
+                var jumpList = new JumpList
+                {
+                    ShowFrequentCategory = false,
+                    ShowRecentCategory = false
+                };
 
                 // --- Search Items ---
                 jumpList.JumpItems.Add(new JumpTask
