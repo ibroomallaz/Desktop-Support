@@ -184,7 +184,7 @@ namespace DSAMVVM.MVVM.ViewModel
                         // ACTION: Don't change the view, just run the check.
                         Application.Current.Dispatcher.InvokeAsync(async () =>
                         {
-                            await _versionHandler.CheckAsync();
+                            await _versionHandler.CheckAsync(showUpToDatePopup: true);
                         });
                         break;
                 }

@@ -98,6 +98,12 @@ namespace DSAMVVM.MVVM.Services.Updates
             if (!showed && showUpToDatePopup)
             {
                 UiNotify.Info("You’re up to date.", showStatusBar: true, key: StatusKey);
+
+                MessageBox.Show(
+                    $"No updates found.  Version: ({_installedVersion}).",
+                    "Up to Date",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
                 Log.Info(Cat, "check.up-to-date.shown");
             }
         }
