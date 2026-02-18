@@ -343,6 +343,15 @@ namespace DSAMVVM
                     IconResourcePath = exePath
                 });
 
+                // -- "Application" --
+                jumpList.JumpItems.Add(new JumpTask
+                {
+                    Title = "Check for Updates",
+                    Description = "Force a check for application updates",
+                    Arguments = "--mode update",
+                    CustomCategory = "Application",
+                    IconResourcePath = exePath
+                });
                 // --- Settings Item ---
                 jumpList.JumpItems.Add(new JumpTask
                 {

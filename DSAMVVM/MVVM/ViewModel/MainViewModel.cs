@@ -16,6 +16,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public IDepartmentService DeptService { get; } = null!;
         private readonly IADService _adService = null!;
         private readonly ISearchService _searchService = null!;
+        private readonly IVersionCheckHandler _versionHandler;
         public StatusBarViewModel StatusBar { get; } = null!;
 
         // VM factories (lazy)
@@ -118,6 +119,7 @@ namespace DSAMVVM.MVVM.ViewModel
             IDepartmentService deptService,
             IADService adService,
             ISearchService searchService,
+            IVersionCheckHandler versionHandler,
             StatusBarViewModel statusBar,
             Func<UserViewModel> userVMFactory,
             Func<ComputerViewModel> computerVMFactory,
@@ -129,6 +131,8 @@ namespace DSAMVVM.MVVM.ViewModel
             _adService = adService;
             _searchService = searchService;
             StatusBar = statusBar;
+
+            _versionHandler = versionHandler;
 
             _userVMFactory = userVMFactory;
             _computerVMFactory = computerVMFactory;
@@ -175,6 +179,13 @@ namespace DSAMVVM.MVVM.ViewModel
                         break;
                     case "about":
                         SelectedView = AppView.About;
+                        break;
+                    case "update":
+                        // ACTION: Don't change the view, just run the check.
+                        Application.Current.Dispatcher.InvokeAsync(async () =>
+                        {
+                            await _versionHandler.CheckAsync();
+                        });
                         break;
                 }
             }
