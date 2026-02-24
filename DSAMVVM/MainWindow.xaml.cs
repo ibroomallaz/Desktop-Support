@@ -1,5 +1,4 @@
-﻿using DSAMVVM.MVVM.ViewModel;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -22,13 +21,27 @@ namespace DSAMVVM
         // Minimize window
         private void Minimize_Click(object sender, RoutedEventArgs e)
         {
-            this.WindowState = WindowState.Minimized;
+            if (App.Settings != null && App.Settings.Ui.Tray.EnableTrayIcon && App.Settings.Ui.Tray.MinimizeToTray)
+            {
+                this.Hide();
+            }
+            else
+            {
+                this.WindowState = WindowState.Minimized;
+            }
         }
 
         // Close window
         private void Close_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            if (App.Settings != null && App.Settings.Ui.Tray.EnableTrayIcon && App.Settings.Ui.Tray.CloseToTray)
+            {
+                this.Hide();
+            }
+            else
+            {
+                this.Close();
+            }
         }
 
         // Show history dropdown when clicking in the search box
@@ -47,6 +60,21 @@ namespace DSAMVVM
             {
                 combo.IsDropDownOpen = false;
             }
+        }
+
+        protected override void OnStateChanged(EventArgs e)
+        {
+            if (WindowState == WindowState.Minimized)
+            {
+                if (App.Settings != null && App.Settings.Ui.Tray.EnableTrayIcon && App.Settings.Ui.Tray.MinimizeToTray)
+                {
+                    // Reset state to Normal so the window restores at the correct size later
+                    WindowState = WindowState.Normal;
+                    this.Hide();
+                }
+            }
+
+            base.OnStateChanged(e);
         }
     }
 }

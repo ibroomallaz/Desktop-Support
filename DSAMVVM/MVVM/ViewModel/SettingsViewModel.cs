@@ -45,6 +45,7 @@ namespace DSAMVVM.MVVM.ViewModel
         // --- Exposed Sub-Settings ---
         public LinksUiSettings LinksSettings => _settings.Ui.Links;
         public SearchSettings SearchSettings => _settings.Ui.Search;
+        public TrayUiSettings TraySettings => _settings.Ui.Tray;
 
         // --- UI State Properties ---
         private double _defaultFontSize;
@@ -107,6 +108,28 @@ namespace DSAMVVM.MVVM.ViewModel
         private string _linksUri = string.Empty;
         public string LinksUri { get => _linksUri; set => Set(ref _linksUri, value); }
 
+        // --- Tray Settings State ---
+        private bool _enableTrayIcon;
+        public bool EnableTrayIcon
+        {
+            get => _enableTrayIcon;
+            set
+            {
+                if (Set(ref _enableTrayIcon, value) && !value)
+                {
+                    MinimizeToTray = false;
+                    CloseToTray = false;
+                }
+            }
+        }
+
+        private bool _minimizeToTray;
+        public bool MinimizeToTray { get => _minimizeToTray; set => Set(ref _minimizeToTray, value); }
+
+        private bool _closeToTray;
+        public bool CloseToTray { get => _closeToTray; set => Set(ref _closeToTray, value); }
+
+
         // --- Constructors ---
         public SettingsViewModel()
             : this(App.Services.GetRequiredService<ISettingsService>(),
@@ -159,6 +182,11 @@ namespace DSAMVVM.MVVM.ViewModel
             LinksSource = MatchSourceOption(links.Source);
             LinksUri = links.Uri;
 
+            // Load Tray Settings
+            EnableTrayIcon = _settings.Ui.Tray.EnableTrayIcon;
+            MinimizeToTray = _settings.Ui.Tray.MinimizeToTray;
+            CloseToTray = _settings.Ui.Tray.CloseToTray;
+
             // Configure Commands
             ApplyCommand = new RelayCommand(_ => Apply(deptService, linksService));
             OpenLogsCommand = new RelayCommand(_ => OpenLogsFolder());
@@ -183,6 +211,8 @@ namespace DSAMVVM.MVVM.ViewModel
             bool linksChanged = linkSettings.UseCustomSource != UseCustomLinks ||
                                 !string.Equals(linkSettings.Source, LinksSource, StringComparison.OrdinalIgnoreCase) ||
                                 !string.Equals(linkSettings.Uri, LinksUri);
+
+            bool trayChanged = _settings.Ui.Tray.EnableTrayIcon != EnableTrayIcon;
 
             // VM -> Model
             _settings.Ui.Font.DefaultSize = DefaultFontSize;
@@ -223,6 +253,18 @@ namespace DSAMVVM.MVVM.ViewModel
             links.Source = LinksSource;
             links.Uri = LinksUri;
 
+            var tray = _settings.Ui.Tray;
+            tray.EnableTrayIcon = EnableTrayIcon;
+            tray.MinimizeToTray = MinimizeToTray;
+            tray.CloseToTray = CloseToTray;
+
+            // Stamp the current schema version before saving so older versions don't overwrite it
+            if (_settings.Meta != null)
+            {
+                // overwriting whatever Newtonsoft pulled from the old file
+                _settings.Meta.SchemaVersion = Globals.g_SettingsSchema;
+            }
+
             _settings.ApplyDefaultsAndClamp();
             var path = Path.Combine(Globals.g_AppDir, "settings.json");
             _settingsSvc.RequestSave(_settings, path);
@@ -235,6 +277,18 @@ namespace DSAMVVM.MVVM.ViewModel
 
             if (deptChanged) _ = deptService?.ReloadDataAsync();
             if (linksChanged) _ = linksService?.ReloadLinksDataAsync();
+
+            // Notify application about dynamic tray state changes
+            if (trayChanged)
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (System.Windows.Application.Current is App myApp)
+                    {
+                        myApp.ToggleTrayIcon(EnableTrayIcon);
+                    }
+                });
+            }
 
             _notifier?.NotifyChanged();
         }

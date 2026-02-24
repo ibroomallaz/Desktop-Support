@@ -1,7 +1,5 @@
 ﻿namespace DSAMVVM.Core.Interfaces
 {
-
- 
     public interface IVersionCheckHandler
     {
         Task EnforceRequiredAsync(); // may block + shutdown if below required min

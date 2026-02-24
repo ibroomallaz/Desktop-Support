@@ -16,6 +16,7 @@ using DSAMVVM.MVVM.Services.Status;
 using DSAMVVM.MVVM.Services.Updates;
 using DSAMVVM.MVVM.View;
 using DSAMVVM.MVVM.ViewModel;
+using H.NotifyIcon;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DSAMVVM
@@ -26,6 +27,7 @@ namespace DSAMVVM
         private AppSettings? _settings;
         private int _persistOnceFlag;
         private SplashWindow? _splash;
+        private TaskbarIcon? _appTrayIcon;
 
         // Single Instance Identifiers
         private const string UniqueMutexName = "DSAMVVM_Mutex_Global_v1";
@@ -166,6 +168,8 @@ namespace DSAMVVM
             var mainWindow = new MainWindow { DataContext = mainVM };
             MainWindow = mainWindow;
 
+            InitializeTrayIcon(mainVM);
+
             // Handle initial view routing
             if (StartupArgs.Length > 0)
             {
@@ -226,8 +230,58 @@ namespace DSAMVVM
             }
         }
 
+        // --- COMPONENT INITIALIZATION ---
+        private void InitializeTrayIcon(MainViewModel mainVM)
+        {
+            // Respect the user's setting on startup
+            if (!Settings.Ui.Tray.EnableTrayIcon) return;
+
+            try
+            {
+                _appTrayIcon = (TaskbarIcon)FindResource("GlobalAppTrayIcon");
+
+                if (_appTrayIcon != null)
+                {
+                    _appTrayIcon.DataContext = mainVM;
+
+                    // EXPLICITLY pass the ViewModel to the ContextMenu so the bindings never fail
+                    if (_appTrayIcon.ContextMenu != null)
+                    {
+                        _appTrayIcon.ContextMenu.DataContext = mainVM;
+                    }
+
+                    _appTrayIcon.ForceCreate();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("TrayIcon", $"Failed to initialize system tray icon: {ex.Message}");
+            }
+        }
+        // Called dynamically by SettingsViewModel when the user clicks "Apply"
+        public void ToggleTrayIcon(bool enable)
+        {
+            if (_appTrayIcon == null)
+            {
+                // If it was never created (e.g., they started the app with it disabled), create it now
+                if (enable)
+                {
+                    var mainVM = Services.GetService<MainViewModel>();
+                    if (mainVM != null)
+                    {
+                        InitializeTrayIcon(mainVM);
+                    }
+                }
+            }
+            else
+            {
+                // If it already exists, just hide or show it instead of destroying the object entirely
+                _appTrayIcon.Visibility = enable ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
         // --- SINGLE INSTANCE LOGIC: CLIENT ---
-        private async Task SendArgsToFirstInstanceAsync(string[] args)
+        private async static Task SendArgsToFirstInstanceAsync(string[] args)
         {
             if (args.Length == 0) return;
 
@@ -294,7 +348,7 @@ namespace DSAMVVM
             mainVM?.ProcessArgs(args);
         }
 
-        private void ConfigureJumpList()
+        private static void ConfigureJumpList()
         {
             try
             {
@@ -386,6 +440,8 @@ namespace DSAMVVM
             {
                 fl.Dispose();
             }
+
+            _appTrayIcon?.Dispose();
 
             // Release Mutex on exit
             _mutex?.Dispose();

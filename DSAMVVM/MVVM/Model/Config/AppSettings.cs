@@ -6,7 +6,7 @@ using Newtonsoft.Json.Converters;
 
 namespace DSAMVVM.MVVM.Model.Config
 {
-    public class AppSettings
+    public sealed class AppSettings
     {
         public SettingsMeta Meta { get; set; } = new();
         public Paths Paths { get; set; } = new();
@@ -20,6 +20,7 @@ namespace DSAMVVM.MVVM.Model.Config
 
             Ui?.Search?.Clamp();
             Ui?.Font?.Clamp();
+            Ui?.Tray?.Normalize();
 
             // Ensure case-insensitive view keys even if JSON replaced the dictionary
             if (Ui?.ViewFontSizes != null &&
@@ -48,14 +49,14 @@ namespace DSAMVVM.MVVM.Model.Config
         }
     }
 
-    public class Paths
+    public sealed class Paths
     {
         public string DataDir { get; set; } = "data";
         public DataLocation DepartmentData { get; set; } = new();
         public DataLocation LinksData { get; set; } = new();
     }
 
-    public class DataLocation
+    public sealed class DataLocation
     {
         // Master toggle for this override
         public bool UseCustomSource { get; set; } = false;
@@ -91,7 +92,7 @@ namespace DSAMVVM.MVVM.Model.Config
         }
     }
 
-    public class Ui
+    public sealed class Ui
     {
         public FontSettings Font { get; set; } = new();
 
@@ -103,6 +104,27 @@ namespace DSAMVVM.MVVM.Model.Config
 
         // Links preferences
         public LinksUiSettings Links { get; set; } = new();
+
+        // System Tray preferences
+        public TrayUiSettings Tray { get; set; } = new();
+    }
+
+    public sealed class TrayUiSettings
+    {
+        public bool EnableTrayIcon { get; set; } = false;
+        public bool MinimizeToTray { get; set; } = false;
+        public bool CloseToTray { get; set; } = false;
+
+        public void Normalize()
+        {
+            // Safety: If the tray is disabled, ensure window hiding flags are disabled
+            // so the app doesn't hide itself into a non-existent tray.
+            if (!EnableTrayIcon)
+            {
+                MinimizeToTray = false;
+                CloseToTray = false;
+            }
+        }
     }
 
     public sealed class LinksUiSettings
@@ -142,7 +164,7 @@ namespace DSAMVVM.MVVM.Model.Config
         }
     }
 
-    public class FontSettings
+    public sealed class FontSettings
     {
         public double DefaultSize { get; set; } = 14.0;
         public bool ViewFontSizeOverride { get; set; } = false;
@@ -153,7 +175,7 @@ namespace DSAMVVM.MVVM.Model.Config
         }
     }
 
-    public class ViewFontSetting
+    public sealed class ViewFontSetting
     {
         public double FontSize { get; set; }
 
@@ -184,7 +206,7 @@ namespace DSAMVVM.MVVM.Model.Config
         }
     }
 
-    public class SearchSettings
+    public sealed class SearchSettings
     {
         public bool UseSavedSearchHistory { get; set; } = true;
         public int MaxSearchHistory { get; set; } = 10;
@@ -206,7 +228,7 @@ namespace DSAMVVM.MVVM.Model.Config
         }
     }
 
-    public class LoggingSettings
+    public sealed class LoggingSettings
     {
         [JsonConverter(typeof(StringEnumConverter))]
         public AppLogLevel MinimumLevel { get; set; } = AppLogLevel.Warn;

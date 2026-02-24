@@ -6,7 +6,9 @@ namespace DSAMVVM.MVVM.Model
     public class Globals
     {
 
+#pragma warning disable CA2211 // Non-constant fields should not be visible
         public static string g_AppVersion = VersionDisplayHelper.GetSemVerDisplay();
+#pragma warning restore CA2211 // Non-constant fields should not be visible
 
         // AD constants
 
@@ -44,7 +46,7 @@ namespace DSAMVVM.MVVM.Model
         public static readonly string g_SettingsLegacyDir = Path.Combine(g_AppDir, "settings-legacy");
 
         // Schema versions
-        public const int g_SettingsSchema = 2;
+        public const int g_SettingsSchema = 3;
         public const int g_DepartmentJSONSchema = 3;
         public const int g_LinkJSONSchema = 2;
         public const int g_VersionSchema = 2;

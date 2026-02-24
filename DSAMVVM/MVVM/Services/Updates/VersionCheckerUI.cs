@@ -99,11 +99,27 @@ namespace DSAMVVM.MVVM.Services.Updates
             {
                 UiNotify.Info("You’re up to date.", showStatusBar: true, key: StatusKey);
 
-                MessageBox.Show(
-                    $"No updates found.  Version: ({_installedVersion}).",
-                    "Up to Date",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                // Anchor the MessageBox to the main window to prevent Windows from culling it
+                var owner = GetPreferredOwner();
+                if (owner != null)
+                {
+                    MessageBox.Show(
+                        owner,
+                        $"No updates found.  Version: ({_installedVersion}).",
+                        "Up to Date",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                else
+                {
+                    // Safe fallback if the window handle is completely unavailable
+                    MessageBox.Show(
+                        $"No updates found.  Version: ({_installedVersion}).",
+                        "Up to Date",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+
                 Log.Info(Cat, "check.up-to-date.shown");
             }
         }

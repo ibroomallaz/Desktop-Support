@@ -1,12 +1,13 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Threading;
-using DSAMVVM.Core.Enums;
+﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
-using Microsoft.Extensions.DependencyInjection;
 using DSAMVVM.MVVM.View.Resources;
+using Microsoft.Extensions.DependencyInjection;
+using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -55,6 +56,10 @@ namespace DSAMVVM.MVVM.ViewModel
         public RelayCommand AboutCommand { get; private set; } = null!;
         public RelayCommand ExecuteSearchCommand { get; private set; } = null!;
         public RelayCommand SettingsCommand { get; private set; } = null!;
+
+        public ICommand ShowWindowCommand { get; private set; } = null!;
+        public ICommand CheckUpdateCommand { get; private set; } = null!;
+        public ICommand ExitApplicationCommand { get; private set; } = null!;
 
         // Navigation collection and selection
         public ObservableCollection<NavItem> NavItems { get; } = [];
@@ -202,7 +207,7 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        private string? GetArgValue(string[] args, string key)
+        private static string? GetArgValue(string[] args, string key)
         {
             for (int i = 0; i < args.Length; i++)
             {
@@ -269,15 +274,25 @@ namespace DSAMVVM.MVVM.ViewModel
         // command setup
         private void InitializeCommands()
         {
-            HomeViewCommand = new RelayCommand(_ => SelectedView = AppView.Home);
-            UserCommand = new RelayCommand(_ => SelectedView = AppView.User);
-            ComputerCommand = new RelayCommand(_ => SelectedView = AppView.Computer);
-            GroupCommand = new RelayCommand(_ => SelectedView = AppView.Group);
-            EntraCommand = new RelayCommand(_ => SelectedView = AppView.Entra);
-            LinksCommand = new RelayCommand(_ => SelectedView = AppView.Links);
-            AboutCommand = new RelayCommand(_ => SelectedView = AppView.About);
-            SettingsCommand = new RelayCommand(_ => SelectedView = AppView.Settings);
+            HomeViewCommand = new RelayCommand(_ => { SelectedView = AppView.Home; RestoreWindow(); });
+            UserCommand = new RelayCommand(_ => { SelectedView = AppView.User; RestoreWindow(); });
+            ComputerCommand = new RelayCommand(_ => { SelectedView = AppView.Computer; RestoreWindow(); });
+            GroupCommand = new RelayCommand(_ => { SelectedView = AppView.Group; RestoreWindow(); });
+            EntraCommand = new RelayCommand(_ => { SelectedView = AppView.Entra; RestoreWindow(); });
+            LinksCommand = new RelayCommand(_ => { SelectedView = AppView.Links; RestoreWindow(); });
+            AboutCommand = new RelayCommand(_ => { SelectedView = AppView.About; RestoreWindow(); });
+            SettingsCommand = new RelayCommand(_ => { SelectedView = AppView.Settings; RestoreWindow(); });
+
             ExecuteSearchCommand = new RelayCommand(_ => TriggerSearch());
+            ShowWindowCommand = new RelayCommand(_ => RestoreWindow());
+            ExitApplicationCommand = new RelayCommand(_ => Application.Current.Shutdown());
+            CheckUpdateCommand = new RelayCommand(_ =>
+            {
+                Application.Current.Dispatcher.InvokeAsync(async () =>
+                {
+                    await _versionHandler.CheckAsync(showUpToDatePopup: true);
+                });
+            });
         }
 
         // search helpers
@@ -330,6 +345,27 @@ namespace DSAMVVM.MVVM.ViewModel
             var snap = _searchService.GetHistorySnapshot();
             SearchHistory.Clear();
             foreach (var q in snap) SearchHistory.Add(q);
+        }
+
+        private static void RestoreWindow()
+        {
+            var mainWindow = Application.Current?.MainWindow;
+            if (mainWindow == null) return;
+
+            // 1. Un-hide the window
+            mainWindow.Show();
+
+            // 2. Restore its size if it was minimized
+            if (mainWindow.WindowState == WindowState.Minimized)
+            {
+                mainWindow.WindowState = WindowState.Normal;
+            }
+
+            // 3. Force Windows to bring it to the absolute front
+            mainWindow.Activate();
+            mainWindow.Topmost = true;  // Snap to front
+            mainWindow.Topmost = false; // Release lock so it doesn't block other apps
+            mainWindow.Focus();
         }
     }
 }

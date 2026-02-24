@@ -17,7 +17,6 @@ namespace DSAMVVM.Core.Services
 
         // Load / Save (core)
 
-
         public async Task<AppSettings> LoadAsync(string settingsPath, CancellationToken ct = default)
         {
             var path = Expand(settingsPath);

@@ -32,12 +32,8 @@
     <None Remove="MVVM\View\fileicon.png" />
   </ItemGroup>
 
-
   <ItemGroup>
-    <Content Include="img\MainIcon.ico" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.4.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="10.0.3" />

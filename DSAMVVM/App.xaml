@@ -8,6 +8,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Theme/Index.xaml"/>
+                <ResourceDictionary Source="MVVM/View/Resources/TrayIcon.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Fonts-->
