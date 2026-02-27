@@ -8,6 +8,7 @@ namespace DSAMVVM.MVVM.Model
 
 #pragma warning disable CA2211 // Non-constant fields should not be visible
         public static string g_AppVersion = VersionDisplayHelper.GetSemVerDisplay();
+        public static string g_FileVersion = VersionDisplayHelper.GetFileVersionDisplay();
 #pragma warning restore CA2211 // Non-constant fields should not be visible
 
         // AD constants

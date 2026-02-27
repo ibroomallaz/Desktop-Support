@@ -13,7 +13,6 @@
                 <ResourceDictionary Source="/Theme/Controls/Button.Rounded.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- card container style -->
             <Style x:Key="Card.Surface" TargetType="Border">
                 <Setter Property="CornerRadius" Value="12"/>
                 <Setter Property="Padding" Value="0"/>
@@ -30,7 +29,6 @@
                 </Style.Triggers>
             </Style>
 
-            <!-- compact button -->
             <Style x:Key="Button.Rounded.Compact" TargetType="Button" BasedOn="{StaticResource Button.Rounded}">
                 <Setter Property="Padding"   Value="8,2"/>
                 <Setter Property="MinHeight" Value="26"/>
@@ -50,7 +48,6 @@
                        Foreground="{DynamicResource Brush.Text.Primary}"
                        Margin="0,0,0,12"/>
 
-            <!-- Application -->
             <Border Style="{StaticResource Card.Surface}" Margin="0,0,0,16">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -69,18 +66,25 @@
                                    Margin="0,0,0,12"/>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                             <TextBlock Text="Version:" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,0,6,0"/>
-                            <TextBlock Text="{Binding AppVersion}" Foreground="{DynamicResource Brush.Text.Primary}" FontWeight="Medium"/>
+                            <TextBlock Text="{Binding AppVersion}" 
+                                       Foreground="{DynamicResource Brush.Text.Primary}" 
+                                       FontWeight="Medium"
+                                       Cursor="Hand"
+                                       ToolTip="Click to toggle detailed file version">
+                                <TextBlock.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding ToggleVersionCommand}"/>
+                                </TextBlock.InputBindings>
+                            </TextBlock>
                         </StackPanel>
                         <WrapPanel>
                             <Button Style="{StaticResource Button.Rounded.Compact}"
                                     Content="Check for Update"
-                                    Click="OnCheckVersionClick"/>
+                                    Command="{Binding CheckVersionCommand}"/>
                         </WrapPanel>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- Developers -->
             <Border Style="{StaticResource Card.Surface}" Margin="0,0,0,16">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -93,7 +97,7 @@
                             CornerRadius="12,0,0,12"/>
 
                     <StackPanel Grid.Column="1" Margin="16">
-                        <TextBlock Text="Developers"
+                        <TextBlock Text="Developer Team"
                                    FontSize="16" FontWeight="Bold"
                                    Foreground="{DynamicResource Brush.Text.Primary}"
                                    Margin="0,0,0,12"/>
@@ -111,7 +115,6 @@
                 </Grid>
             </Border>
 
-            <!-- Links -->
             <Border Style="{StaticResource Card.Surface}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -124,17 +127,17 @@
                             CornerRadius="12,0,0,12"/>
 
                     <StackPanel Grid.Column="1" Margin="16">
-                        <TextBlock Text="Links"
+                        <TextBlock Text="Resources"
                                    FontSize="16" FontWeight="Bold"
                                    Foreground="{DynamicResource Brush.Text.Primary}"
                                    Margin="0,0,0,12"/>
                         <WrapPanel>
                             <Button Style="{StaticResource Button.Rounded.Compact}"
-                                    Content="Open GitHub"
-                                    Click="OnOpenGitHubClick"/>
+                                    Content="View Source on GitHub"
+                                    Command="{Binding OpenGitHubCommand}" Click="Button_Click"/>
                             <Button Style="{StaticResource Button.Rounded.Compact}"
                                     Content="Open SharePoint"
-                                    Click="OnOpenSharePointClick"/>
+                                    Command="{Binding OpenSharePointCommand}"/>
                         </WrapPanel>
                     </StackPanel>
                 </Grid>

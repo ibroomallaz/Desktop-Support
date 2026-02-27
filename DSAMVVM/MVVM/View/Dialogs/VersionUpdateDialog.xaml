@@ -11,7 +11,10 @@
         Topmost="True"
         Background="Transparent">
 
-    <!-- Themed container with custom title bar -->
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Window.Resources>
+
     <Border CornerRadius="12"
             Background="{DynamicResource Brush.Surface}"
             BorderBrush="{DynamicResource Brush.Card.Border.Alternate}"
@@ -27,7 +30,6 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Title bar -->
             <Border Grid.Row="0" Padding="12,8"
                     Background="{DynamicResource Brush.Surface}"
                     BorderBrush="{DynamicResource Brush.Card.Border.Alternate}"
@@ -46,13 +48,13 @@
 
                     <Button Grid.Column="1" Content="✕" Width="28" Height="28" Padding="0"
                             Command="{Binding CloseCommand}"
+                            IsEnabled="{Binding IsNotDownloading}"
                             Background="Transparent"
                             Foreground="{DynamicResource Brush.Text.Primary}"
                             BorderBrush="{x:Null}"/>
                 </Grid>
             </Border>
 
-            <!-- Body -->
             <Grid Grid.Row="1" Margin="16">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -60,10 +62,8 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Header -->
                 <StackPanel Grid.Row="0" Orientation="Vertical" Margin="0,0,0,12">
                     <TextBlock Text="{Binding HeaderText}"
                                FontSize="18"
@@ -78,7 +78,6 @@
                                Foreground="{DynamicResource Brush.Text.Primary}"/>
                 </StackPanel>
 
-                <!-- Change Log -->
                 <TextBlock Grid.Row="1"
                            Text="Change Log"
                            Margin="0,0,0,6"
@@ -101,67 +100,37 @@
                     </ScrollViewer>
                 </Border>
 
-                <!-- Links -->
-                <TextBlock Grid.Row="3"
-                           Text="Links"
-                           Margin="0,12,0,6"
-                           FontWeight="Bold"
-                           Foreground="{DynamicResource Brush.Text.Primary}"/>
+                <StackPanel Grid.Row="3" Margin="0,12,0,0"
+                            Visibility="{Binding IsDownloading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="{Binding StatusText}" 
+                               HorizontalAlignment="Center" 
+                               Margin="0,0,0,6" 
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource Brush.Text.Primary}"/>
+                    <ProgressBar IsIndeterminate="True" Height="6" Background="{DynamicResource Brush.Surface}" Foreground="{DynamicResource Brush.Accent}"/>
+                </StackPanel>
 
-                <Border Grid.Row="4"
-                        Background="{DynamicResource Brush.Card.Alternate}"
-                        BorderBrush="{DynamicResource Brush.Card.Border.Alternate}"
-                        BorderThickness="1"
-                        CornerRadius="12"
-                        Padding="12"
-                        Visibility="{Binding LinksCardVisibility}">
-                    <StackPanel>
-                        <TextBlock TextWrapping="Wrap"
-                                   Foreground="{DynamicResource Brush.Text.Primary}"
-                                   Visibility="{Binding DownloadRowVisibility}">
-                            <Run Text="Download: " FontWeight="SemiBold"/>
-                            <Hyperlink Command="{Binding DownloadCommand}"
-                                       Foreground="{DynamicResource Brush.Accent}"
-                                       TextDecorations="Underline">
-                                <Run Text="{Binding DownloadUrl, Mode=OneWay}"/>
-                            </Hyperlink>
-                        </TextBlock>
-
-                        <TextBlock Margin="0,6,0,0"
-                                   TextWrapping="Wrap"
-                                   Foreground="{DynamicResource Brush.Text.Primary}"
-                                   Visibility="{Binding NotesLinkVisibility}">
-                            <Run Text="Release notes: " FontWeight="SemiBold"/>
-                            <Hyperlink Command="{Binding OpenReleaseNotesCommand}"
-                                       Foreground="{DynamicResource Brush.Accent}"
-                                       TextDecorations="Underline">
-                                <Run Text="{Binding ChangeLogUrl, Mode=OneWay}"/>
-                            </Hyperlink>
-                        </TextBlock>
-                    </StackPanel>
-                </Border>
-
-                <!-- Actions -->
-                <StackPanel Grid.Row="5"
+                <StackPanel Grid.Row="4"
                             Orientation="Horizontal"
                             HorizontalAlignment="Right"
                             Margin="0,12,0,0">
-                    <Button Content="Download"
+                    <Button Content="Install Update"
                             MinWidth="110"
                             Margin="0,0,8,0"
                             IsDefault="True"
-                            Command="{Binding DownloadCommand}"
-                            Visibility="{Binding DownloadRowVisibility}"
+                            Command="{Binding InstallUpdateCommand}"
+                            IsEnabled="{Binding IsNotDownloading}"
                             Style="{DynamicResource Button.Rounded}"/>
                     <Button Content="Release notes"
                             MinWidth="120"
                             Margin="0,0,8,0"
                             Command="{Binding OpenReleaseNotesCommand}"
-                            IsEnabled="{Binding NotesButtonEnabled}"
+                            IsEnabled="{Binding IsNotDownloading}"
                             Style="{DynamicResource Button.Rounded}"/>
                     <Button Content="Close"
                             MinWidth="96"
                             Command="{Binding CloseCommand}"
+                            IsEnabled="{Binding IsNotDownloading}"
                             Style="{DynamicResource Button.Rounded}"/>
                 </StackPanel>
             </Grid>

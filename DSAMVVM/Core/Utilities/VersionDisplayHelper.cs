@@ -26,6 +26,20 @@ namespace DSAMVVM.Core.Utilities
             return lowercase ? s.ToLowerInvariant() : s;
         }
 
+        // Retrieves the raw file version string from the executing assembly
+        public static string GetFileVersionDisplay()
+        {
+            try
+            {
+                var asm = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+                return FileVersionInfo.GetVersionInfo(asm.Location).FileVersion ?? "Unknown";
+            }
+            catch
+            {
+                return "Unknown";
+            }
+        }
+
         private static string GetRawInformational()
         {
             var asm = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();

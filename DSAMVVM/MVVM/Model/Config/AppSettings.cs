@@ -12,6 +12,7 @@ namespace DSAMVVM.MVVM.Model.Config
         public Paths Paths { get; set; } = new();
         public Ui Ui { get; set; } = new();
         public LoggingSettings Logging { get; set; } = new();
+        public UpdateSettings Updates { get; set; } = new();
 
         // Call after deserialization
         public void ApplyDefaultsAndClamp()
@@ -247,5 +248,9 @@ namespace DSAMVVM.MVVM.Model.Config
                 MinimumLevel = AppLogLevel.Warn;
             }
         }
+    }
+    public sealed class UpdateSettings
+    {
+        public bool EnablePreReleaseChannel { get; set; } = false;
     }
 }

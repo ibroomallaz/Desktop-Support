@@ -11,8 +11,8 @@
     <RepositoryUrl>https://github.com/ibroomallaz/Desktop-Support</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <AssemblyVersion>4.2.0</AssemblyVersion>
-    <FileVersion>4.2.1010</FileVersion>
-    <Version>4.2.0-Beta</Version>
+    <FileVersion>4.2.1020</FileVersion>
+    <Version>4.2.0-Beta2</Version>
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Title>Desktop Support App</Title>

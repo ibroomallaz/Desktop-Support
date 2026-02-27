@@ -1,16 +1,22 @@
-﻿using System.Windows;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.View.Dialogs;
+using DSAMVVM.MVVM.ViewModel.Dialogs;
 
 namespace DSAMVVM.MVVM.Services.Updates
 {
     // Fetches once per cycle; enforces required; prompts once per version; implements scheduler handler
-    public class VersionCheckerUI(IHttpService http) : IVersionCheckHandler
+    public class VersionCheckerUI(IHttpService http, IUpdaterService updater) : IVersionCheckHandler
     {
         private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
+        private readonly IUpdaterService _updaterService = updater ?? throw new ArgumentNullException(nameof(updater));
+
         private readonly string _installedVersion = Globals.g_AppVersion;
         private readonly string _versionUrl = Globals.g_VersionJSON;
 
@@ -18,14 +24,14 @@ namespace DSAMVVM.MVVM.Services.Updates
         private const string Cat = "Version.UI";
         private const string RequiredCat = "Version.Required";
 
-        // -> simple in-memory dedupe
+        // In-memory state tracking to prevent duplicate prompts during a single application session
         private VersionCheckResult? _cached;
         private DateTime _lastFetchUtc;
         private readonly TimeSpan _cacheWindow = TimeSpan.FromMinutes(2);
         private string? _lastPromptedStable;
         private string? _lastPromptedPre;
 
-        // -> required gate (uses single fetch)
+        // Evaluates application version against required minimums and triggers blocking actions if obsolete
         public async Task EnforceRequiredAsync()
         {
             Log.Info(RequiredCat, $"enforce.start installed=\"{_installedVersion}\" url=\"{_versionUrl}\"");
@@ -51,12 +57,12 @@ namespace DSAMVVM.MVVM.Services.Updates
 
             var msg = res.RequiredMessage ?? "A newer version is required to continue.";
             var dl = res.Info?.Current?.Location ?? res.StableLocation;
-            ShowRequiredBlocking(GetPreferredOwner(), minReq!, msg, dl);
+            await ShowRequiredBlockingAsync(GetPreferredOwner(), minReq!, msg, dl);
         }
 
-        // -> non-blocking update path (uses single fetch)
         public async Task CheckAsync() => await CheckAsync(false);
 
+        // Executes a standard version check and triggers the appropriate UI elements based on the result
         public async Task CheckAsync(bool showUpToDatePopup)
         {
             Log.Info(Cat, $"check.start installed=\"{_installedVersion}\" url=\"{_versionUrl}\"");
@@ -69,13 +75,13 @@ namespace DSAMVVM.MVVM.Services.Updates
                 return;
             }
 
-            // -> honor required gate using same fetch (no extra network)
+            // Validates required bounds before processing optional updates
             if (!string.IsNullOrWhiteSpace(res.RequiredMinVersion) &&
                 VersionChecker.IsNewerVersion(_installedVersion, res.RequiredMinVersion))
             {
                 var msg = res.RequiredMessage ?? "A newer version is required to continue.";
                 var dl = res.Info?.Current?.Location ?? res.StableLocation;
-                ShowRequiredBlocking(GetPreferredOwner(), res.RequiredMinVersion!, msg, dl);
+                await ShowRequiredBlockingAsync(GetPreferredOwner(), res.RequiredMinVersion!, msg, dl);
                 return;
             }
 
@@ -99,7 +105,6 @@ namespace DSAMVVM.MVVM.Services.Updates
             {
                 UiNotify.Info("You’re up to date.", showStatusBar: true, key: StatusKey);
 
-                // Anchor the MessageBox to the main window to prevent Windows from culling it
                 var owner = GetPreferredOwner();
                 if (owner != null)
                 {
@@ -112,7 +117,6 @@ namespace DSAMVVM.MVVM.Services.Updates
                 }
                 else
                 {
-                    // Safe fallback if the window handle is completely unavailable
                     MessageBox.Show(
                         $"No updates found.  Version: ({_installedVersion}).",
                         "Up to Date",
@@ -124,7 +128,7 @@ namespace DSAMVVM.MVVM.Services.Updates
             }
         }
 
-        // -> shared fetch with short cache window
+        // Reduces redundant network requests during automated polling cycles
         private async Task<VersionCheckResult?> FetchAsync()
         {
             if (_cached != null && (DateTime.UtcNow - _lastFetchUtc) < _cacheWindow)
@@ -143,7 +147,7 @@ namespace DSAMVVM.MVVM.Services.Updates
             return res;
         }
 
-        // -> compare, session-level dedupe, show dialog
+        // Determines version hierarchy and handles session-level deduplication before triggering UI
         private bool ShowPopupIfNewer(string? stableVer, string? stableLoc, string? stableChg,
                                       bool preExists, string? preVer, string? preLoc, string? preChg)
         {
@@ -162,7 +166,7 @@ namespace DSAMVVM.MVVM.Services.Updates
                     return false;
                 }
 
-                VersionUpdateDialog.ShowFor(owner, _installedVersion, stableVer!, stableLoc, stableChg, isBeta: false);
+                ShowUpdateDialog(owner, stableVer!, stableLoc, stableChg, isPre: false);
                 _lastPromptedStable = stableVer;
                 Log.Info(Cat, "popup.stable.shown");
                 return true;
@@ -176,7 +180,7 @@ namespace DSAMVVM.MVVM.Services.Updates
                     return false;
                 }
 
-                VersionUpdateDialog.ShowFor(owner, _installedVersion, preVer!, preLoc, preChg, isBeta: true);
+                ShowUpdateDialog(owner, preVer!, preLoc, preChg, isPre: true);
                 _lastPromptedPre = preVer;
                 Log.Info(Cat, "popup.pre.shown");
                 return true;
@@ -186,8 +190,35 @@ namespace DSAMVVM.MVVM.Services.Updates
             return false;
         }
 
-        // -> blocking modal for required
-        private static void ShowRequiredBlocking(Window? owner, string minVersion, string message, string? downloadUrl)
+        // Instantiates the MVVM dialog components on the main dispatcher thread
+        private void ShowUpdateDialog(Window? owner, string version, string? location, string? changelog, bool isPre)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var viewModel = new VersionUpdateDialogViewModel(
+                    _updaterService,
+                    _installedVersion,
+                    version,
+                    isPre,
+                    location,
+                    changelog,
+                    string.Empty
+                );
+
+                var dialog = new VersionUpdateDialog
+                {
+                    DataContext = viewModel,
+                    Owner = owner ?? GetPreferredOwner()
+                };
+
+                viewModel.RequestClose += () => dialog.Close();
+
+                dialog.ShowDialog();
+            });
+        }
+
+        // Enforces application exit if an update is mandatory, utilizing the automated pipeline if approved
+        private async Task ShowRequiredBlockingAsync(Window? owner, string minVersion, string message, string? downloadUrl)
         {
             var text =
                 "This version of the app is no longer supported.\n\n" +
@@ -202,21 +233,16 @@ namespace DSAMVVM.MVVM.Services.Updates
 
             if (result == MessageBoxResult.OK && !string.IsNullOrWhiteSpace(downloadUrl))
             {
-                try
-                {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = downloadUrl,
-                        UseShellExecute = true
-                    });
-                }
-                catch { }
+                // Executes the automated process directly. The service handles the final Application.Current.Shutdown()
+                await _updaterService.DownloadAndInstallAsync(downloadUrl);
             }
-
-            Application.Current?.Shutdown();
+            else
+            {
+                Application.Current?.Shutdown();
+            }
         }
 
-        // -> owner select
+        // Locates the topmost active application window to use as a dialog owner
         private static Window? GetPreferredOwner()
         {
             var active = Application.Current?.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);

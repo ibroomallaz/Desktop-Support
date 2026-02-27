@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,19 +22,22 @@ namespace DSAMVVM.MVVM.View
             DataContext = _vm;
         }
 
-        // Optional passthroughs if XAML uses Click= handlers; otherwise bind to commands in XAML.
-        private void OnOpenGitHubClick(object sender, RoutedEventArgs e) => _vm.OpenGitHubCommand.Execute(null);
-        private void OnOpenSharePointClick(object sender, RoutedEventArgs e) => _vm.OpenSharePointCommand.Execute(null);
-        private void OnCheckVersionClick(object sender, RoutedEventArgs e) => _vm.CheckVersionCommand.Execute(null);
-
         private static void TryOpenUrl(string url)
         {
-            try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
+            try
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
             catch (Exception ex)
             {
                 MessageBox.Show($"Unable to open: {url}\n\n{ex.Message}", "Open Link",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

@@ -283,15 +283,16 @@ namespace DSAMVVM
         // --- SINGLE INSTANCE LOGIC: CLIENT ---
         private async static Task SendArgsToFirstInstanceAsync(string[] args)
         {
-            if (args.Length == 0) return;
-
             try
             {
                 using var client = new NamedPipeClientStream(".", PipeName, PipeDirection.Out);
                 await client.ConnectAsync(1000);
 
                 using var writer = new StreamWriter(client) { AutoFlush = true };
-                await writer.WriteLineAsync(string.Join(" ", args));
+
+                // If there are no args, send a dummy "WAKE_UP" signal so the server still triggers
+                var payload = args.Length > 0 ? string.Join(" ", args) : "WAKE_UP";
+                await writer.WriteLineAsync(payload);
             }
             catch (Exception)
             {
@@ -312,11 +313,13 @@ namespace DSAMVVM
                     using var reader = new StreamReader(server);
                     var line = await reader.ReadLineAsync();
 
-                    if (!string.IsNullOrWhiteSpace(line))
-                    {
-                        var args = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                        Application.Current.Dispatcher.Invoke(() => HandleExternalArgs(args));
-                    }
+                    // Parse the arguments, stripping out our dummy wake up signal if it's there
+                    var argsToPass = string.IsNullOrWhiteSpace(line) || line == "WAKE_UP"
+                        ? []
+                        : line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                    // ALWAYS fire the handler so the window snaps to the front, even if args are empty
+                    Application.Current.Dispatcher.Invoke(() => HandleExternalArgs(argsToPass));
                 }
                 catch
                 {
@@ -334,6 +337,8 @@ namespace DSAMVVM
             // Force window to front
             if (MainWindow is Window w)
             {
+                w.Show();
+
                 if (w.WindowState == WindowState.Minimized)
                     w.WindowState = WindowState.Normal;
 
@@ -492,6 +497,7 @@ namespace DSAMVVM
             services.AddSingleton<IADService, ADService>();
             services.AddSingleton<ILinksService, LinksService>();
             services.AddSingleton<ISearchService, SearchService>();
+            services.AddSingleton<IUpdaterService, UpdaterService>();
 
             services.AddSingleton<IOutputTextSettingsProvider>(sp =>
                 new OutputTextSettingsProvider(

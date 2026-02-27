@@ -11,13 +11,25 @@
         <tb:TaskbarIcon.ContextMenu>
             <ContextMenu>
                 <MenuItem Header="Open Support App" Command="{Binding ShowWindowCommand}" FontWeight="Bold"/>
+
                 <Separator/>
-                <MenuItem Header="Search Users" Command="{Binding UserCommand}"/>
-                <MenuItem Header="Search Computers" Command="{Binding ComputerCommand}"/>
+
+                <MenuItem Header="Search">
+                    <MenuItem Header="Users" Command="{Binding UserCommand}"/>
+                    <MenuItem Header="Computers" Command="{Binding ComputerCommand}"/>
+                    <MenuItem Header="Groups" Command="{Binding GroupCommand}"/>
+                </MenuItem>
+
+                <MenuItem Header="Quick Links" Command="{Binding LinksCommand}"/>
+
                 <MenuItem Header="Settings" Command="{Binding SettingsCommand}"/>
+
                 <Separator/>
+
                 <MenuItem Header="Check for Updates..." Command="{Binding CheckUpdateCommand}"/>
+
                 <Separator/>
+
                 <MenuItem Header="Exit Application" Command="{Binding ExitApplicationCommand}"/>
             </ContextMenu>
         </tb:TaskbarIcon.ContextMenu>

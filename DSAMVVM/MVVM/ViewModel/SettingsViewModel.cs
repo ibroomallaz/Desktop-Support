@@ -129,6 +129,9 @@ namespace DSAMVVM.MVVM.ViewModel
         private bool _closeToTray;
         public bool CloseToTray { get => _closeToTray; set => Set(ref _closeToTray, value); }
 
+        // --- Update Settings State ---
+        private bool _enablePreReleaseChannel;
+        public bool EnablePreReleaseChannel { get => _enablePreReleaseChannel; set => Set(ref _enablePreReleaseChannel, value); }
 
         // --- Constructors ---
         public SettingsViewModel()
@@ -186,6 +189,9 @@ namespace DSAMVVM.MVVM.ViewModel
             EnableTrayIcon = _settings.Ui.Tray.EnableTrayIcon;
             MinimizeToTray = _settings.Ui.Tray.MinimizeToTray;
             CloseToTray = _settings.Ui.Tray.CloseToTray;
+
+            // Load Update Settings
+            EnablePreReleaseChannel = _settings.Updates.EnablePreReleaseChannel;
 
             // Configure Commands
             ApplyCommand = new RelayCommand(_ => Apply(deptService, linksService));
@@ -257,6 +263,9 @@ namespace DSAMVVM.MVVM.ViewModel
             tray.EnableTrayIcon = EnableTrayIcon;
             tray.MinimizeToTray = MinimizeToTray;
             tray.CloseToTray = CloseToTray;
+
+            // VM -> Model for Update Settings
+            _settings.Updates.EnablePreReleaseChannel = EnablePreReleaseChannel;
 
             // Stamp the current schema version before saving so older versions don't overwrite it
             if (_settings.Meta != null)
@@ -379,5 +388,6 @@ namespace DSAMVVM.MVVM.ViewModel
             Directory.CreateDirectory(Globals.g_LogsDir);
             return Globals.g_LogsDir;
         }
+
     }
 }
