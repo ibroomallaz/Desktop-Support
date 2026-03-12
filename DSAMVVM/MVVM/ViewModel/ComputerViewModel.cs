@@ -172,13 +172,16 @@ namespace DSAMVVM.MVVM.ViewModel
                 if (!string.IsNullOrWhiteSpace(comp.OUs))
                     AppendLabelValue("OUs: ", comp.OUs);
 
+                if (!string.IsNullOrWhiteSpace(comp.LastLogonDate))
+                    AppendLabelValue("Last Logon: ", comp.LastLogonDate);
+
                 if (comp.Enabled == false)
                     AppendLabelValue("Enabled: ", "False", treatEmptyAsNone: false);
 
                 AppendLabelValue("Hybrid Group Member: ", comp.IsHybridGroupMember ? "True" : "False", treatEmptyAsNone: false);
 
                 Log.Info("ComputerView",
-                    $"Computer found: Name='{comp.Name}', OS='{comp.OperatingSystem}', Enabled={comp.Enabled}, Hybrid={comp.IsHybridGroupMember}, OUs='{comp.OUs}'");
+                    $"Computer found: Name='{comp.Name}', OS='{comp.OperatingSystem}', LastLogon='{comp.LastLogonDate}', Enabled={comp.Enabled}, Hybrid={comp.IsHybridGroupMember}, OUs='{comp.OUs}'");
 
                 AppendRaw(string.Empty);
                 Log.Info("ComputerView", "Search completed");

@@ -1,6 +1,7 @@
-﻿using DSAMVVM.Core.Utilities;
+﻿using System.DirectoryServices;
+using System.Reflection;
+using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
-using System.DirectoryServices;
 
 namespace DSAMVVM.Core.Services.AD
 {
@@ -39,6 +40,8 @@ namespace DSAMVVM.Core.Services.AD
 
                     // simple membership flag from memberOf attribute when present
                     info.IsHybridGroupMember = DirectoryUtility.IsMemberOf(r, "UA-MEMHybridDevices");
+
+                    info.LastLogonDate = ParseLastLogon(r);
                 }
                 catch (DirectoryServicesCOMException ex)
                 {
@@ -55,6 +58,32 @@ namespace DSAMVVM.Core.Services.AD
 
                 return info;
             });
+        }
+
+        // converts AD IADsLargeInteger to a formatted local timestamp string
+        private static string ParseLastLogon(SearchResult r)
+        {
+            if (!r.Properties.Contains("lastLogonTimestamp") || r.Properties["lastLogonTimestamp"].Count == 0)
+                return "Never";
+
+            var ts = r.Properties["lastLogonTimestamp"][0];
+
+            try
+            {
+                if (ts is long longValue)
+                    return DateTime.FromFileTime(longValue).ToString("MMM dd, yyyy h:mm tt");
+
+                var type = ts.GetType();
+                var highPart = (int)type.InvokeMember("HighPart", BindingFlags.GetProperty, null, ts, null!);
+                var lowPart = (int)type.InvokeMember("LowPart", BindingFlags.GetProperty, null, ts, null!);
+
+                var fileTime = ((long)highPart << 32) | (uint)lowPart;
+                return DateTime.FromFileTime(fileTime).ToString("MMM dd, yyyy h:mm tt");
+            }
+            catch
+            {
+                return "Unknown";
+            }
         }
     }
 }

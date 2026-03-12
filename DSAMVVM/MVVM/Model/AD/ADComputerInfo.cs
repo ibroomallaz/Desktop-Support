@@ -11,6 +11,7 @@
         public bool Exists { get; set; }
         public bool? Enabled { get; set; }
         public bool IsHybridGroupMember { get; set; }
+        public string? LastLogonDate { get; set; }
 
         public string? ErrorMessage { get; set; }
     }

@@ -15,7 +15,7 @@ namespace DSAMVVM.Core.Services.AD
 
         // computer props used by UI and services
         private static readonly string[] ComputerProps = [
-            "distinguishedName","description","operatingSystem","userAccountControl","memberOf"
+            "distinguishedName","description","operatingSystem","userAccountControl","memberOf","lastLogonTimestamp"
         ];
 
         // ---- user lookups ----
@@ -147,12 +147,19 @@ namespace DSAMVVM.Core.Services.AD
 
         // ---- property helpers ----
 
-        public static bool IsMemberOf(SearchResult r, string groupCnContains)
+        public static bool IsMemberOf(SearchResult r, string exactGroupCn)
         {
             if (!r.Properties.Contains("memberOf")) return false;
+
+            var searchTarget = $"CN={exactGroupCn},";
+
             foreach (var v in r.Properties["memberOf"])
-                if (v?.ToString()?.Contains(groupCnContains, StringComparison.OrdinalIgnoreCase) == true)
+            {
+                if (v?.ToString()?.Contains(searchTarget, StringComparison.OrdinalIgnoreCase) == true)
+                {
                     return true;
+                }
+            }
             return false;
         }
 
@@ -201,8 +208,7 @@ namespace DSAMVVM.Core.Services.AD
                 Filter = filter,
                 SearchScope = SearchScope.Subtree,
                 CacheResults = true,
-                Asynchronous = true,
-                ServerTimeLimit = TimeSpan.FromSeconds(3),
+                ServerTimeLimit = TimeSpan.FromSeconds(15),
                 SizeLimit = sizeLimit,
                 PageSize = pageSize,
                 ReferralChasing = ReferralChasingOption.None
