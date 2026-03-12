@@ -39,10 +39,7 @@ namespace DSAMVVM.MVVM.View.Dialogs
         private void UpdateChangelogMaxHeight()
         {
             var usable = Math.Max(0, ActualHeight - 220);
-            if (ChangelogScroll != null)
-            {
-                ChangelogScroll.MaxHeight = Math.Max(140, usable * 0.6);
-            }
+            ChangelogScroll?.MaxHeight = Math.Max(140, usable * 0.6);
         }
 
         // Enables dragging the window by clicking and holding the custom title bar

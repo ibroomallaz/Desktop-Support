@@ -268,11 +268,8 @@ namespace DSAMVVM.MVVM.ViewModel
             _settings.Updates.EnablePreReleaseChannel = EnablePreReleaseChannel;
 
             // Stamp the current schema version before saving so older versions don't overwrite it
-            if (_settings.Meta != null)
-            {
-                // overwriting whatever Newtonsoft pulled from the old file
-                _settings.Meta.SchemaVersion = Globals.g_SettingsSchema;
-            }
+            // overwriting whatever Newtonsoft pulled from the old file
+            _settings.Meta?.SchemaVersion = Globals.g_SettingsSchema;
 
             _settings.ApplyDefaultsAndClamp();
             var path = Path.Combine(Globals.g_AppDir, "settings.json");
@@ -308,7 +305,7 @@ namespace DSAMVVM.MVVM.ViewModel
             try { Process.Start(new ProcessStartInfo(dir) { UseShellExecute = true }); } catch { }
         }
 
-        private void BrowseForFile(Action<string> onPathSelected)
+        private static void BrowseForFile(Action<string> onPathSelected)
         {
             var dlg = new OpenFileDialog
             {

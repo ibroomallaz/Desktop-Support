@@ -74,11 +74,16 @@ namespace DSAMVVM.Core.Services.AD
                     return DateTime.FromFileTime(longValue).ToString("MMM dd, yyyy h:mm tt");
 
                 var type = ts.GetType();
-                var highPart = (int)type.InvokeMember("HighPart", BindingFlags.GetProperty, null, ts, null!);
-                var lowPart = (int)type.InvokeMember("LowPart", BindingFlags.GetProperty, null, ts, null!);
+                var highObj = type.InvokeMember("HighPart", BindingFlags.GetProperty, null, ts, null!);
+                var lowObj = type.InvokeMember("LowPart", BindingFlags.GetProperty, null, ts, null!);
 
-                var fileTime = ((long)highPart << 32) | (uint)lowPart;
-                return DateTime.FromFileTime(fileTime).ToString("MMM dd, yyyy h:mm tt");
+                if (highObj is int highPart && lowObj is int lowPart)
+                {
+                    var fileTime = ((long)highPart << 32) | (uint)lowPart;
+                    return DateTime.FromFileTime(fileTime).ToString("MMM dd, yyyy h:mm tt");
+                }
+
+                return "Unknown";
             }
             catch
             {

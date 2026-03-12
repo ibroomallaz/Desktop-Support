@@ -245,10 +245,7 @@ namespace DSAMVVM
                     _appTrayIcon.DataContext = mainVM;
 
                     // EXPLICITLY pass the ViewModel to the ContextMenu so the bindings never fail
-                    if (_appTrayIcon.ContextMenu != null)
-                    {
-                        _appTrayIcon.ContextMenu.DataContext = mainVM;
-                    }
+                    _appTrayIcon.ContextMenu?.DataContext = mainVM;
 
                     _appTrayIcon.ForceCreate();
                 }
