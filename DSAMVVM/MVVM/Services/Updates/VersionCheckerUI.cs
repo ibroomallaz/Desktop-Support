@@ -6,19 +6,26 @@ using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
+using DSAMVVM.MVVM.Model.Schemas;
+using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.View.Dialogs;
 using DSAMVVM.MVVM.ViewModel.Dialogs;
 
 namespace DSAMVVM.MVVM.Services.Updates
 {
     // Fetches once per cycle; enforces required; prompts once per version; implements scheduler handler
-    public class VersionCheckerUI(IHttpService http, IUpdaterService updater) : IVersionCheckHandler
+    public class VersionCheckerUI(IHttpService http, IUpdaterService updater, AppSettings settings) : IVersionCheckHandler
     {
         private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
         private readonly IUpdaterService _updaterService = updater ?? throw new ArgumentNullException(nameof(updater));
+        private readonly AppSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
 
         private readonly string _installedVersion = Globals.g_AppVersion;
-        private readonly string _versionUrl = Globals.g_VersionJSON;
+
+        // Dynamically evaluates the active update URL based on application configuration
+        private string ActiveVersionUrl => _settings.Updates.UseInternalTestingSources
+            ? Globals.g_TestVersionJSON
+            : Globals.g_VersionJSON;
 
         private const string StatusKey = "VersionCheck.Status";
         private const string Cat = "Version.UI";
@@ -34,7 +41,8 @@ namespace DSAMVVM.MVVM.Services.Updates
         // Evaluates application version against required minimums and triggers blocking actions if obsolete
         public async Task EnforceRequiredAsync()
         {
-            Log.Info(RequiredCat, $"enforce.start installed=\"{_installedVersion}\" url=\"{_versionUrl}\"");
+            var url = ActiveVersionUrl;
+            Log.Info(RequiredCat, $"enforce.start installed=\"{_installedVersion}\" url=\"{url}\"");
             var res = await FetchAsync();
 
             if (res == null || (!res.Success && res.Info == null && !res.HasAnyStable && !res.HasAnyPre))
@@ -56,8 +64,17 @@ namespace DSAMVVM.MVVM.Services.Updates
             if (!mustUpdate) return;
 
             var msg = res.RequiredMessage ?? "A newer version is required to continue.";
-            var dl = res.Info?.Current?.Location ?? res.StableLocation;
-            await ShowRequiredBlockingAsync(GetPreferredOwner(), minReq!, msg, dl);
+
+            var updatePayload = res.Info?.Current ?? new CurrentVersion
+            {
+                Location = res.StableLocation,
+                Version = res.StableVersion,
+                MsiUrl = res.StableMsiUrl,
+                SetupUrl = res.StableSetupUrl,
+                RequiredDotNetVersion = res.StableRequiredDotNetVersion
+            };
+
+            await ShowRequiredBlockingAsync(GetPreferredOwner(), minReq!, msg, updatePayload);
         }
 
         public async Task CheckAsync() => await CheckAsync(false);
@@ -65,7 +82,8 @@ namespace DSAMVVM.MVVM.Services.Updates
         // Executes a standard version check and triggers the appropriate UI elements based on the result
         public async Task CheckAsync(bool showUpToDatePopup)
         {
-            Log.Info(Cat, $"check.start installed=\"{_installedVersion}\" url=\"{_versionUrl}\"");
+            var url = ActiveVersionUrl;
+            Log.Info(Cat, $"check.start installed=\"{_installedVersion}\" url=\"{url}\"");
 
             var res = await FetchAsync();
             if (res == null || (!res.Success && res.Info == null && !res.HasAnyStable && !res.HasAnyPre))
@@ -75,28 +93,40 @@ namespace DSAMVVM.MVVM.Services.Updates
                 return;
             }
 
+            var stablePayload = res.Info?.Current ?? new CurrentVersion
+            {
+                Version = res.StableVersion,
+                Location = res.StableLocation,
+                Changelog = res.StableChangelog,
+                MsiUrl = res.StableMsiUrl,
+                SetupUrl = res.StableSetupUrl,
+                RequiredDotNetVersion = res.StableRequiredDotNetVersion
+            };
+
+            var prePayload = new CurrentVersion
+            {
+                Version = res.Info?.PreRelease?.Version ?? res.PreVersion,
+                Location = res.Info?.PreRelease?.Location ?? res.PreLocation,
+                Changelog = res.Info?.PreRelease?.Changelog ?? res.PreChangelog,
+                MsiUrl = res.Info?.PreRelease?.MsiUrl ?? res.PreMsiUrl,
+                SetupUrl = res.Info?.PreRelease?.SetupUrl ?? res.PreSetupUrl,
+                RequiredDotNetVersion = res.Info?.PreRelease?.RequiredDotNetVersion ?? res.PreRequiredDotNetVersion
+            };
+
+            var preExists = res.Info?.PreRelease?.Exists ?? res.PreExists;
+
             // Validates required bounds before processing optional updates
             if (!string.IsNullOrWhiteSpace(res.RequiredMinVersion) &&
                 VersionChecker.IsNewerVersion(_installedVersion, res.RequiredMinVersion))
             {
                 var msg = res.RequiredMessage ?? "A newer version is required to continue.";
-                var dl = res.Info?.Current?.Location ?? res.StableLocation;
-                await ShowRequiredBlockingAsync(GetPreferredOwner(), res.RequiredMinVersion!, msg, dl);
+                await ShowRequiredBlockingAsync(GetPreferredOwner(), res.RequiredMinVersion!, msg, stablePayload);
                 return;
             }
 
-            var stableVer = res.Info?.Current?.Version ?? res.StableVersion;
-            var stableLoc = res.Info?.Current?.Location ?? res.StableLocation;
-            var stableChg = res.Info?.Current?.Changelog ?? res.StableChangelog;
+            Log.Info(Cat, $"check.info stable=\"{Val(stablePayload.Version)}\" pre=\"{Val(prePayload.Version)}\" pre.exists={(preExists ? "true" : "false")}");
 
-            var preExists = res.Info?.PreRelease?.Exists ?? res.PreExists;
-            var preVer = res.Info?.PreRelease?.Version ?? res.PreVersion;
-            var preLoc = res.Info?.PreRelease?.Location ?? res.PreLocation;
-            var preChg = res.Info?.PreRelease?.Changelog ?? res.PreChangelog;
-
-            Log.Info(Cat, $"check.info stable=\"{Val(stableVer)}\" pre=\"{Val(preVer)}\" pre.exists={(preExists ? "true" : "false")}");
-
-            var showed = ShowPopupIfNewer(stableVer, stableLoc, stableChg, preExists, preVer, preLoc, preChg);
+            var showed = ShowPopupIfNewer(stablePayload, preExists, prePayload);
 
             UiNotify.Info($"Version: {_installedVersion}.", showStatusBar: true, key: StatusKey);
             Log.Debug(Cat, "report.success");
@@ -106,22 +136,15 @@ namespace DSAMVVM.MVVM.Services.Updates
                 UiNotify.Info("You’re up to date.", showStatusBar: true, key: StatusKey);
 
                 var owner = GetPreferredOwner();
+                var msgBoxText = $"No updates found.  Version: ({_installedVersion}).";
+
                 if (owner != null)
                 {
-                    MessageBox.Show(
-                        owner,
-                        $"No updates found.  Version: ({_installedVersion}).",
-                        "Up to Date",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
+                    MessageBox.Show(owner, msgBoxText, "Up to Date", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    MessageBox.Show(
-                        $"No updates found.  Version: ({_installedVersion}).",
-                        "Up to Date",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
+                    MessageBox.Show(msgBoxText, "Up to Date", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
                 Log.Info(Cat, "check.up-to-date.shown");
@@ -137,7 +160,8 @@ namespace DSAMVVM.MVVM.Services.Updates
                 return _cached;
             }
 
-            var res = await VersionChecker.CheckVersionAsync(_versionUrl, _http);
+            var url = ActiveVersionUrl;
+            var res = await VersionChecker.CheckVersionAsync(url, _http);
             if (res.Success || res.Info != null || res.HasAnyStable || res.HasAnyPre)
             {
                 _cached = res;
@@ -148,11 +172,10 @@ namespace DSAMVVM.MVVM.Services.Updates
         }
 
         // Determines version hierarchy and handles session-level deduplication before triggering UI
-        private bool ShowPopupIfNewer(string? stableVer, string? stableLoc, string? stableChg,
-                                      bool preExists, string? preVer, string? preLoc, string? preChg)
+        private bool ShowPopupIfNewer(CurrentVersion stable, bool preExists, CurrentVersion pre)
         {
-            var newerStable = !string.IsNullOrWhiteSpace(stableVer) && VersionChecker.IsNewerVersion(_installedVersion, stableVer!);
-            var newerPre = preExists && !string.IsNullOrWhiteSpace(preVer) && VersionChecker.IsNewerVersion(_installedVersion, preVer!);
+            var newerStable = !string.IsNullOrWhiteSpace(stable.Version) && VersionChecker.IsNewerVersion(_installedVersion, stable.Version!);
+            var newerPre = preExists && !string.IsNullOrWhiteSpace(pre.Version) && VersionChecker.IsNewerVersion(_installedVersion, pre.Version!);
 
             Log.Info(Cat, $"decide newer.stable={(newerStable ? "true" : "false")} newer.pre={(newerPre ? "true" : "false")}");
 
@@ -160,28 +183,28 @@ namespace DSAMVVM.MVVM.Services.Updates
 
             if (newerStable)
             {
-                if (string.Equals(_lastPromptedStable, stableVer, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(_lastPromptedStable, stable.Version, StringComparison.OrdinalIgnoreCase))
                 {
                     Log.Info(Cat, "popup.stable.skip duplicate");
                     return false;
                 }
 
-                ShowUpdateDialog(owner, stableVer!, stableLoc, stableChg, isPre: false);
-                _lastPromptedStable = stableVer;
+                ShowUpdateDialog(owner, stable, isPre: false);
+                _lastPromptedStable = stable.Version;
                 Log.Info(Cat, "popup.stable.shown");
                 return true;
             }
 
             if (newerPre)
             {
-                if (string.Equals(_lastPromptedPre, preVer, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(_lastPromptedPre, pre.Version, StringComparison.OrdinalIgnoreCase))
                 {
                     Log.Info(Cat, "popup.pre.skip duplicate");
                     return false;
                 }
 
-                ShowUpdateDialog(owner, preVer!, preLoc, preChg, isPre: true);
-                _lastPromptedPre = preVer;
+                ShowUpdateDialog(owner, pre, isPre: true);
+                _lastPromptedPre = pre.Version;
                 Log.Info(Cat, "popup.pre.shown");
                 return true;
             }
@@ -191,18 +214,15 @@ namespace DSAMVVM.MVVM.Services.Updates
         }
 
         // Instantiates the MVVM dialog components on the main dispatcher thread
-        private void ShowUpdateDialog(Window? owner, string version, string? location, string? changelog, bool isPre)
+        private void ShowUpdateDialog(Window? owner, CurrentVersion updateInfo, bool isPre)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
                 var viewModel = new VersionUpdateDialogViewModel(
                     _updaterService,
                     _installedVersion,
-                    version,
-                    isPre,
-                    location,
-                    changelog,
-                    string.Empty
+                    updateInfo,
+                    isPre
                 );
 
                 var dialog = new VersionUpdateDialog
@@ -218,7 +238,7 @@ namespace DSAMVVM.MVVM.Services.Updates
         }
 
         // Enforces application exit if an update is mandatory, utilizing the automated pipeline if approved
-        private async Task ShowRequiredBlockingAsync(Window? owner, string minVersion, string message, string? downloadUrl)
+        private async Task ShowRequiredBlockingAsync(Window? owner, string minVersion, string message, CurrentVersion updateInfo)
         {
             var text =
                 "This version of the app is no longer supported.\n\n" +
@@ -231,10 +251,9 @@ namespace DSAMVVM.MVVM.Services.Updates
                                          MessageBoxButton.OKCancel,
                                          MessageBoxImage.Warning);
 
-            if (result == MessageBoxResult.OK && !string.IsNullOrWhiteSpace(downloadUrl))
+            if (result == MessageBoxResult.OK && updateInfo != null)
             {
-                // Executes the automated process directly. The service handles the final Application.Current.Shutdown()
-                await _updaterService.DownloadAndInstallAsync(downloadUrl);
+                await _updaterService.DownloadAndInstallAsync(updateInfo);
             }
             else
             {

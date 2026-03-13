@@ -1,9 +1,10 @@
-﻿using System.Text.RegularExpressions;
+﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model.Schemas;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using DSAMVVM.Core.Logging;
+using System.Text.RegularExpressions;
 
 namespace DSAMVVM.Core.Utilities
 {
@@ -17,11 +18,17 @@ namespace DSAMVVM.Core.Utilities
         public string? StableVersion { get; set; }
         public string? StableLocation { get; set; }
         public string? StableChangelog { get; set; }
+        public string? StableMsiUrl { get; set; }
+        public string? StableSetupUrl { get; set; }
+        public string? StableRequiredDotNetVersion { get; set; }
 
         public bool PreExists { get; set; }
         public string? PreVersion { get; set; }
         public string? PreLocation { get; set; }
         public string? PreChangelog { get; set; }
+        public string? PreMsiUrl { get; set; }
+        public string? PreSetupUrl { get; set; }
+        public string? PreRequiredDotNetVersion { get; set; }
 
         // Required (raw) fields (top-level in your manifest)
         public string? RequiredMinVersion { get; set; }
@@ -58,9 +65,9 @@ namespace DSAMVVM.Core.Utilities
                 // Extract raw fields directly from JSON (case-insensitive)
                 var res = ExtractRawFields(json);
                 Log.Info(Cat,
-                    $"peek.current version=\"{Val(res.StableVersion)}\" location=\"{Val(res.StableLocation)}\" changelog=\"{Val(res.StableChangelog)}\"");
+                    $"peek.current version=\"{Val(res.StableVersion)}\" location=\"{Val(res.StableLocation)}\" changelog=\"{Val(res.StableChangelog)}\" msiUrl=\"{Val(res.StableMsiUrl)}\" setupUrl=\"{Val(res.StableSetupUrl)}\" reqDotNet=\"{Val(res.StableRequiredDotNetVersion)}\"");
                 Log.Info(Cat,
-                    $"peek.prerelease exists={(res.PreExists ? "true" : "false")} version=\"{Val(res.PreVersion)}\" location=\"{Val(res.PreLocation)}\" changelog=\"{Val(res.PreChangelog)}\"");
+                    $"peek.prerelease exists={(res.PreExists ? "true" : "false")} version=\"{Val(res.PreVersion)}\" location=\"{Val(res.PreLocation)}\" changelog=\"{Val(res.PreChangelog)}\" msiUrl=\"{Val(res.PreMsiUrl)}\" setupUrl=\"{Val(res.PreSetupUrl)}\" reqDotNet=\"{Val(res.PreRequiredDotNetVersion)}\"");
                 Log.Info(Cat,
                     $"peek.required min=\"{Val(res.RequiredMinVersion)}\" message=\"{Val(res.RequiredMessage)}\"");
 
@@ -212,11 +219,17 @@ namespace DSAMVVM.Core.Utilities
                 r.StableVersion = ReadString(current, "version");
                 r.StableLocation = ReadString(current, "location");
                 r.StableChangelog = ReadString(current, "changelog");
+                r.StableMsiUrl = ReadString(current, "msiUrl");
+                r.StableSetupUrl = ReadString(current, "setupUrl");
+                r.StableRequiredDotNetVersion = ReadString(current, "requiredDotNetVersion");
 
                 r.PreExists = ReadBool(pre, "exists");
                 r.PreVersion = ReadString(pre, "version");
                 r.PreLocation = ReadString(pre, "location");
                 r.PreChangelog = ReadString(pre, "changelog");
+                r.PreMsiUrl = ReadString(pre, "msiUrl");
+                r.PreSetupUrl = ReadString(pre, "setupUrl");
+                r.PreRequiredDotNetVersion = ReadString(pre, "requiredDotNetVersion");
 
                 r.RequiredMinVersion = ReadString(req, "minVersion");
                 r.RequiredMessage = ReadString(req, "message");

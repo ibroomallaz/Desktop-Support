@@ -31,6 +31,15 @@ namespace DSAMVVM.MVVM.Model.Schemas
         [JsonProperty("location", NullValueHandling = NullValueHandling.Ignore)]
         public string? Location { get; set; }
 
+        [JsonProperty("msiUrl", NullValueHandling = NullValueHandling.Ignore)]
+        public string? MsiUrl { get; set; }
+
+        [JsonProperty("setupUrl", NullValueHandling = NullValueHandling.Ignore)]
+        public string? SetupUrl { get; set; }
+
+        [JsonProperty("requiredDotNetVersion", NullValueHandling = NullValueHandling.Ignore)]
+        public string? RequiredDotNetVersion { get; set; }
+
         [JsonProperty("changelog", NullValueHandling = NullValueHandling.Ignore)]
         public string? Changelog { get; set; }
     }
@@ -45,6 +54,15 @@ namespace DSAMVVM.MVVM.Model.Schemas
 
         [JsonProperty("location", NullValueHandling = NullValueHandling.Ignore)]
         public string? Location { get; set; }
+
+        [JsonProperty("msiUrl", NullValueHandling = NullValueHandling.Ignore)]
+        public string? MsiUrl { get; set; }
+
+        [JsonProperty("setupUrl", NullValueHandling = NullValueHandling.Ignore)]
+        public string? SetupUrl { get; set; }
+
+        [JsonProperty("requiredDotNetVersion", NullValueHandling = NullValueHandling.Ignore)]
+        public string? RequiredDotNetVersion { get; set; }
 
         [JsonProperty("changelog", NullValueHandling = NullValueHandling.Ignore)]
         public string? Changelog { get; set; }

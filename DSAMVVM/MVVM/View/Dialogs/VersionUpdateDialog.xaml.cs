@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using DSAMVVM.MVVM.ViewModel.Dialogs;
 
@@ -20,6 +19,10 @@ namespace DSAMVVM.MVVM.View.Dialogs
         {
             if (DataContext is VersionUpdateDialogViewModel vm)
             {
+                // Wire up the close request from the ViewModel
+                vm.RequestClose += () => Dispatcher.Invoke(Close);
+
+                // Wire up the focus request for the changelog
                 vm.RequestFocusNotes += () => Dispatcher.Invoke(() =>
                 {
                     ChangelogScroll?.ScrollToTop();
@@ -38,14 +41,18 @@ namespace DSAMVVM.MVVM.View.Dialogs
         // Dynamically constrains the changelog scroll viewer height relative to the current window size
         private void UpdateChangelogMaxHeight()
         {
-            var usable = Math.Max(0, ActualHeight - 220);
+            // Adjusted offset slightly to account for the new Admin Warning border
+            var usable = Math.Max(0, ActualHeight - 240);
             ChangelogScroll?.MaxHeight = Math.Max(140, usable * 0.6);
         }
 
         // Enables dragging the window by clicking and holding the custom title bar
         private void OnTitleBarDrag(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left) DragMove();
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                try { DragMove(); } catch { /* Ignore potential move errors if window is closing */ }
+            }
         }
     }
 }

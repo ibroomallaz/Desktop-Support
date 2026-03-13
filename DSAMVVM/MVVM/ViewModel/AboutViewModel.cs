@@ -1,10 +1,14 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Services;
+using DSAMVVM.Core.Services.Updates;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
+using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.Services.Updates;
+using Microsoft.Extensions.DependencyInjection;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -69,7 +73,8 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 UiNotify.Progress(UiNotify.ProgressOf(key), "Checking for updates…");
 
-                var checker = new VersionCheckerUI(_http, _updater);
+                var appSettings = App.Services.GetRequiredService<AppSettings>();
+                var checker = new VersionCheckerUI(_http, _updater, appSettings);
                 await checker.CheckAsync(showUpToDatePopup: true);
             }
             finally

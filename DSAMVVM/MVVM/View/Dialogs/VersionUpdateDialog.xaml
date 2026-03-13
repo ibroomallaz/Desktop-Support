@@ -6,7 +6,7 @@
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterOwner"
         MinWidth="560"
-        MinHeight="320"
+        MinHeight="340"
         ShowInTaskbar="False"
         Topmost="True"
         Background="Transparent">
@@ -62,6 +62,7 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0" Orientation="Vertical" Margin="0,0,0,12">
@@ -93,6 +94,7 @@
                         Visibility="{Binding ChangeLogCardVisibility}">
                     <ScrollViewer x:Name="ChangelogScroll"
                                   VerticalScrollBarVisibility="Auto"
+                                  MaxHeight="200"
                                   CanContentScroll="True">
                         <TextBlock Text="{Binding ChangelogText, Mode=OneWay}"
                                    TextWrapping="Wrap"
@@ -100,7 +102,25 @@
                     </ScrollViewer>
                 </Border>
 
-                <StackPanel Grid.Row="3" Margin="0,12,0,0"
+                <Border Grid.Row="3" 
+                        Margin="0,12,0,0"
+                        Padding="10,8"
+                        Background="{DynamicResource Brush.Card.Alternate}"
+                        BorderBrush="Orange"
+                        BorderThickness="1,1,1,1"
+                        CornerRadius="8"
+                        Visibility="{Binding AdminWarningVisibility}">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="⚠" Foreground="Orange" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Administrator privileges required for .NET Desktop Runtime upgrade." 
+                                   Foreground="{DynamicResource Brush.Text.Primary}" 
+                                   FontWeight="SemiBold"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Row="4" Margin="0,12,0,0"
                             Visibility="{Binding IsDownloading, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <TextBlock Text="{Binding StatusText}" 
                                HorizontalAlignment="Center" 
@@ -110,7 +130,7 @@
                     <ProgressBar IsIndeterminate="True" Height="6" Background="{DynamicResource Brush.Surface}" Foreground="{DynamicResource Brush.Accent}"/>
                 </StackPanel>
 
-                <StackPanel Grid.Row="4"
+                <StackPanel Grid.Row="5"
                             Orientation="Horizontal"
                             HorizontalAlignment="Right"
                             Margin="0,12,0,0">

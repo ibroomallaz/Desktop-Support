@@ -218,6 +218,18 @@ namespace DSAMVVM
             mainWindow.Show();
             Mark("Window shown");
 
+            // Dispatches background Temp folder cleanup task
+            try
+            {
+                var updaterService = _serviceProvider.GetRequiredService<IUpdaterService>();
+                _ = updaterService.CleanupOldUpdatesAsync();
+                Log.Debug("Startup", "Dispatched background Temp folder cleanup task");
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("Startup", $"Failed to dispatch temp folder cleanup: {ex.Message}");
+            }
+
             try
             {
                 var scheduler = _serviceProvider.GetRequiredService<VersionUpdateScheduler>();
@@ -489,6 +501,8 @@ namespace DSAMVVM
 
             services.AddSingleton<IHttpService, HttpService>();
             services.AddSingleton<ISettingsService, SettingsService>();
+
+            services.AddSingleton<AppSettings>(sp => _settings ?? new AppSettings());
 
             services.AddSingleton<IDepartmentService, DepartmentService>();
             services.AddSingleton<IADService, ADService>();

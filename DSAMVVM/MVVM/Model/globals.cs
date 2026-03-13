@@ -50,8 +50,25 @@ namespace DSAMVVM.MVVM.Model
         public const int g_SettingsSchema = 3;
         public const int g_DepartmentJSONSchema = 3;
         public const int g_LinkJSONSchema = 2;
-        public const int g_VersionSchema = 2;
+        public const int g_VersionSchema = 3;
 
+        //.NET runtime requirement check for the update installer
+        public static bool IsTargetRuntimePresent(string? requiredVersion)
+        {
+            // If no version is specified in the JSON, we assume no change
+            if (string.IsNullOrWhiteSpace(requiredVersion)) return true;
+            if (!Version.TryParse(requiredVersion, out var required)) return true;
+
+            // Standard path for the .NET Desktop Runtime
+            var runtimePath = @"C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App";
+
+            if (!Directory.Exists(runtimePath)) return false;
+
+            // Check all installed versions in the shared folder
+            return Directory.GetDirectories(runtimePath)
+                .Select(Path.GetFileName)
+                .Any(name => Version.TryParse(name, out var installed) && installed >= required);
+        }
         // Ensure the core directories exist (throws if a file blocks a folder path)
         public static void EnsureCoreDirs()
         {

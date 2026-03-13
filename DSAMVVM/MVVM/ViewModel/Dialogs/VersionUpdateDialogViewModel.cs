@@ -1,17 +1,19 @@
-﻿using System;
+﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Logging;
+using DSAMVVM.MVVM.Model;
+using DSAMVVM.MVVM.Model.Schemas;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
-using DSAMVVM.Core.Interfaces;
 
 namespace DSAMVVM.MVVM.ViewModel.Dialogs
 {
-    // Manages the data bindings and execution logic for the simplified application update dialog
     public sealed class VersionUpdateDialogViewModel : INotifyPropertyChanged
     {
         private readonly IUpdaterService _updaterService;
+        private readonly CurrentVersion _updateInfo; // Store the full payload
 
         private bool _isDownloading;
         private string _statusText = string.Empty;
@@ -20,18 +22,17 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
         public string HeaderText { get; }
         public string SubText { get; }
 
-        public string? DownloadUrl { get; }
-        public string? ChangelogText { get; }
-        public string ChangeLogUrl { get; }
+        // Mapped from the internal payload
+        public string? DownloadUrl => _updateInfo.Location;
+        public string? ChangelogText => _updateInfo.Changelog;
+        public string ChangeLogUrl { get; } // Kept for legacy if needed, otherwise maps to Location
 
-        // Evaluates property validity for conditional UI rendering and command execution
-        public bool HasDownload => Uri.TryCreate(DownloadUrl ?? "", UriKind.Absolute, out _);
+        public bool HasDownload => !string.IsNullOrWhiteSpace(_updateInfo.MsiUrl) || !string.IsNullOrWhiteSpace(_updateInfo.Location);
         public bool HasNotesText => !string.IsNullOrWhiteSpace(ChangelogText);
         public bool NotesButtonEnabled => !string.IsNullOrWhiteSpace(ChangeLogUrl) || HasNotesText;
 
         public Visibility ChangeLogCardVisibility => HasNotesText ? Visibility.Visible : Visibility.Collapsed;
 
-        // Controls the active state of the installation process and triggers UI layout changes
         public bool IsDownloading
         {
             get => _isDownloading;
@@ -45,7 +46,6 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
 
         public bool IsNotDownloading => !IsDownloading;
 
-        // Holds the current string output from the IUpdaterService
         public string StatusText
         {
             get => _statusText;
@@ -60,6 +60,15 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
         public ICommand OpenReleaseNotesCommand { get; }
         public ICommand CloseCommand { get; }
 
+        // Logic to determine if we are about to do an admin-level upgrade
+        public bool WillUpgradeRuntime => !Globals.IsTargetRuntimePresent(_updateInfo.RequiredDotNetVersion);
+
+        // Drives the visibility of the warning block in XAML
+        public Visibility AdminWarningVisibility => WillUpgradeRuntime ? Visibility.Visible : Visibility.Collapsed;
+
+        // Helpful for a ToolTip or specialized text block
+        public static string AdminWarningText => "A .NET Runtime upgrade is required. Administrative privileges will be requested.";
+
         public event Action? RequestClose;
         public event Action? RequestFocusNotes;
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -67,22 +76,19 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
         public VersionUpdateDialogViewModel(
             IUpdaterService updaterService,
             string installedVersion,
-            string newVersion,
-            bool isPreRelease,
-            string? downloadUrl,
-            string? changelogText,
-            string changeLogUrl)
+            CurrentVersion updateInfo, // Refactored signature
+            bool isPreRelease)
         {
             _updaterService = updaterService;
+            _updateInfo = updateInfo;
 
             HeaderText = isPreRelease
-                ? $"A pre-release build is available: {newVersion}"
-                : $"A new version is available: {newVersion}";
+                ? $"A pre-release build is available: {updateInfo.Version}"
+                : $"A new version is available: {updateInfo.Version}";
             SubText = $"Installed: {installedVersion}";
 
-            DownloadUrl = string.IsNullOrWhiteSpace(downloadUrl) ? null : downloadUrl.Trim();
-            ChangelogText = string.IsNullOrWhiteSpace(changelogText) ? null : changelogText.Trim();
-            ChangeLogUrl = changeLogUrl?.Trim() ?? string.Empty;
+            // Map manual link if one exists
+            ChangeLogUrl = updateInfo.Location?.Trim() ?? string.Empty;
 
             InstallUpdateCommand = new RelayCommand(_ => HasDownload, _ => ExecuteInstall());
             OpenReleaseNotesCommand = new RelayCommand(
@@ -97,20 +103,28 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
             CloseCommand = new RelayCommand(_ => true, _ => RequestClose?.Invoke());
         }
 
-        // Executes the background download pipeline and binds progress reports to the StatusText property
         private async void ExecuteInstall()
         {
-            if (string.IsNullOrWhiteSpace(DownloadUrl)) return;
-
+            //passing the full object
             IsDownloading = true;
 
             var progress = new Progress<string>(message => StatusText = message);
-            await _updaterService.DownloadAndInstallAsync(DownloadUrl, progress);
 
-            IsDownloading = false;
+            try
+            {
+                await _updaterService.DownloadAndInstallAsync(_updateInfo, progress);
+            }
+            catch (Exception ex)
+            {
+                StatusText = "Installation failed.";
+                Log.Error("UpdateVM", "Update failed", ex);
+            }
+            finally
+            {
+                IsDownloading = false;
+            }
         }
 
-        // Executes the system default web browser for a given URL
         private static void OpenUrl(string? url)
         {
             if (string.IsNullOrWhiteSpace(url)) return;
@@ -122,7 +136,6 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        // Internal implementation of ICommand for binding actions to the View
         private sealed class RelayCommand(Predicate<object?> can, Action<object?> run) : ICommand
         {
             private readonly Predicate<object?> _can = can;
@@ -130,7 +143,11 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
 
             public bool CanExecute(object? p) => _can(p);
             public void Execute(object? p) => _run(p);
-            public event EventHandler? CanExecuteChanged { add { } remove { } }
+            public event EventHandler? CanExecuteChanged
+            {
+                add => CommandManager.RequerySuggested += value;
+                remove => CommandManager.RequerySuggested -= value;
+            }
         }
     }
 }

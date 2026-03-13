@@ -2,6 +2,8 @@
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
+using DSAMVVM.MVVM.Model;
+using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.View.Resources;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
@@ -307,7 +309,30 @@ namespace DSAMVVM.MVVM.ViewModel
         private async void TriggerSearch()
         {
             var query = (SearchQuery ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(query) || CurrentView is not ISearchableViewModel searchable)
+            if (string.IsNullOrWhiteSpace(query))
+                return;
+
+            string lowerQuery = query.ToLowerInvariant();
+            if (lowerQuery == "-test-" || lowerQuery == "-production-")
+            {
+                bool useTest = lowerQuery == "-test-";
+
+                var settingsService = App.Services.GetRequiredService<ISettingsService>();
+                var appSettings = App.Services.GetRequiredService<AppSettings>();
+
+                appSettings.Updates.UseInternalTestingSources = useTest;
+
+                // Requires a valid path string for your settings file
+                settingsService.RequestSave(appSettings, Globals.g_SettingsPath);
+
+                string mode = useTest ? "TEST" : "PRODUCTION";
+                UiNotify.Info($"Update source toggled to: {mode}", showStatusBar: true);
+
+                SearchQuery = string.Empty;
+                return;
+            }
+
+            if (CurrentView is not ISearchableViewModel searchable)
                 return;
 
             var target = ResolveTargetFromView(CurrentView);
