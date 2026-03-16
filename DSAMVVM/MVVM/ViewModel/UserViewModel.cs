@@ -7,6 +7,7 @@ using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
 using System.Diagnostics;
 using System.IO;
+using System.Windows.Input; // Added for ICommand
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -24,6 +25,29 @@ namespace DSAMVVM.MVVM.ViewModel
 
         // State for linking
         private string? _currentRawLicense;
+        private string? _currentSearchNetId; // Added to store target for on-demand checks
+
+        // Adobe Licensing State
+        private bool _hasAcrobatPro;
+        public bool HasAcrobatPro
+        {
+            get => _hasAcrobatPro;
+            private set { _hasAcrobatPro = value; OnPropertyChanged(nameof(HasAcrobatPro)); }
+        }
+
+        private bool _hasCreativeCloud;
+        public bool HasCreativeCloud
+        {
+            get => _hasCreativeCloud;
+            private set { _hasCreativeCloud = value; OnPropertyChanged(nameof(HasCreativeCloud)); }
+        }
+
+        private bool _isAdobeCheckComplete;
+        public bool IsAdobeCheckComplete
+        {
+            get => _isAdobeCheckComplete;
+            private set { _isAdobeCheckComplete = value; OnPropertyChanged(nameof(IsAdobeCheckComplete)); }
+        }
 
         // UI state
         private double _effectiveFontSize = 14;
@@ -105,6 +129,41 @@ namespace DSAMVVM.MVVM.ViewModel
                     AppendRaw("[red]No raw license data available.[/red]");
                 }
             }
+            //Catch the Adobe license check link
+            else if (url.Equals("dsa://license/adobe", StringComparison.OrdinalIgnoreCase))
+            {
+                await PerformAdobeCheckAsync();
+            }
+        }
+
+        private async Task PerformAdobeCheckAsync()
+        {
+            if (string.IsNullOrWhiteSpace(_currentSearchNetId)) return;
+            if (IsAdobeCheckComplete) return;
+
+            // Add a line break for breathing room
+            AppendRaw(string.Empty);
+            AppendRaw($"[yellow]Adobe Licenses ({_currentSearchNetId}):[/yellow]");
+
+            var status = await _adService.CheckAdobeLicensesAsync(_currentSearchNetId);
+
+            HasAcrobatPro = status.HasAcrobatPro;
+            HasCreativeCloud = status.HasCreativeCloud;
+            IsAdobeCheckComplete = true;
+
+            // Determine formatting based on status
+            string acroColor = HasAcrobatPro ? "green" : "red";
+            string acroIcon = HasAcrobatPro ? "✓" : "✗";
+            string acroText = HasAcrobatPro ? "Assigned" : "None";
+
+            string ccColor = HasCreativeCloud ? "green" : "red";
+            string ccIcon = HasCreativeCloud ? "✓" : "✗";
+            string ccText = HasCreativeCloud ? "Assigned" : "None";
+
+            // Output with indentation for hierarchy
+            AppendRaw($"[cyan]  Acrobat Pro: [/cyan][{acroColor}]{acroIcon} {acroText}[/{acroColor}]");
+            AppendRaw($"[cyan]  Creative Cloud: [/cyan][{ccColor}]{ccIcon} {ccText}[/{ccColor}]");
+            AppendRaw(string.Empty);
         }
 
         private void OnFontSettingsChanged(object? sender, EventArgs e) => RefreshEffectiveFontSize();
@@ -223,6 +282,12 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             Error = null;
             _currentRawLicense = null; // Reset previous raw data
+            _currentSearchNetId = context.Query; // Store target for on-demand checks
+
+            //Reset Adobe UI state
+            IsAdobeCheckComplete = false;
+            HasAcrobatPro = false;
+            HasCreativeCloud = false;
 
             if (!string.IsNullOrEmpty(SearchLog))
             {
@@ -289,16 +354,23 @@ namespace DSAMVVM.MVVM.ViewModel
                 if (user.Locked == true)
                     AppendLabelValue("Locked: ", "True", treatEmptyAsNone: false);
 
-                // --- License Output with Link ---
+                // --- Software Licenses Block ---
+                AppendRaw("[cyan]Software Licenses:[/cyan]");
+
+                // O365 Bullet
                 if (!string.IsNullOrWhiteSpace(user.RawLicense))
                 {
-                    // Render as a clickable link to show raw data
-                    AppendRaw($"[cyan]O365 Licensing: [/cyan][red][{user.License}](dsa://license/show)[/red]");
+                    AppendRaw($"[lightgray]   • [/lightgray][cyan]O365: [/cyan][red][{user.License}](dsa://license/show)[/red]");
                 }
                 else
                 {
-                    AppendLabelValue("O365 Licensing: ", user.License, treatEmptyAsNone: false);
+                    var lic = string.IsNullOrWhiteSpace(user.License) ? "None" : user.License;
+                    AppendRaw($"[lightgray]   • [/lightgray][cyan]O365: [/cyan][red]{lic}[/red]");
                 }
+
+                // Adobe Bullet
+                AppendRaw($"[lightgray]   • [/lightgray][cyan]Adobe: [/cyan][red][Check](dsa://license/adobe)[/red]");
+
 
                 Log.Info("UserView",
                     $"User found: DisplayName='{user.DisplayName}', Affiliation='{user.EduAffiliation}', Division='{user.Division}', DeptName='{user.DepartmentName}', Enabled={user.Enabled}, Locked={(user.Locked.HasValue ? user.Locked.ToString() : "null")}, License='{user.License}', DeptNum='{user.DepartmentNumber}'");

@@ -10,7 +10,7 @@ namespace DSAMVVM.Core.Services.AD
         private static readonly string[] UserProps = [
             "displayName","distinguishedName","userAccountControl",
             "department","Department","eduPersonPrimaryAffiliation","extensionAttribute15",
-            "memberOf","msDS-User-Account-Control-Computed"
+            "msDS-User-Account-Control-Computed"
         ];
 
         // computer props used by UI and services
@@ -45,6 +45,18 @@ namespace DSAMVVM.Core.Services.AD
                 $"(&(objectCategory=group)(member={Escape(userDn)})(cn=*MIM-DivisionRollup*))",
                 sizeLimit: 1, props: ["cn"]);
             return ds.FindOne();
+        }
+        public static IReadOnlyList<string> GetUserGroupsBySam(string ldap, string sam)
+        {
+            using var root = Bind(ldap);
+            using var ds = NewSearcher(root,
+                $"(&(objectCategory=person)(objectClass=user)(sAMAccountName={Escape(sam)}))",
+                sizeLimit: 1, props: ["memberOf"]);
+
+            var r = ds.FindOne();
+            if (r == null) return [];
+
+            return GetStrings(r, "memberOf");
         }
 
         // ---- computer lookups ----

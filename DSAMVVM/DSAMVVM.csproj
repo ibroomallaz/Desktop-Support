@@ -6,13 +6,14 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <UseWindowsForms>False</UseWindowsForms>
     <ApplicationIcon>img\MainIcon.ico</ApplicationIcon>
     <RepositoryUrl>https://github.com/ibroomallaz/Desktop-Support</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <AssemblyVersion>4.2.0</AssemblyVersion>
-    <FileVersion>4.2.1030</FileVersion>
-    <Version>4.2.0-Beta4</Version>
+    <FileVersion>4.2.1091</FileVersion>
+    <Version>4.2.0-RC1</Version>
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Title>Desktop Support App</Title>

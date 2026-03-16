@@ -1,4 +1,5 @@
 ﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Models;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
 
@@ -17,6 +18,9 @@ namespace DSAMVVM.Core.Services.AD
 
         public Task<string?> LookupNameByEmployeeID(string userNumber)
             => _userService.LookupNameByEmployeeID(userNumber);
+
+        public Task<AdobeLicenseStatus> CheckAdobeLicensesAsync(string netid)
+            => _userService.CheckAdobeLicensesAsync(netid);
 
         // Computer
 

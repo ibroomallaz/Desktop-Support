@@ -1,4 +1,5 @@
-﻿using DSAMVVM.Core.Utilities;
+﻿using DSAMVVM.Core.Models;
+using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
 using System.DirectoryServices;
 using System.Text.RegularExpressions;
@@ -131,6 +132,56 @@ namespace DSAMVVM.Core.Services.AD
                 }
                 return null;
             });
+        }
+
+        // Fetches a user's group membership and evaluates it for Adobe entitlements
+        public Task<AdobeLicenseStatus> CheckAdobeLicensesAsync(string netid)
+        {
+            return Task.Run(() =>
+            {
+                try
+                {
+                    var groups = DirectoryUtility.GetUserGroupsBySam(_ldap, netid);
+                    return EvaluateAdobeLicenses(groups);
+                }
+                catch (Exception ex)
+                {
+                    UiNotify.Warn($"Could not retrieve Adobe licensing groups for '{netid}'.");
+                    return new AdobeLicenseStatus(false, false);
+                }
+            });
+        }
+
+        // Evaluates a provided collection of Active Directory groups to determine Adobe software entitlements
+        public AdobeLicenseStatus EvaluateAdobeLicenses(IEnumerable<string>? userGroups)
+        {
+            bool hasPro = false;
+            bool hasCc = false;
+
+            if (userGroups == null)
+            {
+                return new AdobeLicenseStatus(false, false);
+            }
+
+            foreach (var group in userGroups)
+            {
+                if (group.Contains("adobesync-acrobat-pro", StringComparison.OrdinalIgnoreCase))
+                {
+                    hasPro = true;
+                }
+                else if (group.Contains("adobesync-cc-campus", StringComparison.OrdinalIgnoreCase) ||
+                         group.Contains("adobesync-cc-student", StringComparison.OrdinalIgnoreCase))
+                {
+                    hasCc = true;
+                }
+
+                if (hasPro && hasCc)
+                {
+                    break;
+                }
+            }
+
+            return new AdobeLicenseStatus(hasPro, hasCc);
         }
     }
 }

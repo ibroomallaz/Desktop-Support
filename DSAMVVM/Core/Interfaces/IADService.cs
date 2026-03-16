@@ -1,4 +1,5 @@
 ﻿using DSAMVVM.MVVM.Model.AD;
+using DSAMVVM.Core.Models;
 
 namespace DSAMVVM.Core.Interfaces
 {
@@ -13,5 +14,7 @@ namespace DSAMVVM.Core.Interfaces
         Task<ADGroupInfo> GetGroupAsync(string groupName);
 
         Task<MimLookupResult> GetUserMimGroupsAsync(string netid);
+
+        Task<AdobeLicenseStatus> CheckAdobeLicensesAsync(string netid);
     }
 }
