@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Enums;
-using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model.Schemas;
 using Newtonsoft.Json;
@@ -156,15 +155,23 @@ namespace DSAMVVM.Core.Utilities
             {
                 if (!labelCurr.Equals(labelNew, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (labelCurr.Equals("alpha", StringComparison.OrdinalIgnoreCase) &&
-                        labelNew.Equals("beta", StringComparison.OrdinalIgnoreCase))
-                    { Log.Debug(Cat, "compare.result beta>alpha:newer"); return true; }
+                    // Define priority: higher number = newer
+                    int GetPriority(string? label) => label?.ToLowerInvariant() switch
+                    {
+                        "alpha" => 1,
+                        "beta" => 2,
+                        "rc" => 3,
+                        _ => 0
+                    };
 
-                    if (labelCurr.Equals("beta", StringComparison.OrdinalIgnoreCase) &&
-                        labelNew.Equals("alpha", StringComparison.OrdinalIgnoreCase))
-                    { Log.Debug(Cat, "compare.result alpha<beta:not-newer"); return false; }
+                    int pCurr = GetPriority(labelCurr);
+                    int pNew = GetPriority(labelNew);
+
+                    if (pNew > pCurr) { Log.Debug(Cat, $"compare.result {labelNew}>{labelCurr}:newer"); return true; }
+                    if (pNew < pCurr) { Log.Debug(Cat, $"compare.result {labelNew}<{labelCurr}:not-newer"); return false; }
                 }
 
+                // If labels are the same (e.g. both are RC), compare the suffix number
                 var res = numNew > numCurr;
                 Log.Debug(Cat, $"compare.result prerelease.num {(res ? "newer" : "not-newer")}");
                 return res;
@@ -273,7 +280,7 @@ namespace DSAMVVM.Core.Utilities
         private static string Val(string? s) => string.IsNullOrWhiteSpace(s) ? "(none)" : s!;
 
         // Base + optional prerelease with optional dash/dot separator
-        [GeneratedRegex(@"^(?<base>\d+\.\d+\.\d+)(?:-(?<label>alpha|beta)(?:[-\.]?(?<number>\d+))?)?$",
+        [GeneratedRegex(@"^(?<base>\d+(\.\d+){1,3})(?:-(?<label>alpha|beta|rc)(?:[-\.]?(?<number>\d+))?)?$",
             RegexOptions.IgnoreCase, "en-US")]
         private static partial Regex VersionRegex();
 
