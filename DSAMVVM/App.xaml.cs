@@ -40,6 +40,9 @@ namespace DSAMVVM
         // Stores command-line arguments passed during application startup
         public static string[] StartupArgs { get; private set; } = [];
 
+        // Global flag to check if we just arrived from an update
+        public static bool WasJustUpdated => HasArg("-updated");
+
         public App()
         {
             this.DispatcherUnhandledException += (_, __) => TryPersistSettingsOnce();

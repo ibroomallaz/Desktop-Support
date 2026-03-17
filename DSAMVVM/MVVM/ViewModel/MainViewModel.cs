@@ -1,5 +1,6 @@
 ﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
@@ -159,6 +160,23 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             if (args == null || args.Length == 0) return;
 
+            // --- Update Relaunch Handler ---
+            // Detects if we were started by the PowerShell watchdog after a successful MSI install
+            if (args.Any(a => a.Equals("-updated", StringComparison.OrdinalIgnoreCase)))
+            {
+                // Navigate to About so the tech sees the new version number immediately
+                SelectedView = AppView.About;
+
+                // Alert the StatusBus/StatusBarViewModel
+                UiNotify.Info("✔ Update installed successfully!", showStatusBar: true);
+
+                Log.Info("Update", "Application relaunched with '-updated' flag. Update cycle complete.");
+
+                // If the only arg was -updated, we can stop here. 
+                // If there are other args (like from a JumpList), we continue parsing below.
+                if (args.Length == 1) return;
+            }
+
             // 1. Extract Mode
             string? mode = GetArgValue(args, "--mode");
 
@@ -188,7 +206,6 @@ namespace DSAMVVM.MVVM.ViewModel
                         SelectedView = AppView.About;
                         break;
                     case "update":
-                        // ACTION: Don't change the view, just run the check.
                         Application.Current.Dispatcher.InvokeAsync(async () =>
                         {
                             await _versionHandler.CheckAsync(showUpToDatePopup: true);
