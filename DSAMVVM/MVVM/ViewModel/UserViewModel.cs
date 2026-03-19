@@ -1,13 +1,11 @@
-﻿using DSAMVVM.Core.Enums;
+﻿using System.IO;
+using System.Text;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
-using System.Diagnostics;
-using System.IO;
-using System.Windows.Input; // Added for ICommand
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -20,12 +18,10 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IOutputTextSettingsProvider _notifier;
         private readonly IFlowDocService _flowDoc;
 
-        // Per-view font context
         private const string ViewKey = "UserView";
 
-        // State for linking
-        private string? _currentRawLicense;
-        private string? _currentSearchNetId; // Added to store target for on-demand checks
+        // Context tracking
+        private string? _currentSearchNetId;
 
         // Adobe Licensing State
         private bool _hasAcrobatPro;
@@ -49,7 +45,7 @@ namespace DSAMVVM.MVVM.ViewModel
             private set { _isAdobeCheckComplete = value; OnPropertyChanged(nameof(IsAdobeCheckComplete)); }
         }
 
-        // UI state
+        // UI State
         private double _effectiveFontSize = 14;
         public double EffectiveFontSize
         {
@@ -86,11 +82,11 @@ namespace DSAMVVM.MVVM.ViewModel
         }
 
         public UserViewModel(
-                    IADService adService,
-                    IDepartmentService deptService,
-                    ISettingsService settingsSvc,
-                    IOutputTextSettingsProvider notifier,
-                    IFlowDocService flowDoc) // Inject
+            IADService adService,
+            IDepartmentService deptService,
+            ISettingsService settingsSvc,
+            IOutputTextSettingsProvider notifier,
+            IFlowDocService flowDoc)
         {
             _adService = adService ?? throw new ArgumentNullException(nameof(adService));
             _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
@@ -99,192 +95,84 @@ namespace DSAMVVM.MVVM.ViewModel
             _flowDoc = flowDoc ?? throw new ArgumentNullException(nameof(flowDoc));
 
             _notifier.Changed += OnFontSettingsChanged;
-
-            // Subscribe to Link Clicks
             _flowDoc.LinkClicked += OnLinkClicked;
 
             RefreshEffectiveFontSize();
         }
 
+        // --- Link Routing ---
         private async void OnLinkClicked(object? sender, string url)
         {
             if (url.StartsWith("dsa://team/", StringComparison.OrdinalIgnoreCase))
             {
-                var encodedName = url["dsa://team/".Length..];
-                var teamName = Uri.UnescapeDataString(encodedName);
+                var teamName = Uri.UnescapeDataString(url["dsa://team/".Length..]);
                 await ShowTeamInfoAsync(teamName);
             }
-            else if (url.Equals("dsa://license/show", StringComparison.OrdinalIgnoreCase))
+            else if (url.StartsWith("dsa://license/adobe/", StringComparison.OrdinalIgnoreCase))
             {
-                // Show raw license info
-                if (!string.IsNullOrWhiteSpace(_currentRawLicense))
-                {
-                    AppendRaw(string.Empty);
-                    AppendRaw("[yellow]Raw AD License Attribute:[/yellow]");
-                    AppendRaw($"[lightgray]{_currentRawLicense}[/lightgray]");
-                    AppendRaw(string.Empty);
-                }
-                else
-                {
-                    AppendRaw("[red]No raw license data available.[/red]");
-                }
+                var targetNetId = url["dsa://license/adobe/".Length..];
+                await PerformAdobeCheckAsync(targetNetId);
             }
-            //Catch the Adobe license check link
-            else if (url.Equals("dsa://license/adobe", StringComparison.OrdinalIgnoreCase))
+            else if (url.StartsWith("dsa://license/o365/", StringComparison.OrdinalIgnoreCase))
             {
-                await PerformAdobeCheckAsync();
+                var segments = url["dsa://license/o365/".Length..].Split('/');
+                if (segments.Length >= 2)
+                {
+                    var netid = segments[0];
+                    var base64Data = segments[1];
+                    try
+                    {
+                        var rawLicense = Encoding.UTF8.GetString(Convert.FromBase64String(base64Data));
+                        ShowRawLicenseInfo(netid, rawLicense);
+                    }
+                    catch { AppendRaw("[red]Error: Could not decode raw license data.[/red]"); }
+                }
             }
         }
 
-        private async Task PerformAdobeCheckAsync()
+        private void ShowRawLicenseInfo(string netid, string rawLicense)
         {
-            if (string.IsNullOrWhiteSpace(_currentSearchNetId)) return;
-            if (IsAdobeCheckComplete) return;
-
-            // Add a line break for breathing room
             AppendRaw(string.Empty);
-            AppendRaw($"[yellow]Adobe Licenses ({_currentSearchNetId}):[/yellow]");
+            AppendRaw($"[yellow]Raw AD License Attribute for {netid}:[/yellow]");
+            AppendRaw($"[lightgray]{rawLicense}[/lightgray]");
+            AppendRaw(string.Empty);
+        }
 
-            var status = await _adService.CheckAdobeLicensesAsync(_currentSearchNetId);
+        private async Task PerformAdobeCheckAsync(string netid)
+        {
+            if (string.IsNullOrWhiteSpace(netid)) return;
 
-            HasAcrobatPro = status.HasAcrobatPro;
-            HasCreativeCloud = status.HasCreativeCloud;
-            IsAdobeCheckComplete = true;
+            AppendRaw(string.Empty);
+            AppendRaw($"[yellow]Adobe Licenses ({netid}):[/yellow]");
 
-            // Determine formatting based on status
-            string acroColor = HasAcrobatPro ? "green" : "red";
-            string acroIcon = HasAcrobatPro ? "✓" : "✗";
-            string acroText = HasAcrobatPro ? "Assigned" : "None";
+            var status = await _adService.CheckAdobeLicensesAsync(netid);
 
-            string ccColor = HasCreativeCloud ? "green" : "red";
-            string ccIcon = HasCreativeCloud ? "✓" : "✗";
-            string ccText = HasCreativeCloud ? "Assigned" : "None";
+            if (netid.Equals(_currentSearchNetId, StringComparison.OrdinalIgnoreCase))
+            {
+                HasAcrobatPro = status.HasAcrobatPro;
+                HasCreativeCloud = status.HasCreativeCloud;
+                IsAdobeCheckComplete = true;
+            }
 
-            // Output with indentation for hierarchy
+            string acroColor = status.HasAcrobatPro ? "green" : "red";
+            string acroIcon = status.HasAcrobatPro ? "✓" : "✗";
+            string acroText = status.HasAcrobatPro ? "Assigned" : "None";
+
+            string ccColor = status.HasCreativeCloud ? "green" : "red";
+            string ccIcon = status.HasCreativeCloud ? "✓" : "✗";
+            string ccText = status.HasCreativeCloud ? "Assigned" : "None";
+
             AppendRaw($"[cyan]  Acrobat Pro: [/cyan][{acroColor}]{acroIcon} {acroText}[/{acroColor}]");
             AppendRaw($"[cyan]  Creative Cloud: [/cyan][{ccColor}]{ccIcon} {ccText}[/{ccColor}]");
             AppendRaw(string.Empty);
         }
 
-        private void OnFontSettingsChanged(object? sender, EventArgs e) => RefreshEffectiveFontSize();
-
-        private void RefreshEffectiveFontSize()
-        {
-            EffectiveFontSize = _notifier.GetFontSize(ViewKey);
-        }
-
-        // Output helpers
-        private void AppendRaw(string message)
-        {
-            SearchLog += message + "\n";
-            Debug.WriteLine($"[{DateTime.Now:HH:mm:ss}] {message}");
-        }
-
-        private void AppendTitle(string? text)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return;
-            AppendRaw($"[yellow]{text}[/yellow]");
-        }
-
-        private void AppendLabelValue(string label, string? value, bool treatEmptyAsNone = true)
-        {
-            var finalValue = value;
-            if (string.IsNullOrWhiteSpace(finalValue) && treatEmptyAsNone) finalValue = "None";
-            if (finalValue == null) return;
-            AppendRaw($"[cyan]{label}[/cyan][red]{finalValue}[/red]");
-        }
-
-        private void AppendLabeledLink(string labelPrefix, string labelText, string pathOrUrl)
-        {
-            if (string.IsNullOrWhiteSpace(pathOrUrl))
-            {
-                AppendRaw($"[cyan]{labelPrefix}[/cyan][red]None[/red]");
-                return;
-            }
-
-            string linkTarget;
-
-            if (Uri.TryCreate(pathOrUrl, UriKind.Absolute, out var u))
-            {
-                linkTarget = u.AbsoluteUri;
-            }
-            else if (pathOrUrl.StartsWith(@"\\") || Path.IsPathRooted(pathOrUrl))
-            {
-                try
-                {
-                    var fu = new Uri(pathOrUrl, UriKind.Absolute);
-                    linkTarget = fu.AbsoluteUri;
-                }
-                catch
-                {
-                    linkTarget = pathOrUrl;
-                }
-            }
-            else
-            {
-                linkTarget = pathOrUrl;
-            }
-
-            AppendRaw($"[cyan]{labelPrefix}[/cyan][red][{labelText}]({linkTarget})[/red]");
-        }
-
-        private async Task ShowTeamInfoAsync(string teamName)
-        {
-            AppendRaw(string.Empty);
-            AppendRaw($"[green]Fetching info for team: {teamName}...[/green]");
-
-            var team = await _deptService.GetSupportTeamAsync(teamName);
-
-            if (team == null)
-            {
-                AppendRaw($"[red]Team details not found.[/red]");
-                return;
-            }
-
-            AppendTitle($"Team: {team.SupportTeamName}");
-
-            if (!string.IsNullOrWhiteSpace(team.ManagerName))
-            {
-                var mgr = team.ManagerName;
-                if (!string.IsNullOrWhiteSpace(team.ManagerNetID)) mgr += $" ({team.ManagerNetID})";
-                AppendLabelValue("Manager: ", mgr);
-            }
-
-            if (!string.IsNullOrWhiteSpace(team.PhoneNumber))
-            {
-                AppendLabelValue("Support Phone: ", team.PhoneNumber);
-            }
-
-            if (team.SupportedDivisions != null && team.SupportedDivisions.Count > 0)
-            {
-                AppendRaw("[cyan]Supported Divisions:[/cyan]");
-
-                // Sort: Abbrev first, then Name
-                var sortedDivs = team.SupportedDivisions
-                    .OrderBy(d => d.DivAbbrev)
-                    .ThenBy(d => d.DivFullName);
-
-                foreach (var div in sortedDivs)
-                {
-                    // Format: Abbrev - Name (Gray)
-                    AppendRaw($"[lightgray]   • {div.DivAbbrev} - {div.DivFullName}[/lightgray]");
-                }
-            }
-            else
-            {
-                AppendRaw("[gray](No specific divisions listed)[/gray]");
-            }
-            AppendRaw(string.Empty);
-        }
-
-        // Search entry point
+        // --- Core Search Logic ---
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
             Error = null;
-            _currentRawLicense = null; // Reset previous raw data
-            _currentSearchNetId = context.Query; // Store target for on-demand checks
+            _currentSearchNetId = context.Query;
 
-            //Reset Adobe UI state
             IsAdobeCheckComplete = false;
             HasAcrobatPro = false;
             HasCreativeCloud = false;
@@ -292,133 +180,67 @@ namespace DSAMVVM.MVVM.ViewModel
             if (!string.IsNullOrEmpty(SearchLog))
             {
                 AppendRaw("\n[cyan]────────── New Search ──────────[/cyan]\n");
-                if (!string.IsNullOrWhiteSpace(context.Query))
-                    AppendRaw($"[cyan]Query:[/cyan] [red]{context.Query}[/red]");
             }
-            else if (!string.IsNullOrWhiteSpace(context.Query))
-            {
-                AppendRaw($"[cyan]Query:[/cyan] [red]{context.Query}[/red]");
-            }
-
-            Log.Info("UserView", $"Search started: target={target}, query='{context.Query}'");
-
-            if (target != SearchTarget.User)
-            {
-                Error = "Invalid search target provided to UserViewModel.";
-                AppendRaw("[red]Invalid search target for UserViewModel[/red]");
-                Log.Warn("UserView", $"Invalid target: {target}");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(context.Query))
-            {
-                AppendRaw("[cyan]Query was null or whitespace.[/cyan]");
-                Log.Info("UserView", "Aborted: empty query");
-                return;
-            }
+            AppendRaw($"[cyan]Query:[/cyan] [red]{context.Query}[/red]");
 
             try
             {
                 IsLoading = true;
-                AppendRaw("[green]Starting user search...[/green]");
-                Log.Debug("UserView", "Dispatching directory search");
-
                 var user = await searchService.SearchAsync(context, target) as ADUserInfo;
 
                 if (user is null || !user.Exists)
                 {
                     Error = user?.ErrorMessage ?? "User not found.";
                     AppendRaw($"[red]Search complete. User not found. Error: {Error}[/red]");
-                    Log.Info("UserView", $"Not found. Error='{Error}'");
                     return;
                 }
-
-                // Store raw license for linking
-                _currentRawLicense = user.RawLicense;
 
                 AppendRaw(string.Empty);
                 AppendTitle(user.DisplayName);
 
-                if (!string.IsNullOrEmpty(user.EduAffiliation))
-                    AppendLabelValue("Affiliation: ", user.EduAffiliation);
+                if (!string.IsNullOrEmpty(user.EduAffiliation)) AppendLabelValue("Affiliation: ", user.EduAffiliation);
+                if (!string.IsNullOrEmpty(user.Division)) AppendLabelValue("Division: ", user.Division);
+                if (!string.IsNullOrEmpty(user.DepartmentName)) AppendLabelValue("Department: ", user.DepartmentName);
+                if (user.Enabled == false) AppendLabelValue("Enabled: ", "False", false);
+                if (user.Locked == true) AppendLabelValue("Locked: ", "True", false);
 
-                if (!string.IsNullOrEmpty(user.Division))
-                    AppendLabelValue("Division: ", user.Division);
-
-                if (!string.IsNullOrEmpty(user.DepartmentName))
-                    AppendLabelValue("Department: ", user.DepartmentName);
-
-                if (user.Enabled == false)
-                    AppendLabelValue("Enabled: ", "False", treatEmptyAsNone: false);
-
-                if (user.Locked == true)
-                    AppendLabelValue("Locked: ", "True", treatEmptyAsNone: false);
-
-                // --- Software Licenses Block ---
                 AppendRaw("[cyan]Software Licenses:[/cyan]");
 
-                // O365 Bullet
                 if (!string.IsNullOrWhiteSpace(user.RawLicense))
                 {
-                    AppendRaw($"[lightgray]   • [/lightgray][cyan]O365: [/cyan][red][{user.License}](dsa://license/show)[/red]");
+                    var b64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.RawLicense));
+                    var o365Url = $"dsa://license/o365/{user.Name}/{b64}";
+                    AppendRaw($"[lightgray]   • [/lightgray][cyan]O365: [/cyan][red][{user.License}]({o365Url})[/red]");
                 }
                 else
                 {
-                    var lic = string.IsNullOrWhiteSpace(user.License) ? "None" : user.License;
-                    AppendRaw($"[lightgray]   • [/lightgray][cyan]O365: [/cyan][red]{lic}[/red]");
+                    AppendRaw($"[lightgray]   • [/lightgray][cyan]O365: [/cyan][red]{user.License ?? "None"}[/red]");
                 }
 
-                // Adobe Bullet
-                AppendRaw($"[lightgray]   • [/lightgray][cyan]Adobe: [/cyan][red][Check](dsa://license/adobe)[/red]");
-
-
-                Log.Info("UserView",
-                    $"User found: DisplayName='{user.DisplayName}', Affiliation='{user.EduAffiliation}', Division='{user.Division}', DeptName='{user.DepartmentName}', Enabled={user.Enabled}, Locked={(user.Locked.HasValue ? user.Locked.ToString() : "null")}, License='{user.License}', DeptNum='{user.DepartmentNumber}'");
+                AppendRaw($"[lightgray]   • [/lightgray][cyan]Adobe: [/cyan][red][Check](dsa://license/adobe/{user.Name})[/red]");
 
                 if (!string.IsNullOrEmpty(user.DepartmentNumber))
                 {
                     var dept = await _deptService.GetDepartmentAsync(user.DepartmentNumber);
-
                     if (dept != null)
                     {
                         var team = await _deptService.GetTeamAsync(dept.Number);
-                        var teamName = string.IsNullOrWhiteSpace(team) ? null : team.Trim();
-
-                        if (!string.IsNullOrWhiteSpace(teamName))
+                        if (!string.IsNullOrWhiteSpace(team))
                         {
-                            var url = $"dsa://team/{Uri.EscapeDataString(teamName)}";
-                            AppendRaw($"[cyan]Support Team: [/cyan][red][{teamName}]({url})[/red]");
+                            var url = $"dsa://team/{Uri.EscapeDataString(team.Trim())}";
+                            AppendRaw($"[cyan]Support Team: [/cyan][red][{team.Trim()}]({url})[/red]");
                         }
-                        else
-                        {
-                            AppendLabelValue("Teams: ", "None", treatEmptyAsNone: false);
-                        }
-
                         var repoPath = await _deptService.GetFileRepoPathAsync(dept.Number);
-                        if (!string.IsNullOrWhiteSpace(repoPath))
-                            AppendLabeledLink("File Repository: ", "Open File Repository", repoPath);
-
-                        if (!string.IsNullOrEmpty(dept.Notes))
-                            AppendLabelValue("Notes: ", dept.Notes, treatEmptyAsNone: false);
-
-                        Log.Info("UserView",
-                            $"Dept info: Number='{dept.Number}', SupportKnown={dept.SupportKnown}, Team='{teamName ?? "(none)"}', Repo='{(string.IsNullOrWhiteSpace(repoPath) ? "(none)" : repoPath)}'");
-                    }
-                    else
-                    {
-                        AppendRaw("[cyan]Department information not found in cache.[/cyan]");
-                        Log.Info("UserView", $"Dept cache miss: '{user.DepartmentNumber}'");
+                        if (!string.IsNullOrWhiteSpace(repoPath)) AppendLabeledLink("File Repository: ", "Open Repository", repoPath);
+                        if (!string.IsNullOrEmpty(dept.Notes)) AppendLabelValue("Notes: ", dept.Notes, false);
                     }
                 }
-
                 AppendRaw(string.Empty);
-                Log.Info("UserView", "Search completed");
             }
             catch (Exception ex)
             {
-                Error = $"Search failed: {ex.Message}";
-                AppendRaw($"[red]Exception during user search: {ex}[/red]");
-                Log.Error("UserView", "Search failed", ex);
+                Error = ex.Message;
+                AppendRaw($"[red]Search failed: {ex.Message}[/red]");
             }
             finally
             {
@@ -427,58 +249,30 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        // Refresh department JSON: status bar + view log + app log
+        // --- Code-Behind Support ---
         public async Task RefreshDepartmentDataAsync()
         {
-            const string StatusKey = "DeptRefresh";
-            if (IsRefreshing)
-            {
-                AppendRaw("[cyan]Busy: department refresh already in progress.[/cyan]");
-                return;
-            }
-
+            if (IsRefreshing) return;
             IsRefreshing = true;
-            var sw = Stopwatch.StartNew();
-
             try
             {
                 AppendRaw("[green]Refreshing department data…[/green]");
-                UiNotify.Info("Refreshing department data…", showStatusBar: true, key: StatusKey);
-                Log.Info("UserView", "Department refresh started.");
-
+                UiNotify.Info("Refreshing department data…", showStatusBar: true, key: "DeptRefresh");
                 await _deptService.ReloadDataAsync();
-
-                sw.Stop();
-                var msg = $"Department data refresh completed in {sw.ElapsedMilliseconds} ms.";
-                AppendRaw($"[green]{msg}[/green]");
-                UiNotify.Info(msg, showStatusBar: true, key: StatusKey);
-                Log.Info("UserView", msg);
+                AppendRaw("[green]Department data refresh completed.[/green]");
             }
             catch (Exception ex)
             {
-                sw.Stop();
-                var em = $"Department data refresh failed: {ex.Message}";
-                AppendRaw($"[red]{em}[/red]");
-                UiNotify.Error("Department data refresh failed", ex.Message, alsoStatusBar: true, key: StatusKey);
-                Log.Error("UserView", "Department refresh failed", ex);
+                AppendRaw($"[red]Refresh failed: {ex.Message}[/red]");
             }
-            finally
-            {
-                IsRefreshing = false;
-            }
+            finally { IsRefreshing = false; }
         }
 
-        public Task<string?> LookupNameByID(string id) => _adService.LookupNameByEmployeeID(id);
-
-        public void ClearLog() => SearchLog = string.Empty;
-
-        // Font controls
         public void AdjustFont(int delta)
         {
             var s = App.Settings;
-            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
-
-            _ = _settingsSvc.AdjustOutputFontSize(s, preferPerView ? ViewKey : null, delta, preferPerView);
+            bool perView = s.Ui.Font.ViewFontSizeOverride;
+            _settingsSvc.AdjustOutputFontSize(s, perView ? ViewKey : null, delta, perView);
             _notifier.NotifyChanged();
             _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
         }
@@ -486,29 +280,45 @@ namespace DSAMVVM.MVVM.ViewModel
         public void ResetFont()
         {
             var s = App.Settings;
-            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
-
-            _settingsSvc.ResetOutputFontSize(s, preferPerView ? ViewKey : null, preferPerView, defaultSize: 14);
+            bool perView = s.Ui.Font.ViewFontSizeOverride;
+            _settingsSvc.ResetOutputFontSize(s, perView ? ViewKey : null, perView, 14);
             _notifier.NotifyChanged();
             _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
         }
 
-        // Dispose pattern
+        public Task<string?> LookupNameByID(string id) => _adService.LookupNameByEmployeeID(id);
+        public void ClearLog() => SearchLog = string.Empty;
+
+        // --- UI Helpers ---
+        private void AppendRaw(string msg) => SearchLog += msg + "\n";
+        private void AppendTitle(string? t) => AppendRaw($"[yellow]{t}[/yellow]");
+        private void AppendLabelValue(string l, string? v, bool tNone = true)
+        {
+            var val = (string.IsNullOrWhiteSpace(v) && tNone) ? "None" : v;
+            if (val != null) AppendRaw($"[cyan]{l}[/cyan][red]{val}[/red]");
+        }
+        private void AppendLabeledLink(string lp, string lt, string target) =>
+            AppendRaw($"[cyan]{lp}[/cyan][red][{lt}]({target})[/red]");
+
+        private async Task ShowTeamInfoAsync(string teamName)
+        {
+            AppendRaw(string.Empty);
+            var team = await _deptService.GetSupportTeamAsync(teamName);
+            if (team == null) { AppendRaw("[red]Team not found.[/red]"); return; }
+            AppendTitle($"Team: {team.SupportTeamName}");
+            if (!string.IsNullOrWhiteSpace(team.ManagerName)) AppendLabelValue("Manager: ", team.ManagerName);
+            AppendRaw(string.Empty);
+        }
+
+        private void OnFontSettingsChanged(object? s, EventArgs e) => RefreshEffectiveFontSize();
+        private void RefreshEffectiveFontSize() => EffectiveFontSize = _notifier.GetFontSize(ViewKey);
+
         private bool _disposed;
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
             if (_disposed) return;
-            if (disposing)
-            {
-                _notifier.Changed -= OnFontSettingsChanged;
-                _flowDoc.LinkClicked -= OnLinkClicked;
-            }
+            _notifier.Changed -= OnFontSettingsChanged;
+            _flowDoc.LinkClicked -= OnLinkClicked;
             _disposed = true;
         }
     }
