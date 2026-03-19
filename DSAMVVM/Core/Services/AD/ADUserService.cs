@@ -144,7 +144,7 @@ namespace DSAMVVM.Core.Services.AD
                     var groups = DirectoryUtility.GetUserGroupsBySam(_ldap, netid);
                     return EvaluateAdobeLicenses(groups);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     UiNotify.Warn($"Could not retrieve Adobe licensing groups for '{netid}'.");
                     return new AdobeLicenseStatus(false, false);
@@ -153,7 +153,7 @@ namespace DSAMVVM.Core.Services.AD
         }
 
         // Evaluates a provided collection of Active Directory groups to determine Adobe software entitlements
-        public AdobeLicenseStatus EvaluateAdobeLicenses(IEnumerable<string>? userGroups)
+        public static AdobeLicenseStatus EvaluateAdobeLicenses(IEnumerable<string>? userGroups)
         {
             bool hasPro = false;
             bool hasCc = false;
