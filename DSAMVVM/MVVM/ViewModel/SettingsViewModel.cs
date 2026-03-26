@@ -21,6 +21,14 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private readonly AppSettings _settings;
 
+        // --- State Flags ---
+        private bool _hasUnsavedChanges;
+        public bool HasUnsavedChanges
+        {
+            get => _hasUnsavedChanges;
+            set => Set(ref _hasUnsavedChanges, value);
+        }
+
         // --- Commands ---
         public ICommand ApplyCommand { get; }
         public ICommand OpenLogsCommand { get; }
@@ -39,7 +47,6 @@ namespace DSAMVVM.MVVM.ViewModel
         public IReadOnlyList<double> InitialFontSizeOptions { get; } =
             [10d, 12d, 14d, 16d, 18d, 20d, 22d];
 
-        // Capitalized display options
         public ObservableCollection<string> DataSourceOptions { get; } = ["Web", "File"];
 
         // --- Exposed Sub-Settings ---
@@ -55,8 +62,11 @@ namespace DSAMVVM.MVVM.ViewModel
             set
             {
                 var v = UiLimits.ClampFontSize(value);
-                if (Set(ref _defaultFontSize, v) && !UsePerViewOverride)
-                    SyncPerViewToDefault();
+                if (Set(ref _defaultFontSize, v))
+                {
+                    if (!UsePerViewOverride) SyncPerViewToDefault();
+                    SetModified();
+                }
             }
         }
 
@@ -66,72 +76,72 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _usePerViewOverride;
             set
             {
-                if (Set(ref _usePerViewOverride, value) && !value)
-                    SyncPerViewToDefault();
+                if (Set(ref _usePerViewOverride, value))
+                {
+                    if (!value) SyncPerViewToDefault();
+                    SetModified();
+                }
             }
         }
 
         private double _userFontSize, _computerFontSize, _groupFontSize, _entraFontSize;
-        public double UserFontSize { get => _userFontSize; set => Set(ref _userFontSize, UiLimits.ClampFontSize(value)); }
-        public double ComputerFontSize { get => _computerFontSize; set => Set(ref _computerFontSize, UiLimits.ClampFontSize(value)); }
-        public double GroupFontSize { get => _groupFontSize; set => Set(ref _groupFontSize, UiLimits.ClampFontSize(value)); }
-        public double EntraFontSize { get => _entraFontSize; set => Set(ref _entraFontSize, UiLimits.ClampFontSize(value)); }
+        public double UserFontSize { get => _userFontSize; set { if (Set(ref _userFontSize, UiLimits.ClampFontSize(value))) SetModified(); } }
+        public double ComputerFontSize { get => _computerFontSize; set { if (Set(ref _computerFontSize, UiLimits.ClampFontSize(value))) SetModified(); } }
+        public double GroupFontSize { get => _groupFontSize; set { if (Set(ref _groupFontSize, UiLimits.ClampFontSize(value))) SetModified(); } }
+        public double EntraFontSize { get => _entraFontSize; set { if (Set(ref _entraFontSize, UiLimits.ClampFontSize(value))) SetModified(); } }
 
         private AppLogLevel _minimumLogLevel;
-        public AppLogLevel MinimumLogLevel { get => _minimumLogLevel; set => Set(ref _minimumLogLevel, value); }
+        public AppLogLevel MinimumLogLevel { get => _minimumLogLevel; set { if (Set(ref _minimumLogLevel, value)) SetModified(); } }
 
         private int _retentionDays;
-        public int RetentionDays { get => _retentionDays; set => Set(ref _retentionDays, value); }
+        public int RetentionDays { get => _retentionDays; set { if (Set(ref _retentionDays, value)) SetModified(); } }
 
         private bool _useSavedSearchHistory;
-        public bool UseSavedSearchHistory { get => _useSavedSearchHistory; set => Set(ref _useSavedSearchHistory, value); }
+        public bool UseSavedSearchHistory { get => _useSavedSearchHistory; set { if (Set(ref _useSavedSearchHistory, value)) SetModified(); } }
 
         private int _maxSearchHistory;
-        public int MaxSearchHistory { get => _maxSearchHistory; set => Set(ref _maxSearchHistory, Math.Max(0, value)); }
+        public int MaxSearchHistory { get => _maxSearchHistory; set { if (Set(ref _maxSearchHistory, Math.Max(0, value))) SetModified(); } }
 
-        // --- Data Source State ---
         private bool _useCustomDept;
-        public bool UseCustomDept { get => _useCustomDept; set => Set(ref _useCustomDept, value); }
+        public bool UseCustomDept { get => _useCustomDept; set { if (Set(ref _useCustomDept, value)) SetModified(); } }
 
         private string _deptSource = "Web";
-        public string DeptSource { get => _deptSource; set => Set(ref _deptSource, value); }
+        public string DeptSource { get => _deptSource; set { if (Set(ref _deptSource, value)) SetModified(); } }
 
         private string _deptUri = string.Empty;
-        public string DeptUri { get => _deptUri; set => Set(ref _deptUri, value); }
+        public string DeptUri { get => _deptUri; set { if (Set(ref _deptUri, value)) SetModified(); } }
 
         private bool _useCustomLinks;
-        public bool UseCustomLinks { get => _useCustomLinks; set => Set(ref _useCustomLinks, value); }
+        public bool UseCustomLinks { get => _useCustomLinks; set { if (Set(ref _useCustomLinks, value)) SetModified(); } }
 
         private string _linksSource = "Web";
-        public string LinksSource { get => _linksSource; set => Set(ref _linksSource, value); }
+        public string LinksSource { get => _linksSource; set { if (Set(ref _linksSource, value)) SetModified(); } }
 
         private string _linksUri = string.Empty;
-        public string LinksUri { get => _linksUri; set => Set(ref _linksUri, value); }
+        public string LinksUri { get => _linksUri; set { if (Set(ref _linksUri, value)) SetModified(); } }
 
-        // --- Tray Settings State ---
         private bool _enableTrayIcon;
         public bool EnableTrayIcon
         {
             get => _enableTrayIcon;
             set
             {
-                if (Set(ref _enableTrayIcon, value) && !value)
+                if (Set(ref _enableTrayIcon, value))
                 {
-                    MinimizeToTray = false;
-                    CloseToTray = false;
+                    if (!value) { MinimizeToTray = false; CloseToTray = false; }
+                    SetModified();
                 }
             }
         }
 
         private bool _minimizeToTray;
-        public bool MinimizeToTray { get => _minimizeToTray; set => Set(ref _minimizeToTray, value); }
+        public bool MinimizeToTray { get => _minimizeToTray; set { if (Set(ref _minimizeToTray, value)) SetModified(); } }
 
         private bool _closeToTray;
-        public bool CloseToTray { get => _closeToTray; set => Set(ref _closeToTray, value); }
+        public bool CloseToTray { get => _closeToTray; set { if (Set(ref _closeToTray, value)) SetModified(); } }
 
-        // --- Update Settings State ---
         private bool _enablePreReleaseChannel;
-        public bool EnablePreReleaseChannel { get => _enablePreReleaseChannel; set => Set(ref _enablePreReleaseChannel, value); }
+        public bool EnablePreReleaseChannel { get => _enablePreReleaseChannel; set { if (Set(ref _enablePreReleaseChannel, value)) SetModified(); } }
 
         // --- Constructors ---
         public SettingsViewModel()
@@ -172,42 +182,41 @@ namespace DSAMVVM.MVVM.ViewModel
             EnsureHistoryOption(savedMax);
             MaxSearchHistory = savedMax;
 
-            // Load Data Sources
             var dept = _settings.Paths.DepartmentData;
             UseCustomDept = dept.UseCustomSource;
-            // Match loaded value ("web"/"file") to capitalized options ("Web"/"File")
             DeptSource = MatchSourceOption(dept.Source);
             DeptUri = dept.Uri;
 
             var links = _settings.Paths.LinksData;
             UseCustomLinks = links.UseCustomSource;
-            // Match loaded value ("web"/"file") to capitalized options ("Web"/"File")
             LinksSource = MatchSourceOption(links.Source);
             LinksUri = links.Uri;
 
-            // Load Tray Settings
             EnableTrayIcon = _settings.Ui.Tray.EnableTrayIcon;
             MinimizeToTray = _settings.Ui.Tray.MinimizeToTray;
             CloseToTray = _settings.Ui.Tray.CloseToTray;
 
-            // Load Update Settings
             EnablePreReleaseChannel = _settings.Updates.EnablePreReleaseChannel;
 
-            // Configure Commands
+            // Reset flag after initial load
+            HasUnsavedChanges = false;
+
             ApplyCommand = new RelayCommand(_ => Apply(deptService, linksService));
             OpenLogsCommand = new RelayCommand(_ => OpenLogsFolder());
             BrowseDeptCommand = new RelayCommand(_ => BrowseForFile(path => DeptUri = path));
             BrowseLinksCommand = new RelayCommand(_ => BrowseForFile(path => LinksUri = path));
-
-            // Runtime policy
-            _searchSvc?.ConfigureHistory(UseSavedSearchHistory, MaxSearchHistory);
         }
 
         // --- Logic ---
 
+        private void SetModified()
+        {
+            // Only set to true if it isn't already, preventing redundant property changes
+            if (!HasUnsavedChanges) HasUnsavedChanges = true;
+        }
+
         private void Apply(IDepartmentService? deptService, ILinksService? linksService)
         {
-            // Use case-insensitive comparison for dirty check
             var deptSettings = _settings.Paths.DepartmentData;
             bool deptChanged = deptSettings.UseCustomSource != UseCustomDept ||
                                !string.Equals(deptSettings.Source, DeptSource, StringComparison.OrdinalIgnoreCase) ||
@@ -220,7 +229,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
             bool trayChanged = _settings.Ui.Tray.EnableTrayIcon != EnableTrayIcon;
 
-            // VM -> Model
+            // Sync to model
             _settings.Ui.Font.DefaultSize = DefaultFontSize;
             _settings.Ui.Font.ViewFontSizeOverride = UsePerViewOverride;
 
@@ -239,8 +248,7 @@ namespace DSAMVVM.MVVM.ViewModel
             if (MaxSearchHistory <= 0)
             {
                 _settings.Ui.Search.UseSavedSearchHistory = false;
-                if (_settings.Ui.Search.MaxSearchHistory <= 0)
-                    _settings.Ui.Search.MaxSearchHistory = 10;
+                if (_settings.Ui.Search.MaxSearchHistory <= 0) _settings.Ui.Search.MaxSearchHistory = 10;
             }
             else
             {
@@ -264,35 +272,29 @@ namespace DSAMVVM.MVVM.ViewModel
             tray.MinimizeToTray = MinimizeToTray;
             tray.CloseToTray = CloseToTray;
 
-            // VM -> Model for Update Settings
             _settings.Updates.EnablePreReleaseChannel = EnablePreReleaseChannel;
-
-            // Stamp the current schema version before saving so older versions don't overwrite it
-            // overwriting whatever Newtonsoft pulled from the old file
-            _settings.Meta?.SchemaVersion = Globals.g_SettingsSchema;
+            _settings.Meta!.SchemaVersion = Globals.g_SettingsSchema;
 
             _settings.ApplyDefaultsAndClamp();
             var path = Path.Combine(Globals.g_AppDir, "settings.json");
             _settingsSvc.RequestSave(_settings, path);
             TryFlushPendingSaves(_settingsSvc);
 
+            // Reset state
+            HasUnsavedChanges = false;
+
             Log.ApplySettings(_settings);
             _searchSvc?.ConfigureHistory(_settings.Ui.Search.UseSavedSearchHistory, _settings.Ui.Search.MaxSearchHistory);
-            if (!_settings.Ui.Search.UseSavedSearchHistory)
-                _searchSvc?.ClearHistory();
+            if (!_settings.Ui.Search.UseSavedSearchHistory) _searchSvc?.ClearHistory();
 
             if (deptChanged) _ = deptService?.ReloadDataAsync();
             if (linksChanged) _ = linksService?.ReloadLinksDataAsync();
 
-            // Notify application about dynamic tray state changes
             if (trayChanged)
             {
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
-                    if (System.Windows.Application.Current is App myApp)
-                    {
-                        myApp.ToggleTrayIcon(EnableTrayIcon);
-                    }
+                    if (System.Windows.Application.Current is App myApp) myApp.ToggleTrayIcon(EnableTrayIcon);
                 });
             }
 
@@ -314,19 +316,12 @@ namespace DSAMVVM.MVVM.ViewModel
                 CheckFileExists = true
             };
 
-            if (dlg.ShowDialog() == true)
-            {
-                onPathSelected(dlg.FileName);
-            }
+            if (dlg.ShowDialog() == true) onPathSelected(dlg.FileName);
         }
 
         // --- Helpers ---
-
-        // Matches "web" -> "Web", "file" -> "File"
-        private string MatchSourceOption(string input)
-        {
-            return DataSourceOptions.FirstOrDefault(x => x.Equals(input, StringComparison.OrdinalIgnoreCase)) ?? "Web";
-        }
+        private string MatchSourceOption(string input) =>
+            DataSourceOptions.FirstOrDefault(x => x.Equals(input, StringComparison.OrdinalIgnoreCase)) ?? "Web";
 
         private void SyncPerViewToDefault()
         {
@@ -347,7 +342,12 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             if (!_settings.Ui.ViewFontSizes.TryGetValue(key, out var entry) || entry == null)
                 _settings.Ui.ViewFontSizes[key] = entry = new ViewFontSetting();
-            entry.FontSize = UiLimits.ClampFontSize(size);
+
+            if (entry.FontSize != size)
+            {
+                entry.FontSize = UiLimits.ClampFontSize(size);
+                SetModified();
+            }
         }
 
         private void EnsureHistoryOption(int value)
@@ -385,6 +385,5 @@ namespace DSAMVVM.MVVM.ViewModel
             Directory.CreateDirectory(Globals.g_LogsDir);
             return Globals.g_LogsDir;
         }
-
     }
 }

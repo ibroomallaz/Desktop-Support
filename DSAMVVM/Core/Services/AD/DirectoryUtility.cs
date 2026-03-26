@@ -210,7 +210,6 @@ namespace DSAMVVM.Core.Services.AD
         }
 
         // ---- internals ----
-
         public static DirectoryEntry Bind(string ldap) => new(ldap);
 
         private static DirectorySearcher NewSearcher(DirectoryEntry root, string filter, int sizeLimit, int pageSize = 0, string[]? props = null)

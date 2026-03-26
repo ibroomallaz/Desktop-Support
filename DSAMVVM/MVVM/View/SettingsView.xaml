@@ -583,26 +583,60 @@
         </ScrollViewer>
 
         <Grid Grid.Row="1" Margin="16,0,16,16">
-            <Border Background="{DynamicResource Brush.Surface.Hover}"
-                    BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1"
-                    CornerRadius="12">
-                <Grid Margin="12,8">
+            <Border x:Name="FooterBorder"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Padding="12,8">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="{DynamicResource Brush.Surface.Hover}"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasUnsavedChanges}" Value="True">
+                                <Setter Property="Background" Value="#1A1A00"/>
+                                <Setter Property="BorderBrush" Value="Yellow"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Changes are not saved until you click Apply."
-                               VerticalAlignment="Center"
-                               Foreground="{DynamicResource Brush.Text.Primary}"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="⚠" 
+                                   Foreground="Yellow" 
+                                   FontSize="18" 
+                                   FontWeight="Bold"
+                                   Margin="0,0,12,0"
+                                   VerticalAlignment="Center"
+                                   Visibility="{Binding HasUnsavedChanges, Converter={StaticResource BoolToVis}}"/>
+
+                        <TextBlock VerticalAlignment="Center" Foreground="White">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="Settings are up to date."/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasUnsavedChanges}" Value="True">
+                                            <Setter Property="Text" Value="Changes detected. Remember to click Apply!"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                            <Setter Property="Foreground" Value="Yellow"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
 
                     <Button x:Name="BtnApply" Grid.Column="1"
                             Style="{StaticResource Button.Rounded}"
                             Command="{Binding ApplyCommand}"
                             MinHeight="32" Height="36" MinWidth="92" Padding="14,6"
-                            Margin="12,0,0,0"
-                            BorderBrush="{DynamicResource Brush.Accent}" BorderThickness="1.25">
-                        <TextBlock Text="Apply" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                            Margin="12,0,0,0">
+                        <TextBlock Text="Apply" Foreground="{DynamicResource Brush.Text.Primary}" FontWeight="Bold"/>
                     </Button>
                 </Grid>
             </Border>

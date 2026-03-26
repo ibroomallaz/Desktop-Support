@@ -306,7 +306,19 @@ namespace DSAMVVM.MVVM.ViewModel
             var team = await _deptService.GetSupportTeamAsync(teamName);
             if (team == null) { AppendRaw("[red]Team not found.[/red]"); return; }
             AppendTitle($"Team: {team.SupportTeamName}");
-            if (!string.IsNullOrWhiteSpace(team.ManagerName)) AppendLabelValue("Manager: ", team.ManagerName);
+            if (!string.IsNullOrWhiteSpace(team.ManagerName))
+            {
+                AppendRaw($"[red]Manager: {team.ManagerName} [/red][lightgray]([/lightgray][red]{team.ManagerNetID}[/red][lightgray])[/lightgray]");
+            }
+            if (!string.IsNullOrWhiteSpace(team.PhoneNumber)) AppendLabelValue("Phone: ", team.PhoneNumber);
+            if (team.SupportedDivisions != null && team.SupportedDivisions.Count > 0)
+            {
+                AppendRaw("[cyan]Supported Divisions:[/cyan]");
+                foreach (var div in team.SupportedDivisions)
+                {
+                    AppendRaw($"[lightgray]  • [/lightgray][red]{div.DivAbbrev}[/red] [lightgray]-[/lightgray] [red]{div.DivFullName}[/red]");
+                }
+            }
             AppendRaw(string.Empty);
         }
 
