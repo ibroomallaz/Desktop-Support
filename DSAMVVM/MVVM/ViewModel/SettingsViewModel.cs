@@ -19,7 +19,7 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IOutputTextSettingsProvider? _notifier;
         private readonly ISearchService? _searchSvc;
 
-        private readonly AppSettings _settings;
+        private AppSettings _settings;
 
         // --- State Flags ---
         private bool _hasUnsavedChanges;
@@ -29,11 +29,20 @@ namespace DSAMVVM.MVVM.ViewModel
             set => Set(ref _hasUnsavedChanges, value);
         }
 
+        private string _statusMessage = "Settings are up to date.";
+        public string StatusMessage
+        {
+            get => _statusMessage;
+            set => Set(ref _statusMessage, value);
+        }
+
         // --- Commands ---
         public ICommand ApplyCommand { get; }
         public ICommand OpenLogsCommand { get; }
         public ICommand BrowseDeptCommand { get; }
         public ICommand BrowseLinksCommand { get; }
+        public ICommand DiscardCommand { get; }
+        public ICommand ResetDefaultsCommand { get; }
 
         // --- Collections ---
         public IReadOnlyList<AppLogLevel> LogLevels { get; } =
@@ -50,6 +59,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public ObservableCollection<string> DataSourceOptions { get; } = ["Web", "File"];
 
         // --- Exposed Sub-Settings ---
+        // These point directly into the _settings object
         public LinksUiSettings LinksSettings => _settings.Ui.Links;
         public SearchSettings SearchSettings => _settings.Ui.Search;
         public TrayUiSettings TraySettings => _settings.Ui.Tray;
@@ -164,9 +174,24 @@ namespace DSAMVVM.MVVM.ViewModel
             _searchSvc = searchSvc;
 
             _settings = App.Settings ?? new AppSettings();
+
+            LoadValuesFromSettings();
+
+            ApplyCommand = new RelayCommand(_ => Apply(deptService, linksService));
+            DiscardCommand = new RelayCommand(_ => LoadValuesFromSettings(), _ => HasUnsavedChanges);
+            ResetDefaultsCommand = new RelayCommand(_ => ResetToFactoryDefaults());
+
+            OpenLogsCommand = new RelayCommand(_ => OpenLogsFolder());
+            BrowseDeptCommand = new RelayCommand(_ => BrowseForFile(path => DeptUri = path));
+            BrowseLinksCommand = new RelayCommand(_ => BrowseForFile(path => LinksUri = path));
+        }
+
+        // --- Logic ---
+
+        private void LoadValuesFromSettings()
+        {
             _settings.ApplyDefaultsAndClamp();
 
-            // Load Values -> VM
             DefaultFontSize = _settings.Ui.Font.DefaultSize;
             UsePerViewOverride = _settings.Ui.Font.ViewFontSizeOverride;
             UserFontSize = GetViewSize("UserView", DefaultFontSize);
@@ -178,127 +203,151 @@ namespace DSAMVVM.MVVM.ViewModel
             RetentionDays = _settings.Logging.RetentionDays;
 
             UseSavedSearchHistory = _settings.Ui.Search.UseSavedSearchHistory;
-            var savedMax = _settings.Ui.Search.MaxSearchHistory;
-            EnsureHistoryOption(savedMax);
-            MaxSearchHistory = savedMax;
+            EnsureHistoryOption(_settings.Ui.Search.MaxSearchHistory);
+            MaxSearchHistory = _settings.Ui.Search.MaxSearchHistory;
 
-            var dept = _settings.Paths.DepartmentData;
-            UseCustomDept = dept.UseCustomSource;
-            DeptSource = MatchSourceOption(dept.Source);
-            DeptUri = dept.Uri;
+            UseCustomDept = _settings.Paths.DepartmentData.UseCustomSource;
+            DeptSource = MatchSourceOption(_settings.Paths.DepartmentData.Source);
+            DeptUri = _settings.Paths.DepartmentData.Uri;
 
-            var links = _settings.Paths.LinksData;
-            UseCustomLinks = links.UseCustomSource;
-            LinksSource = MatchSourceOption(links.Source);
-            LinksUri = links.Uri;
+            UseCustomLinks = _settings.Paths.LinksData.UseCustomSource;
+            LinksSource = MatchSourceOption(_settings.Paths.LinksData.Source);
+            LinksUri = _settings.Paths.LinksData.Uri;
 
             EnableTrayIcon = _settings.Ui.Tray.EnableTrayIcon;
             MinimizeToTray = _settings.Ui.Tray.MinimizeToTray;
             CloseToTray = _settings.Ui.Tray.CloseToTray;
-
             EnablePreReleaseChannel = _settings.Updates.EnablePreReleaseChannel;
 
-            // Reset flag after initial load
             HasUnsavedChanges = false;
-
-            ApplyCommand = new RelayCommand(_ => Apply(deptService, linksService));
-            OpenLogsCommand = new RelayCommand(_ => OpenLogsFolder());
-            BrowseDeptCommand = new RelayCommand(_ => BrowseForFile(path => DeptUri = path));
-            BrowseLinksCommand = new RelayCommand(_ => BrowseForFile(path => LinksUri = path));
+            StatusMessage = "Settings are up to date.";
         }
 
-        // --- Logic ---
+        private void ResetToFactoryDefaults()
+        {
+            var res = System.Windows.MessageBox.Show(
+                "This will reset all preferences and data paths to factory defaults. Proceed?",
+                "Reset to Defaults", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning);
+
+            if (res != System.Windows.MessageBoxResult.Yes) return;
+
+            // 1. Replace reference with fresh defaults
+            _settings = new AppSettings();
+
+            // 2. Refresh UI bindings for sub-objects (LinksSettings, etc.)
+            OnPropertyChanged(nameof(LinksSettings));
+            OnPropertyChanged(nameof(SearchSettings));
+            OnPropertyChanged(nameof(TraySettings));
+
+            // 3. Load values into VM properties
+            LoadValuesFromSettings();
+
+            // 4. Set state to modified so Apply saves this new object
+            HasUnsavedChanges = true;
+            StatusMessage = "Factory defaults loaded. Click Apply to save.";
+            UiNotify.Info("Defaults loaded. Apply to confirm.", showStatusBar: true);
+        }
 
         private void SetModified()
         {
-            // Only set to true if it isn't already, preventing redundant property changes
             if (!HasUnsavedChanges) HasUnsavedChanges = true;
         }
 
-        private void Apply(IDepartmentService? deptService, ILinksService? linksService)
+        private async void Apply(IDepartmentService? deptService, ILinksService? linksService)
         {
-            var deptSettings = _settings.Paths.DepartmentData;
-            bool deptChanged = deptSettings.UseCustomSource != UseCustomDept ||
-                               !string.Equals(deptSettings.Source, DeptSource, StringComparison.OrdinalIgnoreCase) ||
-                               !string.Equals(deptSettings.Uri, DeptUri);
-
-            var linkSettings = _settings.Paths.LinksData;
-            bool linksChanged = linkSettings.UseCustomSource != UseCustomLinks ||
-                                !string.Equals(linkSettings.Source, LinksSource, StringComparison.OrdinalIgnoreCase) ||
-                                !string.Equals(linkSettings.Uri, LinksUri);
-
-            bool trayChanged = _settings.Ui.Tray.EnableTrayIcon != EnableTrayIcon;
-
-            // Sync to model
-            _settings.Ui.Font.DefaultSize = DefaultFontSize;
-            _settings.Ui.Font.ViewFontSizeOverride = UsePerViewOverride;
-
-            UpsertViewSize("UserView", UserFontSize);
-            UpsertViewSize("ComputerView", ComputerFontSize);
-            UpsertViewSize("GroupView", GroupFontSize);
-            UpsertViewSize("EntraView", EntraFontSize);
-
-            _settings.Logging.MinimumLevel = MinimumLogLevel;
-
-            var days = RetentionDays;
-            if (days == -1) days = 36500;
-            if (days < 1) days = 1;
-            _settings.Logging.RetentionDays = days;
-
-            if (MaxSearchHistory <= 0)
+            try
             {
-                _settings.Ui.Search.UseSavedSearchHistory = false;
-                if (_settings.Ui.Search.MaxSearchHistory <= 0) _settings.Ui.Search.MaxSearchHistory = 10;
-            }
-            else
-            {
+                // 1. Detect changes by comparing UI properties against the current active settings.
+
+                var active = App.Settings;
+
+                bool deptChanged = active.Paths.DepartmentData.UseCustomSource != UseCustomDept ||
+                                   !string.Equals(active.Paths.DepartmentData.Source, DeptSource, StringComparison.OrdinalIgnoreCase) ||
+                                   !string.Equals(active.Paths.DepartmentData.Uri, DeptUri);
+
+                bool linksChanged = active.Paths.LinksData.UseCustomSource != UseCustomLinks ||
+                                    !string.Equals(active.Paths.LinksData.Source, LinksSource, StringComparison.OrdinalIgnoreCase) ||
+                                    !string.Equals(active.Paths.LinksData.Uri, LinksUri);
+
+                bool trayChanged = active.Ui.Tray.EnableTrayIcon != EnableTrayIcon;
+
+                // 2. Sync UI Properties -> Local _settings object
+                _settings.Ui.Font.DefaultSize = DefaultFontSize;
+                _settings.Ui.Font.ViewFontSizeOverride = UsePerViewOverride;
+                UpsertViewSize("UserView", UserFontSize);
+                UpsertViewSize("ComputerView", ComputerFontSize);
+                UpsertViewSize("GroupView", GroupFontSize);
+                UpsertViewSize("EntraView", EntraFontSize);
+
+                _settings.Logging.MinimumLevel = MinimumLogLevel;
+                _settings.Logging.RetentionDays = RetentionDays == -1 ? 36500 : Math.Max(1, RetentionDays);
+
                 _settings.Ui.Search.UseSavedSearchHistory = UseSavedSearchHistory;
-                EnsureHistoryOption(MaxSearchHistory);
                 _settings.Ui.Search.MaxSearchHistory = MaxSearchHistory;
-            }
 
-            var dept = _settings.Paths.DepartmentData;
-            dept.UseCustomSource = UseCustomDept;
-            dept.Source = DeptSource;
-            dept.Uri = DeptUri;
+                _settings.Paths.DepartmentData.UseCustomSource = UseCustomDept;
+                _settings.Paths.DepartmentData.Source = DeptSource;
+                _settings.Paths.DepartmentData.Uri = DeptUri;
 
-            var links = _settings.Paths.LinksData;
-            links.UseCustomSource = UseCustomLinks;
-            links.Source = LinksSource;
-            links.Uri = LinksUri;
+                _settings.Paths.LinksData.UseCustomSource = UseCustomLinks;
+                _settings.Paths.LinksData.Source = LinksSource;
+                _settings.Paths.LinksData.Uri = LinksUri;
 
-            var tray = _settings.Ui.Tray;
-            tray.EnableTrayIcon = EnableTrayIcon;
-            tray.MinimizeToTray = MinimizeToTray;
-            tray.CloseToTray = CloseToTray;
+                _settings.Ui.Tray.EnableTrayIcon = EnableTrayIcon;
+                _settings.Ui.Tray.MinimizeToTray = MinimizeToTray;
+                _settings.Ui.Tray.CloseToTray = CloseToTray;
+                _settings.Updates.EnablePreReleaseChannel = EnablePreReleaseChannel;
 
-            _settings.Updates.EnablePreReleaseChannel = EnablePreReleaseChannel;
-            _settings.Meta!.SchemaVersion = Globals.g_SettingsSchema;
+                _settings.ApplyDefaultsAndClamp();
 
-            _settings.ApplyDefaultsAndClamp();
-            var path = Path.Combine(Globals.g_AppDir, "settings.json");
-            _settingsSvc.RequestSave(_settings, path);
-            TryFlushPendingSaves(_settingsSvc);
+                // 3. Transfer the data to the global reference.
+                active.Ui = _settings.Ui;
+                active.Paths = _settings.Paths;
+                active.Logging = _settings.Logging;
+                active.Updates = _settings.Updates;
+                active.Meta = _settings.Meta;
 
-            // Reset state
-            HasUnsavedChanges = false;
+                // 4. Save the global object to disk
+                var path = Path.Combine(Globals.g_AppDir, "settings.json");
+                _settingsSvc.RequestSave(active, path);
+                TryFlushPendingSaves(_settingsSvc);
 
-            Log.ApplySettings(_settings);
-            _searchSvc?.ConfigureHistory(_settings.Ui.Search.UseSavedSearchHistory, _settings.Ui.Search.MaxSearchHistory);
-            if (!_settings.Ui.Search.UseSavedSearchHistory) _searchSvc?.ClearHistory();
+                // 5. Update UI state
+                HasUnsavedChanges = false;
+                StatusMessage = "Settings successfully applied!";
+                UiNotify.Info("Settings applied.", showStatusBar: true);
 
-            if (deptChanged) _ = deptService?.ReloadDataAsync();
-            if (linksChanged) _ = linksService?.ReloadLinksDataAsync();
+                // 6. Trigger Side Effects
+                Log.ApplySettings(active);
+                _searchSvc?.ConfigureHistory(active.Ui.Search.UseSavedSearchHistory, active.Ui.Search.MaxSearchHistory);
+                if (!active.Ui.Search.UseSavedSearchHistory) _searchSvc?.ClearHistory();
 
-            if (trayChanged)
-            {
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                if (deptChanged) _ = deptService?.ReloadDataAsync();
+                if (linksChanged) _ = linksService?.ReloadLinksDataAsync();
+
+                if (trayChanged)
                 {
-                    if (System.Windows.Application.Current is App myApp) myApp.ToggleTrayIcon(EnableTrayIcon);
-                });
-            }
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        if (System.Windows.Application.Current is App myApp) myApp.ToggleTrayIcon(EnableTrayIcon);
+                    });
+                }
 
-            _notifier?.NotifyChanged();
+                _notifier?.NotifyChanged();
+
+                // 7. Success Message Timer
+                await Task.Delay(3000);
+                if (!HasUnsavedChanges)
+                {
+                    StatusMessage = "Settings are up to date.";
+                }
+            }
+            catch (System.Exception ex)
+            {
+                StatusMessage = "Error saving settings.";
+                UiNotify.Error("Settings Error", ex.Message, alsoStatusBar: true);
+                Log.Error("Settings", "Failed to apply settings", ex);
+            }
         }
 
         private void OpenLogsFolder()

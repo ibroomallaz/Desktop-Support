@@ -137,9 +137,7 @@
                             <ColumnDefinition Width="6"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-
                         <StackPanel Grid.Column="1" Margin="16">
                             <TextBlock Text="Search text" FontSize="16" FontWeight="SemiBold"
                                        Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
@@ -151,12 +149,10 @@
                                     <ColumnDefinition Width="240"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Default search size at launch" Style="{StaticResource FieldLabel}"/>
-                                <ComboBox x:Name="InitialSizeCombo" Grid.Column="2"
-                                          Style="{DynamicResource Combo.Links.Dropdown}"
+                                <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}"
                                           ItemsSource="{Binding InitialFontSizeOptions}"
                                           SelectedValue="{Binding DefaultFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                          SelectedValuePath="."
-                                          ItemTemplate="{StaticResource PtItemTemplate}"/>
+                                          SelectedValuePath="." ItemTemplate="{StaticResource PtItemTemplate}"/>
                             </Grid>
 
                             <Grid Margin="0,0,0,12">
@@ -168,26 +164,20 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Default search text size" Style="{StaticResource FieldLabel}"/>
-                                <Slider x:Name="GeneralSizeSlider" Grid.Column="2"
-                                        Minimum="8" Maximum="24" TickFrequency="1"
-                                        IsSnapToTickEnabled="True"
-                                        Value="{Binding DefaultFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <Slider x:Name="GeneralSizeSlider" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
+                                        IsSnapToTickEnabled="True" Value="{Binding DefaultFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                 <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
                                     <Run Text="{Binding ElementName=GeneralSizeSlider, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
                                 </TextBlock>
                             </Grid>
 
-                            <CheckBox x:Name="UsePerViewCheck"
-                                      Foreground="{DynamicResource Brush.Text.Primary}"
-                                      Content="Enable per-tab search size (override default)"
-                                      Margin="0,0,0,8"
+                            <CheckBox x:Name="UsePerViewCheck" Foreground="{DynamicResource Brush.Text.Primary}"
+                                      Content="Enable per-tab search size (override default)" Margin="0,0,0,8"
                                       IsChecked="{Binding UsePerViewOverride, Mode=TwoWay}"/>
 
-                            <StackPanel x:Name="PerViewPanel"
-                                        Visibility="{Binding ElementName=UsePerViewCheck, Path=IsChecked, Converter={StaticResource BoolToVis}}">
+                            <StackPanel Visibility="{Binding ElementName=UsePerViewCheck, Path=IsChecked, Converter={StaticResource BoolToVis}}">
                                 <TextBlock Text="Per-tab search text sizes" FontWeight="SemiBold"
                                            Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,8"/>
-
                                 <UniformGrid Columns="2" Rows="2">
                                     <Grid Margin="0,0,12,8">
                                         <Grid.ColumnDefinitions>
@@ -198,12 +188,9 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="User" Style="{StaticResource FieldLabel}"/>
-                                        <Slider x:Name="UserSize" Grid.Column="2" Minimum="8" Maximum="24"
-                                                TickFrequency="1" IsSnapToTickEnabled="True"
-                                                Value="{Binding UserFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                        <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
-                                            <Run Text="{Binding ElementName=UserSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
-                                        </TextBlock>
+                                        <Slider x:Name="UserSize" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
+                                                IsSnapToTickEnabled="True" Value="{Binding UserFontSize, Mode=TwoWay}"/>
+                                        <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}"><Run Text="{Binding ElementName=UserSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/></TextBlock>
                                     </Grid>
                                     <Grid Margin="0,0,12,8">
                                         <Grid.ColumnDefinitions>
@@ -214,12 +201,9 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Computer" Style="{StaticResource FieldLabel}"/>
-                                        <Slider x:Name="ComputerSize" Grid.Column="2" Minimum="8" Maximum="24"
-                                                TickFrequency="1" IsSnapToTickEnabled="True"
-                                                Value="{Binding ComputerFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                        <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
-                                            <Run Text="{Binding ElementName=ComputerSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
-                                        </TextBlock>
+                                        <Slider x:Name="ComputerSize" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
+                                                IsSnapToTickEnabled="True" Value="{Binding ComputerFontSize, Mode=TwoWay}"/>
+                                        <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}"><Run Text="{Binding ElementName=ComputerSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/></TextBlock>
                                     </Grid>
                                     <Grid Margin="0,0,12,8">
                                         <Grid.ColumnDefinitions>
@@ -230,12 +214,9 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Group" Style="{StaticResource FieldLabel}"/>
-                                        <Slider x:Name="GroupSize" Grid.Column="2" Minimum="8" Maximum="24"
-                                                TickFrequency="1" IsSnapToTickEnabled="True"
-                                                Value="{Binding GroupFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                        <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
-                                            <Run Text="{Binding ElementName=GroupSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
-                                        </TextBlock>
+                                        <Slider x:Name="GroupSize" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
+                                                IsSnapToTickEnabled="True" Value="{Binding GroupFontSize, Mode=TwoWay}"/>
+                                        <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}"><Run Text="{Binding ElementName=GroupSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/></TextBlock>
                                     </Grid>
                                     <Grid Margin="0,0,12,8">
                                         <Grid.ColumnDefinitions>
@@ -246,12 +227,9 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Entra" Style="{StaticResource FieldLabel}"/>
-                                        <Slider x:Name="EntraSize" Grid.Column="2" Minimum="8" Maximum="24"
-                                                TickFrequency="1" IsSnapToTickEnabled="True"
-                                                Value="{Binding EntraFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                        <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
-                                            <Run Text="{Binding ElementName=EntraSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
-                                        </TextBlock>
+                                        <Slider x:Name="EntraSize" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
+                                                IsSnapToTickEnabled="True" Value="{Binding EntraFontSize, Mode=TwoWay}"/>
+                                        <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}"><Run Text="{Binding ElementName=EntraSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/></TextBlock>
                                     </Grid>
                                 </UniformGrid>
                             </StackPanel>
@@ -265,29 +243,13 @@
                             <ColumnDefinition Width="6"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-
                         <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="System Tray" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-
-                            <CheckBox x:Name="EnableTrayCheck"
-                                      Foreground="{DynamicResource Brush.Text.Primary}"
-                                      Content="Enable System Tray Icon"
-                                      Margin="0,0,0,8"
-                                      IsChecked="{Binding EnableTrayIcon, Mode=TwoWay}"/>
-
+                            <TextBlock Text="System Tray" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                            <CheckBox x:Name="EnableTrayCheck" Foreground="{DynamicResource Brush.Text.Primary}" Content="Enable System Tray Icon" Margin="0,0,0,8" IsChecked="{Binding EnableTrayIcon, Mode=TwoWay}"/>
                             <StackPanel Visibility="{Binding ElementName=EnableTrayCheck, Path=IsChecked, Converter={StaticResource BoolToVis}}" Margin="0,4,0,0">
-                                <CheckBox Foreground="{DynamicResource Brush.Text.Primary}"
-                                          Content="Minimize window to Tray"
-                                          Margin="24,0,0,8"
-                                          IsChecked="{Binding MinimizeToTray, Mode=TwoWay}"/>
-
-                                <CheckBox Foreground="{DynamicResource Brush.Text.Primary}"
-                                          Content="Close button (X) minimizes to Tray"
-                                          Margin="24,0,0,0"
-                                          IsChecked="{Binding CloseToTray, Mode=TwoWay}"/>
+                                <CheckBox Foreground="{DynamicResource Brush.Text.Primary}" Content="Minimize window to Tray" Margin="24,0,0,8" IsChecked="{Binding MinimizeToTray, Mode=TwoWay}"/>
+                                <CheckBox Foreground="{DynamicResource Brush.Text.Primary}" Content="Close button (X) minimizes to Tray" Margin="24,0,0,0" IsChecked="{Binding CloseToTray, Mode=TwoWay}"/>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
@@ -299,17 +261,10 @@
                             <ColumnDefinition Width="6"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-
                         <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Application Updates" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-
-                            <CheckBox Foreground="{DynamicResource Brush.Text.Primary}"
-                                      Content="Opt-in to Pre-Release Channels"
-                                      IsChecked="{Binding EnablePreReleaseChannel, Mode=TwoWay}"
-                                      ToolTip="Download and test early preview builds before they are widely released."/>
+                            <TextBlock Text="Application Updates" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                            <CheckBox Foreground="{DynamicResource Brush.Text.Primary}" Content="Opt-in to Pre-Release Channels" IsChecked="{Binding EnablePreReleaseChannel, Mode=TwoWay}" ToolTip="Download preview builds for testing."/>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -320,21 +275,11 @@
                             <ColumnDefinition Width="6"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-
                         <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Data Management" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-
-                            <TextBlock Text="Department Data" FontWeight="SemiBold" Margin="0,0,0,8" 
-                                       Foreground="{DynamicResource Brush.Text.Primary}" FontSize="13"/>
-
-                            <CheckBox Content="Override Default Location" 
-                                      IsChecked="{Binding UseCustomDept}"
-                                      Foreground="{DynamicResource Brush.Text.Primary}"
-                                      Margin="0,0,0,12"/>
-
+                            <TextBlock Text="Data Management" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                            <TextBlock Text="Department Data" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,8"/>
+                            <CheckBox Content="Override Default Location" IsChecked="{Binding UseCustomDept}" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
                             <Grid Margin="0,0,0,16" Visibility="{Binding UseCustomDept, Converter={StaticResource BoolToVis}}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="80"/>
@@ -347,24 +292,11 @@
                                     <RowDefinition Height="12"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Source" Style="{StaticResource FieldLabel}"/>
-                                <ComboBox Grid.Row="0" Grid.Column="2" 
-                                          ItemsSource="{Binding DataSourceOptions}"
-                                          SelectedItem="{Binding DeptSource}"
-                                          Style="{DynamicResource Combo.Links.Dropdown}"
-                                          HorizontalAlignment="Left" Width="140"/>
-
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Location" Style="{StaticResource FieldLabel}"/>
-                                <TextBox Grid.Row="2" Grid.Column="2" 
-                                         Text="{Binding DeptUri, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource TextBox.Settings}"
-                                         ToolTip="Enter Web URL (https://...) or Local File Path"/>
-
-                                <Button Grid.Row="2" Grid.Column="3"
-                                        Command="{Binding BrowseDeptCommand}"
-                                        Content="Browse" ToolTip="Browse for local file"
-                                        Width="60" Margin="8,0,0,0">
+                                <TextBlock Grid.Row="0" Text="Source" Style="{StaticResource FieldLabel}"/>
+                                <ComboBox Grid.Row="0" Grid.Column="2" ItemsSource="{Binding DataSourceOptions}" SelectedItem="{Binding DeptSource}" Style="{DynamicResource Combo.Links.Dropdown}" HorizontalAlignment="Left" Width="140"/>
+                                <TextBlock Grid.Row="2" Text="Location" Style="{StaticResource FieldLabel}"/>
+                                <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding DeptUri, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBox.Settings}"/>
+                                <Button Grid.Row="2" Grid.Column="3" Command="{Binding BrowseDeptCommand}" Content="Browse" Width="60" Margin="8,0,0,0">
                                     <Button.Style>
                                         <Style TargetType="Button" BasedOn="{StaticResource Button.Rounded.Compact}">
                                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -377,15 +309,8 @@
                                     </Button.Style>
                                 </Button>
                             </Grid>
-
-                            <TextBlock Text="Links Data" FontWeight="SemiBold" Margin="0,0,0,8" 
-                                       Foreground="{DynamicResource Brush.Text.Primary}" FontSize="13"/>
-
-                            <CheckBox Content="Override Default Location" 
-                                      IsChecked="{Binding UseCustomLinks}"
-                                      Foreground="{DynamicResource Brush.Text.Primary}"
-                                      Margin="0,0,0,12"/>
-
+                            <TextBlock Text="Links Data" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,8"/>
+                            <CheckBox Content="Override Default Location" IsChecked="{Binding UseCustomLinks}" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
                             <Grid Visibility="{Binding UseCustomLinks, Converter={StaticResource BoolToVis}}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="80"/>
@@ -398,24 +323,11 @@
                                     <RowDefinition Height="12"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Source" Style="{StaticResource FieldLabel}"/>
-                                <ComboBox Grid.Row="0" Grid.Column="2" 
-                                          ItemsSource="{Binding DataSourceOptions}"
-                                          SelectedItem="{Binding LinksSource}"
-                                          Style="{DynamicResource Combo.Links.Dropdown}"
-                                          HorizontalAlignment="Left" Width="140"/>
-
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Location" Style="{StaticResource FieldLabel}"/>
-                                <TextBox Grid.Row="2" Grid.Column="2" 
-                                         Text="{Binding LinksUri, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource TextBox.Settings}"
-                                         ToolTip="Enter Web URL (https://...) or Local File Path"/>
-
-                                <Button Grid.Row="2" Grid.Column="3"
-                                        Command="{Binding BrowseLinksCommand}"
-                                        Content="Browse" ToolTip="Browse for local file"
-                                        Width="60" Margin="8,0,0,0">
+                                <TextBlock Grid.Row="0" Text="Source" Style="{StaticResource FieldLabel}"/>
+                                <ComboBox Grid.Row="0" Grid.Column="2" ItemsSource="{Binding DataSourceOptions}" SelectedItem="{Binding LinksSource}" Style="{DynamicResource Combo.Links.Dropdown}" HorizontalAlignment="Left" Width="140"/>
+                                <TextBlock Grid.Row="2" Text="Location" Style="{StaticResource FieldLabel}"/>
+                                <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding LinksUri, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBox.Settings}"/>
+                                <Button Grid.Row="2" Grid.Column="3" Command="{Binding BrowseLinksCommand}" Content="Browse" Width="60" Margin="8,0,0,0">
                                     <Button.Style>
                                         <Style TargetType="Button" BasedOn="{StaticResource Button.Rounded.Compact}">
                                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -438,55 +350,30 @@
                             <ColumnDefinition Width="6"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-
                         <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Links Start Mode" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-
+                            <TextBlock Text="Links Start Mode" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
                             <StackPanel Margin="0,0,0,8">
-                                <RadioButton x:Name="RB_LastViewed" GroupName="LinksStartMode"
-                                             Content="Start with last viewed team"
-                                             Foreground="{DynamicResource Brush.Text.Primary}"
-                                             IsChecked="{Binding LinksSettings.OpenLastViewedFirst, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-
-                                <RadioButton x:Name="RB_Override" GroupName="LinksStartMode"
-                                             Content="Start with a specific team"
-                                             Foreground="{DynamicResource Brush.Text.Primary}"
-                                             Margin="0,6,0,0"
-                                             IsChecked="{Binding LinksSettings.OverrideEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <RadioButton GroupName="LinksStartMode" Content="Start with last viewed team" Foreground="{DynamicResource Brush.Text.Primary}" IsChecked="{Binding LinksSettings.OpenLastViewedFirst, Mode=TwoWay}"/>
+                                <RadioButton GroupName="LinksStartMode" Content="Start with a specific team" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,6,0,0" IsChecked="{Binding LinksSettings.OverrideEnabled, Mode=TwoWay}"/>
                             </StackPanel>
-
-                            <Grid Margin="0,0,0,8"
-                                  Visibility="{Binding LinksSettings.OverrideEnabled, Converter={StaticResource BoolToVis}}">
+                            <Grid Visibility="{Binding LinksSettings.OverrideEnabled, Converter={StaticResource BoolToVis}}" Margin="0,0,0,8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="12"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-
                                 <TextBlock Text="Override team" Style="{StaticResource FieldLabel}"/>
-
-                                <ComboBox Grid.Column="2"
-                                          Style="{DynamicResource Combo.Links.Dropdown}"
-                                          Width="220" Height="28"
-                                          HorizontalAlignment="Left"
-                                          Foreground="{DynamicResource Brush.Text.Primary}"
+                                <ComboBox Grid.Column="2" Width="220" Height="28" Style="{DynamicResource Combo.Links.Dropdown}"
                                           ItemsSource="{Binding DataContext.LinksVM.TeamNames, RelativeSource={RelativeSource AncestorType=Window}}"
-                                          SelectedItem="{Binding LinksSettings.OverrideTeam, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                          IsSynchronizedWithCurrentItem="False">
+                                          SelectedItem="{Binding LinksSettings.OverrideTeam, Mode=TwoWay}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" ToolTip="{Binding}"
-                                                       Foreground="{DynamicResource Brush.Text.Primary}" FontSize="12"/>
+                                            <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Brush.Text.Primary}"/>
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
                             </Grid>
-
-                            <TextBlock Text="Choose how Links opens. If ‘Start with a specific team’ is selected and that team exists, Links opens to it; otherwise it opens to your last viewed team"
-                                       Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -497,13 +384,9 @@
                             <ColumnDefinition Width="6"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-
                         <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Logs" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-
+                            <TextBlock Text="Logs" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
                             <Grid Margin="0,0,0,12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -511,12 +394,8 @@
                                     <ColumnDefinition Width="240"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Log level" Style="{StaticResource FieldLabel}"/>
-                                <ComboBox x:Name="LogLevelCombo" Grid.Column="2"
-                                          Style="{DynamicResource Combo.Links.Dropdown}"
-                                          ItemsSource="{Binding LogLevels}"
-                                          SelectedItem="{Binding MinimumLogLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}" ItemsSource="{Binding LogLevels}" SelectedItem="{Binding MinimumLogLevel, Mode=TwoWay}"/>
                             </Grid>
-
                             <Grid Margin="0,0,0,12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -524,25 +403,14 @@
                                     <ColumnDefinition Width="240"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Log retention" Style="{StaticResource FieldLabel}"/>
-                                <ComboBox x:Name="RetentionCombo" Grid.Column="2"
-                                          Style="{DynamicResource Combo.Links.Dropdown}"
-                                          ItemsSource="{Binding RetentionOptions}"
-                                          SelectedItem="{Binding RetentionDays, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                          ItemTemplate="{StaticResource DaysItemTemplate}"/>
+                                <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}" ItemsSource="{Binding RetentionOptions}" SelectedItem="{Binding RetentionDays, Mode=TwoWay}" ItemTemplate="{StaticResource DaysItemTemplate}"/>
                             </Grid>
-
-                            <WrapPanel Orientation="Horizontal">
-                                <Button x:Name="BtnOpenLogsFolder"
-                                        Style="{StaticResource Button.Rounded.Compact}"
-                                        Command="{Binding OpenLogsCommand}">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Image Source="pack://application:,,,/img/fileicon.png"
-                                               Width="18" Height="18" Margin="0,0,8,0"/>
-                                        <TextBlock Text="Open logs folder"
-                                                   Foreground="{DynamicResource Brush.Text.Primary}"/>
-                                    </StackPanel>
-                                </Button>
-                            </WrapPanel>
+                            <Button Command="{Binding OpenLogsCommand}" Style="{StaticResource Button.Rounded.Compact}" HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="pack://application:,,,/img/fileicon.png" Width="18" Height="18" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Open logs folder" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -553,40 +421,47 @@
                             <ColumnDefinition Width="6"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-
                         <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Search" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-
-                            <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Search History" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                            <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="12"/>
                                     <ColumnDefinition Width="240"/>
                                 </Grid.ColumnDefinitions>
-
                                 <TextBlock Text="History size" Style="{StaticResource FieldLabel}"/>
-
-                                <ComboBox x:Name="HistorySizeCombo" Grid.Column="2"
-                                          Style="{DynamicResource Combo.Links.Dropdown}"
-                                          ItemsSource="{Binding HistorySizeOptions}"
-                                          SelectedValue="{Binding MaxSearchHistory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                          SelectedValuePath="."
-                                          ItemTemplate="{StaticResource HistoryItemTemplate}"/>
+                                <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}" ItemsSource="{Binding HistorySizeOptions}" SelectedValue="{Binding MaxSearchHistory, Mode=TwoWay}" SelectedValuePath="." ItemTemplate="{StaticResource HistoryItemTemplate}"/>
                             </Grid>
                         </StackPanel>
                     </Grid>
                 </Border>
+
+                <Border Style="{StaticResource Card.Container}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="6"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
+                        <StackPanel Grid.Column="1" Margin="16">
+                            <TextBlock Text="App Maintenance" FontSize="16" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Reset all settings, paths, and UI preferences to factory state." 
+                                       Foreground="{DynamicResource Brush.Text.Primary}" Opacity="0.6" FontSize="11" Margin="0,0,0,12"/>
+                            <Button Command="{Binding ResetDefaultsCommand}" Style="{StaticResource Button.Rounded.Compact}"
+                                    HorizontalAlignment="Left" Padding="16,4">
+                                <TextBlock Text="Reset to Factory Defaults" Foreground="White" FontSize="12"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
             </StackPanel>
         </ScrollViewer>
 
         <Grid Grid.Row="1" Margin="16,0,16,16">
-            <Border x:Name="FooterBorder"
-                    BorderThickness="1"
-                    CornerRadius="12"
-                    Padding="12,8">
+            <Border x:Name="FooterBorder" BorderThickness="1" CornerRadius="12" Padding="12,8">
                 <Border.Style>
                     <Style TargetType="Border">
                         <Setter Property="Background" Value="{DynamicResource Brush.Surface.Hover}"/>
@@ -599,7 +474,6 @@
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
-
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -607,18 +481,12 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="⚠" 
-                                   Foreground="Yellow" 
-                                   FontSize="18" 
-                                   FontWeight="Bold"
-                                   Margin="0,0,12,0"
-                                   VerticalAlignment="Center"
+                        <TextBlock Text="⚠" Foreground="Yellow" FontSize="18" FontWeight="Bold" Margin="0,0,12,0" VerticalAlignment="Center"
                                    Visibility="{Binding HasUnsavedChanges, Converter={StaticResource BoolToVis}}"/>
-
                         <TextBlock VerticalAlignment="Center" Foreground="White">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="Settings are up to date."/>
+                                    <Setter Property="Text" Value="{Binding StatusMessage}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding HasUnsavedChanges}" Value="True">
                                             <Setter Property="Text" Value="Changes detected. Remember to click Apply!"/>
@@ -631,13 +499,14 @@
                         </TextBlock>
                     </StackPanel>
 
-                    <Button x:Name="BtnApply" Grid.Column="1"
-                            Style="{StaticResource Button.Rounded}"
-                            Command="{Binding ApplyCommand}"
-                            MinHeight="32" Height="36" MinWidth="92" Padding="14,6"
-                            Margin="12,0,0,0">
-                        <TextBlock Text="Apply" Foreground="{DynamicResource Brush.Text.Primary}" FontWeight="Bold"/>
-                    </Button>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Command="{Binding DiscardCommand}" Content="Discard" Style="{StaticResource Button.Rounded.Compact}"
+                                Margin="0,0,10,0" Padding="14,0" Visibility="{Binding HasUnsavedChanges, Converter={StaticResource BoolToVis}}"/>
+                        <Button x:Name="BtnApply" Style="{StaticResource Button.Rounded}" Command="{Binding ApplyCommand}"
+                                MinHeight="32" Height="36" MinWidth="92" Padding="14,6">
+                            <TextBlock Text="Apply" Foreground="{DynamicResource Brush.Text.Primary}" FontWeight="Bold"/>
+                        </Button>
+                    </StackPanel>
                 </Grid>
             </Border>
         </Grid>

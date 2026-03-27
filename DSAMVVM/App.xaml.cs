@@ -35,7 +35,11 @@ namespace DSAMVVM
         private Mutex? _mutex;
 
         public static IServiceProvider Services { get; private set; } = default!;
-        public static AppSettings Settings => ((App)Current)._settings ?? new AppSettings();
+        public static AppSettings Settings
+        {
+            get => ((App)Current)._settings ??= new AppSettings();
+            set => ((App)Current)._settings = value;
+        }
 
         // Stores command-line arguments passed during application startup
         public static string[] StartupArgs { get; private set; } = [];
@@ -505,7 +509,7 @@ namespace DSAMVVM
             services.AddSingleton<IHttpService, HttpService>();
             services.AddSingleton<ISettingsService, SettingsService>();
 
-            services.AddSingleton<AppSettings>(sp => _settings ?? new AppSettings());
+            services.AddSingleton<AppSettings>(sp => Settings);
 
             services.AddSingleton<IDepartmentService, DepartmentService>();
             services.AddSingleton<IADService, ADService>();
@@ -516,7 +520,7 @@ namespace DSAMVVM
             services.AddSingleton<IOutputTextSettingsProvider>(sp =>
                 new OutputTextSettingsProvider(
                     sp.GetRequiredService<ISettingsService>(),
-                    () => _settings ?? new AppSettings()));
+                    () => Settings));
 
             services.AddSingleton<IFlowDocService, FlowDocService>();
 
