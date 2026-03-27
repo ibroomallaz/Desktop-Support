@@ -11,8 +11,8 @@
     <ApplicationIcon>img\MainIcon.ico</ApplicationIcon>
     <RepositoryUrl>https://github.com/ibroomallaz/Desktop-Support</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>4.2.0</AssemblyVersion>
-    <FileVersion>4.2.1200</FileVersion>
+    <AssemblyVersion>4.2.2</AssemblyVersion>
+    <FileVersion>4.2.1300</FileVersion>
     <Version>4.2.0</Version>
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
