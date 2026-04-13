@@ -1,6 +1,4 @@
 ﻿using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Services;
-using DSAMVVM.Core.Services.Updates;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;

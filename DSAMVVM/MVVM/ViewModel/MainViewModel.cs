@@ -5,6 +5,7 @@ using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
+using DSAMVVM.MVVM.Services.Status;
 using DSAMVVM.MVVM.View.Resources;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
@@ -330,16 +331,19 @@ namespace DSAMVVM.MVVM.ViewModel
                 return;
 
             string lowerQuery = query.ToLowerInvariant();
+
+            // --- HIDDEN COMMANDS ---
+
+            //Toggle Update Environment
             if (lowerQuery == "-test-" || lowerQuery == "-production-")
             {
                 bool useTest = lowerQuery == "-test-";
 
-                var settingsService = App.Services.GetRequiredService<ISettingsService>();
-                var appSettings = App.Services.GetRequiredService<AppSettings>();
-
+                // Use the global static property to ensure reference consistency
+                var appSettings = App.Settings;
                 appSettings.Updates.UseInternalTestingSources = useTest;
 
-                // Requires a valid path string for your settings file
+                var settingsService = App.Services.GetRequiredService<ISettingsService>();
                 settingsService.RequestSave(appSettings, Globals.g_SettingsPath);
 
                 string mode = useTest ? "TEST" : "PRODUCTION";
@@ -348,6 +352,29 @@ namespace DSAMVVM.MVVM.ViewModel
                 SearchQuery = string.Empty;
                 return;
             }
+
+            // Trigger Sticky Error
+            if (lowerQuery == "-debug-error-")
+            {
+                var bus = App.Services.GetRequiredService<StatusBus>();
+
+                var testError = new StatusItemBuilder()
+                    .Key("DEBUG_STICKY_ERROR")
+                    .Level(StatusLevel.Error)
+                    .Sticky(true)
+                    .Priority(1)
+                    .Text("DEBUG: This is a persistent high-priority error. Test the ")
+                    .Bold("✕")
+                    .Text(" button!")
+                    .Build();
+
+                bus.Report(testError);
+
+                SearchQuery = string.Empty;
+                return;
+            }
+
+            // --- STANDARD SEARCH LOGIC ---
 
             if (CurrentView is not ISearchableViewModel searchable)
                 return;
@@ -371,6 +398,7 @@ namespace DSAMVVM.MVVM.ViewModel
             }
             catch (Exception ex)
             {
+                // Notice we pass the 'key' here so errors can also be dismissed or updated
                 UiNotify.Error("Search failed", ex.Message, ex, alsoStatusBar: true, key: key);
             }
         }
