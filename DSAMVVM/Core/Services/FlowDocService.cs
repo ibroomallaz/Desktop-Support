@@ -21,7 +21,13 @@ namespace DSAMVVM.Core.Services
         {
             ["UserView"] = "Enter a NetID above, then press Enter to search.",
             ["ComputerView"] = "Enter a computer name above, then press Enter to search.",
-            ["GroupView"] = "Select \"User's MIM Groups\" to search by NetID, or \"Group Members\" for department number, then press Enter to search.",
+
+            // Mode-specific instructions for GroupView
+            ["GroupView.UserMim"] = "Enter a NetID to find all associated MIM rollup groups.",
+            ["GroupView.GroupMembers"] = "Enter a Dept number to list all current members.",
+            ["GroupView.Department"] = "Enter a Department Number to view assigned support teams.",
+            ["GroupView.Division"] = "Enter a 4-character Division Code to identify responsible support teams.",
+
             ["EntraView"] = "Enter an Entra user or device above, then press Enter to search.",
         };
 

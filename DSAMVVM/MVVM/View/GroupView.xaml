@@ -14,33 +14,38 @@
 
         <!-- Mode radios -->
         <StackPanel Grid.Row="0"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Center"
-                    Margin="0,0,0,10">
+            Orientation="Horizontal"
+            HorizontalAlignment="Center"
+            Margin="0,0,0,10">
             <RadioButton Content="User's MIM Groups"
-                         GroupName="Mode"
-                         IsChecked="{Binding IsUserMim}"
-                         Margin="0,0,16,0"
-                         Style="{StaticResource Radio.GroupView}"/>
+                 GroupName="Mode"
+                 IsChecked="{Binding IsUserMim}"
+                 Margin="0,0,16,0"
+                 Style="{StaticResource Radio.GroupView}"/>
             <RadioButton Content="Group Members"
-                         GroupName="Mode"
-                         IsChecked="{Binding IsGroupMembers}"
-                         Margin="0,0,16,0"
-                         Style="{StaticResource Radio.GroupView}"/>
+                 GroupName="Mode"
+                 IsChecked="{Binding IsGroupMembers}"
+                 Margin="0,0,16,0"
+                 Style="{StaticResource Radio.GroupView}"/>
             <RadioButton Content="Dept Support Search"
-                         GroupName="Mode"
-                         IsChecked="{Binding IsDeptSearch}"
-                         Style="{StaticResource Radio.GroupView}"/> 
+                 GroupName="Mode"
+                 IsChecked="{Binding IsDeptSearch}"
+                 Margin="0,0,16,0" 
+                 Style="{StaticResource Radio.GroupView}"/>
+            <RadioButton Content="Division Support"
+                 GroupName="Mode"
+                 IsChecked="{Binding IsDivSearch}"
+                 Style="{StaticResource Radio.GroupView}"/>
         </StackPanel>
 
         <!-- FlowDocument viewer -->
         <FlowDocumentScrollViewer
-            Grid.Row="1"
-            IsToolBarVisible="False"
-            VerticalScrollBarVisibility="Auto"
-            beh:FlowDocBinder.Text="{Binding SearchLog}"
-            beh:FlowDocBinder.ViewName="GroupView"
-            beh:FlowDocBinder.PreserveScrollPosition="True" />
+                Grid.Row="1"
+                IsToolBarVisible="False"
+                VerticalScrollBarVisibility="Auto"
+                beh:FlowDocBinder.Text="{Binding SearchLog}"
+                beh:FlowDocBinder.ViewName="{Binding CurrentViewContext}"
+                beh:FlowDocBinder.PreserveScrollPosition="True" />
 
         <!-- Bottom Bar -->
         <Grid Grid.Row="2" Margin="0,10,0,0">

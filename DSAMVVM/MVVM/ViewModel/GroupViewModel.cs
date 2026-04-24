@@ -22,10 +22,12 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             UserMim,
             GroupMembers,
-            Department
+            Department,
+            Division
         }
 
         private GroupSearchMode _searchMode = GroupSearchMode.UserMim;
+        public string CurrentViewContext => $"GroupView.{_searchMode}";
 
         public bool IsUserMim
         {
@@ -44,7 +46,11 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _searchMode == GroupSearchMode.Department;
             set { if (value) UpdateMode(GroupSearchMode.Department); }
         }
-
+        public bool IsDivSearch
+        {
+            get => _searchMode == GroupSearchMode.Division;
+            set { if (value) UpdateMode(GroupSearchMode.Division); }
+        }
         // Core logic to handle exclusive switching
         private void UpdateMode(GroupSearchMode newMode)
         {
@@ -55,12 +61,20 @@ namespace DSAMVVM.MVVM.ViewModel
             OnPropertyChanged(nameof(IsUserMim));
             OnPropertyChanged(nameof(IsGroupMembers));
             OnPropertyChanged(nameof(IsDeptSearch));
-
+            OnPropertyChanged(nameof(IsDivSearch));
             OnPropertyChanged(nameof(QueryPlaceholder));
+            //Notify the binder that the context has changed
+            OnPropertyChanged(nameof(CurrentViewContext));
+            // Force the FlowDocument to refresh instructions if the log is empty
+            if (string.IsNullOrEmpty(SearchLog))
+            {
+                OnPropertyChanged(nameof(SearchLog));
+            }
         }
 
         public string QueryPlaceholder => IsUserMim ? "Enter a NetID..." :
                                           IsDeptSearch ? "Enter Department Number..." :
+                                          IsDivSearch ? "Enter 4-character Division Code..." :
                                           "Enter Group Name or 4-digit Dept#...";
 
         // UI state
@@ -197,6 +211,9 @@ namespace DSAMVVM.MVVM.ViewModel
                     case GroupSearchMode.Department:
                         await SearchDepartmentSupport(Query);
                         break;
+                    case GroupSearchMode.Division:
+                        await SearchDivisionSupport(Query);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -330,6 +347,35 @@ namespace DSAMVVM.MVVM.ViewModel
             }
 
             AppendRaw(string.Empty);
+        }
+        //Division search
+        private async Task SearchDivisionSupport(string divCode)
+        {
+            AppendRaw($"[gray]Looking up support for division '{divCode}'...[/gray]");
+            var teams = (await _deptService.GetTeamsByDivisionAsync(divCode)).ToList();
+
+            if (teams.Count == 0)
+            {
+                Error = $"No division '{divCode}' found.";
+                AppendRaw($"[red]{Error}[/red]");
+                return;
+            }
+
+            foreach (var team in teams)
+            {
+                AppendRaw(string.Empty);
+                AppendTitle($"Support Team: {team.SupportTeamName}");
+
+                if (!string.IsNullOrWhiteSpace(team.ManagerName))
+                {
+                    var mgr = team.ManagerName;
+                    if (!string.IsNullOrWhiteSpace(team.ManagerNetID)) mgr += $" ({team.ManagerNetID})";
+                    AppendLabelValue("Manager: ", mgr);
+                }
+
+                if (!string.IsNullOrWhiteSpace(team.PhoneNumber))
+                    AppendLabelValue("Support Phone: ", team.PhoneNumber);
+            }
         }
 
         public void AdjustFont(int delta)
