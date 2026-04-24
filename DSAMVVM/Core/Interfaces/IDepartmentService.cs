@@ -26,7 +26,7 @@ namespace DSAMVVM.Core.Interfaces
         Task<bool?> IsSupportKnownAsync(string departmentNumber);
         Task<string?> GetNotesAsync(string departmentNumber);
         Task<string?> GetFileRepoPathAsync(string departmentNumber);
-
+        Task<IEnumerable<SupportTeam>> GetTeamsByDivisionAsync(string divAbbrev);
         Task PreCacheDataAsync();
         Task ReloadDataAsync();
     }

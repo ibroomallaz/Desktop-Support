@@ -45,7 +45,16 @@ namespace DSAMVVM.Core.Services
         public async Task<string?> GetNotesAsync(string departmentNumber) => (await GetDepartmentAsync(departmentNumber))?.Notes;
         public async Task<bool?> IsSupportKnownAsync(string departmentNumber) => (await GetDepartmentAsync(departmentNumber))?.SupportKnown;
         public async Task<string?> GetFileRepoPathAsync(string departmentNumber) => (await GetDepartmentAsync(departmentNumber))?.FileRepoPath;
+        public async Task<IEnumerable<SupportTeam>> GetTeamsByDivisionAsync(string divAbbrev)
+        {
+            await EnsureDataLoaded();
+            if (string.IsNullOrWhiteSpace(divAbbrev)) return [];
 
+            var search = divAbbrev.Trim();
+            return _teamMap.Values
+                .Where(t => t.SupportedDivisions?
+                    .Any(d => string.Equals(d.DivAbbrev, search, StringComparison.OrdinalIgnoreCase)) == true);
+        }
         public async Task ReloadDataAsync()
         {
             await _lock.WaitAsync();
