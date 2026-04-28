@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
+using DSAMVVM.MVVM.Model.Config.UI;
 using DSAMVVM.Core.Logging;
 
 namespace DSAMVVM.Core.Services

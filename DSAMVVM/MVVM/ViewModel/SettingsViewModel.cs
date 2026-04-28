@@ -10,6 +10,7 @@ using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
+using DSAMVVM.MVVM.Model.Config.UI;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
