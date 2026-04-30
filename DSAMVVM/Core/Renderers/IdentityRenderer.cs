@@ -95,5 +95,37 @@ namespace DSAMVVM.Core.Renderers
 
             return doc.ToString();
         }
+        // --- DEEP LINK RENDERING: O365 RAW ---
+        public static string RenderRawLicenseInfo(string netid, string rawLicense)
+        {
+            var doc = new FlowDocMarkupBuilder();
+            doc.AddRaw(string.Empty);
+            doc.AddTitle($"Raw AD License Attribute for {netid}:");
+            doc.AddDim(rawLicense);
+            doc.AddRaw(string.Empty);
+            return doc.ToString();
+        }
+
+        // --- DEEP LINK RENDERING: ADOBE ---
+        public static string RenderAdobeLicenseStatus(string netid, bool hasAcrobat, bool hasCC)
+        {
+            var doc = new FlowDocMarkupBuilder();
+            doc.AddRaw(string.Empty);
+            doc.AddTitle($"Adobe Licenses ({netid}):");
+
+            string acroColor = hasAcrobat ? "green" : "red";
+            string acroIcon = hasAcrobat ? "✓" : "✗";
+            string acroText = hasAcrobat ? "Assigned" : "None";
+
+            string ccColor = hasCC ? "green" : "red";
+            string ccIcon = hasCC ? "✓" : "✗";
+            string ccText = hasCC ? "Assigned" : "None";
+
+            doc.AddRaw($"[cyan]  Acrobat Pro: [/cyan][{acroColor}]{acroIcon} {acroText}[/{acroColor}]");
+            doc.AddRaw($"[cyan]  Creative Cloud: [/cyan][{ccColor}]{ccIcon} {ccText}[/{ccColor}]");
+            doc.AddRaw(string.Empty);
+
+            return doc.ToString();
+        }
     }
 }

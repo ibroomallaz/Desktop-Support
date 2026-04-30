@@ -51,5 +51,36 @@ namespace DSAMVVM.Core.Renderers
             if (!found) doc.AddError($"No division '{divCode}' found.");
             return doc.ToString();
         }
+        // --- DEEP LINK RENDERING: TEAM INFO ---
+        public static async Task<string> RenderTeamInfoAsync(string teamName, IDepartmentService service)
+        {
+            var doc = new FlowDocMarkupBuilder();
+            doc.AddRaw(string.Empty);
+
+            var team = await service.GetSupportTeamAsync(teamName);
+            if (team == null)
+            {
+                doc.AddError("Team not found.");
+                return doc.ToString();
+            }
+
+            doc.AddTitle($"Team: {team.SupportTeamName}");
+            if (!string.IsNullOrWhiteSpace(team.ManagerName))
+            {
+                doc.AddRaw($"[red]Manager: {team.ManagerName} [/red][gray]([/gray][red]{team.ManagerNetID}[/red][gray])[/gray]");
+            }
+            if (!string.IsNullOrWhiteSpace(team.PhoneNumber)) doc.AddLabelValue("Phone: ", team.PhoneNumber);
+
+            if (team.SupportedDivisions != null && team.SupportedDivisions.Count > 0)
+            {
+                doc.AddRaw("[cyan]Supported Divisions:[/cyan]");
+                foreach (var div in team.SupportedDivisions)
+                {
+                    doc.AddRaw($"[gray]  • [/gray][red]{div.DivAbbrev}[/red] [gray]-[/gray] [red]{div.DivFullName}[/red]");
+                }
+            }
+            doc.AddRaw(string.Empty);
+            return doc.ToString();
+        }
     }
 }

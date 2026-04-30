@@ -132,21 +132,12 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private void ShowRawLicenseInfo(string netid, string rawLicense)
         {
-            var doc = new FlowDocMarkupBuilder();
-            doc.AddRaw(string.Empty);
-            doc.AddTitle($"Raw AD License Attribute for {netid}:");
-            doc.AddDim(rawLicense);
-            doc.AddRaw(string.Empty);
-            SearchLog += doc.ToString();
+            SearchLog += IdentityRenderer.RenderRawLicenseInfo(netid, rawLicense);
         }
 
-        private async Task PerformAdobeCheckAsync(string netid)
+      private async Task PerformAdobeCheckAsync(string netid)
         {
             if (string.IsNullOrWhiteSpace(netid)) return;
-
-            var doc = new FlowDocMarkupBuilder();
-            doc.AddRaw(string.Empty);
-            doc.AddTitle($"Adobe Licenses ({netid}):");
 
             var status = await _adService.CheckAdobeLicensesAsync(netid);
 
@@ -157,51 +148,12 @@ namespace DSAMVVM.MVVM.ViewModel
                 IsAdobeCheckComplete = true;
             }
 
-            string acroColor = status.HasAcrobatPro ? "green" : "red";
-            string acroIcon = status.HasAcrobatPro ? "✓" : "✗";
-            string acroText = status.HasAcrobatPro ? "Assigned" : "None";
-
-            string ccColor = status.HasCreativeCloud ? "green" : "red";
-            string ccIcon = status.HasCreativeCloud ? "✓" : "✗";
-            string ccText = status.HasCreativeCloud ? "Assigned" : "None";
-
-            doc.AddRaw($"[cyan]  Acrobat Pro: [/cyan][{acroColor}]{acroIcon} {acroText}[/{acroColor}]");
-            doc.AddRaw($"[cyan]  Creative Cloud: [/cyan][{ccColor}]{ccIcon} {ccText}[/{ccColor}]");
-            doc.AddRaw(string.Empty);
-
-            SearchLog += doc.ToString();
+            SearchLog += IdentityRenderer.RenderAdobeLicenseStatus(netid, status.HasAcrobatPro, status.HasCreativeCloud);
         }
 
         private async Task ShowTeamInfoAsync(string teamName)
         {
-            var doc = new FlowDocMarkupBuilder();
-            doc.AddRaw(string.Empty);
-
-            var team = await _deptService.GetSupportTeamAsync(teamName);
-            if (team == null)
-            {
-                doc.AddError("Team not found.");
-                SearchLog += doc.ToString();
-                return;
-            }
-
-            doc.AddTitle($"Team: {team.SupportTeamName}");
-            if (!string.IsNullOrWhiteSpace(team.ManagerName))
-            {
-                doc.AddRaw($"[red]Manager: {team.ManagerName} [/red][gray]([/gray][red]{team.ManagerNetID}[/red][gray])[/gray]");
-            }
-            if (!string.IsNullOrWhiteSpace(team.PhoneNumber)) doc.AddLabelValue("Phone: ", team.PhoneNumber);
-
-            if (team.SupportedDivisions != null && team.SupportedDivisions.Count > 0)
-            {
-                doc.AddRaw("[cyan]Supported Divisions:[/cyan]");
-                foreach (var div in team.SupportedDivisions)
-                {
-                    doc.AddRaw($"[gray]  • [/gray][red]{div.DivAbbrev}[/red] [gray]-[/gray] [red]{div.DivFullName}[/red]");
-                }
-            }
-            doc.AddRaw(string.Empty);
-            SearchLog += doc.ToString();
+            SearchLog += await OrganizationalRenderer.RenderTeamInfoAsync(teamName, _deptService);
         }
 
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
