@@ -1,17 +1,17 @@
-﻿using System.IO;
-using System.Text;
-using DSAMVVM.Core.Enums;
+﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Models;
+using DSAMVVM.Core.Renderers;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
+using System.IO;
+using System.Text;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
     public class UserViewModel : ObservableObject, ISearchableViewModel, IDisposable
     {
-        // Services
         private readonly IADService _adService;
         private readonly IDepartmentService _deptService;
         private readonly ISettingsService _settingsSvc;
@@ -19,11 +19,8 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IFlowDocService _flowDoc;
 
         private const string ViewKey = "UserView";
-
-        // Context tracking
         private string? _currentSearchNetId;
 
-        // Adobe Licensing State
         private bool _hasAcrobatPro;
         public bool HasAcrobatPro
         {
@@ -45,7 +42,6 @@ namespace DSAMVVM.MVVM.ViewModel
             private set { _isAdobeCheckComplete = value; OnPropertyChanged(nameof(IsAdobeCheckComplete)); }
         }
 
-        // UI State
         private double _effectiveFontSize = 14;
         public double EffectiveFontSize
         {
@@ -100,7 +96,6 @@ namespace DSAMVVM.MVVM.ViewModel
             RefreshEffectiveFontSize();
         }
 
-        // --- Link Routing ---
         private async void OnLinkClicked(object? sender, string url)
         {
             if (url.StartsWith("dsa://team/", StringComparison.OrdinalIgnoreCase))
@@ -125,25 +120,33 @@ namespace DSAMVVM.MVVM.ViewModel
                         var rawLicense = Encoding.UTF8.GetString(Convert.FromBase64String(base64Data));
                         ShowRawLicenseInfo(netid, rawLicense);
                     }
-                    catch { AppendRaw("[red]Error: Could not decode raw license data.[/red]"); }
+                    catch
+                    {
+                        var errDoc = new FlowDocMarkupBuilder();
+                        errDoc.AddError("Error: Could not decode raw license data.");
+                        SearchLog += errDoc.ToString();
+                    }
                 }
             }
         }
 
         private void ShowRawLicenseInfo(string netid, string rawLicense)
         {
-            AppendRaw(string.Empty);
-            AppendRaw($"[yellow]Raw AD License Attribute for {netid}:[/yellow]");
-            AppendRaw($"[lightgray]{rawLicense}[/lightgray]");
-            AppendRaw(string.Empty);
+            var doc = new FlowDocMarkupBuilder();
+            doc.AddRaw(string.Empty);
+            doc.AddTitle($"Raw AD License Attribute for {netid}:");
+            doc.AddDim(rawLicense);
+            doc.AddRaw(string.Empty);
+            SearchLog += doc.ToString();
         }
 
         private async Task PerformAdobeCheckAsync(string netid)
         {
             if (string.IsNullOrWhiteSpace(netid)) return;
 
-            AppendRaw(string.Empty);
-            AppendRaw($"[yellow]Adobe Licenses ({netid}):[/yellow]");
+            var doc = new FlowDocMarkupBuilder();
+            doc.AddRaw(string.Empty);
+            doc.AddTitle($"Adobe Licenses ({netid}):");
 
             var status = await _adService.CheckAdobeLicensesAsync(netid);
 
@@ -162,12 +165,45 @@ namespace DSAMVVM.MVVM.ViewModel
             string ccIcon = status.HasCreativeCloud ? "✓" : "✗";
             string ccText = status.HasCreativeCloud ? "Assigned" : "None";
 
-            AppendRaw($"[cyan]  Acrobat Pro: [/cyan][{acroColor}]{acroIcon} {acroText}[/{acroColor}]");
-            AppendRaw($"[cyan]  Creative Cloud: [/cyan][{ccColor}]{ccIcon} {ccText}[/{ccColor}]");
-            AppendRaw(string.Empty);
+            doc.AddRaw($"[cyan]  Acrobat Pro: [/cyan][{acroColor}]{acroIcon} {acroText}[/{acroColor}]");
+            doc.AddRaw($"[cyan]  Creative Cloud: [/cyan][{ccColor}]{ccIcon} {ccText}[/{ccColor}]");
+            doc.AddRaw(string.Empty);
+
+            SearchLog += doc.ToString();
         }
 
-        // --- Core Search Logic ---
+        private async Task ShowTeamInfoAsync(string teamName)
+        {
+            var doc = new FlowDocMarkupBuilder();
+            doc.AddRaw(string.Empty);
+
+            var team = await _deptService.GetSupportTeamAsync(teamName);
+            if (team == null)
+            {
+                doc.AddError("Team not found.");
+                SearchLog += doc.ToString();
+                return;
+            }
+
+            doc.AddTitle($"Team: {team.SupportTeamName}");
+            if (!string.IsNullOrWhiteSpace(team.ManagerName))
+            {
+                doc.AddRaw($"[red]Manager: {team.ManagerName} [/red][gray]([/gray][red]{team.ManagerNetID}[/red][gray])[/gray]");
+            }
+            if (!string.IsNullOrWhiteSpace(team.PhoneNumber)) doc.AddLabelValue("Phone: ", team.PhoneNumber);
+
+            if (team.SupportedDivisions != null && team.SupportedDivisions.Count > 0)
+            {
+                doc.AddRaw("[cyan]Supported Divisions:[/cyan]");
+                foreach (var div in team.SupportedDivisions)
+                {
+                    doc.AddRaw($"[gray]  • [/gray][red]{div.DivAbbrev}[/red] [gray]-[/gray] [red]{div.DivFullName}[/red]");
+                }
+            }
+            doc.AddRaw(string.Empty);
+            SearchLog += doc.ToString();
+        }
+
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
             Error = null;
@@ -177,93 +213,86 @@ namespace DSAMVVM.MVVM.ViewModel
             HasAcrobatPro = false;
             HasCreativeCloud = false;
 
-            if (!string.IsNullOrEmpty(SearchLog))
+            var headerDoc = new FlowDocMarkupBuilder();
+            if (!string.IsNullOrEmpty(SearchLog)) headerDoc.AddHeader("New Search");
+            if (!string.IsNullOrWhiteSpace(context.Query)) headerDoc.AddLabelValue("Query: ", context.Query);
+
+            SearchLog += headerDoc.ToString();
+
+            if (target != SearchTarget.User || string.IsNullOrWhiteSpace(context.Query))
             {
-                AppendRaw("\n[cyan]────────── New Search ──────────[/cyan]\n");
+                Error = "Invalid target or empty query.";
+
+                var errDoc = new FlowDocMarkupBuilder();
+                errDoc.AddError("Aborted: Invalid search parameters.");
+                SearchLog += errDoc.ToString();
+                return;
             }
-            AppendRaw($"[cyan]Query:[/cyan] [red]{context.Query}[/red]");
 
             try
             {
                 IsLoading = true;
+
+                var loadDoc = new FlowDocMarkupBuilder();
+                loadDoc.AddSuccess("Starting user search...");
+                SearchLog += loadDoc.ToString();
+
                 var user = await searchService.SearchAsync(context, target) as ADUserInfo;
+
+                // 1. Render the Identity Data (Requires ONLY the user)
+                SearchLog += IdentityRenderer.RenderADUser(user);
+
+                // 2. Render the Organizational Data (Requires BOTH the Dept Number and _deptService)
+                if (user != null && user.Exists && !string.IsNullOrEmpty(user.DepartmentNumber))
+                {
+                    SearchLog += await OrganizationalRenderer.RenderDepartmentContextAsync(user.DepartmentNumber, _deptService);
+                }
 
                 if (user is null || !user.Exists)
                 {
                     Error = user?.ErrorMessage ?? "User not found.";
-                    AppendRaw($"[red]Search complete. User not found. Error: {Error}[/red]");
-                    return;
                 }
-
-                AppendRaw(string.Empty);
-                AppendTitle(user.DisplayName);
-
-                if (!string.IsNullOrEmpty(user.EduAffiliation)) AppendLabelValue("Affiliation: ", user.EduAffiliation);
-                if (!string.IsNullOrEmpty(user.Division)) AppendLabelValue("Division: ", user.Division);
-                if (!string.IsNullOrEmpty(user.DepartmentName)) AppendLabelValue("Department: ", user.DepartmentName);
-                if (user.Enabled == false) AppendLabelValue("Enabled: ", "False", false);
-                if (user.Locked == true) AppendLabelValue("Locked: ", "True", false);
-
-                AppendRaw("[cyan]Software Licenses:[/cyan]");
-
-                if (!string.IsNullOrWhiteSpace(user.RawLicense))
-                {
-                    var b64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.RawLicense));
-                    var o365Url = $"dsa://license/o365/{user.Name}/{b64}";
-                    AppendRaw($"[lightgray]   • [/lightgray][cyan]O365: [/cyan][red][{user.License}]({o365Url})[/red]");
-                }
-                else
-                {
-                    AppendRaw($"[lightgray]   • [/lightgray][cyan]O365: [/cyan][red]{user.License ?? "None"}[/red]");
-                }
-
-                AppendRaw($"[lightgray]   • [/lightgray][cyan]Adobe: [/cyan][red][Check](dsa://license/adobe/{user.Name})[/red]");
-
-                if (!string.IsNullOrEmpty(user.DepartmentNumber))
-                {
-                    var dept = await _deptService.GetDepartmentAsync(user.DepartmentNumber);
-                    if (dept != null)
-                    {
-                        var team = await _deptService.GetTeamAsync(dept.Number);
-                        if (!string.IsNullOrWhiteSpace(team))
-                        {
-                            var url = $"dsa://team/{Uri.EscapeDataString(team.Trim())}";
-                            AppendRaw($"[cyan]Support Team: [/cyan][red][{team.Trim()}]({url})[/red]");
-                        }
-                        var repoPath = await _deptService.GetFileRepoPathAsync(dept.Number);
-                        if (!string.IsNullOrWhiteSpace(repoPath)) AppendLabeledLink("File Repository: ", "Open Repository", repoPath);
-                        if (!string.IsNullOrEmpty(dept.Notes)) AppendLabelValue("Notes: ", dept.Notes, false);
-                    }
-                }
-                AppendRaw(string.Empty);
             }
             catch (Exception ex)
             {
                 Error = ex.Message;
-                AppendRaw($"[red]Search failed: {ex.Message}[/red]");
+
+                var failDoc = new FlowDocMarkupBuilder();
+                failDoc.AddError($"Search failed: {ex.Message}");
+                SearchLog += failDoc.ToString();
             }
             finally
             {
                 IsLoading = false;
-                AppendRaw("[green]User search process completed.[/green]\n");
+
+                var compDoc = new FlowDocMarkupBuilder();
+                compDoc.AddSuccess("User search process completed.");
+                SearchLog += compDoc.ToString();
             }
         }
 
-        // --- Code-Behind Support ---
         public async Task RefreshDepartmentDataAsync()
         {
             if (IsRefreshing) return;
             IsRefreshing = true;
             try
             {
-                AppendRaw("[green]Refreshing department data…[/green]");
+                var startDoc = new FlowDocMarkupBuilder();
+                startDoc.AddSuccess("Refreshing department data…");
+                SearchLog += startDoc.ToString();
+
                 UiNotify.Info("Refreshing department data…", showStatusBar: true, key: "DeptRefresh");
                 await _deptService.ReloadDataAsync();
-                AppendRaw("[green]Department data refresh completed.[/green]");
+
+                var endDoc = new FlowDocMarkupBuilder();
+                endDoc.AddSuccess("Department data refresh completed.");
+                SearchLog += endDoc.ToString();
             }
             catch (Exception ex)
             {
-                AppendRaw($"[red]Refresh failed: {ex.Message}[/red]");
+                var errDoc = new FlowDocMarkupBuilder();
+                errDoc.AddError($"Refresh failed: {ex.Message}");
+                SearchLog += errDoc.ToString();
             }
             finally { IsRefreshing = false; }
         }
@@ -288,39 +317,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public Task<string?> LookupNameByID(string id) => _adService.LookupNameByEmployeeID(id);
         public void ClearLog() => SearchLog = string.Empty;
-
-        // --- UI Helpers ---
-        private void AppendRaw(string msg) => SearchLog += msg + "\n";
-        private void AppendTitle(string? t) => AppendRaw($"[yellow]{t}[/yellow]");
-        private void AppendLabelValue(string l, string? v, bool tNone = true)
-        {
-            var val = (string.IsNullOrWhiteSpace(v) && tNone) ? "None" : v;
-            if (val != null) AppendRaw($"[cyan]{l}[/cyan][red]{val}[/red]");
-        }
-        private void AppendLabeledLink(string lp, string lt, string target) =>
-            AppendRaw($"[cyan]{lp}[/cyan][red][{lt}]({target})[/red]");
-
-        private async Task ShowTeamInfoAsync(string teamName)
-        {
-            AppendRaw(string.Empty);
-            var team = await _deptService.GetSupportTeamAsync(teamName);
-            if (team == null) { AppendRaw("[red]Team not found.[/red]"); return; }
-            AppendTitle($"Team: {team.SupportTeamName}");
-            if (!string.IsNullOrWhiteSpace(team.ManagerName))
-            {
-                AppendRaw($"[red]Manager: {team.ManagerName} [/red][lightgray]([/lightgray][red]{team.ManagerNetID}[/red][lightgray])[/lightgray]");
-            }
-            if (!string.IsNullOrWhiteSpace(team.PhoneNumber)) AppendLabelValue("Phone: ", team.PhoneNumber);
-            if (team.SupportedDivisions != null && team.SupportedDivisions.Count > 0)
-            {
-                AppendRaw("[cyan]Supported Divisions:[/cyan]");
-                foreach (var div in team.SupportedDivisions)
-                {
-                    AppendRaw($"[lightgray]  • [/lightgray][red]{div.DivAbbrev}[/red] [lightgray]-[/lightgray] [red]{div.DivFullName}[/red]");
-                }
-            }
-            AppendRaw(string.Empty);
-        }
 
         private void OnFontSettingsChanged(object? s, EventArgs e) => RefreshEffectiveFontSize();
         private void RefreshEffectiveFontSize() => EffectiveFontSize = _notifier.GetFontSize(ViewKey);

@@ -8,6 +8,7 @@ using DSAMVVM.MVVM.Model.AD;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;
+using DSAMVVM.Core.Renderers;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -115,90 +116,43 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             Error = null;
 
-            if (!string.IsNullOrEmpty(SearchLog))
-            {
-                AppendRaw("\n[cyan]────────── New Search ──────────[/cyan]\n");
-                if (!string.IsNullOrWhiteSpace(context.Query))
-                    AppendRaw($"[cyan]Query:[/cyan] [red]{context.Query}[/red]");
-            }
-            else if (!string.IsNullOrWhiteSpace(context.Query))
-            {
-                AppendRaw($"[cyan]Query:[/cyan] [red]{context.Query}[/red]");
-            }
+            var headerDoc = new FlowDocMarkupBuilder();
+            if (!string.IsNullOrEmpty(SearchLog)) headerDoc.AddHeader("New Search");
+            if (!string.IsNullOrWhiteSpace(context.Query)) headerDoc.AddLabelValue("Query: ", context.Query);
 
-            Log.Info("ComputerView", $"Search started: target={target}, query='{context.Query}'");
+            // Push header to UI immediately
+            SearchLog += headerDoc.ToString();
 
-            if (target != SearchTarget.Computer)
+            if (target != SearchTarget.Computer || string.IsNullOrWhiteSpace(context.Query))
             {
-                Error = "Invalid search target provided to ComputerViewModel.";
-                AppendRaw("[red]Invalid search target for ComputerViewModel[/red]");
-                Log.Warn("ComputerView", $"Invalid target: {target}");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(context.Query))
-            {
-                AppendRaw("[cyan]Query was null or whitespace.[/cyan]");
-                Log.Info("ComputerView", "Aborted: empty query");
+                Error = "Invalid target or empty query.";
+                SearchLog += "[red]Aborted: Invalid search parameters.[/red]\n";
                 return;
             }
 
             try
             {
                 IsLoading = true;
-                AppendRaw("[green]Starting computer search...[/green]");
-                Log.Debug("ComputerView", "Dispatching directory search");
+                SearchLog += "[green]Starting computer search...[/green]\n";
 
                 var result = await searchService.SearchAsync(context, target);
                 var comp = result as ADComputerInfo;
 
-                if (comp is null || !comp.Exists)
-                {
-                    Error = comp?.ErrorMessage ?? "Computer not found.";
-                    AppendRaw($"[red]Search complete. Computer not found. Error: {Error}[/red]");
-                    Log.Info("ComputerView", $"Not found. Error='{Error}'");
-                    return;
-                }
+                SearchLog += IdentityRenderer.RenderADComputer(comp);
 
-                AppendRaw(string.Empty);
-                AppendTitle(comp.Name);
-
-                if (!string.IsNullOrWhiteSpace(comp.Description))
-                    AppendLabelValue("Description: ", comp.Description);
-
-                if (!string.IsNullOrWhiteSpace(comp.OperatingSystem))
-                    AppendLabelValue("Operating System: ", comp.OperatingSystem);
-
-                if (!string.IsNullOrWhiteSpace(comp.OUs))
-                    AppendLabelValue("OUs: ", comp.OUs);
-
-                if (!string.IsNullOrWhiteSpace(comp.LastLogonDate))
-                    AppendLabelValue("Last Logon: ", comp.LastLogonDate);
-
-                if (comp.Enabled == false)
-                    AppendLabelValue("Enabled: ", "False", treatEmptyAsNone: false);
-
-                AppendLabelValue("Hybrid Group Member: ", comp.IsHybridGroupMember ? "True" : "False", treatEmptyAsNone: false);
-
-                Log.Info("ComputerView",
-                    $"Computer found: Name='{comp.Name}', OS='{comp.OperatingSystem}', LastLogon='{comp.LastLogonDate}', Enabled={comp.Enabled}, Hybrid={comp.IsHybridGroupMember}, OUs='{comp.OUs}'");
-
-                AppendRaw(string.Empty);
-                Log.Info("ComputerView", "Search completed");
+                if (comp is null || !comp.Exists) Error = comp?.ErrorMessage ?? "Computer not found.";
             }
             catch (Exception ex)
             {
                 Error = $"Search failed: {ex.Message}";
-                AppendRaw($"[red]Exception during computer search: {ex}[/red]");
-                Log.Error("ComputerView", "Search failed", ex);
+                SearchLog += $"[red]Exception during computer search: {ex.Message}[/red]\n";
             }
             finally
             {
                 IsLoading = false;
-                AppendRaw("[green]Computer search process completed.[/green]");
+                SearchLog += "[green]Computer search process completed.[/green]\n";
             }
         }
-
         public void ClearLog() => SearchLog = string.Empty;
 
         // Dispose pattern for non-sealed type
