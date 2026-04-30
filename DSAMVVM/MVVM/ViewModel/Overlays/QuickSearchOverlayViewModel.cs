@@ -1,12 +1,13 @@
-﻿using System.Windows.Documents;
-using DSAMVVM.Core.Enums;
+﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
+using System.Text.Json;
+using System.Windows.Documents;
 
 namespace DSAMVVM.MVVM.ViewModel.Overlays
 {
-    public class QuickSearchViewModel : ObservableObject
+    public class QuickSearchOverlayViewModel : ObservableObject
     {
         private readonly ISearchService _searchService;
         private readonly IFlowDocService _flowDocService;
@@ -32,7 +33,7 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
             set { _resultDocument = value; OnPropertyChanged(); }
         }
 
-        public QuickSearchViewModel(ISearchService searchService, IFlowDocService flowDocService)
+        public QuickSearchOverlayViewModel(ISearchService searchService, IFlowDocService flowDocService)
         {
             _searchService = searchService;
             _flowDocService = flowDocService;
@@ -54,8 +55,8 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
 
                 if (rawData != null)
                 {
-                    // Formats the returned object into a string for the FlowDoc parser
-                    string formattedText = rawData.ToString() ?? "Data retrieved but could not be parsed.";
+                    var options = new JsonSerializerOptions { WriteIndented = true };
+                    string formattedText = JsonSerializer.Serialize(rawData, options);
 
                     ResultDocument = _flowDocService.BuildDocument(
                         fullText: formattedText,
@@ -75,7 +76,6 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
                 IsSearching = false;
             }
         }
-
         private static SearchTarget MapViewToTarget(AppView view)
         {
             return view switch

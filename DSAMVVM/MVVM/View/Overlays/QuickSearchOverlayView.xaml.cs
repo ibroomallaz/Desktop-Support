@@ -1,43 +1,55 @@
 ﻿using System.Windows;
 using System.Windows.Input;
+using DSAMVVM.Core.Enums;
+using DSAMVVM.MVVM.ViewModel.Overlays;
 
 namespace DSAMVVM.MVVM.View.Overlays
 {
     public partial class QuickSearchOverlayView : Window
     {
-        public QuickSearchOverlayView(string capturedText)
+        private readonly QuickSearchOverlayViewModel _viewModel;
+
+        public QuickSearchOverlayView(string capturedText, QuickSearchOverlayViewModel viewModel)
         {
             InitializeComponent();
+            _viewModel = viewModel;
+            DataContext = _viewModel;
 
-            // Inject the text grabbed from the stealth copy
-            SearchBox.Text = capturedText.Trim();
+            _viewModel.SearchText = capturedText.Trim();
 
-            // Auto-focus the text box when the window opens
             Loaded += (s, e) =>
             {
                 SearchBox.Focus();
-                SearchBox.SelectAll();
+                SearchBox.CaretIndex = SearchBox.Text.Length;
             };
 
-            //Auto-close if the user clicks away or the app loses focus
             this.Deactivated += (s, e) => this.Close();
         }
 
-        // Dismiss the overlay easily
-        protected override void OnKeyDown(KeyEventArgs e)
+        private async void BtnUser_Click(object sender, RoutedEventArgs e) => await ExecuteTargetedSearch(AppView.User);
+        private async void BtnComputer_Click(object sender, RoutedEventArgs e) => await ExecuteTargetedSearch(AppView.Computer);
+        private async void BtnGroup_Click(object sender, RoutedEventArgs e) => await ExecuteTargetedSearch(AppView.Group);
+
+        protected override async void OnPreviewKeyDown(KeyEventArgs e)
         {
-            base.OnKeyDown(e);
+            base.OnPreviewKeyDown(e);
 
             if (e.Key == Key.Escape)
             {
                 this.Close();
+                e.Handled = true;
             }
-            else if (e.Key == Key.Enter)
+            else if (Keyboard.Modifiers == ModifierKeys.Alt)
             {
-                // TODO: Execute your actual search logic here
-                MessageBox.Show($"Searching for: {SearchBox.Text}");
-                this.Close();
+                if (e.SystemKey == Key.U) { await ExecuteTargetedSearch(AppView.User); e.Handled = true; }
+                else if (e.SystemKey == Key.C) { await ExecuteTargetedSearch(AppView.Computer); e.Handled = true; }
+                else if (e.SystemKey == Key.G) { await ExecuteTargetedSearch(AppView.Group); e.Handled = true; }
             }
+        }
+
+        private async Task ExecuteTargetedSearch(AppView targetCategory)
+        {
+            await _viewModel.ExecuteInlineSearchAsync(targetCategory);
         }
     }
 }

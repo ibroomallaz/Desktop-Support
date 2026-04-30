@@ -1,9 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO;
-using System.IO.Pipes;
-using System.Windows;
-using System.Windows.Shell;
-using DSAMVVM.Core.Enums;
+﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Services;
@@ -17,8 +12,14 @@ using DSAMVVM.MVVM.Services.Updates;
 using DSAMVVM.MVVM.View;
 using DSAMVVM.MVVM.View.Overlays;
 using DSAMVVM.MVVM.ViewModel;
+using DSAMVVM.MVVM.ViewModel.Overlays;
 using H.NotifyIcon;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Pipes;
+using System.Windows;
+using System.Windows.Shell;
 
 namespace DSAMVVM
 {
@@ -183,10 +184,8 @@ namespace DSAMVVM
 
             quickSearch.QuickSearchTriggered += (s, capturedText) =>
             {
-                // Ensure UI elements are created on the main UI thread
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    // Close any lingering overlays to prevent duplicates
                     foreach (Window window in Application.Current.Windows)
                     {
                         if (window is QuickSearchOverlayView)
@@ -195,10 +194,13 @@ namespace DSAMVVM
                         }
                     }
 
-                    // Summon the overlay
-                    var overlay = new QuickSearchOverlayView(capturedText);
+                    // Resolves the ViewModel from the DI container
+                    var qsViewModel = _serviceProvider.GetRequiredService<QuickSearchOverlayViewModel>();
+
+                    // Passes both required parameters to the constructor
+                    var overlay = new QuickSearchOverlayView(capturedText, qsViewModel);
                     overlay.Show();
-                    overlay.Activate(); // Steal focus from current app
+                    overlay.Activate();
                 });
             };
 
@@ -600,6 +602,7 @@ namespace DSAMVVM
                     goAbout: () => Services.GetRequiredService<MainViewModel>().SelectedView = AppView.About
                 )
             );
+            services.AddTransient<QuickSearchOverlayViewModel>();
 
             services.AddTransient<Func<UserViewModel>>(sp => () => sp.GetRequiredService<UserViewModel>());
             services.AddTransient<Func<GroupViewModel>>(sp => () => sp.GetRequiredService<GroupViewModel>());
