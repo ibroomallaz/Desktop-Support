@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace DSAMVVM.Core.Utilities
 {
-    public abstract class ObeservableObject : INotifyPropertyChanged
+    public abstract class ObservableObject : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 

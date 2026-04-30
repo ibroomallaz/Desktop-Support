@@ -9,7 +9,7 @@ using DSAMVVM.MVVM.Model.Data;
 
 namespace DSAMVVM.MVVM.ViewModel;
 
-public class LinksViewModel : ObeservableObject
+public class LinksViewModel : ObservableObject
 {
     private const string Tag = "LinksVM";
     private const string StatusKey = "Links.Reload";

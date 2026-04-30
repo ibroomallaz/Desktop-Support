@@ -9,7 +9,7 @@ using DSAMVVM.MVVM.Model.AD;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class UserViewModel : ObeservableObject, ISearchableViewModel, IDisposable
+    public class UserViewModel : ObservableObject, ISearchableViewModel, IDisposable
     {
         // Services
         private readonly IADService _adService;

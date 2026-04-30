@@ -15,6 +15,7 @@ using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.Services.Status;
 using DSAMVVM.MVVM.Services.Updates;
 using DSAMVVM.MVVM.View;
+using DSAMVVM.MVVM.View.Overlays;
 using DSAMVVM.MVVM.ViewModel;
 using H.NotifyIcon;
 using Microsoft.Extensions.DependencyInjection;
@@ -177,6 +178,32 @@ namespace DSAMVVM
 
             InitializeTrayIcon(mainVM);
 
+            // --- QUICKSEARCH INITIALIZATION ---
+            var quickSearch = _serviceProvider.GetRequiredService<QuickSearchService>();
+
+            quickSearch.QuickSearchTriggered += (s, capturedText) =>
+            {
+                // Ensure UI elements are created on the main UI thread
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    // Close any lingering overlays to prevent duplicates
+                    foreach (Window window in Application.Current.Windows)
+                    {
+                        if (window is QuickSearchOverlayView)
+                        {
+                            window.Close();
+                        }
+                    }
+
+                    // Summon the overlay
+                    var overlay = new QuickSearchOverlayView(capturedText);
+                    overlay.Show();
+                    overlay.Activate(); // Steal focus from current app
+                });
+            };
+
+            quickSearch.Start();
+
             // Handle initial view routing
             if (StartupArgs.Length > 0)
             {
@@ -221,7 +248,19 @@ namespace DSAMVVM
                 }, System.Windows.Threading.DispatcherPriority.Background);
             };
 
-            mainWindow.Closed += (_, __) => TryPersistSettingsOnce();
+            mainWindow.Closed += (_, __) =>
+            {
+                TryPersistSettingsOnce();
+
+                // Force-close any floating overlays so the app can terminate cleanly
+                foreach (Window window in Application.Current.Windows)
+                {
+                    if (window is QuickSearchOverlayView)
+                    {
+                        window.Close();
+                    }
+                }
+            };
             mainWindow.Show();
             Mark("Window shown");
 
@@ -457,6 +496,8 @@ namespace DSAMVVM
 
             (_serviceProvider.GetService<VersionUpdateScheduler>() as IDisposable)?.Dispose();
 
+            _serviceProvider.GetService<QuickSearchService>()?.Stop();
+
             if (_serviceProvider.GetService<IAppLogger>() is FileLogger fl)
             {
                 fl.Dispose();
@@ -505,6 +546,7 @@ namespace DSAMVVM
             services.AddSingleton<IAppLogger>(_ => new FileLogger(Globals.g_LogsDir));
             services.AddSingleton<StatusBus>();
             services.AddSingleton<StatusBarViewModel>();
+            services.AddSingleton<QuickSearchService>();
 
             services.AddSingleton<IHttpService, HttpService>();
             services.AddSingleton<ISettingsService, SettingsService>();

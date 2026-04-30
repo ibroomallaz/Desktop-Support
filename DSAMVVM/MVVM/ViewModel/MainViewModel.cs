@@ -15,7 +15,7 @@ using System.Windows.Threading;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class MainViewModel : ObeservableObject
+    public class MainViewModel : ObservableObject
     {
         // Services
         public IDepartmentService DeptService { get; } = null!;

@@ -11,7 +11,7 @@ using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class ComputerViewModel : ObeservableObject, ISearchableViewModel, IDisposable
+    public class ComputerViewModel : ObservableObject, ISearchableViewModel, IDisposable
     {
         // Services
         private readonly IADService _ad;

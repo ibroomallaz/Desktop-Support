@@ -2,7 +2,7 @@
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class EntraViewModel : ObeservableObject
+    public class EntraViewModel : ObservableObject
     {
         public static async Task OnSearchUpdated(string query)
         {

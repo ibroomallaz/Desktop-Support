@@ -14,7 +14,7 @@ using DSAMVVM.MVVM.Model.Config.UI;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class SettingsViewModel : ObeservableObject
+    public class SettingsViewModel : ObservableObject
     {
         private readonly ISettingsService _settingsSvc;
         private readonly IOutputTextSettingsProvider? _notifier;

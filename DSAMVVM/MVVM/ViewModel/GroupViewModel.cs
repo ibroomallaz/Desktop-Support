@@ -9,7 +9,7 @@ using System.IO;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class GroupViewModel : ObeservableObject, ISearchableViewModel, IDisposable
+    public class GroupViewModel : ObservableObject, ISearchableViewModel, IDisposable
     {
         // Services
         private readonly IADService _ad;

@@ -4,7 +4,7 @@ using DSAMVVM.MVVM.Model;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class HomeViewModel : ObeservableObject
+    public class HomeViewModel : ObservableObject
     {
         // Callbacks provided by MainViewModel
         private readonly Action<string?>? _openUser;
