@@ -87,10 +87,5 @@ namespace DSAMVVM.MVVM.View
             return null;
         }
 
-        // Bottom bar actions delegate to the ViewModel
-        private void ClearLog_Click(object sender, RoutedEventArgs e) => _vm?.ClearLog();
-        private void IncreaseFont_Click(object sender, RoutedEventArgs e) => _vm?.AdjustFont(+1);
-        private void DecreaseFont_Click(object sender, RoutedEventArgs e) => _vm?.AdjustFont(-1);
-        private void ResetFont_Click(object sender, RoutedEventArgs e) => _vm?.ResetFont();
     }
 }
