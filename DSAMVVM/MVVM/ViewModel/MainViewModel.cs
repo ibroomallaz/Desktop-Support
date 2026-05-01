@@ -4,7 +4,6 @@ using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
-using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.Services.Status;
 using DSAMVVM.MVVM.View.Resources;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +21,7 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IADService _adService = null!;
         private readonly ISearchService _searchService = null!;
         private readonly IVersionCheckHandler _versionHandler;
+        private readonly IDeepLinkRoutingService _linkRouter;
         public StatusBarViewModel StatusBar { get; } = null!;
 
         // VM factories (lazy)
@@ -130,6 +130,7 @@ namespace DSAMVVM.MVVM.ViewModel
             ISearchService searchService,
             IVersionCheckHandler versionHandler,
             StatusBarViewModel statusBar,
+            IDeepLinkRoutingService linkRouter,
             Func<UserViewModel> userVMFactory,
             Func<ComputerViewModel> computerVMFactory,
             Func<GroupViewModel> groupVMFactory,
@@ -140,7 +141,7 @@ namespace DSAMVVM.MVVM.ViewModel
             _adService = adService;
             _searchService = searchService;
             StatusBar = statusBar;
-
+            _linkRouter = linkRouter;
             _versionHandler = versionHandler;
 
             _userVMFactory = userVMFactory;
@@ -151,9 +152,37 @@ namespace DSAMVVM.MVVM.ViewModel
             _searchService.HistoryChanged += OnHistoryChanged;
             SyncHistoryFromService();
 
+            // Hook up the Navigation Event from the QuickSearch
+            _linkRouter.NavigationRequested += OnNavigationRequested;
+
             InitializeViewModels(aboutVM);
             InitializeCommands();
             InitializeNavigation();
+        }
+
+        // --- Deep Link Navigation Handler ---
+        private void OnNavigationRequested(string targetView, string targetQuery)
+        {
+            Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                RestoreWindow();
+
+                if (targetView.Equals("user", StringComparison.OrdinalIgnoreCase))
+                {
+                    SelectedView = AppView.User;
+                }
+                else if (targetView.Equals("computer", StringComparison.OrdinalIgnoreCase))
+                {
+                    SelectedView = AppView.Computer;
+                }
+                else
+                {
+                    return; // Ignore unknown view requests
+                }
+
+                SearchQuery = targetQuery;
+                TriggerSearch();
+            });
         }
 
         // --- Argument Processing (Jump List / Startup) ---
@@ -162,19 +191,12 @@ namespace DSAMVVM.MVVM.ViewModel
             if (args == null || args.Length == 0) return;
 
             // --- Update Relaunch Handler ---
-            // Detects if we were started by the PowerShell watchdog after a successful MSI install
             if (args.Any(a => a.Equals("-updated", StringComparison.OrdinalIgnoreCase)))
             {
-                // Navigate to About so the tech sees the new version number immediately
                 SelectedView = AppView.About;
-
-                // Alert the StatusBus/StatusBarViewModel
                 UiNotify.Info("✔ Update installed successfully!", showStatusBar: true);
-
                 Log.Info("Update", "Application relaunched with '-updated' flag. Update cycle complete.");
 
-                // If the only arg was -updated, we can stop here. 
-                // If there are other args (like from a JumpList), we continue parsing below.
                 if (args.Length == 1) return;
             }
 
@@ -256,8 +278,6 @@ namespace DSAMVVM.MVVM.ViewModel
         // initial view bootstrap
         public void BootstrapInitialView()
         {
-            // Note: If ProcessArgs set the view already, don't overwrite it with Home.
-            // Only set to Home if the CurrentView is null or explicitly Home.
             if (CurrentView == null || SelectedView == AppView.Home)
             {
                 CurrentView = HomeVM;
@@ -333,13 +353,9 @@ namespace DSAMVVM.MVVM.ViewModel
             string lowerQuery = query.ToLowerInvariant();
 
             // --- HIDDEN COMMANDS ---
-
-            //Toggle Update Environment
             if (lowerQuery == "-test-" || lowerQuery == "-production-")
             {
                 bool useTest = lowerQuery == "-test-";
-
-                // Use the global static property to ensure reference consistency
                 var appSettings = App.Settings;
                 appSettings.Updates.UseInternalTestingSources = useTest;
 
@@ -353,7 +369,6 @@ namespace DSAMVVM.MVVM.ViewModel
                 return;
             }
 
-            // Trigger Sticky Error
             if (lowerQuery == "-debug-error-")
             {
                 var bus = App.Services.GetRequiredService<StatusBus>();
@@ -398,7 +413,6 @@ namespace DSAMVVM.MVVM.ViewModel
             }
             catch (Exception ex)
             {
-                // Notice we pass the 'key' here so errors can also be dismissed or updated
                 UiNotify.Error("Search failed", ex.Message, ex, alsoStatusBar: true, key: key);
             }
         }
@@ -422,19 +436,16 @@ namespace DSAMVVM.MVVM.ViewModel
             var mainWindow = Application.Current?.MainWindow;
             if (mainWindow == null) return;
 
-            // 1. Un-hide the window
             mainWindow.Show();
 
-            // 2. Restore its size if it was minimized
             if (mainWindow.WindowState == WindowState.Minimized)
             {
                 mainWindow.WindowState = WindowState.Normal;
             }
 
-            // 3. Force Windows to bring it to the absolute front
             mainWindow.Activate();
-            mainWindow.Topmost = true;  // Snap to front
-            mainWindow.Topmost = false; // Release lock so it doesn't block other apps
+            mainWindow.Topmost = true;
+            mainWindow.Topmost = false;
             mainWindow.Focus();
         }
     }

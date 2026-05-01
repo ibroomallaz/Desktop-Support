@@ -10,6 +10,8 @@ namespace DSAMVVM.Core.Services
         private readonly IADService _adService;
         private readonly IDepartmentService _deptService;
 
+        public event Action<string, string>? NavigationRequested;
+
         public DeepLinkRoutingService(IADService adService, IDepartmentService deptService)
         {
             _adService = adService ?? throw new ArgumentNullException(nameof(adService));
@@ -24,6 +26,19 @@ namespace DSAMVVM.Core.Services
 
             try
             {
+                if (url.StartsWith("dsa://nav/", StringComparison.OrdinalIgnoreCase))
+                {
+                    var segments = url["dsa://nav/".Length..].Split('/');
+                    if (segments.Length >= 2)
+                    {
+                        var targetView = segments[0];
+                        var targetQuery = segments[1];
+                        NavigationRequested?.Invoke(targetView, targetQuery);
+                    }
+
+                    return string.Empty;
+                }
+
                 if (url.StartsWith("dsa://team/", StringComparison.OrdinalIgnoreCase))
                 {
                     var teamName = Uri.UnescapeDataString(url["dsa://team/".Length..]);
@@ -56,7 +71,6 @@ namespace DSAMVVM.Core.Services
             }
             catch (Exception ex)
             {
-                // Catch any network or AD failures triggered by clicking a link
                 Log.Error("LinkRouter", $"Failed to process deep link '{url}'", ex);
 
                 var errDoc = new FlowDocMarkupBuilder();

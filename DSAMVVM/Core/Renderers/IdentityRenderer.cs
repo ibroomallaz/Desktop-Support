@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using DSAMVVM.MVVM.Model.AD;
 
 namespace DSAMVVM.Core.Renderers
@@ -95,7 +96,7 @@ namespace DSAMVVM.Core.Renderers
 
             return doc.ToString();
         }
-        // --- DEEP LINK RENDERING: O365 RAW ---
+
         public static string RenderRawLicenseInfo(string netid, string rawLicense)
         {
             var doc = new FlowDocMarkupBuilder();
@@ -106,7 +107,6 @@ namespace DSAMVVM.Core.Renderers
             return doc.ToString();
         }
 
-        // --- DEEP LINK RENDERING: ADOBE ---
         public static string RenderAdobeLicenseStatus(string netid, bool hasAcrobat, bool hasCC)
         {
             var doc = new FlowDocMarkupBuilder();
@@ -124,6 +124,59 @@ namespace DSAMVVM.Core.Renderers
             doc.AddRaw($"[cyan]  Acrobat Pro: [/cyan][{acroColor}]{acroIcon} {acroText}[/{acroColor}]");
             doc.AddRaw($"[cyan]  Creative Cloud: [/cyan][{ccColor}]{ccIcon} {ccText}[/{ccColor}]");
             doc.AddRaw(string.Empty);
+
+            return doc.ToString();
+        }
+
+        public static string RenderQuickADUser(ADUserInfo? user)
+        {
+            var doc = new FlowDocMarkupBuilder();
+
+            if (user is null || !user.Exists)
+            {
+                doc.AddError($"User not found.");
+                return doc.ToString();
+            }
+
+            doc.AddRaw($"[yellow]{user.DisplayName}[/yellow]");
+
+            if (!string.IsNullOrEmpty(user.EduAffiliation)) doc.AddLabelValue("Affiliation: ", user.EduAffiliation);
+            if (!string.IsNullOrEmpty(user.Division)) doc.AddLabelValue("Division: ", user.Division);
+            if (!string.IsNullOrEmpty(user.DepartmentName)) doc.AddLabelValue("Department: ", user.DepartmentName);
+
+            doc.AddRaw("[cyan]Software Licenses:[/cyan]");
+            if (!string.IsNullOrWhiteSpace(user.RawLicense))
+            {
+                var b64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.RawLicense));
+                doc.AddListLink("O365: ", user.License ?? "Unknown", $"dsa://license/o365/{user.Name}/{b64}");
+            }
+            else doc.AddLabeledListItem("O365: ", user.License ?? "None");
+
+            doc.AddListLink("Adobe: ", "Check", $"dsa://license/adobe/{user.Name}");
+
+            return doc.ToString();
+        }
+
+        public static string RenderQuickADComputer(ADComputerInfo? comp)
+        {
+            var doc = new FlowDocMarkupBuilder();
+            if (comp is null || !comp.Exists)
+            {
+                doc.AddError($"Search complete. Computer not found. Error: {comp?.ErrorMessage ?? "Unknown"}");
+                return doc.ToString();
+            }
+
+            doc.AddRaw(string.Empty);
+            doc.AddTitle(comp.Name);
+            if (!string.IsNullOrWhiteSpace(comp.Description)) doc.AddLabelValue("Description: ", comp.Description);
+            if (!string.IsNullOrWhiteSpace(comp.OperatingSystem)) doc.AddLabelValue("Operating System: ", comp.OperatingSystem);
+            if (!string.IsNullOrWhiteSpace(comp.OUs)) doc.AddLabelValue("OUs: ", comp.OUs);
+            if (!string.IsNullOrWhiteSpace(comp.LastLogonDate)) doc.AddLabelValue("Last Logon: ", comp.LastLogonDate);
+            if (comp.Enabled == false) doc.AddLabelValue("Enabled: ", "False", false);
+            doc.AddLabelValue("Hybrid Group Member: ", comp.IsHybridGroupMember ? "True" : "False", false);
+
+            doc.AddRaw(string.Empty);
+            doc.AddRaw($"[gray]   • [/gray][cyan]Action:[/cyan] [red][View Full Details](dsa://nav/computer/{comp.Name})[/red]");
 
             return doc.ToString();
         }
