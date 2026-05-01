@@ -7,10 +7,10 @@ using System.Windows.Documents;
 
 namespace DSAMVVM.MVVM.ViewModel.Overlays
 {
-    public class QuickSearchOverlayViewModel : ObservableObject
+    public class QuickSearchOverlayViewModel(ISearchService searchService, IFlowDocService flowDocService) : ObservableObject
     {
-        private readonly ISearchService _searchService;
-        private readonly IFlowDocService _flowDocService;
+        private readonly ISearchService _searchService = searchService;
+        private readonly IFlowDocService _flowDocService = flowDocService;
 
         private string _searchText = string.Empty;
         public string SearchText
@@ -31,12 +31,6 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
         {
             get => _resultDocument;
             set { _resultDocument = value; OnPropertyChanged(); }
-        }
-
-        public QuickSearchOverlayViewModel(ISearchService searchService, IFlowDocService flowDocService)
-        {
-            _searchService = searchService;
-            _flowDocService = flowDocService;
         }
 
         public async Task ExecuteInlineSearchAsync(AppView category)

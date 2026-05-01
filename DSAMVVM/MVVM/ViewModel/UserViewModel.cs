@@ -1,12 +1,12 @@
 ﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Renderers;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
 using System.IO;
-using System.Text;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -17,30 +17,9 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly ISettingsService _settingsSvc;
         private readonly IOutputTextSettingsProvider _notifier;
         private readonly IFlowDocService _flowDoc;
+        private readonly IDeepLinkRoutingService _linkRouter;
 
         private const string ViewKey = "UserView";
-        private string? _currentSearchNetId;
-
-        private bool _hasAcrobatPro;
-        public bool HasAcrobatPro
-        {
-            get => _hasAcrobatPro;
-            private set { _hasAcrobatPro = value; OnPropertyChanged(nameof(HasAcrobatPro)); }
-        }
-
-        private bool _hasCreativeCloud;
-        public bool HasCreativeCloud
-        {
-            get => _hasCreativeCloud;
-            private set { _hasCreativeCloud = value; OnPropertyChanged(nameof(HasCreativeCloud)); }
-        }
-
-        private bool _isAdobeCheckComplete;
-        public bool IsAdobeCheckComplete
-        {
-            get => _isAdobeCheckComplete;
-            private set { _isAdobeCheckComplete = value; OnPropertyChanged(nameof(IsAdobeCheckComplete)); }
-        }
 
         private double _effectiveFontSize = 14;
         public double EffectiveFontSize
@@ -82,13 +61,15 @@ namespace DSAMVVM.MVVM.ViewModel
             IDepartmentService deptService,
             ISettingsService settingsSvc,
             IOutputTextSettingsProvider notifier,
-            IFlowDocService flowDoc)
+            IFlowDocService flowDoc,
+            IDeepLinkRoutingService linkRouter)
         {
             _adService = adService ?? throw new ArgumentNullException(nameof(adService));
             _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
             _settingsSvc = settingsSvc ?? throw new ArgumentNullException(nameof(settingsSvc));
             _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
             _flowDoc = flowDoc ?? throw new ArgumentNullException(nameof(flowDoc));
+            _linkRouter = linkRouter ?? throw new ArgumentNullException(nameof(linkRouter));
 
             _notifier.Changed += OnFontSettingsChanged;
             _flowDoc.LinkClicked += OnLinkClicked;
@@ -98,72 +79,18 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private async void OnLinkClicked(object? sender, string url)
         {
-            if (url.StartsWith("dsa://team/", StringComparison.OrdinalIgnoreCase))
+            if (IsLoading) return;
+
+            string result = await _linkRouter.HandleLinkAsync(url);
+            if (!string.IsNullOrWhiteSpace(result))
             {
-                var teamName = Uri.UnescapeDataString(url["dsa://team/".Length..]);
-                await ShowTeamInfoAsync(teamName);
+                SearchLog += result;
             }
-            else if (url.StartsWith("dsa://license/adobe/", StringComparison.OrdinalIgnoreCase))
-            {
-                var targetNetId = url["dsa://license/adobe/".Length..];
-                await PerformAdobeCheckAsync(targetNetId);
-            }
-            else if (url.StartsWith("dsa://license/o365/", StringComparison.OrdinalIgnoreCase))
-            {
-                var segments = url["dsa://license/o365/".Length..].Split('/');
-                if (segments.Length >= 2)
-                {
-                    var netid = segments[0];
-                    var base64Data = segments[1];
-                    try
-                    {
-                        var rawLicense = Encoding.UTF8.GetString(Convert.FromBase64String(base64Data));
-                        ShowRawLicenseInfo(netid, rawLicense);
-                    }
-                    catch
-                    {
-                        var errDoc = new FlowDocMarkupBuilder();
-                        errDoc.AddError("Error: Could not decode raw license data.");
-                        SearchLog += errDoc.ToString();
-                    }
-                }
-            }
-        }
-
-        private void ShowRawLicenseInfo(string netid, string rawLicense)
-        {
-            SearchLog += IdentityRenderer.RenderRawLicenseInfo(netid, rawLicense);
-        }
-
-      private async Task PerformAdobeCheckAsync(string netid)
-        {
-            if (string.IsNullOrWhiteSpace(netid)) return;
-
-            var status = await _adService.CheckAdobeLicensesAsync(netid);
-
-            if (netid.Equals(_currentSearchNetId, StringComparison.OrdinalIgnoreCase))
-            {
-                HasAcrobatPro = status.HasAcrobatPro;
-                HasCreativeCloud = status.HasCreativeCloud;
-                IsAdobeCheckComplete = true;
-            }
-
-            SearchLog += IdentityRenderer.RenderAdobeLicenseStatus(netid, status.HasAcrobatPro, status.HasCreativeCloud);
-        }
-
-        private async Task ShowTeamInfoAsync(string teamName)
-        {
-            SearchLog += await OrganizationalRenderer.RenderTeamInfoAsync(teamName, _deptService);
         }
 
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
             Error = null;
-            _currentSearchNetId = context.Query;
-
-            IsAdobeCheckComplete = false;
-            HasAcrobatPro = false;
-            HasCreativeCloud = false;
 
             var headerDoc = new FlowDocMarkupBuilder();
             if (!string.IsNullOrEmpty(SearchLog)) headerDoc.AddHeader("New Search");
@@ -174,6 +101,7 @@ namespace DSAMVVM.MVVM.ViewModel
             if (target != SearchTarget.User || string.IsNullOrWhiteSpace(context.Query))
             {
                 Error = "Invalid target or empty query.";
+                Log.Warn(ViewKey, $"Search aborted: Invalid target ({target}) or empty query.");
 
                 var errDoc = new FlowDocMarkupBuilder();
                 errDoc.AddError("Aborted: Invalid search parameters.");
@@ -184,30 +112,31 @@ namespace DSAMVVM.MVVM.ViewModel
             try
             {
                 IsLoading = true;
-
-                var loadDoc = new FlowDocMarkupBuilder();
-                loadDoc.AddSuccess("Starting user search...");
-                SearchLog += loadDoc.ToString();
+                Log.Info(ViewKey, $"Starting User search for '{context.Query}'");
 
                 var user = await searchService.SearchAsync(context, target) as ADUserInfo;
 
-                // 1. Render the Identity Data (Requires ONLY the user)
                 SearchLog += IdentityRenderer.RenderADUser(user);
 
-                // 2. Render the Organizational Data (Requires BOTH the Dept Number and _deptService)
-                if (user != null && user.Exists && !string.IsNullOrEmpty(user.DepartmentNumber))
+                if (user != null && user.Exists)
                 {
-                    SearchLog += await OrganizationalRenderer.RenderDepartmentContextAsync(user.DepartmentNumber, _deptService);
-                }
+                    Log.Info(ViewKey, $"User '{user.Name}' found successfully.");
 
-                if (user is null || !user.Exists)
+                    if (!string.IsNullOrEmpty(user.DepartmentNumber))
+                    {
+                        SearchLog += await OrganizationalRenderer.RenderDepartmentContextAsync(user.DepartmentNumber, _deptService);
+                    }
+                }
+                else
                 {
                     Error = user?.ErrorMessage ?? "User not found.";
+                    Log.Warn(ViewKey, $"Search completed, but user '{context.Query}' was not found. Error: {Error}");
                 }
             }
             catch (Exception ex)
             {
                 Error = ex.Message;
+                Log.Error(ViewKey, $"Exception during user search for '{context.Query}'", ex);
 
                 var failDoc = new FlowDocMarkupBuilder();
                 failDoc.AddError($"Search failed: {ex.Message}");
@@ -216,10 +145,6 @@ namespace DSAMVVM.MVVM.ViewModel
             finally
             {
                 IsLoading = false;
-
-                var compDoc = new FlowDocMarkupBuilder();
-                compDoc.AddSuccess("User search process completed.");
-                SearchLog += compDoc.ToString();
             }
         }
 

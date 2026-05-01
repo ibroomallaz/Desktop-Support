@@ -1,11 +1,13 @@
-﻿using DSAMVVM.Core.Enums;
+﻿using System.IO;
+using System.Windows.Input;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
+using DSAMVVM.Core.Renderers;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
-using System.Diagnostics;
-using System.IO;
+using DSAMVVM.MVVM.Model.AD;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -13,396 +15,173 @@ namespace DSAMVVM.MVVM.ViewModel
     {
         // Services
         private readonly IADService _ad;
-        private readonly IDepartmentService _deptService;
         private readonly ISettingsService _settingsSvc;
         private readonly IOutputTextSettingsProvider _notifier;
+        private readonly IFlowDocService _flowDoc;
+        private readonly IDeepLinkRoutingService _linkRouter;
 
-        // Mode state
-        public enum GroupSearchMode
-        {
-            UserMim,
-            GroupMembers,
-            Department,
-            Division
-        }
+        private const string ViewKey = "GroupView";
+        private string? _currentSearchQuery;
 
-        private GroupSearchMode _searchMode = GroupSearchMode.UserMim;
-        public string CurrentViewContext => $"GroupView.{_searchMode}";
-
-        public bool IsUserMim
-        {
-            get => _searchMode == GroupSearchMode.UserMim;
-            set { if (value) UpdateMode(GroupSearchMode.UserMim); }
-        }
-
-        public bool IsGroupMembers
-        {
-            get => _searchMode == GroupSearchMode.GroupMembers;
-            set { if (value) UpdateMode(GroupSearchMode.GroupMembers); }
-        }
-
-        public bool IsDeptSearch
-        {
-            get => _searchMode == GroupSearchMode.Department;
-            set { if (value) UpdateMode(GroupSearchMode.Department); }
-        }
-        public bool IsDivSearch
-        {
-            get => _searchMode == GroupSearchMode.Division;
-            set { if (value) UpdateMode(GroupSearchMode.Division); }
-        }
-        // Core logic to handle exclusive switching
-        private void UpdateMode(GroupSearchMode newMode)
-        {
-            if (_searchMode == newMode) return;
-
-            _searchMode = newMode;
-
-            OnPropertyChanged(nameof(IsUserMim));
-            OnPropertyChanged(nameof(IsGroupMembers));
-            OnPropertyChanged(nameof(IsDeptSearch));
-            OnPropertyChanged(nameof(IsDivSearch));
-            OnPropertyChanged(nameof(QueryPlaceholder));
-            //Notify the binder that the context has changed
-            OnPropertyChanged(nameof(CurrentViewContext));
-            // Force the FlowDocument to refresh instructions if the log is empty
-            if (string.IsNullOrEmpty(SearchLog))
-            {
-                OnPropertyChanged(nameof(SearchLog));
-            }
-        }
-
-        public string QueryPlaceholder => IsUserMim ? "Enter a NetID..." :
-                                          IsDeptSearch ? "Enter Department Number..." :
-                                          IsDivSearch ? "Enter 4-character Division Code..." :
-                                          "Enter Group Name or 4-digit Dept#...";
-
-        // UI state
-        private double _effectiveFontSize = 14;
-        public double EffectiveFontSize
-        {
-            get => _effectiveFontSize;
-            private set { _effectiveFontSize = value; OnPropertyChanged(nameof(EffectiveFontSize)); }
-        }
-
-        private string _query = string.Empty;
-        public string Query
-        {
-            get => _query;
-            set { _query = value?.Trim() ?? string.Empty; OnPropertyChanged(); }
-        }
+        // Errors / state
+        private string? _error;
+        public string? Error { get => _error; private set { _error = value; OnPropertyChanged(nameof(Error)); } }
 
         private bool _isLoading;
-        public bool IsLoading
-        {
-            get => _isLoading;
-            private set { _isLoading = value; OnPropertyChanged(); }
-        }
+        public bool IsLoading { get => _isLoading; private set { _isLoading = value; OnPropertyChanged(nameof(IsLoading)); } }
 
-        private string? _error;
-        public string? Error
-        {
-            get => _error;
-            private set { _error = value; OnPropertyChanged(); }
-        }
-
+        // FlowDoc text (bound to viewer)
         private string _searchLog = string.Empty;
-        public string SearchLog
+        public string SearchLog { get => _searchLog; private set { _searchLog = value; OnPropertyChanged(nameof(SearchLog)); } }
+
+        // Effective output font size for this view
+        private double _effectiveOutputFontSize;
+        public double EffectiveOutputFontSize
         {
-            get => _searchLog;
-            private set { _searchLog = value; OnPropertyChanged(nameof(SearchLog)); }
+            get => _effectiveOutputFontSize;
+            private set { _effectiveOutputFontSize = value; OnPropertyChanged(nameof(EffectiveOutputFontSize)); }
         }
+
+        // Commands
+        public ICommand ClearLogCommand { get; }
+        public ICommand IncreaseFontCommand { get; }
+        public ICommand DecreaseFontCommand { get; }
+        public ICommand ResetFontCommand { get; }
 
         public GroupViewModel(
             IADService adService,
-            IDepartmentService deptService,
             ISettingsService settingsSvc,
-            IOutputTextSettingsProvider notifier)
+            IOutputTextSettingsProvider notifier,
+            IFlowDocService flowDoc,
+            IDeepLinkRoutingService linkRouter)
         {
             _ad = adService ?? throw new ArgumentNullException(nameof(adService));
-            _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
             _settingsSvc = settingsSvc ?? throw new ArgumentNullException(nameof(settingsSvc));
             _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
+            _flowDoc = flowDoc ?? throw new ArgumentNullException(nameof(flowDoc));
+            _linkRouter = linkRouter ?? throw new ArgumentNullException(nameof(linkRouter));
 
-            _notifier.Changed += OnFontSettingsChanged;
-            RefreshEffectiveFontSize();
+            RefreshEffectiveFont();
+            _notifier.Changed += OnOutputFontSettingsChanged;
+            _flowDoc.LinkClicked += OnLinkClicked;
+
+            ClearLogCommand = new RelayCommand(_ => ClearLog());
+            IncreaseFontCommand = new RelayCommand(_ => AdjustFont(+1));
+            DecreaseFontCommand = new RelayCommand(_ => AdjustFont(-1));
+            ResetFontCommand = new RelayCommand(_ => ResetFont());
         }
 
-        private void OnFontSettingsChanged(object? sender, EventArgs e) => RefreshEffectiveFontSize();
-
-        private void RefreshEffectiveFontSize()
+        // --- Deep Link Handler ---
+        private async void OnLinkClicked(object? sender, string url)
         {
-            EffectiveFontSize = _notifier.GetFontSize("GroupView");
+            if (IsLoading) return;
+
+            string result = await _linkRouter.HandleLinkAsync(url, _currentSearchQuery);
+            if (!string.IsNullOrWhiteSpace(result))
+            {
+                SearchLog += result;
+            }
         }
 
-        // Output helpers
-        private void AppendRaw(string message)
+        private void OnOutputFontSettingsChanged(object? sender, EventArgs e) => RefreshEffectiveFont();
+
+        private void RefreshEffectiveFont()
         {
-            SearchLog += (message ?? string.Empty) + "\n";
-            Debug.WriteLine($"[{DateTime.Now:HH:mm:ss}] {message}");
+            EffectiveOutputFontSize = _notifier.GetFontSize(ViewKey);
         }
 
-        private void AppendTitle(string? text)
+        private void AdjustFont(int delta)
         {
-            if (string.IsNullOrWhiteSpace(text)) return;
-            AppendRaw($"[yellow]{text}[/yellow]");
+            var s = App.Settings;
+            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
+
+            _ = _settingsSvc.AdjustOutputFontSize(s, preferPerView ? ViewKey : null, delta, preferPerView);
+            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
+
+            _notifier.NotifyChanged();
         }
 
-        private void AppendLabelValue(string label, string? value, bool treatEmptyAsNone = true)
+        private void ResetFont()
         {
-            var finalValue = value;
-            if (string.IsNullOrWhiteSpace(finalValue) && treatEmptyAsNone) finalValue = "None";
-            if (finalValue == null) return;
-            AppendRaw($"[cyan]{label}[/cyan][red]{finalValue}[/red]");
+            var s = App.Settings;
+            bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
+
+            _settingsSvc.ResetOutputFontSize(s, preferPerView ? ViewKey : null, preferPerView, defaultSize: 14);
+            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
+
+            _notifier.NotifyChanged();
         }
 
-        public void ClearLog() => SearchLog = string.Empty;
-
-        public async Task OnSearchUpdated(SearchContextDTO context, ISearchService _search, SearchTarget target)
+        // --- Search Flow ---
+        public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
             Error = null;
+            _currentSearchQuery = context.Query;
 
-            if (!string.IsNullOrEmpty(SearchLog))
+            var headerDoc = new FlowDocMarkupBuilder();
+            if (!string.IsNullOrEmpty(SearchLog)) headerDoc.AddHeader("New Search");
+            if (!string.IsNullOrWhiteSpace(context.Query)) headerDoc.AddLabelValue("Query: ", context.Query);
+
+            SearchLog += headerDoc.ToString();
+
+            if (string.IsNullOrWhiteSpace(context.Query))
             {
-                AppendRaw("\n[cyan]────────── New Search ──────────[/cyan]\n");
-            }
+                Error = "Empty query.";
+                Log.Warn(ViewKey, "Search aborted: Empty query.");
 
-            if (!string.IsNullOrWhiteSpace(context?.Query))
-                AppendRaw($"[cyan]Query:[/cyan] [red]{context.Query}[/red]");
-
-            if (target != SearchTarget.Group)
-            {
-                Error = "Invalid search target provided to GroupViewModel.";
-                AppendRaw("[red]Invalid search target for GroupViewModel[/red]");
-                Log.Warn("GroupView", $"Invalid target: {target}");
+                var errDoc = new FlowDocMarkupBuilder();
+                errDoc.AddError("Aborted: Invalid search parameters.");
+                SearchLog += errDoc.ToString();
                 return;
             }
-
-            if (!string.IsNullOrWhiteSpace(context?.Query))
-                Query = context!.Query!.Trim();
-
-            await ExecuteAsync();
-        }
-
-        public async Task ExecuteAsync()
-        {
-            if (string.IsNullOrWhiteSpace(Query))
-            {
-                AppendRaw($"[cyan]{QueryPlaceholder}[/cyan]");
-                return;
-            }
-
-            Error = null;
-            IsLoading = true;
 
             try
             {
-                AppendRaw("[green]Starting search...[/green]");
-                Log.Debug("GroupView", $"Mode={_searchMode}, Query='{Query}'");
+                IsLoading = true;
+                Log.Info(ViewKey, $"Starting Group search for '{context.Query}' (Target: {target})");
 
-                switch (_searchMode)
+                // Execute search based on the mode
+                var result = await searchService.SearchAsync(context, target);
+
+                // Route to the correct renderer based on what the service returned
+                if (result is MimLookupResult mimResult)
                 {
-                    case GroupSearchMode.UserMim:
-                        await SearchUserMimGroups(Query);
-                        break;
-                    case GroupSearchMode.GroupMembers:
-                        await SearchGroupMembers(Query);
-                        break;
-                    case GroupSearchMode.Department:
-                        await SearchDepartmentSupport(Query);
-                        break;
-                    case GroupSearchMode.Division:
-                        await SearchDivisionSupport(Query);
-                        break;
+                    SearchLog += IdentityRenderer.RenderMimGroups(mimResult, context.Query);
+
+                    if (mimResult.Exists) Log.Info(ViewKey, $"MIM lookup successful for '{context.Query}'. Found {mimResult.Groups?.Count ?? 0} groups.");
+                    else { Error = mimResult.Error; Log.Warn(ViewKey, $"MIM lookup failed for '{context.Query}': {Error}"); }
+                }
+                else if (result is ADGroupInfo adGroup)
+                {
+                    SearchLog += IdentityRenderer.RenderGroupMembers(adGroup, context.Query);
+
+                    if (adGroup.Exists) Log.Info(ViewKey, $"AD Group '{context.Query}' lookup successful. Found {adGroup.MemberCount ?? 0} members.");
+                    else { Error = adGroup.ErrorMessage; Log.Warn(ViewKey, $"AD Group lookup failed for '{context.Query}': {Error}"); }
+                }
+                else
+                {
+                    Error = "Unknown result type returned from search service.";
+                    Log.Warn(ViewKey, $"Search returned an unhandled type for query '{context.Query}'.");
                 }
             }
             catch (Exception ex)
             {
-                Error = $"Search failed: {ex.Message}";
-                AppendRaw($"[red]Exception during search: {ex.Message}[/red]");
-                Log.Error("GroupView", "Search failed", ex);
+                Error = ex.Message;
+                Log.Error(ViewKey, $"Exception during group search for '{context.Query}'", ex);
+
+                var failDoc = new FlowDocMarkupBuilder();
+                failDoc.AddError($"Search failed: {ex.Message}");
+                SearchLog += failDoc.ToString();
             }
             finally
             {
                 IsLoading = false;
-                AppendRaw("[green]Search completed.[/green]\n");
             }
         }
 
-        // Logic: User MIM Groups
-        private async Task SearchUserMimGroups(string query)
-        {
-            AppendRaw(string.Empty);
+        public void ClearLog() => SearchLog = string.Empty;
 
-            AppendTitle($"MIM groups for user '{query}'");
-            var r = await _ad.GetUserMimGroupsAsync(query);
-
-            if (!r.Exists)
-            {
-                Error = string.IsNullOrWhiteSpace(r.Error) ? $"'{query}' is not a valid NetID." : r.Error;
-                AppendRaw($"[red]{Error}[/red]");
-                return;
-            }
-
-            if (r.Enabled == false)
-                AppendLabelValue("Enabled: ", "False", treatEmptyAsNone: false);
-
-            AppendLabelValue("Total MIM groups: ", r.Groups?.Count.ToString() ?? "0", treatEmptyAsNone: false);
-
-            if (r.Groups is { Count: > 0 })
-            {
-                foreach (var g in r.Groups)
-                    AppendRaw($"[lightgray] • {g}[/lightgray]");
-            }
-            else
-            {
-                AppendRaw("[cyan]No valid MIM groups found.[/cyan]");
-            }
-
-            AppendRaw(string.Empty);
-        }
-
-        // Logic: Group Members
-        private async Task SearchGroupMembers(string query)
-        {
-            AppendRaw(string.Empty);
-
-            var groupName = NormalizeGroupName(query);
-            AppendTitle($"Members of group '{groupName}'");
-
-            var info = await _ad.GetGroupAsync(groupName);
-
-            if (info.Exists && info.MemberCount is int c)
-            {
-                AppendLabelValue("Total members: ", c.ToString(), treatEmptyAsNone: false);
-
-                if (c == 0)
-                {
-                    AppendRaw("[cyan]No group members exist.[/cyan]");
-                }
-                else
-                {
-                    if (info.GroupMembers is not null)
-                        foreach (var m in info.GroupMembers)
-                            AppendRaw($"[lightgray] • {m}[/lightgray]");
-                }
-            }
-            else
-            {
-                Error = info.ErrorMessage ?? "Group not found or lookup failed.";
-                AppendRaw($"[red]{Error}[/red]");
-            }
-
-            AppendRaw(string.Empty);
-        }
-
-        // Logic: Department Support
-        private async Task SearchDepartmentSupport(string deptNumber)
-        {
-            AppendRaw($"[gray]Looking up department '{deptNumber}'...[/gray]");
-
-            var dept = await _deptService.GetDepartmentAsync(deptNumber);
-
-            if (dept == null)
-            {
-                Error = $"Department '{deptNumber}' not found in configuration.";
-                AppendRaw($"[red]{Error}[/red]");
-                return;
-            }
-
-            AppendRaw(string.Empty);
-
-            AppendTitle($"Department: {dept.Number}");
-
-            if (!string.IsNullOrWhiteSpace(dept.Notes))
-                AppendLabelValue("Notes: ", dept.Notes);
-
-            var teamName = await _deptService.GetTeamAsync(dept.Number);
-            if (!string.IsNullOrWhiteSpace(teamName))
-            {
-                AppendRaw($"[cyan]Assigned Team: [/cyan][red]{teamName}[/red]");
-
-                var teamInfo = await _deptService.GetSupportTeamAsync(teamName);
-                if (teamInfo != null)
-                {
-                    if (!string.IsNullOrWhiteSpace(teamInfo.ManagerName))
-                    {
-                        var mgr = teamInfo.ManagerName;
-                        if (!string.IsNullOrWhiteSpace(teamInfo.ManagerNetID)) mgr += $" ({teamInfo.ManagerNetID})";
-                        AppendLabelValue("Manager: ", mgr);
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(teamInfo.PhoneNumber))
-                        AppendLabelValue("Support Phone: ", teamInfo.PhoneNumber);
-                }
-            }
-            else
-            {
-                AppendLabelValue("Assigned Team: ", "None", treatEmptyAsNone: false);
-            }
-
-            if (!string.IsNullOrWhiteSpace(dept.FileRepoPath))
-            {
-                AppendRaw($"[cyan]File Repository: [/cyan][red][Open Location]({dept.FileRepoPath})[/red]");
-            }
-
-            AppendRaw(string.Empty);
-        }
-        //Division search
-        private async Task SearchDivisionSupport(string divCode)
-        {
-            AppendRaw($"[gray]Looking up support for division '{divCode}'...[/gray]");
-            var teams = (await _deptService.GetTeamsByDivisionAsync(divCode)).ToList();
-
-            if (teams.Count == 0)
-            {
-                Error = $"No division '{divCode}' found.";
-                AppendRaw($"[red]{Error}[/red]");
-                return;
-            }
-
-            foreach (var team in teams)
-            {
-                AppendRaw(string.Empty);
-                AppendTitle($"Support Team: {team.SupportTeamName}");
-
-                if (!string.IsNullOrWhiteSpace(team.ManagerName))
-                {
-                    var mgr = team.ManagerName;
-                    if (!string.IsNullOrWhiteSpace(team.ManagerNetID)) mgr += $" ({team.ManagerNetID})";
-                    AppendLabelValue("Manager: ", mgr);
-                }
-
-                if (!string.IsNullOrWhiteSpace(team.PhoneNumber))
-                    AppendLabelValue("Support Phone: ", team.PhoneNumber);
-            }
-        }
-
-        public void AdjustFont(int delta)
-        {
-            var s = App.Settings;
-            bool perView = s.Ui.Font.ViewFontSizeOverride;
-            _ = _settingsSvc.AdjustOutputFontSize(s, perView ? "GroupView" : null, delta, perView);
-            _notifier.NotifyChanged();
-            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
-        }
-
-        public void ResetFont()
-        {
-            var s = App.Settings;
-            bool perView = s.Ui.Font.ViewFontSizeOverride;
-            _settingsSvc.ResetOutputFontSize(s, perView ? "GroupView" : null, perView, 14);
-            _notifier.NotifyChanged();
-            _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
-        }
-
-        private static string NormalizeGroupName(string input)
-        {
-            var s = input.Trim();
-            if (s.Length == 4 && int.TryParse(s, out _)) return $"UA-MIM-0{s}";
-            return s;
-        }
-
+        // Dispose pattern
         private bool _disposed;
         public void Dispose()
         {
@@ -415,7 +194,8 @@ namespace DSAMVVM.MVVM.ViewModel
             if (_disposed) return;
             if (disposing)
             {
-                _notifier.Changed -= OnFontSettingsChanged;
+                _notifier.Changed -= OnOutputFontSettingsChanged;
+                if (_flowDoc != null) _flowDoc.LinkClicked -= OnLinkClicked;
             }
             _disposed = true;
         }

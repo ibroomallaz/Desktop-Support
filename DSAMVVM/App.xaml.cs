@@ -560,6 +560,7 @@ namespace DSAMVVM
             services.AddSingleton<ILinksService, LinksService>();
             services.AddSingleton<ISearchService, SearchService>();
             services.AddSingleton<IUpdaterService, UpdaterService>();
+            services.AddSingleton<IDeepLinkRoutingService, DeepLinkRoutingService>();
 
             services.AddSingleton<IOutputTextSettingsProvider>(sp =>
                 new OutputTextSettingsProvider(
