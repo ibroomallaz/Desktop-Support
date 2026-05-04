@@ -9,6 +9,8 @@ namespace DSAMVVM.MVVM.View.Overlays
     {
         private readonly QuickSearchOverlayViewModel _viewModel;
 
+        private bool _isClosing = false;
+
         public QuickSearchOverlayView(string capturedText, QuickSearchOverlayViewModel viewModel)
         {
             InitializeComponent();
@@ -23,7 +25,16 @@ namespace DSAMVVM.MVVM.View.Overlays
                 SearchBox.CaretIndex = SearchBox.Text.Length;
             };
 
-            this.Deactivated += (s, e) => this.Close();
+            this.Closing += (s, e) => _isClosing = true;
+
+            //Only attempt to close on deactivation if we aren't already shutting down
+            this.Deactivated += (s, e) =>
+            {
+                if (!_isClosing)
+                {
+                    this.Close();
+                }
+            };
         }
 
         private async void BtnUser_Click(object sender, RoutedEventArgs e) => await ExecuteTargetedSearch(AppView.User);
