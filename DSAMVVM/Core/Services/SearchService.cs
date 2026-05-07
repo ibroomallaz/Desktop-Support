@@ -56,7 +56,7 @@ namespace DSAMVVM.Core.Services
             if (string.IsNullOrWhiteSpace(context?.Query))
                 throw new ArgumentException("Search query cannot be empty.", nameof(context));
 
-            MaybeAddToHistory(context.Query);
+            AddToHistory(context.Query);
 
             return target switch
             {
@@ -67,7 +67,7 @@ namespace DSAMVVM.Core.Services
             };
         }
 
-        private void MaybeAddToHistory(string query)
+        public void AddToHistory(string query)
         {
             lock (_gate)
             {

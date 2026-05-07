@@ -8,8 +8,10 @@ using DSAMVVM.MVVM.Services.Status;
 using DSAMVVM.MVVM.View.Resources;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Threading;
 
 namespace DSAMVVM.MVVM.ViewModel
@@ -24,29 +26,19 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IDeepLinkRoutingService _linkRouter;
         public StatusBarViewModel StatusBar { get; } = null!;
 
-        // VM factories (lazy)
+        // VM factories
         private readonly Func<UserViewModel> _userVMFactory;
         private readonly Func<ComputerViewModel> _computerVMFactory;
         private readonly Func<GroupViewModel> _groupVMFactory;
         private readonly Func<LinksViewModel> _linksVMFactory;
 
-        // ViewModels (Home/About eager; others lazy)
+        // ViewModels
         public HomeViewModel HomeVM { get; private set; } = null!;
-        private UserViewModel? _userVM;
-        public UserViewModel UserVM => _userVM ??= _userVMFactory();
-
-        private ComputerViewModel? _computerVM;
-        public ComputerViewModel ComputerVM => _computerVM ??= _computerVMFactory();
-
-        private GroupViewModel? _groupVM;
-        public GroupViewModel GroupVM => _groupVM ??= _groupVMFactory();
-
-        private EntraViewModel? _entraVM;
-        public EntraViewModel EntraVM => _entraVM ??= new EntraViewModel();
-
-        private LinksViewModel? _linksVM;
-        public LinksViewModel LinksVM => _linksVM ??= _linksVMFactory();
-
+        public UserViewModel UserVM { get; private set; } = null!;
+        public ComputerViewModel ComputerVM { get; private set; } = null!;
+        public GroupViewModel GroupVM { get; private set; } = null!;
+        public EntraViewModel EntraVM { get; private set; } = null!;
+        public LinksViewModel LinksVM { get; private set; } = null!;
         public AboutViewModel AboutVM { get; private set; } = null!;
         public SettingsViewModel SettingsVM { get; private set; } = null!;
 
@@ -65,7 +57,6 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand CheckUpdateCommand { get; private set; } = null!;
         public ICommand ExitApplicationCommand { get; private set; } = null!;
 
-        // Navigation collection and selection
         public ObservableCollection<NavItem> NavItems { get; } = [];
         private NavItem? _selectedNav;
         public NavItem? SelectedNav
@@ -82,7 +73,6 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        // Current content view and selected enum
         private object? _currentView;
         public object? CurrentView
         {
@@ -114,7 +104,6 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        // Search binding and history
         private string? _searchQuery;
         public string? SearchQuery
         {
@@ -123,7 +112,6 @@ namespace DSAMVVM.MVVM.ViewModel
         }
         public ObservableCollection<string> SearchHistory { get; } = [];
 
-        // ctor
         public MainViewModel(
             IDepartmentService deptService,
             IADService adService,
@@ -152,7 +140,8 @@ namespace DSAMVVM.MVVM.ViewModel
             _searchService.HistoryChanged += OnHistoryChanged;
             SyncHistoryFromService();
 
-            // Hook up the Navigation Event from the QuickSearch
+            // Prevent instance-level duplicate subscriptions
+            _linkRouter.NavigationRequested -= OnNavigationRequested;
             _linkRouter.NavigationRequested += OnNavigationRequested;
 
             InitializeViewModels(aboutVM);
@@ -160,24 +149,36 @@ namespace DSAMVVM.MVVM.ViewModel
             InitializeNavigation();
         }
 
-        // --- Deep Link Navigation Handler ---
+        // --- THE FIX: Static lock shared across all ghost VM instances ---
+        private static DateTime _lastNavTime = DateTime.MinValue;
+
         private void OnNavigationRequested(string targetView, string targetQuery)
         {
-            Application.Current.Dispatcher.InvokeAsync(() =>
+            // If another instance of MainViewModel just processed a link in the last 500ms, block this one.
+            if ((DateTime.UtcNow - _lastNavTime).TotalMilliseconds < 500) return;
+            _lastNavTime = DateTime.UtcNow;
+
+            Application.Current.Dispatcher.Invoke(() =>
             {
                 RestoreWindow();
 
-                if (targetView.Equals("user", StringComparison.OrdinalIgnoreCase))
+                AppView targetAppView = targetView.ToLowerInvariant() switch
                 {
-                    SelectedView = AppView.User;
-                }
-                else if (targetView.Equals("computer", StringComparison.OrdinalIgnoreCase))
+                    "user" => AppView.User,
+                    "computer" => AppView.Computer,
+                    "group" => AppView.Group,
+                    _ => AppView.Home
+                };
+
+                if (targetAppView == AppView.Home) return;
+
+                SelectedView = targetAppView;
+
+                var navItem = NavItems.FirstOrDefault(n => n.View == targetAppView);
+                if (navItem != null)
                 {
-                    SelectedView = AppView.Computer;
-                }
-                else
-                {
-                    return; // Ignore unknown view requests
+                    _selectedNav = navItem;
+                    OnPropertyChanged(nameof(SelectedNav));
                 }
 
                 SearchQuery = targetQuery;
@@ -185,49 +186,30 @@ namespace DSAMVVM.MVVM.ViewModel
             });
         }
 
-        // --- Argument Processing (Jump List / Startup) ---
         public void ProcessArgs(string[] args)
         {
             if (args == null || args.Length == 0) return;
 
-            // --- Update Relaunch Handler ---
             if (args.Any(a => a.Equals("-updated", StringComparison.OrdinalIgnoreCase)))
             {
                 SelectedView = AppView.About;
                 UiNotify.Info("✔ Update installed successfully!", showStatusBar: true);
-                Log.Info("Update", "Application relaunched with '-updated' flag. Update cycle complete.");
-
+                Log.Info("Update", "Application relaunched with '-updated' flag.");
                 if (args.Length == 1) return;
             }
 
-            // 1. Extract Mode
             string? mode = GetArgValue(args, "--mode");
-
             if (!string.IsNullOrEmpty(mode))
             {
                 switch (mode.ToLowerInvariant())
                 {
-                    case "user":
-                        SelectedView = AppView.User;
-                        break;
-                    case "computer":
-                        SelectedView = AppView.Computer;
-                        break;
-                    case "group":
-                        SelectedView = AppView.Group;
-                        break;
-                    case "settings":
-                        SelectedView = AppView.Settings;
-                        break;
-                    case "links":
-                        SelectedView = AppView.Links;
-                        break;
-                    case "entra":
-                        SelectedView = AppView.Entra;
-                        break;
-                    case "about":
-                        SelectedView = AppView.About;
-                        break;
+                    case "user": SelectedView = AppView.User; break;
+                    case "computer": SelectedView = AppView.Computer; break;
+                    case "group": SelectedView = AppView.Group; break;
+                    case "settings": SelectedView = AppView.Settings; break;
+                    case "links": SelectedView = AppView.Links; break;
+                    case "entra": SelectedView = AppView.Entra; break;
+                    case "about": SelectedView = AppView.About; break;
                     case "update":
                         Application.Current.Dispatcher.InvokeAsync(async () =>
                         {
@@ -237,7 +219,6 @@ namespace DSAMVVM.MVVM.ViewModel
                 }
             }
 
-            // 2. Extract Query (Optional)
             string? query = GetArgValue(args, "--query");
             if (!string.IsNullOrEmpty(query))
             {
@@ -261,7 +242,6 @@ namespace DSAMVVM.MVVM.ViewModel
             return null;
         }
 
-        // Build nav items for sidebar
         private void InitializeNavigation()
         {
             NavItems.Clear();
@@ -275,7 +255,6 @@ namespace DSAMVVM.MVVM.ViewModel
             NavItems.Add(new NavItem { Title = "Settings", Glyph = Glyphs.Settings, View = AppView.Settings, Command = SettingsCommand });
         }
 
-        // initial view bootstrap
         public void BootstrapInitialView()
         {
             if (CurrentView == null || SelectedView == AppView.Home)
@@ -291,7 +270,6 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        // warmup tasks
         public void StartWarmup()
         {
             _ = InitializeAsync();
@@ -303,15 +281,19 @@ namespace DSAMVVM.MVVM.ViewModel
             catch (Exception ex) { UiNotify.Warn($"Failed to load department data: {ex.Message}", sticky: true); }
         }
 
-        // eager setup: Home/About/Settings only
         private void InitializeViewModels(AboutViewModel aboutVM)
         {
             HomeVM = App.Services.GetRequiredService<HomeViewModel>();
             AboutVM = aboutVM;
             SettingsVM = new SettingsViewModel();
+            EntraVM = new EntraViewModel();
+
+            UserVM = _userVMFactory();
+            ComputerVM = _computerVMFactory();
+            GroupVM = _groupVMFactory();
+            LinksVM = _linksVMFactory();
         }
 
-        // command setup
         private void InitializeCommands()
         {
             HomeViewCommand = new RelayCommand(_ => { SelectedView = AppView.Home; RestoreWindow(); });
@@ -335,7 +317,6 @@ namespace DSAMVVM.MVVM.ViewModel
             });
         }
 
-        // search helpers
         private static SearchTarget? ResolveTargetFromView(object view) => view switch
         {
             UserViewModel => SearchTarget.User,
@@ -347,12 +328,10 @@ namespace DSAMVVM.MVVM.ViewModel
         private async void TriggerSearch()
         {
             var query = (SearchQuery ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(query))
-                return;
+            if (string.IsNullOrWhiteSpace(query)) return;
 
             string lowerQuery = query.ToLowerInvariant();
 
-            // --- HIDDEN COMMANDS ---
             if (lowerQuery == "-test-" || lowerQuery == "-production-")
             {
                 bool useTest = lowerQuery == "-test-";
@@ -389,10 +368,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 return;
             }
 
-            // --- STANDARD SEARCH LOGIC ---
-
-            if (CurrentView is not ISearchableViewModel searchable)
-                return;
+            if (CurrentView is not ISearchableViewModel searchable) return;
 
             var target = ResolveTargetFromView(CurrentView);
             if (target is null)
@@ -431,12 +407,18 @@ namespace DSAMVVM.MVVM.ViewModel
             foreach (var q in snap) SearchHistory.Add(q);
         }
 
+        [DllImport("user32.dll")]
+        private static extern void SwitchToThisWindow(IntPtr hWnd, bool fAltTab);
+
         private static void RestoreWindow()
         {
-            var mainWindow = Application.Current?.MainWindow;
+            var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
             if (mainWindow == null) return;
 
-            mainWindow.Show();
+            if (mainWindow.Visibility != Visibility.Visible)
+            {
+                mainWindow.Show();
+            }
 
             if (mainWindow.WindowState == WindowState.Minimized)
             {
@@ -447,6 +429,14 @@ namespace DSAMVVM.MVVM.ViewModel
             mainWindow.Topmost = true;
             mainWindow.Topmost = false;
             mainWindow.Focus();
+
+            var interopHelper = new WindowInteropHelper(mainWindow);
+            var handle = interopHelper.Handle;
+
+            if (handle != IntPtr.Zero)
+            {
+                SwitchToThisWindow(handle, true);
+            }
         }
     }
 }

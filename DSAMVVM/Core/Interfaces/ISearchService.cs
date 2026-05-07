@@ -8,6 +8,7 @@ namespace DSAMVVM.Core.Interfaces
         Task<object?> SearchAsync(SearchContextDTO context, SearchTarget target);
 
         // History policy
+        void AddToHistory(string query);
         void ConfigureHistory(bool enabled, int capacity);
         void ClearHistory();
 

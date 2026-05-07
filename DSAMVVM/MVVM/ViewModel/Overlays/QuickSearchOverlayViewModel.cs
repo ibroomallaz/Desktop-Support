@@ -1,26 +1,24 @@
 ﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Models;
-using DSAMVVM.Core.Utilities;
-using DSAMVVM.Core.Renderers;
 using DSAMVVM.Core.Logging;
+using DSAMVVM.Core.Models;
+using DSAMVVM.Core.Renderers;
+using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
-using System.Windows.Documents;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel.Overlays
 {
-    public class QuickSearchOverlayViewModel(
-        ISearchService searchService,
-        IADService adService,
-        IFlowDocService flowDocService,
-        IDepartmentService deptService) : ObservableObject
+    public class QuickSearchOverlayViewModel : ObservableObject
     {
-        private readonly ISearchService _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
-        private readonly IADService _adService = adService ?? throw new ArgumentNullException(nameof(adService));
-        private readonly IFlowDocService _flowDocService = flowDocService ?? throw new ArgumentNullException(nameof(flowDocService));
-        private readonly IDepartmentService _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
+        private readonly ISearchService _searchService;
+        private readonly IADService _adService;
+        private readonly IDepartmentService _deptService;
+        private readonly IDeepLinkRoutingService _linkRouter;
+
+        public Action? CloseAction { get; set; }
 
         private string _searchText = string.Empty;
         public string SearchText
@@ -36,21 +34,51 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
             set { _isSearching = value; OnPropertyChanged(); }
         }
 
-        private FlowDocument? _resultDocument;
-        public FlowDocument? ResultDocument
+        private string? _resultText;
+        public string? ResultText
         {
-            get => _resultDocument;
-            set { _resultDocument = value; OnPropertyChanged(); }
+            get => _resultText;
+            set { _resultText = value; OnPropertyChanged(); }
         }
 
-        public async Task ExecuteInlineSearchAsync(AppView category)
+        public QuickSearchOverlayViewModel(
+            ISearchService searchService,
+            IADService adService,
+            IDepartmentService deptService,
+            IDeepLinkRoutingService linkRouter)
+        {
+            _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
+            _adService = adService ?? throw new ArgumentNullException(nameof(adService));
+            _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
+            _linkRouter = linkRouter ?? throw new ArgumentNullException(nameof(linkRouter));
+
+            // NOTE: Memory leak fixed. No more event subscription here.
+        }
+
+        public void LoadCapturedText(string? text)
+        {
+            SearchText = SanitizeCapturedText(text);
+        }
+
+        private string SanitizeCapturedText(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+
+            var cleaned = text.Trim();
+            if (cleaned.Length > 30) return string.Empty;
+
+            cleaned = cleaned.Replace("\r", " ").Replace("\n", " ").Replace("\t", " ");
+            return cleaned;
+        }
+
+        public async Task ExecuteInlineSearchAsync(AppView category, FrameworkElement? anchorElement = null)
         {
             var query = SearchText?.Trim();
             if (string.IsNullOrWhiteSpace(query)) return;
 
             if (category == AppView.Group)
             {
-                PromptGroupSearchMenu(query);
+                PromptGroupSearchMenu(query, anchorElement);
             }
             else
             {
@@ -58,34 +86,64 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
             }
         }
 
-        private void PromptGroupSearchMenu(string query)
+        private void PromptGroupSearchMenu(string query, FrameworkElement? anchorElement)
         {
             Application.Current.Dispatcher.InvokeAsync(() =>
             {
+                var activeWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+
                 var menu = new ContextMenu
                 {
-                    Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint,
+                    PlacementTarget = anchorElement ?? activeWindow,
+                    Placement = anchorElement != null
+                        ? System.Windows.Controls.Primitives.PlacementMode.Bottom
+                        : System.Windows.Controls.Primitives.PlacementMode.MousePoint,
                     IsOpen = true
                 };
 
-                void AddMenuItem(string header, string modeIdentifier)
+                void AddMenuItem(string header, string modeIdentifier, string inputGesture)
                 {
-                    var item = new MenuItem { Header = header };
+                    var item = new MenuItem
+                    {
+                        Header = header,
+                        InputGestureText = inputGesture
+                    };
                     item.Click += async (s, e) => await RunTargetedSearchAsync(query, AppView.Group, modeIdentifier);
                     menu.Items.Add(item);
                 }
 
-                AddMenuItem($"Search '{query}' in User's MIM Groups", "MIM");
-                AddMenuItem($"Search '{query}' in AD Group Members", "AD");
-                AddMenuItem($"Search '{query}' in Department Support", "DEPT");
-                AddMenuItem($"Search '{query}' in Division Support", "DIV");
+                AddMenuItem($"1. Search '{query}' in User's MIM Groups", "MIM", "1");
+                AddMenuItem($"2. Search '{query}' in AD Group Members", "AD", "2");
+                AddMenuItem($"3. Search '{query}' in Department Support", "DEPT", "3");
+                AddMenuItem($"4. Search '{query}' in Division Support", "DIV", "4");
+
+                menu.KeyDown += async (s, e) =>
+                {
+                    string? mode = null;
+                    if (e.Key == Key.D1 || e.Key == Key.NumPad1) mode = "MIM";
+                    else if (e.Key == Key.D2 || e.Key == Key.NumPad2) mode = "AD";
+                    else if (e.Key == Key.D3 || e.Key == Key.NumPad3) mode = "DEPT";
+                    else if (e.Key == Key.D4 || e.Key == Key.NumPad4) mode = "DIV";
+
+                    if (mode != null)
+                    {
+                        e.Handled = true;
+                        menu.IsOpen = false;
+                        await RunTargetedSearchAsync(query, AppView.Group, mode);
+                    }
+                };
+
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    menu.Focus();
+                }), System.Windows.Threading.DispatcherPriority.Input);
             });
         }
 
         private async Task RunTargetedSearchAsync(string query, AppView category, string? groupMode)
         {
             IsSearching = true;
-            ResultDocument = null;
+            ResultText = null;
 
             try
             {
@@ -120,7 +178,6 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
                 }
                 else if (category == AppView.Group)
                 {
-                    // Execute specifically based on what user clicked in the submenu
                     switch (groupMode)
                     {
                         case "MIM":
@@ -150,7 +207,12 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
                     markupResult = "[cyan]No results found or unrecognized data format.[/cyan]";
                 }
 
-                ResultDocument = _flowDocService.BuildDocument(markupResult, viewName: category.ToString());
+                ResultText = markupResult;
+
+                if (category == AppView.Group)
+                {
+                    _searchService.AddToHistory(query);
+                }
             }
             catch (Exception ex)
             {
@@ -158,11 +220,19 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
 
                 var errDoc = new FlowDocMarkupBuilder();
                 errDoc.AddError($"Search failed: {ex.Message}");
-                ResultDocument = _flowDocService.BuildDocument(errDoc.ToString(), viewName: category.ToString());
+                ResultText = errDoc.ToString();
             }
             finally
             {
                 IsSearching = false;
+            }
+        }
+
+        public async Task RouteLinkClickAsync(string url)
+        {
+            if (!string.IsNullOrWhiteSpace(url))
+            {
+                await _linkRouter.HandleLinkAsync(url);
             }
         }
     }

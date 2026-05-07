@@ -17,6 +17,7 @@
         <ResourceDictionary Source="/Theme/Controls/Button.FlowDoc.xaml"/>
         <ResourceDictionary Source="/Theme/Controls/Radio.GroupView.xaml"/>
         <ResourceDictionary Source="/Theme/Controls/ComboBox.Search.xaml"/>
+        <ResourceDictionary Source="/Theme/Controls/ContextMenu.xaml"/>
         <ResourceDictionary Source="/Theme/Controls/Card.xaml"/>
         <ResourceDictionary Source="/Theme/Controls/LinksComboBoxTheme.xaml"/>
         <ResourceDictionary Source="/Theme/Controls/ScrollBar.xaml"/>
