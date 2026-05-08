@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using DSAMVVM.MVVM.Model.AD;
 
 namespace DSAMVVM.Core.Renderers
@@ -38,8 +37,14 @@ namespace DSAMVVM.Core.Renderers
 
             doc.AddRaw(string.Empty);
             doc.AddTitle(user.DisplayName);
+
+
             if (!string.IsNullOrEmpty(user.EduAffiliation)) doc.AddLabelValue("Affiliation: ", user.EduAffiliation);
             if (!string.IsNullOrEmpty(user.Division)) doc.AddLabelValue("Division: ", user.Division);
+            if (!user.HasMimWrkstGroup)
+            {
+                doc.AddRaw("[red]User is missing the 'UA-MIM-Wrkst-AllDivUsers' Group[/red]");
+            }
             if (!string.IsNullOrEmpty(user.DepartmentName)) doc.AddLabelValue("Department: ", user.DepartmentName);
             if (user.Enabled == false) doc.AddLabelValue("Enabled: ", "False", false);
             if (user.Locked == true) doc.AddLabelValue("Locked: ", "True", false);
@@ -140,8 +145,14 @@ namespace DSAMVVM.Core.Renderers
 
             doc.AddRaw($"[yellow]{user.DisplayName}[/yellow]");
 
+
+
             if (!string.IsNullOrEmpty(user.EduAffiliation)) doc.AddLabelValue("Affiliation: ", user.EduAffiliation);
             if (!string.IsNullOrEmpty(user.Division)) doc.AddLabelValue("Division: ", user.Division);
+            if (!user.HasMimWrkstGroup)
+            {
+                doc.AddRaw("[red]User is missing the 'UA-MIM-Wrkst-AllDivUsers' Group[/red]");
+            }
             if (!string.IsNullOrEmpty(user.DepartmentName)) doc.AddLabelValue("Department: ", user.DepartmentName);
 
             doc.AddRaw("[cyan]Software Licenses:[/cyan]");

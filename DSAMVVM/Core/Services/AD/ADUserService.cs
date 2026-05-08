@@ -47,8 +47,12 @@ namespace DSAMVVM.Core.Services.AD
                     info.RawLicense = rawLicense;
                     info.License = ParseLicense(rawLicense);
 
-                    // Second query only if needed to resolve Division rollup group
                     var userDn = DirectoryUtility.GetString(r, "distinguishedName");
+
+                    info.HasMimWrkstGroup = !string.IsNullOrWhiteSpace(userDn) &&
+                                            DirectoryUtility.HasMimWrkstGroup(_ldap, userDn!);
+
+                    // Second query only if needed to resolve Division rollup group
                     var result = !string.IsNullOrWhiteSpace(userDn)
                         ? DirectoryUtility.FindDivisionRollupGroup(_ldap, userDn!)
                         : null;

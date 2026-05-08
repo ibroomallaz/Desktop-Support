@@ -46,6 +46,22 @@ namespace DSAMVVM.Core.Services.AD
                 sizeLimit: 1, props: ["cn"]);
             return ds.FindOne();
         }
+        public static bool HasMimWrkstGroup(string ldap, string userDn)
+        {
+            try
+            {
+                using var root = Bind(ldap);
+                using var ds = NewSearcher(root,
+                    $"(&(objectCategory=group)(member={Escape(userDn)})(cn=UA-MIM-Wrkst-AllDivUsers))",
+                    sizeLimit: 1, props: ["cn"]);
+
+                return ds.FindOne() != null;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         public static IReadOnlyList<string> GetUserGroupsBySam(string ldap, string sam)
         {
             using var root = Bind(ldap);

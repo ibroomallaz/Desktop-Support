@@ -16,7 +16,7 @@
         public bool? Enabled { get; set; }
         public bool? Locked { get; set; }
         public bool? MimGroupExists { get; set; }
-
+        public bool HasMimWrkstGroup { get; set; }
         public List<string>? MimGroupsList { get; set; }
     }
 }
