@@ -5,18 +5,12 @@ using DSAMVVM.Core.Logging;
 
 namespace DSAMVVM.Core.Services
 {
-    public class DeepLinkRoutingService : IDeepLinkRoutingService
+    public class DeepLinkRoutingService(IADService adService, IDepartmentService deptService) : IDeepLinkRoutingService
     {
-        private readonly IADService _adService;
-        private readonly IDepartmentService _deptService;
+        private readonly IADService _adService = adService ?? throw new ArgumentNullException(nameof(adService));
+        private readonly IDepartmentService _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
 
         public event Action<string, string>? NavigationRequested;
-
-        public DeepLinkRoutingService(IADService adService, IDepartmentService deptService)
-        {
-            _adService = adService ?? throw new ArgumentNullException(nameof(adService));
-            _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
-        }
 
         public async Task<string> HandleLinkAsync(string url, string? contextNetId = null)
         {

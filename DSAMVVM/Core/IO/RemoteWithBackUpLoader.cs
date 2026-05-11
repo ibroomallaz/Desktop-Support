@@ -11,10 +11,10 @@ namespace DSAMVVM.Core.IO
             string remoteUrl,
             JsonFileCache<T> fileCache,
             Func<T, DateTime?> stampSelector,
-            CancellationToken ct = default,
             JsonSerializerSettings? jsonSettings = null,
             Action<T>? normalize = null,
-            Action<string>? log = null)
+            Action<string>? log = null,
+            CancellationToken ct = default)
         {
             log?.Invoke($"loader.start url=\"{remoteUrl}\"");
 

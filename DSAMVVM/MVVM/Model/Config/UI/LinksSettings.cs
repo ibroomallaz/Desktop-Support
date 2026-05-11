@@ -2,7 +2,7 @@
 
 namespace DSAMVVM.MVVM.Model.Config.UI
 {
-    public sealed class LinksUiSettings
+    public sealed partial class LinksUiSettings
     {
         public bool OpenLastViewedFirst { get; set; } = true;
         public bool OverrideEnabled { get; set; } = false;
@@ -16,12 +16,16 @@ namespace DSAMVVM.MVVM.Model.Config.UI
             if (OverrideEnabled && string.IsNullOrEmpty(OverrideTeam)) OverrideEnabled = false;
         }
 
-        private static readonly Regex s_wsCollapse = new(@"\s+", RegexOptions.Compiled);
+        [GeneratedRegex(@"\s+")]
+        private static partial Regex WhitespaceCollapseRegex();
+
         private static string? CleanName(string? s)
         {
             if (string.IsNullOrWhiteSpace(s)) return null;
             var t = s.Trim();
-            t = s_wsCollapse.Replace(t, " ");
+
+            t = WhitespaceCollapseRegex().Replace(t, " ");
+
             return t.Length == 0 ? null : t;
         }
     }

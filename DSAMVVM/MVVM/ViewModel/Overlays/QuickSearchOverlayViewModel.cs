@@ -11,12 +11,16 @@ using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel.Overlays
 {
-    public class QuickSearchOverlayViewModel : ObservableObject
+    public class QuickSearchOverlayViewModel(
+        ISearchService searchService,
+        IADService adService,
+        IDepartmentService deptService,
+        IDeepLinkRoutingService linkRouter) : ObservableObject
     {
-        private readonly ISearchService _searchService;
-        private readonly IADService _adService;
-        private readonly IDepartmentService _deptService;
-        private readonly IDeepLinkRoutingService _linkRouter;
+        private readonly ISearchService _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
+        private readonly IADService _adService = adService ?? throw new ArgumentNullException(nameof(adService));
+        private readonly IDepartmentService _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
+        private readonly IDeepLinkRoutingService _linkRouter = linkRouter ?? throw new ArgumentNullException(nameof(linkRouter));
 
         public Action? CloseAction { get; set; }
 
@@ -41,26 +45,12 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
             set { _resultText = value; OnPropertyChanged(); }
         }
 
-        public QuickSearchOverlayViewModel(
-            ISearchService searchService,
-            IADService adService,
-            IDepartmentService deptService,
-            IDeepLinkRoutingService linkRouter)
-        {
-            _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
-            _adService = adService ?? throw new ArgumentNullException(nameof(adService));
-            _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
-            _linkRouter = linkRouter ?? throw new ArgumentNullException(nameof(linkRouter));
-
-            // NOTE: Memory leak fixed. No more event subscription here.
-        }
-
         public void LoadCapturedText(string? text)
         {
             SearchText = SanitizeCapturedText(text);
         }
 
-        private string SanitizeCapturedText(string? text)
+        private static string SanitizeCapturedText(string? text)
         {
             if (string.IsNullOrWhiteSpace(text)) return string.Empty;
 

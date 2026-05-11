@@ -156,7 +156,7 @@ namespace DSAMVVM.Core.Utilities
                 if (!labelCurr.Equals(labelNew, StringComparison.OrdinalIgnoreCase))
                 {
                     // Define priority: higher number = newer
-                    int GetPriority(string? label) => label?.ToLowerInvariant() switch
+                    static int GetPriority(string? label) => label?.ToLowerInvariant() switch
                     {
                         "alpha" => 1,
                         "beta" => 2,

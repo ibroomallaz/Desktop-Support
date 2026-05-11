@@ -263,7 +263,7 @@ namespace DSAMVVM.MVVM.ViewModel
             if (disposing)
             {
                 _notifier.Changed -= OnOutputFontSettingsChanged;
-                if (_flowDoc != null) _flowDoc.LinkClicked -= OnLinkClicked;
+                _flowDoc?.LinkClicked -= OnLinkClicked;
             }
             _disposed = true;
         }

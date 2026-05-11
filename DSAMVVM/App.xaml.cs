@@ -91,7 +91,7 @@ namespace DSAMVVM
             _splash.Show();
             _splash.UpdateStatus("Starting…");
 
-            var sw = System.Diagnostics.Stopwatch.StartNew();
+            Stopwatch sw = Stopwatch.StartNew();
             long Mark(string label)
             {
                 var ms = sw.ElapsedMilliseconds;

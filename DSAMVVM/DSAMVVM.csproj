@@ -22,6 +22,7 @@
     <Company>University of Arizona</Company>
     <Authors>Isaac Broomall</Authors>
     <AssemblyName>Desktop Support App</AssemblyName>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

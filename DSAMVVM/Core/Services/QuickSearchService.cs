@@ -1,26 +1,23 @@
 ﻿using SharpHook;
 using SharpHook.Data;
-using SharpHook.Native;
-using System;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace DSAMVVM.Core.Services
 {
     public class QuickSearchService
     {
-        private readonly IGlobalHook _hook;
-        private readonly IEventSimulator _simulator;
+        private readonly TaskPoolGlobalHook _hook;
+        private readonly EventSimulator _simulator;
 
         private long _lastPressTime = 0;
         private bool _isCtrlDown = false; // Tracks physical key state to prevent auto-repeat ghosting
-        private const int DoubleTapThresholdMs = 400; // Slightly increased for a more natural feel
+        private const int DoubleTapThresholdMs = 400;
 
         public event EventHandler<string>? QuickSearchTriggered;
 
         public QuickSearchService()
         {
-            _hook = new TaskPoolGlobalHook(); // TaskPool is generally safer for UI apps than EventLoop
+            _hook = new TaskPoolGlobalHook();
             _simulator = new EventSimulator();
 
             _hook.KeyPressed += OnKeyPressed;
@@ -77,7 +74,7 @@ namespace DSAMVVM.Core.Services
                     _simulator.SimulateKeyRelease(KeyCode.VcC);
                     _simulator.SimulateKeyRelease(KeyCode.VcLeftControl);
 
-                    // 2. Wait for OS to populate clipboard (150ms is the sweet spot)
+                    // 2. Wait for OS to populate clipboard
                     await Task.Delay(150);
 
                     // 3. Safely attempt to read the clipboard

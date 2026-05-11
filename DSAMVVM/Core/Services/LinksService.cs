@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using static DSAMVVM.Core.Utilities.UiNotify;
 
 namespace DSAMVVM.Core.Services
 {
@@ -136,19 +137,27 @@ namespace DSAMVVM.Core.Services
                         UiNotify.RemoveKey(progressKey);
 
                         var retryAction = UiNotify.Link.Action("Retry", async () => await ReloadLinksDataAsync());
+
                         var openLink = Uri.TryCreate(targetUri, UriKind.Absolute, out var uriResult) &&
                                        (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps)
                                        ? UiNotify.Link.External("Open source", uriResult)
                                        : null;
 
+                        // 1. Build a list of guaranteed non-null links
+                        var notificationLinks = new List<StatusLink> { retryAction };
+                        if (openLink != null)
+                        {
+                            notificationLinks.Add(openLink);
+                        }
+                        notificationLinks.Add(UiNotify.Link.OpenLogs());
+
+                        // 2. Pass the clean array using .ToArray()
                         UiNotify.WarnWithLinks(
                             $"Failed to {(isReload ? "refresh" : "load")} links: {ex.Message}",
                             sticky: true,
                             priority: 3,
                             key: key,
-                            retryAction,
-                            openLink,
-                            UiNotify.Link.OpenLogs());
+                            [.. notificationLinks]);
 
                         return _cache; // Return existing cache (if any) or null
                     }

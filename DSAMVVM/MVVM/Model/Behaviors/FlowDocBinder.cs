@@ -104,8 +104,7 @@ namespace DSAMVVM.MVVM.Model.Behaviors
                     viewer.Dispatcher.Invoke(() => Rebuild(viewer, flowSvc, forceBottom: false)); // settings change -> preserve pos
                 }
 
-                if (current != null)
-                    current.Changed -= Handler; // safe no-op if not the same delegate instance
+                current?.Changed -= Handler; // safe no-op if not the same delegate instance
 
                 textSettings.Changed += Handler;
 

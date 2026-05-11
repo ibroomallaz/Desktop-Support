@@ -199,12 +199,17 @@ namespace DSAMVVM.MVVM.ViewModel
         private void RefreshEffectiveFontSize() => EffectiveFontSize = _notifier.GetFontSize(ViewKey);
 
         private bool _disposed;
+
         public void Dispose()
         {
             if (_disposed) return;
+
             _notifier.Changed -= OnFontSettingsChanged;
             _flowDoc.LinkClicked -= OnLinkClicked;
+
             _disposed = true;
+
+            GC.SuppressFinalize(this);
         }
     }
 }

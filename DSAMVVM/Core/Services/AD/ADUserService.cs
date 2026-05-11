@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace DSAMVVM.Core.Services.AD
 {
-    public class ADUserService(string ldap)
+    public partial class ADUserService(string ldap)
     {
         private readonly string _ldap = ldap;
 
@@ -88,9 +88,7 @@ namespace DSAMVVM.Core.Services.AD
         {
             if (string.IsNullOrWhiteSpace(license)) return "No valid O365 license found";
 
-            var m = Regex.Match(license,
-                @"([om]\d{3})\s*([A-Za-z]+)\s*[-_ ]*\s*(A\d+|E\d+|EXP\d+)",
-                RegexOptions.IgnoreCase);
+            var m = LicenseRegex().Match(license);
 
             if (m.Success)
             {
@@ -187,5 +185,8 @@ namespace DSAMVVM.Core.Services.AD
 
             return new AdobeLicenseStatus(hasPro, hasCc);
         }
+
+        [GeneratedRegex(@"([om]\d{3})\s*([A-Za-z]+)\s*[-_ ]*\s*(A\d+|E\d+|EXP\d+)", RegexOptions.IgnoreCase, "en-US")]
+        private static partial Regex LicenseRegex();
     }
 }

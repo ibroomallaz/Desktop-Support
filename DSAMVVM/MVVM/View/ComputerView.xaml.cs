@@ -39,14 +39,12 @@ namespace DSAMVVM.MVVM.View
         private void AttachVm(ComputerViewModel? vm)
         {
             _vm = vm;
-            if (_vm != null)
-                _vm.PropertyChanged += VmOnPropertyChanged;
+            _vm?.PropertyChanged += VmOnPropertyChanged;
         }
 
         private void DetachVm()
         {
-            if (_vm != null)
-                _vm.PropertyChanged -= VmOnPropertyChanged;
+            _vm?.PropertyChanged -= VmOnPropertyChanged;
             _vm = null;
         }
 

@@ -10,7 +10,7 @@ public static class IdentityUtility
     static string? _cached;
 
     // P/Invoke to tap into native Windows Security API (Catches Entra ID Display Names)
-    [DllImport("secur32.dll", CharSet = CharSet.Auto)]
+    [DllImport("secur32.dll", CharSet = CharSet.Unicode)]
     private static extern bool GetUserNameEx(int nameFormat, StringBuilder userName, ref uint userNameSize);
     private const int NameDisplay = 3; // 3 requests the "Display Name" format
 
@@ -53,16 +53,16 @@ public static class IdentityUtility
 
         // 4. Ultimate Fallback: NetID
         var netId = Environment.UserName;
-        return _cached = string.IsNullOrEmpty(netId) ? "User" : char.ToUpper(netId[0]) + netId.Substring(1);
+        return _cached = string.IsNullOrEmpty(netId) ? "User" : char.ToUpper(netId[0]) + netId[1..];
     }
 
     // Helper method to keep the parsing logic clean
     private static string ParseFirstName(string displayName)
     {
-        var parts = displayName.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        var parts = displayName.Split([',', ' '], StringSplitOptions.RemoveEmptyEntries);
 
         //"LastName, FirstName"
-        if (displayName.Contains(",") && parts.Length > 1)
+        if (displayName.Contains(',') && parts.Length > 1)
             return parts[1].Trim();
 
         //"FirstName LastName"

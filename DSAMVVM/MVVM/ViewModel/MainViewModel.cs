@@ -16,7 +16,7 @@ using System.Windows.Threading;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class MainViewModel : ObservableObject
+    public partial class MainViewModel : ObservableObject
     {
         // Services
         public IDepartmentService DeptService { get; } = null!;
@@ -149,7 +149,7 @@ namespace DSAMVVM.MVVM.ViewModel
             InitializeNavigation();
         }
 
-        // --- THE FIX: Static lock shared across all ghost VM instances ---
+        //Static lock shared across all ghost VM instances
         private static DateTime _lastNavTime = DateTime.MinValue;
 
         private void OnNavigationRequested(string targetView, string targetQuery)
@@ -407,8 +407,13 @@ namespace DSAMVVM.MVVM.ViewModel
             foreach (var q in snap) SearchHistory.Add(q);
         }
 
-        [DllImport("user32.dll")]
-        private static extern void SwitchToThisWindow(IntPtr hWnd, bool fAltTab);
+        [LibraryImport("user32.dll", EntryPoint = "SwitchToThisWindow")]
+        private static partial void SwitchToThisWindow(IntPtr hWnd, [MarshalAs(UnmanagedType.Bool)] bool fAltTab);
+
+
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static partial bool SetForegroundWindow(IntPtr hWnd);
 
         private static void RestoreWindow()
         {

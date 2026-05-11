@@ -72,6 +72,6 @@ namespace DSAMVVM.MVVM.ViewModel
             GoAboutCommand = new RelayCommand(_ => _goAbout?.Invoke());
         }
 
-        public static Task OnSearchUpdated(string query) => Task.CompletedTask; // no-op
+        public static Task OnSearchUpdated(string _) => Task.CompletedTask; // no-op
     }
 }
