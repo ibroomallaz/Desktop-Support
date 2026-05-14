@@ -180,7 +180,7 @@ namespace DSAMVVM
             InitializeTrayIcon(mainVM);
 
             // --- QUICKSEARCH INITIALIZATION ---
-            var quickSearch = _serviceProvider.GetRequiredService<QuickSearchService>();
+            var quickSearch = Services.GetRequiredService<IQuickSearchService>();
 
             quickSearch.QuickSearchTriggered += (s, capturedText) =>
             {
@@ -498,7 +498,7 @@ namespace DSAMVVM
 
             (_serviceProvider.GetService<VersionUpdateScheduler>() as IDisposable)?.Dispose();
 
-            _serviceProvider.GetService<QuickSearchService>()?.Stop();
+            _serviceProvider.GetService<IQuickSearchService>()?.Stop();
 
             if (_serviceProvider.GetService<IAppLogger>() is FileLogger fl)
             {
@@ -548,7 +548,7 @@ namespace DSAMVVM
             services.AddSingleton<IAppLogger>(_ => new FileLogger(Globals.g_LogsDir));
             services.AddSingleton<StatusBus>();
             services.AddSingleton<StatusBarViewModel>();
-            services.AddSingleton<QuickSearchService>();
+            services.AddSingleton<IQuickSearchService, QuickSearchService>();
 
             services.AddSingleton<IHttpService, HttpService>();
             services.AddSingleton<ISettingsService, SettingsService>();

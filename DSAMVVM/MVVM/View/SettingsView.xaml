@@ -254,7 +254,58 @@
                         </StackPanel>
                     </Grid>
                 </Border>
+                <Border Style="{StaticResource Card.Container}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="6"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
 
+                        <StackPanel Grid.Column="1" Margin="16">
+                            <TextBlock Text="Quick Search (Overlay)" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+
+                            <CheckBox x:Name="EnableQuickSearchCheck" Foreground="{DynamicResource Brush.Text.Primary}" 
+                      Content="Enable Double-Tap Quick Search" Margin="0,0,0,12" 
+                      IsChecked="{Binding EnableQuickSearch, Mode=TwoWay}"/>
+
+                            <StackPanel Visibility="{Binding ElementName=EnableQuickSearchCheck, Path=IsChecked, Converter={StaticResource BoolToVis}}" Margin="0,4,0,0">
+
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="200"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Double-Tap Key" Style="{StaticResource FieldLabel}"/>
+
+                                    <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}" 
+                                              ItemsSource="{Binding ModifierKeyOptions}" 
+                                              DisplayMemberPath="Value" 
+                                              SelectedValuePath="Key"
+                                              SelectedValue="{Binding QuickSearchModifierKey, Mode=TwoWay}"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="200"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Double-Tap Speed" Style="{StaticResource FieldLabel}"/>
+                                    <Slider x:Name="DoubleTapSlider" Grid.Column="2" Minimum="100" Maximum="1000" TickFrequency="50" 
+                            IsSnapToTickEnabled="True" Value="{Binding QuickSearchDoubleTapMs, Mode=TwoWay}"/>
+                                    <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
+                        <Run Text="{Binding ElementName=DoubleTapSlider, Path=Value, StringFormat=F0}"/><Run Text=" ms"/>
+                                    </TextBlock>
+                                </Grid>
+
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
                 <Border Style="{StaticResource Card.Container}">
                     <Grid>
                         <Grid.ColumnDefinitions>

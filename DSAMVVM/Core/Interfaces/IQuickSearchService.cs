@@ -1,4 +1,6 @@
-﻿namespace DSAMVVM.Core.Interfaces
+﻿using DSAMVVM.MVVM.Model.Config;
+
+namespace DSAMVVM.Core.Interfaces
 {
     public interface IQuickSearchService
     {
@@ -6,5 +8,6 @@
 
         void Start();
         void Stop();
+        void Configure(QuickSearchSettings settings);
     }
 }

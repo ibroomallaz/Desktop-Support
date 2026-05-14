@@ -1,17 +1,19 @@
 ﻿using SharpHook;
 using SharpHook.Data;
 using System.Windows;
+using DSAMVVM.MVVM.Model.Config;
+using DSAMVVM.Core.Interfaces;
 
 namespace DSAMVVM.Core.Services
 {
-    public class QuickSearchService
+    public class QuickSearchService : IQuickSearchService
     {
         private readonly TaskPoolGlobalHook _hook;
         private readonly EventSimulator _simulator;
 
+        private QuickSearchSettings _settings = new();
         private long _lastPressTime = 0;
-        private bool _isCtrlDown = false; // Tracks physical key state to prevent auto-repeat ghosting
-        private const int DoubleTapThresholdMs = 400;
+        private bool _isTriggerKeyDown = false;
 
         public event EventHandler<string>? QuickSearchTriggered;
 
@@ -24,24 +26,42 @@ namespace DSAMVVM.Core.Services
             _hook.KeyReleased += OnKeyReleased;
         }
 
-        public void Start() => _hook.RunAsync(); // RunAsync is non-blocking
+        // Method to accept on startup and when Apply is clicked in settings
+        public void Configure(QuickSearchSettings settings)
+        {
+            _settings = settings;
+
+            if (_settings.Enabled && !_hook.IsRunning)
+            {
+                Start();
+            }
+            //Commenting out stopping behavior. Causes ObjectDisposedException when the user tries to re-enable
+            // Hook is lightweight and doesn't consume much resources when running
+            /*else if (!_settings.Enabled && _hook.IsRunning)
+                Stop();
+        */
+            }
+
+        public void Start() => _hook.RunAsync();
 
         public void Stop() => _hook.Dispose();
 
         private void OnKeyPressed(object? sender, KeyboardHookEventArgs e)
         {
-            if (e.Data.KeyCode == KeyCode.VcLeftControl)
+            if (!_settings.Enabled) return;
+
+            if (e.Data.KeyCode == _settings.ModifierKeyCode)
             {
-                if (_isCtrlDown) return; // Ignore OS auto-repeat if the key is just being held down
-                _isCtrlDown = true;
+                if (_isTriggerKeyDown) return; // Prevent holding the key down from triggering it
+                _isTriggerKeyDown = true;
 
                 long currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 long diff = currentTime - _lastPressTime;
 
-                // 50ms debounce prevents mechanical switch bouncing from counting as a tap
-                if (diff > 50 && diff < DoubleTapThresholdMs)
+                // Use the configured double-tap threshold (>50ms prevents mechanical switch bounce)
+                if (diff > 50 && diff < _settings.DoubleTapThresholdMs)
                 {
-                    _lastPressTime = 0; // Reset sequence
+                    _lastPressTime = 0;
                     ExecuteCapture();
                 }
                 else
@@ -53,31 +73,31 @@ namespace DSAMVVM.Core.Services
 
         private void OnKeyReleased(object? sender, KeyboardHookEventArgs e)
         {
-            if (e.Data.KeyCode == KeyCode.VcLeftControl)
+            if (e.Data.KeyCode == _settings.ModifierKeyCode)
             {
-                _isCtrlDown = false;
+                _isTriggerKeyDown = false;
             }
         }
 
         private void ExecuteCapture()
         {
-            // Use BeginInvoke so we don't block the global hook while waiting for the clipboard
             Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
             {
                 string capturedText = string.Empty;
 
                 try
                 {
-                    // 1. Fire the stealth copy
+                    // 1. Explicitly release the user's custom trigger key so it doesn't interfere
+                    _simulator.SimulateKeyRelease(_settings.ModifierKeyCode);
+
+                    // 2. ALWAYS fire a hardcoded LeftControl + C to copy the text to the clipboard
                     _simulator.SimulateKeyPress(KeyCode.VcLeftControl);
                     _simulator.SimulateKeyPress(KeyCode.VcC);
                     _simulator.SimulateKeyRelease(KeyCode.VcC);
                     _simulator.SimulateKeyRelease(KeyCode.VcLeftControl);
 
-                    // 2. Wait for OS to populate clipboard
-                    await Task.Delay(150);
+                    await Task.Delay(150); // Wait for Windows to write to clipboard
 
-                    // 3. Safely attempt to read the clipboard
                     if (Clipboard.ContainsText())
                     {
                         capturedText = Clipboard.GetText();
@@ -85,13 +105,10 @@ namespace DSAMVVM.Core.Services
                 }
                 catch (Exception ex)
                 {
-                    // If the clipboard is locked by another process, we swallow the exception.
-                    // We still want the overlay to open, it will just have an empty search box.
                     System.Diagnostics.Debug.WriteLine($"Clipboard access failed: {ex.Message}");
                 }
                 finally
                 {
-                    // 4. GUARANTEE the event fires to summon the overlay, even if text is empty
                     QuickSearchTriggered?.Invoke(this, capturedText);
                 }
             }));

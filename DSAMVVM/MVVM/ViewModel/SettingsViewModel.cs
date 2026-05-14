@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using SharpHook.Data;
 using System.IO;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
@@ -52,6 +53,15 @@ namespace DSAMVVM.MVVM.ViewModel
         public IReadOnlyList<int> RetentionOptions { get; } =
             [7, 14, 30, 90, 180, 365, -1];
 
+        public IReadOnlyDictionary<KeyCode, string> ModifierKeyOptions { get; } = new Dictionary<KeyCode, string>
+            {
+                { KeyCode.VcLeftControl, "Left Control" },
+                { KeyCode.VcRightControl, "Right Control" },
+                { KeyCode.VcLeftAlt, "Left Alt" },
+                { KeyCode.VcRightAlt, "Right Alt" },
+                { KeyCode.VcLeftShift, "Left Shift" },
+                { KeyCode.VcRightShift, "Right Shift" }
+            };
         public List<int> HistorySizeOptions { get; } = [0, 5, 10, 15, 20, 25];
 
         public IReadOnlyList<double> InitialFontSizeOptions { get; } =
@@ -154,6 +164,15 @@ namespace DSAMVVM.MVVM.ViewModel
         private bool _enablePreReleaseChannel;
         public bool EnablePreReleaseChannel { get => _enablePreReleaseChannel; set { if (Set(ref _enablePreReleaseChannel, value)) SetModified(); } }
 
+        private bool _enableQuickSearch;
+        public bool EnableQuickSearch { get => _enableQuickSearch; set { if (Set(ref _enableQuickSearch, value)) SetModified(); } }
+
+        private KeyCode _quickSearchModifierKey;
+        public KeyCode QuickSearchModifierKey { get => _quickSearchModifierKey; set { if (Set(ref _quickSearchModifierKey, value)) SetModified(); } }
+
+        private int _quickSearchDoubleTapMs;
+        public int QuickSearchDoubleTapMs { get => _quickSearchDoubleTapMs; set { if (Set(ref _quickSearchDoubleTapMs, value)) SetModified(); } }
+
         // --- Constructors ---
         public SettingsViewModel()
             : this(App.Services.GetRequiredService<ISettingsService>(),
@@ -219,6 +238,10 @@ namespace DSAMVVM.MVVM.ViewModel
             MinimizeToTray = _settings.Ui.Tray.MinimizeToTray;
             CloseToTray = _settings.Ui.Tray.CloseToTray;
             EnablePreReleaseChannel = _settings.Updates.EnablePreReleaseChannel;
+
+            EnableQuickSearch = _settings.QuickSearch.Enabled;
+            QuickSearchModifierKey = _settings.QuickSearch.ModifierKeyCode;
+            QuickSearchDoubleTapMs = _settings.QuickSearch.DoubleTapThresholdMs;
 
             HasUnsavedChanges = false;
             StatusMessage = "Settings are up to date.";
@@ -299,6 +322,10 @@ namespace DSAMVVM.MVVM.ViewModel
                 _settings.Ui.Tray.CloseToTray = CloseToTray;
                 _settings.Updates.EnablePreReleaseChannel = EnablePreReleaseChannel;
 
+                _settings.QuickSearch.Enabled = EnableQuickSearch;
+                _settings.QuickSearch.ModifierKeyCode = QuickSearchModifierKey;
+                _settings.QuickSearch.DoubleTapThresholdMs = QuickSearchDoubleTapMs;
+
                 _settings.ApplyDefaultsAndClamp();
 
                 // 3. Transfer the data to the global reference.
@@ -307,6 +334,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 active.Logging = _settings.Logging;
                 active.Updates = _settings.Updates;
                 active.Meta = _settings.Meta;
+                active.QuickSearch = _settings.QuickSearch;
 
                 // 4. Save the global object to disk
                 var path = Path.Combine(Globals.g_AppDir, "settings.json");
@@ -322,6 +350,11 @@ namespace DSAMVVM.MVVM.ViewModel
                 Log.ApplySettings(active);
                 _searchSvc?.ConfigureHistory(active.Ui.Search.UseSavedSearchHistory, active.Ui.Search.MaxSearchHistory);
                 if (!active.Ui.Search.UseSavedSearchHistory) _searchSvc?.ClearHistory();
+
+                var quickSearchSvc = App.Services.GetService<IQuickSearchService>();
+                quickSearchSvc?.Configure(active.QuickSearch);
+
+                if (deptChanged) _ = deptService?.ReloadDataAsync();
 
                 if (deptChanged) _ = deptService?.ReloadDataAsync();
                 if (linksChanged) _ = linksService?.ReloadLinksDataAsync();
