@@ -8,11 +8,21 @@
              d:DesignHeight="450" d:DesignWidth="800"
              Background="Transparent">
     <Grid>
-        <TextBlock Text="Work in progress..."
-           VerticalAlignment="Center"
-           HorizontalAlignment="Center"
-           FontSize="18"
-           Foreground="#CCD3DA"
-           Margin="0,0,0,0"/>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,50,0,0">
+
+            <Button Content="Test Entra ID Login" 
+                    Command="{Binding SearchCommand}" 
+                    Width="180" 
+                    Height="35" 
+                    Margin="0,0,0,15" />
+
+            <TextBlock Text="{Binding EntraResults}" 
+                       Foreground="#CCD3DA" 
+                       FontSize="14" 
+                       TextWrapping="Wrap" 
+                       TextAlignment="Center" 
+                       MaxWidth="500" />
+
+        </StackPanel>
     </Grid>
 </UserControl>
