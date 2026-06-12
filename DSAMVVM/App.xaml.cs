@@ -561,6 +561,7 @@ namespace DSAMVVM
             services.AddSingleton<ISearchService, SearchService>();
             services.AddSingleton<IUpdaterService, UpdaterService>();
             services.AddSingleton<IDeepLinkRoutingService, DeepLinkRoutingService>();
+            services.AddSingleton<IAuthenticationService, AuthenticationService>();
 
             services.AddSingleton<IOutputTextSettingsProvider>(sp =>
                 new OutputTextSettingsProvider(
@@ -604,6 +605,7 @@ namespace DSAMVVM
                 )
             );
             services.AddTransient<QuickSearchOverlayViewModel>();
+            services.AddTransient<EntraViewModel>();
 
             services.AddTransient<Func<UserViewModel>>(sp => () => sp.GetRequiredService<UserViewModel>());
             services.AddTransient<Func<GroupViewModel>>(sp => () => sp.GetRequiredService<GroupViewModel>());

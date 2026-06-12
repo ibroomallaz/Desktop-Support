@@ -11,6 +11,13 @@ namespace DSAMVVM.MVVM.Model
         public static string g_FileVersion = VersionDisplayHelper.GetFileVersionDisplay();
 #pragma warning restore CA2211 // Non-constant fields should not be visible
 
+        //Entra ID / Graph constants
+        //Publically discoverable keys are safe for repository
+        public const string EntraClientId = "36cd585b-c3cd-48e0-9fef-0a5fc69f0fa0";
+        public const string EntraTenantId = "5ee35505-eb8e-4929-937d-645df5013288";
+        public const string EntraInstanceUrl = "https://login.microsoftonline.com/";
+        public const string EntraRedirectUri = "dsa://auth";
+
         // AD constants
 
         public const string g_domainPathLDAP = "LDAP://DC=bluecat,DC=arizona,DC=edu";

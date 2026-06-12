@@ -286,7 +286,7 @@ namespace DSAMVVM.MVVM.ViewModel
             HomeVM = App.Services.GetRequiredService<HomeViewModel>();
             AboutVM = aboutVM;
             SettingsVM = new SettingsViewModel();
-            EntraVM = new EntraViewModel();
+            EntraVM = App.Services.GetRequiredService<EntraViewModel>();
 
             UserVM = _userVMFactory();
             ComputerVM = _computerVMFactory();
