@@ -134,7 +134,8 @@ namespace DSAMVVM.MVVM.ViewModel
         // --- Deep Link Handler ---
         private async void OnLinkClicked(object? sender, string url)
         {
-            if (sender is not string sourceView || !sourceView.StartsWith("GroupView")) return;
+            string? sourceView = sender as string;
+            if (sourceView == null || !sourceView.StartsWith("GroupView")) return;
 
             if (IsLoading) return;
 
