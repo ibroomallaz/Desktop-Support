@@ -576,11 +576,12 @@ namespace DSAMVVM
             services.AddTransient<ComputerViewModel>();
             services.AddTransient<LinksViewModel>();
             services.AddSingleton<AboutViewModel>();
+
             services.AddSingleton<HomeViewModel>(sp =>
                 new HomeViewModel(
                     openUser: q =>
                     {
-                        var main = Services.GetRequiredService<MainViewModel>();
+                        var main = sp.GetRequiredService<MainViewModel>();
                         main.SelectedView = AppView.User;
                         if (!string.IsNullOrWhiteSpace(q))
                         {
@@ -590,7 +591,7 @@ namespace DSAMVVM
                     },
                     openComputer: q =>
                     {
-                        var main = Services.GetRequiredService<MainViewModel>();
+                        var main = sp.GetRequiredService<MainViewModel>();
                         main.SelectedView = AppView.Computer;
                         if (!string.IsNullOrWhiteSpace(q))
                         {
@@ -598,12 +599,13 @@ namespace DSAMVVM
                             main.ExecuteSearchCommand.Execute(null);
                         }
                     },
-                    goGroups: () => Services.GetRequiredService<MainViewModel>().SelectedView = AppView.Group,
-                    goEntra: () => Services.GetRequiredService<MainViewModel>().SelectedView = AppView.Entra,
-                    goLinks: () => Services.GetRequiredService<MainViewModel>().SelectedView = AppView.Links,
-                    goAbout: () => Services.GetRequiredService<MainViewModel>().SelectedView = AppView.About
+                    goGroups: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.Group,
+                    goEntra: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.Entra,
+                    goLinks: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.Links,
+                    goAbout: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.About
                 )
             );
+
             services.AddTransient<QuickSearchOverlayViewModel>();
             services.AddTransient<EntraViewModel>();
 

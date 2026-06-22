@@ -11,18 +11,33 @@ using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel.Overlays
 {
-    public class QuickSearchOverlayViewModel(
-        ISearchService searchService,
-        IADService adService,
-        IDepartmentService deptService,
-        IDeepLinkRoutingService linkRouter) : ObservableObject
+    public class QuickSearchOverlayViewModel : ObservableObject
     {
-        private readonly ISearchService _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
-        private readonly IADService _adService = adService ?? throw new ArgumentNullException(nameof(adService));
-        private readonly IDepartmentService _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
-        private readonly IDeepLinkRoutingService _linkRouter = linkRouter ?? throw new ArgumentNullException(nameof(linkRouter));
+        private readonly ISearchService _searchService;
+        private readonly IADService _adService;
+        private readonly IDepartmentService _deptService;
+        private readonly IDeepLinkRoutingService _linkRouter;
+        private readonly IFlowDocService _flowDocService;
+
+        public string ViewKey { get; } = "QuickSearchView";
 
         public Action? CloseAction { get; set; }
+
+        public QuickSearchOverlayViewModel(
+            ISearchService searchService,
+            IADService adService,
+            IDepartmentService deptService,
+            IDeepLinkRoutingService linkRouter,
+            IFlowDocService flowDocService)
+        {
+            _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
+            _adService = adService ?? throw new ArgumentNullException(nameof(adService));
+            _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
+            _linkRouter = linkRouter ?? throw new ArgumentNullException(nameof(linkRouter));
+            _flowDocService = flowDocService ?? throw new ArgumentNullException(nameof(flowDocService));
+
+            _flowDocService.LinkClicked += OnLinkClicked;
+        }
 
         private string _searchText = string.Empty;
         public string SearchText
@@ -218,11 +233,29 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
             }
         }
 
+        private async void OnLinkClicked(object? sender, string url)
+        {
+            string? sourceView = sender as string;
+            if (sourceView != ViewKey) return;
+
+            if (IsSearching) return;
+
+            string result = await _linkRouter.HandleLinkAsync(url);
+            if (!string.IsNullOrWhiteSpace(result))
+            {
+                ResultText += result;
+            }
+        }
+
         public async Task RouteLinkClickAsync(string url)
         {
             if (!string.IsNullOrWhiteSpace(url))
             {
-                await _linkRouter.HandleLinkAsync(url);
+                string result = await _linkRouter.HandleLinkAsync(url);
+                if (!string.IsNullOrWhiteSpace(result))
+                {
+                    ResultText += result;
+                }
             }
         }
     }
