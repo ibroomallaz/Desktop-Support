@@ -134,9 +134,12 @@ namespace DSAMVVM.MVVM.ViewModel
         // --- Deep Link Handler ---
         private async void OnLinkClicked(object? sender, string url)
         {
+            string? sourceView = sender as string;
+            if (sourceView == null || !sourceView.StartsWith("GroupView")) return;
+
             if (IsLoading) return;
 
-            string result = await _linkRouter.HandleLinkAsync(url, _currentSearchQuery);
+            string result = await _linkRouter.HandleLinkAsync(url);
             if (!string.IsNullOrWhiteSpace(result))
             {
                 SearchLog += result;

@@ -79,6 +79,9 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private async void OnLinkClicked(object? sender, string url)
         {
+            string? sourceView = sender as string;
+            if (sourceView != ViewKey) return;
+
             if (IsLoading) return;
 
             string result = await _linkRouter.HandleLinkAsync(url);
@@ -87,7 +90,6 @@ namespace DSAMVVM.MVVM.ViewModel
                 SearchLog += result;
             }
         }
-
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
             Error = null;

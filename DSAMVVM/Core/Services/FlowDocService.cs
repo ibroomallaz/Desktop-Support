@@ -111,7 +111,8 @@ namespace DSAMVVM.Core.Services
             for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i];
-                if (line.Length > 0) AddColoredRuns(p, line, colors);
+                // Passing viewName down to the parser
+                if (line.Length > 0) AddColoredRuns(p, line, colors, viewName);
 
                 bool isLast = i == lines.Length - 1;
                 if (!isLast || (isLast && endsWithNewline)) p.Inlines.Add(new LineBreak());
@@ -121,7 +122,7 @@ namespace DSAMVVM.Core.Services
             return doc;
         }
 
-        private void AddColoredRuns(Paragraph p, string line, IReadOnlyDictionary<string, Brush> colors)
+        private void AddColoredRuns(Paragraph p, string line, IReadOnlyDictionary<string, Brush> colors, string? viewName)
         {
             int index = 0;
             while (index < line.Length)
@@ -129,21 +130,21 @@ namespace DSAMVVM.Core.Services
                 int open = line.IndexOf('[', index);
                 if (open < 0)
                 {
-                    foreach (var inline in SplitTextIntoInlines(line[index..], null))
+                    foreach (var inline in SplitTextIntoInlines(line[index..], null, viewName))
                         p.Inlines.Add(inline);
                     break;
                 }
 
                 if (open > index)
                 {
-                    foreach (var inline in SplitTextIntoInlines(line[index..open], null))
+                    foreach (var inline in SplitTextIntoInlines(line[index..open], null, viewName))
                         p.Inlines.Add(inline);
                 }
 
                 int closeBracket = line.IndexOf(']', open + 1);
                 if (closeBracket < 0)
                 {
-                    foreach (var inline in SplitTextIntoInlines(line[open..], null))
+                    foreach (var inline in SplitTextIntoInlines(line[open..], null, viewName))
                         p.Inlines.Add(inline);
                     break;
                 }
@@ -153,7 +154,7 @@ namespace DSAMVVM.Core.Services
                 int end = line.IndexOf(endTag, closeBracket + 1, StringComparison.Ordinal);
                 if (end < 0)
                 {
-                    foreach (var inline in SplitTextIntoInlines(line[open..], null))
+                    foreach (var inline in SplitTextIntoInlines(line[open..], null, viewName))
                         p.Inlines.Add(inline);
                     break;
                 }
@@ -161,14 +162,14 @@ namespace DSAMVVM.Core.Services
                 string inner = line[(closeBracket + 1)..end];
                 var brush = colors.TryGetValue(colorName.Trim(), out var b) ? b : Brushes.White;
 
-                foreach (var inline in SplitTextIntoInlines(inner, brush))
+                foreach (var inline in SplitTextIntoInlines(inner, brush, viewName))
                     p.Inlines.Add(inline);
 
                 index = end + endTag.Length;
             }
         }
 
-        private Inline[] SplitTextIntoInlines(string text, Brush? foreground)
+        private Inline[] SplitTextIntoInlines(string text, Brush? foreground, string? viewName)
         {
             var parts = new List<Inline>();
             int pos = 0;
@@ -204,13 +205,13 @@ namespace DSAMVVM.Core.Services
                 {
                     var label = md.Groups["label"].Value;
                     var url = md.Groups["url"].Value;
-                    parts.Add(MakeLink(url, foreground, visibleText: label));
+                    parts.Add(MakeLink(url, foreground, viewName, visibleText: label));
                     pos = md.Index + md.Length;
                 }
                 else
                 {
                     var url = raw.Value;
-                    parts.Add(MakeLink(url, foreground, visibleText: url));
+                    parts.Add(MakeLink(url, foreground, viewName, visibleText: url));
                     pos = raw.Index + raw.Length;
                 }
             }
@@ -218,14 +219,12 @@ namespace DSAMVVM.Core.Services
             return [.. parts];
         }
 
-        private Hyperlink MakeLink(string url, Brush? foreground, string? visibleText = null)
+        private Hyperlink MakeLink(string url, Brush? foreground, string? viewName, string? visibleText = null)
         {
             var display = string.IsNullOrWhiteSpace(visibleText) ? url : visibleText;
             var run = new Run(display);
             if (foreground != null) run.Foreground = foreground;
 
-
-            //avoid casting object? to Brush directly to satisfy nullable analysis
             var baseTextBrush = foreground
                 ?? (Application.Current?.Resources["Brush.Text"] as Brush)
                 ?? Brushes.White;
@@ -243,8 +242,8 @@ namespace DSAMVVM.Core.Services
             {
                 if (e.Uri.Scheme.Equals("dsa", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Fire the instance event so the ViewModel knows a team was clicked
-                    LinkClicked?.Invoke(this, e.Uri.OriginalString);
+                    // Pass the viewName as the sender
+                    LinkClicked?.Invoke(viewName, e.Uri.OriginalString);
                 }
                 else
                 {

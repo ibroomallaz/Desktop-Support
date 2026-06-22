@@ -47,7 +47,7 @@
 
             <FlowDocumentScrollViewer Grid.Row="3" 
                                       behaviors:FlowDocBinder.Text="{Binding ResultText}"
-                                      behaviors:FlowDocBinder.ViewName="QuickSearch"
+                                      behaviors:FlowDocBinder.ViewName="QuickSearchView"
                                       VerticalScrollBarVisibility="Auto" 
                                       HorizontalScrollBarVisibility="Disabled"
                                       Margin="0,15,0,0" MaxHeight="400"
