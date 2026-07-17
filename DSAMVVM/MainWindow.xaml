@@ -68,9 +68,16 @@
                             HorizontalAlignment="Right"
                             Margin="0,0,10,0">
                     <Button Style="{StaticResource Button.Rounded.Small}"
+                            Content="{x:Static res:Glyphs.Warning}"
+                            FontFamily="Segoe MDL2 Assets"
+                            ToolTip="Report an Issue or Make a Suggestion"
+                            Margin="0,0,5,0"/>
+
+                    <Button Style="{StaticResource Button.Rounded.Small}"
                             Content="—"
                             Click="Minimize_Click"
                             Margin="0,0,5,0"/>
+
                     <Button Style="{StaticResource Button.Rounded.Small}"
                             Content="X"
                             Click="Close_Click"/>

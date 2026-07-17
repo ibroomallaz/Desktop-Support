@@ -7,5 +7,7 @@
 
         // Ingests deep link query arguments to catch interactive authorization code bounces
         void ProcessAuthRedirect(string url);
+        //Forced Sign-out and cache clear
+        Task SignOutAsync();
     }
 }

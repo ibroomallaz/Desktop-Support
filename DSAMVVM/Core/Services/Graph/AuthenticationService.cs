@@ -8,15 +8,17 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Extensibility;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.Graph
 {
     public class AuthenticationService : IAuthenticationService
     {
         private readonly IPublicClientApplication _pca;
+        private readonly TeamsRoutingService _routingService;
         internal string? _capturedAuthUri;
 
-        public AuthenticationService()
+        public AuthenticationService(TeamsRoutingService routingService)
         {
+            _routingService = routingService;
             var authorityUrl = $"{Globals.EntraInstanceUrl}{Globals.EntraTenantId}";
 
             var builder = PublicClientApplicationBuilder.Create(Globals.EntraClientId)
@@ -33,6 +35,15 @@ namespace DSAMVVM.Core.Services
             _pca = builder.Build();
         }
 
+        private void ExtractAndApplyRouting(AuthenticationResult result)
+        {
+            if (result?.ClaimsPrincipal?.Claims != null)
+            {
+                _routingService.InitializeFromClaims(result.ClaimsPrincipal.Claims);
+                Log.Info("AuthService", "Teams routing configuration extracted and applied from ID Token.");
+            }
+        }
+
         // Silent token cache verification with fallback to interactive browser flows
         public async Task<string> GetGraphAccessTokenAsync(string[] scopes)
         {
@@ -44,6 +55,7 @@ namespace DSAMVVM.Core.Services
                 var silentResult = await _pca.AcquireTokenSilent(scopes, accounts.FirstOrDefault())
                     .ExecuteAsync();
 
+                ExtractAndApplyRouting(silentResult);
                 Log.Debug("AuthService", "Token extracted silently from modern WAM runtime profile.");
                 return silentResult.AccessToken;
             }
@@ -80,6 +92,7 @@ namespace DSAMVVM.Core.Services
                 .WithCustomWebUi(new DeepLinkWebUi(this))
                 .ExecuteAsync();
 
+            ExtractAndApplyRouting(result);
             return result.AccessToken;
         }
 
@@ -92,7 +105,18 @@ namespace DSAMVVM.Core.Services
                 Log.Info("AuthService", "Authorization URI cleanly extracted from active link tracking handle.");
             }
         }
+        public async Task SignOutAsync()
+        {
+            var accounts = await _pca.GetAccountsAsync();
 
+            while (accounts.Any())
+            {
+                await _pca.RemoveAsync(accounts.First());
+                accounts = await _pca.GetAccountsAsync();
+            }
+
+            Log.Info("AuthService", "User signed out successfully and token cache cleared.");
+        }
         // --- CUSTOM WEB UI BRIDGE ---
         private class DeepLinkWebUi(AuthenticationService parent) : ICustomWebUi
         {
