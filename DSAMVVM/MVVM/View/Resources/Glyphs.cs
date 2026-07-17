@@ -14,6 +14,9 @@
         public const string Entra = "\uE753";
         public const string About = "\uE946";
 
+        // ===== TOP =====
+        public const string Warning = "\uE7BA";
+
 
         // Optional helper: accept "E721" or "\uE721" and return the single-char glyph.
         public static string From(string code)

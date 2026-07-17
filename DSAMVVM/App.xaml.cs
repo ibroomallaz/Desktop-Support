@@ -3,6 +3,7 @@ using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Services;
 using DSAMVVM.Core.Services.AD;
+using DSAMVVM.Core.Services.Graph;
 using DSAMVVM.Core.Services.Updates;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
@@ -544,6 +545,8 @@ namespace DSAMVVM
         private void ConfigureServices()
         {
             var services = new ServiceCollection();
+
+            services.AddSingleton<TeamsRoutingService>();
 
             services.AddSingleton<IAppLogger>(_ => new FileLogger(Globals.g_LogsDir));
             services.AddSingleton<StatusBus>();

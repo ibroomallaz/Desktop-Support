@@ -5,6 +5,7 @@ namespace DSAMVVM.Core.Utilities
 {
     public class EnumEqualsConverter : IValueConverter
     {
+        public EnumEqualsConverter() { }
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
             => value != null && parameter != null && value.Equals(parameter);
 
