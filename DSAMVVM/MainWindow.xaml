@@ -51,7 +51,8 @@
             <!-- Header -->
             <Grid DockPanel.Dock="Top" Height="40" Background="Transparent">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="29*"/>
+                    <ColumnDefinition Width="764*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
@@ -60,18 +61,24 @@
                            FontSize="18"
                            Foreground="{DynamicResource Brush.Text.Primary}"
                            Margin="20,0,0,0"
-                           MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"/>
+                           MouseLeftButtonDown="TitleBar_MouseLeftButtonDown" Grid.ColumnSpan="2"/>
 
                 <StackPanel Orientation="Horizontal"
-                            Grid.Column="1"
+                            Grid.Column="2"
                             VerticalAlignment="Center"
-                            HorizontalAlignment="Right"
-                            Margin="0,0,10,0">
+                            HorizontalAlignment="Left">
                     <Button Style="{StaticResource Button.Rounded.Small}"
                             Content="{x:Static res:Glyphs.Warning}"
                             FontFamily="Segoe MDL2 Assets"
-                            ToolTip="Report an Issue or Make a Suggestion"
-                            Margin="0,0,5,0"/>
+                            Click="FeedbackButton_Click"
+                            Margin="0,0,5,0">
+                        <Button.ContextMenu>
+                            <ContextMenu Placement="Bottom">
+                                <MenuItem Header="Report a Bug" Click="ReportBug_Click" />
+                                <MenuItem Header="Make a Suggestion" Click="MakeSuggestion_Click" />
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                    </Button>
 
                     <Button Style="{StaticResource Button.Rounded.Small}"
                             Content="—"

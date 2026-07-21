@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using DSAMVVM.MVVM.View.Dialogs;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -44,6 +45,45 @@ namespace DSAMVVM
             }
         }
 
+        // Opens the dropdown context menu on left-click of the warning icon
+        private void FeedbackButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.ContextMenu != null)
+            {
+                btn.ContextMenu.PlacementTarget = btn;
+                btn.ContextMenu.IsOpen = true;
+            }
+        }
+
+        // Opens feedback window pre-selected to "Report a Bug" (Index 0)
+        private void ReportBug_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFeedbackDialog(0);
+        }
+
+        // Opens feedback window pre-selected to "Request a Feature" (Index 1)
+        private void MakeSuggestion_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFeedbackDialog(1);
+        }
+
+        // Shared helper to launch the dialog modal
+        private void OpenFeedbackDialog(int typeIndex)
+        {
+            var dialog = new FeedbackWindow(typeIndex)
+            {
+                Owner = this
+            };
+
+            if (dialog.ShowDialog() == true && dialog.Result != null)
+            {
+                string type = dialog.Result.Type;
+                string text = dialog.Result.Text;
+
+                System.Diagnostics.Debug.WriteLine($"[Feedback Captured] Type: {type}, Text: {text}");
+            }
+        }
+
         // Show history dropdown when clicking in the search box
         private void SearchBox_ShowHistory(object sender, MouseButtonEventArgs e)
         {
@@ -68,7 +108,6 @@ namespace DSAMVVM
             {
                 if (App.Settings != null && App.Settings.Ui.Tray.EnableTrayIcon && App.Settings.Ui.Tray.MinimizeToTray)
                 {
-                    // Reset state to Normal so the window restores at the correct size later
                     WindowState = WindowState.Normal;
                     this.Hide();
                 }
