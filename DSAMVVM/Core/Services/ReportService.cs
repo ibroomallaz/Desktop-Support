@@ -1,4 +1,5 @@
 ﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Services.Graph;
 
 namespace DSAMVVM.Core.Services
 {
@@ -62,8 +63,8 @@ namespace DSAMVVM.Core.Services
             try
             {
                 // Request token dynamically just before posting
-                string token = await _authService.GetGraphAccessTokenAsync(new[] { "ChannelMessage.Send" });
-                return await _teamsService.PostMessageRawAsync(token, teamId, channelId, message);
+                string token = await _authService.GetGraphAccessTokenAsync(["ChannelMessage.Send"]);
+                return await RawHttpTeamsService.PostMessageRawAsync(token, teamId, channelId, message);
             }
             catch (Exception ex)
             {

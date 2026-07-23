@@ -3,9 +3,9 @@ using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
-using DSAMVVM.Core.Services;
 using DSAMVVM.MVVM.Services.Status;
 using DSAMVVM.Core.Logging;
+using DSAMVVM.Core.Services.Graph;
 
 namespace DSAMVVM.MVVM.ViewModel
 {

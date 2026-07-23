@@ -1,10 +1,10 @@
 ﻿using System.Security.Claims;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.Graph
 {
     public class TeamsRoutingService
     {
-        private readonly Dictionary<string, string> _channels = new();
+        private readonly Dictionary<string, string> _channels = [];
         public string TeamId { get; private set; } = string.Empty;
 
         public void InitializeFromClaims(IEnumerable<Claim> claims)
@@ -17,7 +17,7 @@ namespace DSAMVVM.Core.Services
 
                 foreach (string pair in routePairs)
                 {
-                    string[] keyValue = pair.Split(new[] { ':' }, 2, StringSplitOptions.RemoveEmptyEntries);
+                    string[] keyValue = pair.Split([':'], 2, StringSplitOptions.RemoveEmptyEntries);
 
                     if (keyValue.Length == 2)
                     {

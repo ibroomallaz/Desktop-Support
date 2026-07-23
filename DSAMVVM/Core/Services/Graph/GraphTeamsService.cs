@@ -18,7 +18,7 @@ namespace DSAMVVM.Core.Services.Graph
     public class GraphTeamsService
     {
         // --- METHOD: TEST CHANNEL POSTING END-TO-END ---
-        public async Task<bool> RunDiagnosticPostTestAsync(GraphServiceClient graphClient, string teamId, string channelId)
+        public static async Task<bool> RunDiagnosticPostTestAsync(GraphServiceClient graphClient, string teamId, string channelId)
         {
             try
             {
