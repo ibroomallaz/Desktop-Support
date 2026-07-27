@@ -24,8 +24,10 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly ISearchService _searchService = null!;
         private readonly IVersionCheckHandler _versionHandler;
         private readonly IDeepLinkRoutingService _linkRouter;
+        private readonly IAuthenticationService _authService;
+        private readonly IApplicationStateService _appStateService = null!;
         public StatusBarViewModel StatusBar { get; } = null!;
-
+        public bool IsUserSignedIn => _authService.IsAuthenticated;
         // VM factories
         private readonly Func<UserViewModel> _userVMFactory;
         private readonly Func<ComputerViewModel> _computerVMFactory;
@@ -87,8 +89,12 @@ namespace DSAMVVM.MVVM.ViewModel
             set
             {
                 if (_selectedView == value) return;
+
                 _selectedView = value;
                 OnPropertyChanged();
+
+                _appStateService.CurrentView = value.ToString();
+
                 CurrentView = value switch
                 {
                     AppView.Home => HomeVM,
@@ -119,10 +125,12 @@ namespace DSAMVVM.MVVM.ViewModel
             IVersionCheckHandler versionHandler,
             StatusBarViewModel statusBar,
             IDeepLinkRoutingService linkRouter,
+            IAuthenticationService authService,
             Func<UserViewModel> userVMFactory,
             Func<ComputerViewModel> computerVMFactory,
             Func<GroupViewModel> groupVMFactory,
             Func<LinksViewModel> linksVMFactory,
+            IApplicationStateService appStateService,
             AboutViewModel aboutVM)
         {
             DeptService = deptService;
@@ -132,6 +140,8 @@ namespace DSAMVVM.MVVM.ViewModel
             _linkRouter = linkRouter;
             _versionHandler = versionHandler;
 
+            _authService = authService;
+            _appStateService = appStateService;
             _userVMFactory = userVMFactory;
             _computerVMFactory = computerVMFactory;
             _groupVMFactory = groupVMFactory;
@@ -139,6 +149,9 @@ namespace DSAMVVM.MVVM.ViewModel
 
             _searchService.HistoryChanged += OnHistoryChanged;
             SyncHistoryFromService();
+
+            // --- SUBSCRIBE TO AUTH STATE ---
+            _authService.AuthenticationStateChanged += OnAuthenticationStateChanged;
 
             // Prevent instance-level duplicate subscriptions
             _linkRouter.NavigationRequested -= OnNavigationRequested;
@@ -406,7 +419,11 @@ namespace DSAMVVM.MVVM.ViewModel
             SearchHistory.Clear();
             foreach (var q in snap) SearchHistory.Add(q);
         }
-
+        private void OnAuthenticationStateChanged(bool isAuthenticated)
+        {
+            // Forces the UI to re-evaluate any elements bound to IsUserSignedIn
+            OnPropertyChanged(nameof(IsUserSignedIn));
+        }
         [LibraryImport("user32.dll", EntryPoint = "SwitchToThisWindow")]
         private static partial void SwitchToThisWindow(IntPtr hWnd, [MarshalAs(UnmanagedType.Bool)] bool fAltTab);
 

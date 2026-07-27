@@ -1,10 +1,11 @@
-﻿using Microsoft.Graph;
+﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Logging;
+using Microsoft.Graph;
 using Microsoft.Kiota.Abstractions.Authentication;
 
 namespace DSAMVVM.Core.Services.Graph
 {
-    // --- KIOTA TOKEN BRIDGE ---
-
+    // Token bridge implementation for Microsoft Graph authentication.
     public class InlineTokenProvider(AuthenticationService authService, string[] scopes) : IAccessTokenProvider
     {
         public AllowedHostsValidator AllowedHostsValidator { get; } = new AllowedHostsValidator();
@@ -17,7 +18,7 @@ namespace DSAMVVM.Core.Services.Graph
 
     public class GraphTeamsService
     {
-        // --- METHOD: TEST CHANNEL POSTING END-TO-END ---
+        // Executes a diagnostic post to verify Entra Token routing GUIDs.
         public static async Task<bool> RunDiagnosticPostTestAsync(GraphServiceClient graphClient, string teamId, string channelId)
         {
             try
@@ -36,15 +37,37 @@ namespace DSAMVVM.Core.Services.Graph
             catch (Microsoft.Graph.Models.ODataErrors.ODataError ex)
             {
                 string errorDetails = $"GRAPH API REJECTION: {ex.Error?.Code} - {ex.Error?.Message}";
-                System.Diagnostics.Debug.WriteLine("========================================");
-                System.Diagnostics.Debug.WriteLine(errorDetails);
-                System.Diagnostics.Debug.WriteLine("========================================");
-
+                Log.Error("GraphTeamsService", errorDetails, ex);
                 return false;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"STANDARD ERROR: {ex.Message}");
+                Log.Error("GraphTeamsService", "STANDARD ERROR", ex);
+                return false;
+            }
+        }
+
+        // Transmits a formatted message payload to a specified Teams channel.
+        public static async Task<bool> PostMessageAsync(GraphServiceClient graphClient, ITeamsMessagePayload payload)
+        {
+            try
+            {
+                var chatMessage = new Microsoft.Graph.Models.ChatMessage
+                {
+                    Subject = payload.GetSubject(),
+                    Body = new Microsoft.Graph.Models.ItemBody
+                    {
+                        ContentType = Microsoft.Graph.Models.BodyType.Html,
+                        Content = payload.GetHtmlBody()
+                    }
+                };
+
+                await graphClient.Teams[payload.TeamId].Channels[payload.ChannelId].Messages.PostAsync(chatMessage);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("GraphTeamsService", $"TEAMS POST ERROR: Failed to post message to channel {payload.ChannelId}.", ex);
                 return false;
             }
         }

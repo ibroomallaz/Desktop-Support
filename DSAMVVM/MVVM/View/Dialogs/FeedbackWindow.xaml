@@ -93,7 +93,7 @@
                              BorderThickness="1"
                              Padding="8"/>
                 </StackPanel>
-
+                <!-- Action Buttons -->
                 <StackPanel Grid.Row="3"
                             Orientation="Horizontal"
                             HorizontalAlignment="Right">
@@ -103,10 +103,10 @@
                             Click="Cancel_Click"
                             Style="{DynamicResource Button.Rounded}"/>
 
-                    <Button Content="Submit"
+                    <Button Content="{Binding SubmitButtonText}"
                             Width="90" Height="30"
                             IsDefault="True"
-                            Click="Submit_Click"
+                            Command="{Binding SubmitCommand}"
                             IsEnabled="{Binding CanSubmit}"
                             Style="{DynamicResource Button.Rounded}"
                             Background="{DynamicResource Brush.Accent}"/>
