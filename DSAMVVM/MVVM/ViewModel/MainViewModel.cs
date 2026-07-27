@@ -5,6 +5,7 @@ using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Services.Status;
+using DSAMVVM.MVVM.View.Dialogs;
 using DSAMVVM.MVVM.View.Resources;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
@@ -28,6 +29,7 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IApplicationStateService _appStateService = null!;
         public StatusBarViewModel StatusBar { get; } = null!;
         public bool IsUserSignedIn => _authService.IsAuthenticated;
+
         // VM factories
         private readonly Func<UserViewModel> _userVMFactory;
         private readonly Func<ComputerViewModel> _computerVMFactory;
@@ -54,6 +56,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public RelayCommand AboutCommand { get; private set; } = null!;
         public RelayCommand ExecuteSearchCommand { get; private set; } = null!;
         public RelayCommand SettingsCommand { get; private set; } = null!;
+        public RelayCommand OpenFeedbackCommand { get; private set; } = null!;
 
         public ICommand ShowWindowCommand { get; private set; } = null!;
         public ICommand CheckUpdateCommand { get; private set; } = null!;
@@ -328,6 +331,27 @@ namespace DSAMVVM.MVVM.ViewModel
                     await _versionHandler.CheckAsync(showUpToDatePopup: true);
                 });
             });
+
+            // Initialize the OpenFeedbackCommand
+            OpenFeedbackCommand = new RelayCommand(param => ExecuteOpenFeedback(param));
+        }
+
+        private void ExecuteOpenFeedback(object? parameter)
+        {
+            int targetIndex = 0; // Default to 'Report a Bug'
+
+            // Try to parse the CommandParameter passed from XAML
+            if (parameter is string paramString && int.TryParse(paramString, out int parsed))
+            {
+                targetIndex = parsed;
+            }
+
+            var window = new FeedbackWindow(targetIndex)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            window.ShowDialog();
         }
 
         private static SearchTarget? ResolveTargetFromView(object view) => view switch
@@ -419,11 +443,13 @@ namespace DSAMVVM.MVVM.ViewModel
             SearchHistory.Clear();
             foreach (var q in snap) SearchHistory.Add(q);
         }
+
         private void OnAuthenticationStateChanged(bool isAuthenticated)
         {
             // Forces the UI to re-evaluate any elements bound to IsUserSignedIn
             OnPropertyChanged(nameof(IsUserSignedIn));
         }
+
         [LibraryImport("user32.dll", EntryPoint = "SwitchToThisWindow")]
         private static partial void SwitchToThisWindow(IntPtr hWnd, [MarshalAs(UnmanagedType.Bool)] bool fAltTab);
 

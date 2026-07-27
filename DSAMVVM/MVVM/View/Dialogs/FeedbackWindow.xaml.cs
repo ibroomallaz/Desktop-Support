@@ -28,7 +28,8 @@ namespace DSAMVVM.MVVM.View.Dialogs
             _viewModel.RequestClose += (s, result) => DialogResult = result;
 
             DataContext = _viewModel;
-            DetailsTextBox.Focus();
+
+            // Note: DetailsTextBox.Focus() was removed here because the input fields are now dynamically swapped.
         }
 
         private void OnTitleBarDrag(object sender, MouseButtonEventArgs e)

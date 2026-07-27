@@ -17,8 +17,14 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
         private readonly IApplicationStateService _appStateService;
 
         private int _selectedFeedbackIndex;
-        private string _detailsText = string.Empty;
         private bool _isAuthenticated;
+
+        // Backing fields for dynamic UI input binding
+        private string _bugRequestText = string.Empty;
+        private string _expectedTeamText = string.Empty;
+        private string _editableDepartment = string.Empty;
+        private string _editableTeam = string.Empty;
+        private string _noteText = string.Empty;
 
         public event EventHandler<bool>? RequestClose;
         public ICommand SubmitCommand { get; }
@@ -40,24 +46,82 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
 
         public string SubmitButtonText => IsAuthenticated ? "Submit" : "Sign-In";
 
+        // Controls active UI state and triggers visibility re-evaluation upon change
         public int SelectedFeedbackIndex
         {
             get => _selectedFeedbackIndex;
-            set { _selectedFeedbackIndex = value; OnPropertyChanged(); }
-        }
-
-        public string DetailsText
-        {
-            get => _detailsText;
             set
             {
-                _detailsText = value;
+                _selectedFeedbackIndex = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(InputPromptText));
+                OnPropertyChanged(nameof(IsBugOrRequestUI));
+                OnPropertyChanged(nameof(IsUpdateUI));
+                OnPropertyChanged(nameof(IsNoteUI));
                 OnPropertyChanged(nameof(CanSubmit));
             }
         }
 
-        public bool CanSubmit => !IsAuthenticated || !string.IsNullOrWhiteSpace(DetailsText);
+        // Visibility toggles for XAML elements
+        public bool IsBugOrRequestUI => SelectedFeedbackIndex == 0 || SelectedFeedbackIndex == 1;
+        public bool IsUpdateUI => SelectedFeedbackIndex == 2;
+        public bool IsNoteUI => SelectedFeedbackIndex == 3;
+
+        // Editable context properties initialized from application state
+        public string EditableDepartment
+        {
+            get => _editableDepartment;
+            set { _editableDepartment = value; OnPropertyChanged(); }
+        }
+
+        public string EditableTeam
+        {
+            get => _editableTeam;
+            set { _editableTeam = value; OnPropertyChanged(); }
+        }
+
+        // Routes the instructional header text above the input controls
+        public string InputPromptText => SelectedFeedbackIndex switch
+        {
+            0 => "Provide bug details below:",
+            1 => "Describe your feature request:",
+            _ => "Provide details below:"
+        };
+
+        public string BugRequestText
+        {
+            get => _bugRequestText;
+            set { _bugRequestText = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanSubmit)); }
+        }
+
+        public string ExpectedTeamText
+        {
+            get => _expectedTeamText;
+            set { _expectedTeamText = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanSubmit)); }
+        }
+
+        public string NoteText
+        {
+            get => _noteText;
+            set { _noteText = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanSubmit)); }
+        }
+
+        // Validates required fields based on the currently active UI index
+        public bool CanSubmit
+        {
+            get
+            {
+                if (!IsAuthenticated) return true;
+
+                return SelectedFeedbackIndex switch
+                {
+                    0 or 1 => !string.IsNullOrWhiteSpace(BugRequestText),
+                    2 => !string.IsNullOrWhiteSpace(ExpectedTeamText) && !string.IsNullOrWhiteSpace(EditableDepartment),
+                    3 => !string.IsNullOrWhiteSpace(NoteText) && !string.IsNullOrWhiteSpace(EditableDepartment),
+                    _ => false
+                };
+            }
+        }
 
         public FeedbackWindowViewModel(
             IAuthenticationService authService,
@@ -67,6 +131,10 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
             _authService = authService;
             _routingService = routingService;
             _appStateService = appStateService;
+
+            // Initialize editable fields from application state defaults
+            _editableDepartment = string.IsNullOrWhiteSpace(_appStateService.RecentDepartment) ? string.Empty : _appStateService.RecentDepartment;
+            _editableTeam = string.IsNullOrWhiteSpace(_appStateService.RecentSupportTeam) ? string.Empty : _appStateService.RecentSupportTeam;
 
             _isAuthenticated = _authService.IsAuthenticated;
             _authService.AuthenticationStateChanged += OnAuthenticationStateChanged;
@@ -104,8 +172,24 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
                 return;
             }
 
-            string feedbackType = SelectedFeedbackIndex == 0 ? "Bug" : "Request";
-            string details = DetailsText.Trim();
+            string feedbackType = SelectedFeedbackIndex switch
+            {
+                0 => "Bug",
+                1 => "Request",
+                2 => "Update",
+                3 => "Note",
+                _ => "Bug"
+            };
+
+            // Compiles individual UI fields into a single details string for the payload
+            string details = SelectedFeedbackIndex switch
+            {
+                0 or 1 => BugRequestText.Trim(),
+                2 => ExpectedTeamText.Trim(),
+                3 => NoteText.Trim(),
+                _ => string.Empty
+            };
+
             System.Diagnostics.Debug.WriteLine($"[FEEDBACK-DEBUG] Preparing to send: {feedbackType}. Details length: {details.Length}");
 
             try
@@ -133,9 +217,9 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
                         details,
                         _appStateService.CurrentView,
                         _appStateService.RecentError,
-                        _appStateService.RecentSupportTeam,
+                        EditableTeam.Trim(),
                         _appStateService.RecentQuery,
-                        _appStateService.RecentDepartment
+                        EditableDepartment.Trim()
                     );
 
                     bool success = await GraphTeamsService.PostMessageAsync(graphClient, payload);
