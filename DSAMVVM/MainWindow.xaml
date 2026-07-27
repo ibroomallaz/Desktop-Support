@@ -74,8 +74,10 @@
                             Margin="0,0,5,0">
                         <Button.ContextMenu>
                             <ContextMenu Placement="Bottom">
-                                <MenuItem Header="Report a Bug" Click="ReportBug_Click" />
-                                <MenuItem Header="Make a Suggestion" Click="MakeSuggestion_Click" />
+                                <MenuItem Header="Report a Bug" Command="{Binding OpenFeedbackCommand}" CommandParameter="0"/>
+                                <MenuItem Header="Request a Feature" Command="{Binding OpenFeedbackCommand}" CommandParameter="1"/>
+                                <MenuItem Header="Update Support Team" Command="{Binding OpenFeedbackCommand}" CommandParameter="2"/>
+                                <MenuItem Header="Add/Update Note" Command="{Binding OpenFeedbackCommand}" CommandParameter="3"/>
                             </ContextMenu>
                         </Button.ContextMenu>
                     </Button>
