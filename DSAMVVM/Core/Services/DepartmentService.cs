@@ -1,5 +1,4 @@
 ﻿using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.IO;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
@@ -13,9 +12,10 @@ using System.Net.Http;
 namespace DSAMVVM.Core.Services
 {
     // Loads Department data using a Remote-First strategy with local offline fallback.
-    public class DepartmentService(IHttpService http) : IDepartmentService
+    public class DepartmentService(IHttpService http, IApplicationStateService appStateService) : IDepartmentService
     {
         private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
+        private readonly IApplicationStateService _appStateService = appStateService ?? throw new ArgumentNullException(nameof(appStateService));
         private readonly SemaphoreSlim _lock = new(1, 1);                   // single-flight load/reload
         private readonly string _cachePath = Globals.g_DepartmentCachePath;
 
@@ -30,14 +30,35 @@ namespace DSAMVVM.Core.Services
         public async Task<IDepartment?> GetDepartmentAsync(string departmentNumber)
         {
             await EnsureDataLoaded();
-            return _departments?.FirstOrDefault(d => d.Number == departmentNumber);
+
+            // Caches the requested department number in the application state
+            if (!string.IsNullOrWhiteSpace(departmentNumber))
+            {
+                _appStateService.RecentDepartment = departmentNumber.Trim();
+            }
+
+            var dept = _departments?.FirstOrDefault(d => d.Number == departmentNumber);
+
+            // Caches the resolved support team in the application state
+            if (dept != null && !string.IsNullOrWhiteSpace(dept.Team))
+            {
+                _appStateService.RecentSupportTeam = dept.Team;
+            }
+
+            return dept;
         }
 
         public async Task<SupportTeam?> GetSupportTeamAsync(string teamName)
         {
             await EnsureDataLoaded();
             if (string.IsNullOrWhiteSpace(teamName)) return null;
-            _teamMap.TryGetValue(teamName.Trim(), out var team);
+
+            if (_teamMap.TryGetValue(teamName.Trim(), out var team))
+            {
+                // Caches the resolved support team in the application state
+                _appStateService.RecentSupportTeam = team.SupportTeamName ?? teamName.Trim();
+            }
+
             return team;
         }
 
@@ -45,6 +66,7 @@ namespace DSAMVVM.Core.Services
         public async Task<string?> GetNotesAsync(string departmentNumber) => (await GetDepartmentAsync(departmentNumber))?.Notes;
         public async Task<bool?> IsSupportKnownAsync(string departmentNumber) => (await GetDepartmentAsync(departmentNumber))?.SupportKnown;
         public async Task<string?> GetFileRepoPathAsync(string departmentNumber) => (await GetDepartmentAsync(departmentNumber))?.FileRepoPath;
+
         public async Task<IEnumerable<SupportTeam>> GetTeamsByDivisionAsync(string divAbbrev)
         {
             await EnsureDataLoaded();
@@ -55,6 +77,7 @@ namespace DSAMVVM.Core.Services
                 .Where(t => t.SupportedDivisions?
                     .Any(d => string.Equals(d.DivAbbrev, search, StringComparison.OrdinalIgnoreCase)) == true);
         }
+
         public async Task ReloadDataAsync()
         {
             await _lock.WaitAsync();

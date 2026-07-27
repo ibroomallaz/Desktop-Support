@@ -1,5 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Threading;
+using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Models;
 
 namespace DSAMVVM.MVVM.Services.Status
@@ -8,6 +10,7 @@ namespace DSAMVVM.MVVM.Services.Status
     {
         public StatusItem? Current { get; private set; }
         public event EventHandler? CurrentChanged;
+        private readonly IApplicationStateService _appStateService;
 
         // timing/behavior
         public bool AutoRotateEnabled { get; set; } = true;   // master on/off
@@ -23,8 +26,9 @@ namespace DSAMVVM.MVVM.Services.Status
 
         private readonly DispatcherTimer _timer;
 
-        public StatusBus()
+        public StatusBus(IApplicationStateService appStateService)
         {
+            _appStateService = appStateService ?? throw new ArgumentNullException(nameof(appStateService));
             _timer = new DispatcherTimer { IsEnabled = false };
             _timer.Tick += (_, __) => Advance();
         }
@@ -33,6 +37,11 @@ namespace DSAMVVM.MVVM.Services.Status
         {
             void OnUi()
             {
+                if (item.Level == StatusLevel.Error)
+                {
+                    // Stitches the text from all formatting spans into a single plain-text string
+                    _appStateService.RecentError = string.Join("", item.Spans.Select(s => s.Text));
+                }
                 if (!string.IsNullOrEmpty(item.Key))
                     _byKey[item.Key!] = item;
 

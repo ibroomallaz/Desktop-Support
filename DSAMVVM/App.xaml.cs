@@ -565,6 +565,7 @@ namespace DSAMVVM
             services.AddSingleton<IUpdaterService, UpdaterService>();
             services.AddSingleton<IDeepLinkRoutingService, DeepLinkRoutingService>();
             services.AddSingleton<IAuthenticationService, AuthenticationService>();
+            services.AddSingleton<IApplicationStateService, ApplicationStateService>();
 
             services.AddSingleton<IOutputTextSettingsProvider>(sp =>
                 new OutputTextSettingsProvider(

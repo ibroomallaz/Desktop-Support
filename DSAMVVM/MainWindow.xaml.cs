@@ -75,12 +75,10 @@ namespace DSAMVVM
                 Owner = this
             };
 
-            if (dialog.ShowDialog() == true && dialog.Result != null)
+            // ShowDialog() will return true if it successfully submitted, or false if canceled.
+            if (dialog.ShowDialog() == true)
             {
-                string type = dialog.Result.Type;
-                string text = dialog.Result.Text;
-
-                System.Diagnostics.Debug.WriteLine($"[Feedback Captured] Type: {type}, Text: {text}");
+                System.Diagnostics.Debug.WriteLine($"[Feedback] Successfully submitted feedback of type index {typeIndex}.");
             }
         }
 

@@ -4,9 +4,11 @@ using DSAMVVM.Core.Models;
 
 namespace DSAMVVM.Core.Services
 {
-    public class SearchService(IADService ad) : ISearchService
+
+    public class SearchService(IADService ad, IApplicationStateService appStateService) : ISearchService
     {
         private readonly IADService _ad = ad ?? throw new ArgumentNullException(nameof(ad));
+        private readonly IApplicationStateService _appStateService = appStateService ?? throw new ArgumentNullException(nameof(appStateService));
 
         // History state
         private readonly Lock _gate = new();
@@ -69,14 +71,20 @@ namespace DSAMVVM.Core.Services
 
         public void AddToHistory(string query)
         {
+            if (string.IsNullOrWhiteSpace(query)) return;
+            string formattedQuery = query.Trim();
+
+            // Sync state immediately, ensuring the Feedback 
+            _appStateService.RecentQuery = formattedQuery;
+
             lock (_gate)
             {
                 if (!_historyEnabled || _historyCap <= 0) return;
 
                 // de-dup case-insensitive, move to front
-                int existing = _history.FindIndex(q => string.Equals(q, query, StringComparison.OrdinalIgnoreCase));
+                int existing = _history.FindIndex(q => string.Equals(q, formattedQuery, StringComparison.OrdinalIgnoreCase));
                 if (existing >= 0) _history.RemoveAt(existing);
-                _history.Insert(0, query);
+                _history.Insert(0, formattedQuery);
 
                 TrimToCap_NoLock();
             }

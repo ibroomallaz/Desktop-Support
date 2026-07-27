@@ -15,6 +15,33 @@ namespace DSAMVVM.Core.Services.Graph
         private readonly IPublicClientApplication _pca;
         private readonly TeamsRoutingService _routingService;
         internal string? _capturedAuthUri;
+        private bool _isAuthenticated;
+
+        public event Action<bool>? AuthenticationStateChanged;
+
+        public bool IsAuthenticated
+        {
+            get => _isAuthenticated;
+            private set
+            {
+                if (_isAuthenticated != value)
+                {
+                    _isAuthenticated = value;
+
+                    if (Application.Current != null)
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            AuthenticationStateChanged?.Invoke(_isAuthenticated);
+                        });
+                    }
+                    else
+                    {
+                        AuthenticationStateChanged?.Invoke(_isAuthenticated);
+                    }
+                }
+            }
+        }
 
         public AuthenticationService(TeamsRoutingService routingService)
         {
@@ -44,6 +71,40 @@ namespace DSAMVVM.Core.Services.Graph
             }
         }
 
+        // Silent authentication check for UI state binding prior to Graph execution
+        public async Task<bool> ValidateAuthenticationAsync(string[] scopes)
+        {
+            var accounts = await _pca.GetAccountsAsync();
+            var account = accounts.FirstOrDefault();
+
+            if (account == null)
+            {
+                IsAuthenticated = false;
+                return false;
+            }
+
+            try
+            {
+                var silentResult = await _pca.AcquireTokenSilent(scopes, account)
+                    .ExecuteAsync();
+
+                ExtractAndApplyRouting(silentResult);
+                IsAuthenticated = !string.IsNullOrEmpty(silentResult?.AccessToken);
+                return IsAuthenticated;
+            }
+            catch (MsalUiRequiredException)
+            {
+                IsAuthenticated = false;
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("AuthService", "Exception during silent authentication state check.", ex);
+                IsAuthenticated = false;
+                return false;
+            }
+        }
+
         // Silent token cache verification with fallback to interactive browser flows
         public async Task<string> GetGraphAccessTokenAsync(string[] scopes)
         {
@@ -57,12 +118,14 @@ namespace DSAMVVM.Core.Services.Graph
 
                 ExtractAndApplyRouting(silentResult);
                 Log.Debug("AuthService", "Token extracted silently from modern WAM runtime profile.");
+
+                IsAuthenticated = true;
                 return silentResult.AccessToken;
             }
             catch (MsalUiRequiredException ex)
             {
                 Log.Warn("AuthService", $"Msal UI needed, initializing protocol redirect chain: {ex.Message}");
-                return await AcquireTokenViaDeepLinkFallbackAsync(scopes);
+                return await AcquireTokenInteractiveAsync(scopes);
             }
             catch (Exception ex)
             {
@@ -72,7 +135,7 @@ namespace DSAMVVM.Core.Services.Graph
         }
 
         // Interactive token acquisition sequence routing through the WAM broker or fallback web UI
-        private async Task<string> AcquireTokenViaDeepLinkFallbackAsync(string[] scopes)
+        public async Task<string> AcquireTokenInteractiveAsync(string[] scopes)
         {
             IntPtr windowHandle = IntPtr.Zero;
 
@@ -93,6 +156,7 @@ namespace DSAMVVM.Core.Services.Graph
                 .ExecuteAsync();
 
             ExtractAndApplyRouting(result);
+            IsAuthenticated = true;
             return result.AccessToken;
         }
 
@@ -105,6 +169,7 @@ namespace DSAMVVM.Core.Services.Graph
                 Log.Info("AuthService", "Authorization URI cleanly extracted from active link tracking handle.");
             }
         }
+
         public async Task SignOutAsync()
         {
             var accounts = await _pca.GetAccountsAsync();
@@ -115,8 +180,10 @@ namespace DSAMVVM.Core.Services.Graph
                 accounts = await _pca.GetAccountsAsync();
             }
 
+            IsAuthenticated = false;
             Log.Info("AuthService", "User signed out successfully and token cache cleared.");
         }
+
         // --- CUSTOM WEB UI BRIDGE ---
         private class DeepLinkWebUi(AuthenticationService parent) : ICustomWebUi
         {

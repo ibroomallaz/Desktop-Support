@@ -16,8 +16,6 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly StatusBus _statusBus;
 
         private string _searchQuery = string.Empty;
-        private string _authButtonText = "Sign in";
-        private bool _isSignedIn;
 
         public string SearchQuery
         {
@@ -25,11 +23,8 @@ namespace DSAMVVM.MVVM.ViewModel
             set { _searchQuery = value; OnPropertyChanged(); }
         }
 
-        public string AuthButtonText
-        {
-            get => _authButtonText;
-            set { _authButtonText = value; OnPropertyChanged(); }
-        }
+        // Computes the button text directly from the global authentication service state
+        public string AuthButtonText => _authService.IsAuthenticated ? "Sign out" : "Sign in";
 
         public ICommand SearchCommand { get; }
         public ICommand AuthToggleCommand { get; }
@@ -41,8 +36,15 @@ namespace DSAMVVM.MVVM.ViewModel
             _routingService = routingService;
             _statusBus = statusBus;
 
+            _authService.AuthenticationStateChanged += OnAuthenticationStateChanged;
+
             AuthToggleCommand = new RelayCommand(async _ => await ExecuteAuthToggleAsync());
             SearchCommand = AuthToggleCommand;
+        }
+
+        private void OnAuthenticationStateChanged(bool isAuthenticated)
+        {
+            OnPropertyChanged(nameof(AuthButtonText));
         }
 
         public Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target) => Task.CompletedTask;
@@ -50,7 +52,7 @@ namespace DSAMVVM.MVVM.ViewModel
         // Routes the command execution based on the tracked MSAL sign-in state
         private async Task ExecuteAuthToggleAsync()
         {
-            if (_isSignedIn)
+            if (_authService.IsAuthenticated)
             {
                 await ExecuteSignOutAsync();
             }
@@ -85,9 +87,6 @@ namespace DSAMVVM.MVVM.ViewModel
                         .Level(StatusLevel.Success)
                         .Text("Successfully signed in.")
                         .Build());
-
-                    _isSignedIn = true;
-                    AuthButtonText = "Sign out";
                 }
             }
             catch (Exception ex)
@@ -119,9 +118,6 @@ namespace DSAMVVM.MVVM.ViewModel
                     .Level(StatusLevel.Success)
                     .Text("Successfully signed out.")
                     .Build());
-
-                _isSignedIn = false;
-                AuthButtonText = "Sign in";
             }
             catch (Exception ex)
             {
