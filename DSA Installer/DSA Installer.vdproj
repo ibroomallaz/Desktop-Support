@@ -253,15 +253,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Desktop Support App"
-        "ProductCode" = "8:{9EEE77CB-515D-403A-B3EC-B9F000DA9626}"
-        "PackageCode" = "8:{EE224A1E-451B-49DD-B43E-9AC485D6C214}"
+        "ProductCode" = "8:{6774B745-A686-493C-A0A5-0D42EBA5B38E}"
+        "PackageCode" = "8:{D973F785-DC67-4632-8439-BC2E47092A58}"
         "UpgradeCode" = "8:{8C75EC73-37A1-4BEF-8ADF-CCF71E46450F}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:4.3.1100"
+        "ProductVersion" = "8:4.4.1100"
         "Manufacturer" = "8:University of Arizona"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/ProjectHome.aspx"
@@ -789,7 +789,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_E0768B0D1B8A4C9B8AFA904CF9613D47"
             {
-            "SourcePath" = "8:..\\DSAMVVM\\obj\\Release\\net10.0-windows10.0.26100.0\\win-x64\\apphost.exe"
+            "SourcePath" = "8:..\\DSAMVVM\\obj\\Debug\\net10.0-windows10.0.26100.0\\win-x64\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_0D37022F8F7C4A6AB7ADD7AFBFDCEB18"
