@@ -1,9 +1,9 @@
-﻿using System.Windows;
-using System.Windows.Input;
-using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Services.Graph;
 using DSAMVVM.MVVM.ViewModel.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
+using System.Windows;
+using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.View.Dialogs
 {

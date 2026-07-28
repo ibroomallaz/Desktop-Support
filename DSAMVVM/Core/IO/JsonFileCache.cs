@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using DSAMVVM.Core.Logging;
+using Newtonsoft.Json;
 using System.IO;
 using System.Text;
-using DSAMVVM.Core.Logging;
 
 namespace DSAMVVM.Core.IO
 {

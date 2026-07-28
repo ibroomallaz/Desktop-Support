@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Windows.Input;
-using DSAMVVM.Core.Enums;
+﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
@@ -8,6 +6,8 @@ using DSAMVVM.Core.Renderers;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
+using System.IO;
+using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel
 {

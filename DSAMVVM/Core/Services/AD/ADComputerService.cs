@@ -1,7 +1,7 @@
-﻿using System.DirectoryServices;
-using System.Reflection;
-using DSAMVVM.Core.Utilities;
+﻿using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
+using System.DirectoryServices;
+using System.Reflection;
 
 namespace DSAMVVM.Core.Services.AD
 {

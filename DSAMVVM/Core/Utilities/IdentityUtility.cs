@@ -1,10 +1,11 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.DirectoryServices.AccountManagement;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Text;
-using System.DirectoryServices.AccountManagement;
 
 namespace DSAMVVM.Core.Utilities;
+
 public static class IdentityUtility
 {
     static string? _cached;

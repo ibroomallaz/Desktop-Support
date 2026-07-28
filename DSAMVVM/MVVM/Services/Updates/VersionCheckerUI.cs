@@ -1,12 +1,12 @@
-﻿using System.Windows;
-using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
-using DSAMVVM.MVVM.Model.Schemas;
 using DSAMVVM.MVVM.Model.Config;
+using DSAMVVM.MVVM.Model.Schemas;
 using DSAMVVM.MVVM.View.Dialogs;
 using DSAMVVM.MVVM.ViewModel.Dialogs;
+using System.Windows;
 
 namespace DSAMVVM.MVVM.Services.Updates
 {

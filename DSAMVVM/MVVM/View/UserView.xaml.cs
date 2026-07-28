@@ -1,9 +1,9 @@
-﻿using System.ComponentModel;
+﻿using DSAMVVM.MVVM.ViewModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using DSAMVVM.MVVM.ViewModel;
 
 namespace DSAMVVM.MVVM.View
 {

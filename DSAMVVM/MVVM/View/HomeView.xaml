@@ -237,7 +237,7 @@
                         <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
                         <StackPanel Grid.Column="1" Margin="12,8,12,8">
                             <TextBlock Text="Entra" Foreground="{DynamicResource Brush.Text.Primary}" FontSize="15"/>
-                            <TextBlock Text="Coming soon..."
+                            <TextBlock Text="Sign in for Feedback"
                                        Foreground="{DynamicResource Brush.Text.Muted}" FontSize="13"
                                        TextWrapping="Wrap"/>
                         </StackPanel>

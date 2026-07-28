@@ -1,6 +1,6 @@
-﻿using System.Net.Http;
-using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Interfaces;
 using Newtonsoft.Json;
+using System.Net.Http;
 
 namespace DSAMVVM.Core.IO
 {

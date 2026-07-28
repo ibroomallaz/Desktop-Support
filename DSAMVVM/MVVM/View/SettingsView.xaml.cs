@@ -1,5 +1,5 @@
-﻿using System.Windows.Controls;
-using DSAMVVM.MVVM.ViewModel;
+﻿using DSAMVVM.MVVM.ViewModel;
+using System.Windows.Controls;
 
 namespace DSAMVVM.MVVM.View
 {

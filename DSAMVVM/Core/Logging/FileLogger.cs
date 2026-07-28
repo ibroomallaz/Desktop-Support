@@ -1,7 +1,7 @@
-﻿using System.IO;
-using System.Text;
-using DSAMVVM.Core.Enums;
+﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
+using System.IO;
+using System.Text;
 
 namespace DSAMVVM.Core.Logging
 {

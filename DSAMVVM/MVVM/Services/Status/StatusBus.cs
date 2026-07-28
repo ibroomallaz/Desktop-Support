@@ -1,8 +1,7 @@
-﻿using System.Windows;
-using System.Windows.Threading;
-using DSAMVVM.Core.Enums;
-using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Models;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace DSAMVVM.MVVM.Services.Status
 {

@@ -1,12 +1,12 @@
-﻿using System.Diagnostics;
-using System.Windows;
-using System.Windows.Interop;
-using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Extensibility;
+using System.Diagnostics;
+using System.Windows;
+using System.Windows.Interop;
 
 namespace DSAMVVM.Core.Services.Graph
 {

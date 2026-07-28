@@ -1,17 +1,17 @@
-﻿using System.Diagnostics;
-using SharpHook.Data;
-using System.IO;
-using System.Collections.ObjectModel;
-using System.Windows.Input;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Win32;
-using DSAMVVM.Core.Enums;
+﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.Model.Config.UI;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
+using SharpHook.Data;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel
 {

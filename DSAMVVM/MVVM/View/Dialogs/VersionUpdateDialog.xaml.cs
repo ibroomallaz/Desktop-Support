@@ -1,6 +1,6 @@
-﻿using System.Windows;
+﻿using DSAMVVM.MVVM.ViewModel.Dialogs;
+using System.Windows;
 using System.Windows.Input;
-using DSAMVVM.MVVM.ViewModel.Dialogs;
 
 namespace DSAMVVM.MVVM.View.Dialogs
 {

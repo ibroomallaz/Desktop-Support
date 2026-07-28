@@ -1,8 +1,8 @@
-﻿using SharpHook;
+﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.MVVM.Model.Config;
+using SharpHook;
 using SharpHook.Data;
 using System.Windows;
-using DSAMVVM.MVVM.Model.Config;
-using DSAMVVM.Core.Interfaces;
 
 namespace DSAMVVM.Core.Services
 {
@@ -40,7 +40,7 @@ namespace DSAMVVM.Core.Services
             /*else if (!_settings.Enabled && _hook.IsRunning)
                 Stop();
         */
-            }
+        }
 
         public void Start() => _hook.RunAsync();
 

@@ -1,9 +1,9 @@
-﻿using System.Windows;
-using System.Windows.Input;
-using System.Windows.Documents;
-using System.Windows.Navigation;
-using DSAMVVM.Core.Enums;
+﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.MVVM.ViewModel.Overlays;
+using System.Windows;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Navigation;
 
 
 namespace DSAMVVM.MVVM.View.Overlays

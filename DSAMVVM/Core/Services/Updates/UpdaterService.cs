@@ -1,10 +1,10 @@
-﻿using System.Diagnostics;
+﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Logging;
+using DSAMVVM.MVVM.Model.Schemas;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Windows;
-using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Logging;
-using DSAMVVM.MVVM.Model.Schemas;
 
 namespace DSAMVVM.Core.Services.Updates
 {

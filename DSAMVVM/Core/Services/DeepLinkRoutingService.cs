@@ -1,7 +1,7 @@
-﻿using System.Text;
-using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Renderers;
+﻿using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
+using DSAMVVM.Core.Renderers;
+using System.Text;
 
 namespace DSAMVVM.Core.Services
 {

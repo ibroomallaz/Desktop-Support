@@ -1,6 +1,6 @@
 ﻿using DSAMVVM.Core.Models;
-using DSAMVVM.MVVM.Services.Status;
 using DSAMVVM.Core.Utilities;
+using DSAMVVM.MVVM.Services.Status;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;

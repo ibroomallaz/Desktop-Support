@@ -1,8 +1,8 @@
-﻿using System.Diagnostics;
+﻿using DSAMVVM.MVVM.ViewModel;
+using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Extensions.DependencyInjection;
-using DSAMVVM.MVVM.ViewModel;
 
 namespace DSAMVVM.MVVM.View
 {

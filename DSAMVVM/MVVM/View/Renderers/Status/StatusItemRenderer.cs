@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using DSAMVVM.Core.Models;
+using DSAMVVM.Core.Utilities;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using DSAMVVM.Core.Models;
-using DSAMVVM.Core.Utilities;
 
 namespace DSAMVVM.MVVM.View.Renderers.Status
 {

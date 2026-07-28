@@ -1,6 +1,6 @@
-﻿using System.Windows.Input;
-using DSAMVVM.Core.Utilities;
+﻿using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
+using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
