@@ -336,7 +336,7 @@ namespace DSAMVVM.MVVM.ViewModel
             OpenFeedbackCommand = new RelayCommand(param => ExecuteOpenFeedback(param));
         }
 
-        private void ExecuteOpenFeedback(object? parameter)
+        private static void ExecuteOpenFeedback(object? parameter)
         {
             int targetIndex = 0; // Default to 'Report a Bug'
 
