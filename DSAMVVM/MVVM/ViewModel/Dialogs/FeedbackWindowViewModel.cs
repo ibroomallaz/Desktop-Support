@@ -181,6 +181,9 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
                 _ => "Bug"
             };
 
+            // Intercepts the Note submission to fetch the Update channel ID from the routing dictionary
+            string routingKey = feedbackType == "Note" ? "Update" : feedbackType;
+
             // Compiles individual UI fields into a single details string for the payload
             string details = SelectedFeedbackIndex switch
             {
@@ -195,7 +198,9 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
             try
             {
                 string teamId = _routingService.TeamId;
-                string channelId = _routingService.GetChannelId(feedbackType);
+
+                // Ensure we use the routingKey here instead of feedbackType
+                string channelId = _routingService.GetChannelId(routingKey);
 
                 System.Diagnostics.Debug.WriteLine($"[FEEDBACK-DEBUG] Extracted Routing -> TeamID: {teamId} | ChannelID: {channelId}");
 
@@ -213,7 +218,7 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
                     var payload = new FeedbackPayload(
                         teamId,
                         channelId,
-                        feedbackType,
+                        feedbackType, // The payload retains the original type to format HTML properly
                         details,
                         _appStateService.CurrentView,
                         _appStateService.RecentError,
