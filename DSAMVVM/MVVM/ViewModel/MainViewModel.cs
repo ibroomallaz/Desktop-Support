@@ -163,6 +163,9 @@ namespace DSAMVVM.MVVM.ViewModel
             InitializeViewModels(aboutVM);
             InitializeCommands();
             InitializeNavigation();
+
+            // Set the initial view state in the application state service to avoid "Unknown" without changing view
+            _appStateService.CurrentView = _selectedView.ToString();
         }
 
         //Static lock shared across all ghost VM instances
