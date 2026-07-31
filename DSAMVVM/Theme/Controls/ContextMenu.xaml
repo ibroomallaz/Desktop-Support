@@ -35,14 +35,55 @@
             <Setter.Value>
                 <ControlTemplate TargetType="MenuItem">
                     <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="4" Margin="2,1">
-                        <ContentPresenter ContentSource="Header" Margin="{TemplateBinding Padding}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <ContentPresenter ContentSource="Header" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+
+                            <Path x:Name="RightArrow" Grid.Column="1" Margin="10,0,10,0"
+                              VerticalAlignment="Center"
+                              Data="M 0 0 L 4 4 L 0 8 Z"
+                              Fill="{TemplateBinding Foreground}"
+                              Visibility="Collapsed"/>
+
+                            <Popup x:Name="SubMenuPopup" 
+                               AllowsTransparency="True" 
+                               IsOpen="{TemplateBinding IsSubmenuOpen}" 
+                               Placement="Right" 
+                               Focusable="False" 
+                               PopupAnimation="Fade">
+
+                                <Border Background="{DynamicResource Brush.Surface.1}"
+                                    BorderBrush="{DynamicResource Brush.Border}"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Padding="2"
+                                    Margin="0,0,15,15">
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="10" Opacity="0.6" ShadowDepth="3"/>
+                                    </Border.Effect>
+
+                                    <ScrollViewer>
+                                        <ItemsPresenter KeyboardNavigation.TabNavigation="Cycle"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
                     </Border>
 
                     <ControlTemplate.Triggers>
+                        <Trigger Property="Role" Value="SubmenuHeader">
+                            <Setter TargetName="RightArrow" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+
                         <Trigger Property="IsHighlighted" Value="True">
                             <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Brush.Surface.Hover}"/>
                             <Setter Property="Foreground" Value="{DynamicResource Brush.Text.OnAccent}"/>
                         </Trigger>
+
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Muted}"/>
                         </Trigger>
