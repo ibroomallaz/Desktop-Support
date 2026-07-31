@@ -26,8 +26,8 @@
 
                 <Separator/>
 
-                <MenuItem Header="Check for Updates..." Command="{Binding CheckUpdateCommand}"/>
-
+                <MenuItem Header="Submit Feedback" Command="{Binding OpenFeedbackCommand}" CommandParameter="0"/>
+                <MenuItem Header="Check for Updates" Command="{Binding CheckUpdateCommand}"/>
                 <Separator/>
 
                 <MenuItem Header="Exit Application" Command="{Binding ExitApplicationCommand}"/>
