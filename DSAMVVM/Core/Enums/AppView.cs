@@ -9,6 +9,7 @@
         Entra,
         Links,
         Settings,
-        About
+        About,
+        Admin
     }
 }

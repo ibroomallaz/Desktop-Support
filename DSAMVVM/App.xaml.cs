@@ -580,6 +580,7 @@ namespace DSAMVVM
             services.AddTransient<ComputerViewModel>();
             services.AddTransient<LinksViewModel>();
             services.AddSingleton<AboutViewModel>();
+            services.AddSingleton<AdminViewModel>();
 
             services.AddSingleton<HomeViewModel>(sp =>
                 new HomeViewModel(
@@ -617,6 +618,7 @@ namespace DSAMVVM
             services.AddTransient<Func<GroupViewModel>>(sp => () => sp.GetRequiredService<GroupViewModel>());
             services.AddTransient<Func<ComputerViewModel>>(sp => () => sp.GetRequiredService<ComputerViewModel>());
             services.AddTransient<Func<LinksViewModel>>(sp => () => sp.GetRequiredService<LinksViewModel>());
+            services.AddTransient<Func<AdminViewModel>>(sp => () => sp.GetRequiredService<AdminViewModel>());
 
             services.AddSingleton<VersionCheckerUI>();
             services.AddSingleton<IVersionCheckHandler>(sp => sp.GetRequiredService<VersionCheckerUI>());

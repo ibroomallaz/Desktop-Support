@@ -35,6 +35,7 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly Func<ComputerViewModel> _computerVMFactory;
         private readonly Func<GroupViewModel> _groupVMFactory;
         private readonly Func<LinksViewModel> _linksVMFactory;
+        private readonly Func<AdminViewModel> _adminVMFactory;
 
         // ViewModels
         public HomeViewModel HomeVM { get; private set; } = null!;
@@ -45,6 +46,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public LinksViewModel LinksVM { get; private set; } = null!;
         public AboutViewModel AboutVM { get; private set; } = null!;
         public SettingsViewModel SettingsVM { get; private set; } = null!;
+        public AdminViewModel AdminVM { get; private set; } = null!;
 
         // Commands
         public RelayCommand HomeViewCommand { get; private set; } = null!;
@@ -57,6 +59,8 @@ namespace DSAMVVM.MVVM.ViewModel
         public RelayCommand ExecuteSearchCommand { get; private set; } = null!;
         public RelayCommand SettingsCommand { get; private set; } = null!;
         public RelayCommand OpenFeedbackCommand { get; private set; } = null!;
+        // NEW: Admin Command
+        public RelayCommand AdminCommand { get; private set; } = null!;
 
         public ICommand ShowWindowCommand { get; private set; } = null!;
         public ICommand CheckUpdateCommand { get; private set; } = null!;
@@ -108,6 +112,7 @@ namespace DSAMVVM.MVVM.ViewModel
                     AppView.Links => LinksVM,
                     AppView.Settings => SettingsVM,
                     AppView.About => AboutVM,
+                    AppView.Admin => AdminVM, // NEW: Route Admin View
                     _ => HomeVM
                 };
             }
@@ -119,6 +124,19 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _searchQuery;
             set { if (_searchQuery != value) { _searchQuery = value; OnPropertyChanged(); } }
         }
+
+        // NEW: Admin Panel State
+        private bool _isAdminUnlocked;
+        public bool IsAdminUnlocked
+        {
+            get => _isAdminUnlocked;
+            set
+            {
+                _isAdminUnlocked = value;
+                OnPropertyChanged(nameof(IsAdminUnlocked));
+            }
+        }
+
         public ObservableCollection<string> SearchHistory { get; } = [];
 
         public MainViewModel(
@@ -133,6 +151,7 @@ namespace DSAMVVM.MVVM.ViewModel
             Func<ComputerViewModel> computerVMFactory,
             Func<GroupViewModel> groupVMFactory,
             Func<LinksViewModel> linksVMFactory,
+            Func<AdminViewModel> adminVMFactory,
             IApplicationStateService appStateService,
             AboutViewModel aboutVM)
         {
@@ -149,6 +168,7 @@ namespace DSAMVVM.MVVM.ViewModel
             _computerVMFactory = computerVMFactory;
             _groupVMFactory = groupVMFactory;
             _linksVMFactory = linksVMFactory;
+            _adminVMFactory = adminVMFactory;
 
             _searchService.HistoryChanged += OnHistoryChanged;
             SyncHistoryFromService();
@@ -311,6 +331,7 @@ namespace DSAMVVM.MVVM.ViewModel
             ComputerVM = _computerVMFactory();
             GroupVM = _groupVMFactory();
             LinksVM = _linksVMFactory();
+            AdminVM = _adminVMFactory();
         }
 
         private void InitializeCommands()
@@ -323,6 +344,8 @@ namespace DSAMVVM.MVVM.ViewModel
             LinksCommand = new RelayCommand(_ => { SelectedView = AppView.Links; RestoreWindow(); });
             AboutCommand = new RelayCommand(_ => { SelectedView = AppView.About; RestoreWindow(); });
             SettingsCommand = new RelayCommand(_ => { SelectedView = AppView.Settings; RestoreWindow(); });
+            // NEW: Admin Command Initialization
+            AdminCommand = new RelayCommand(_ => { SelectedView = AppView.Admin; RestoreWindow(); });
 
             ExecuteSearchCommand = new RelayCommand(_ => TriggerSearch());
             ShowWindowCommand = new RelayCommand(_ => RestoreWindow());
@@ -371,6 +394,21 @@ namespace DSAMVVM.MVVM.ViewModel
             if (string.IsNullOrWhiteSpace(query)) return;
 
             string lowerQuery = query.ToLowerInvariant();
+
+            // ==========================================
+            // NEW: ADMIN CHEAT CODE INTERCEPT
+            // ==========================================
+            if (lowerQuery == "-admin")
+            {
+                IsAdminUnlocked = true;          // Reveal the hidden button
+                SearchQuery = string.Empty;      // Clear the search box
+                SelectedView = AppView.Admin;    // Automatically select the Admin tab
+
+                UiNotify.Info("Admin mode unlocked.", showStatusBar: true);
+                Log.Info("Admin", "Admin panel unlocked via command prompt.");
+                return;
+            }
+            // ==========================================
 
             if (lowerQuery == "-test-" || lowerQuery == "-production-")
             {

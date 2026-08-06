@@ -22,5 +22,6 @@
         <ResourceDictionary Source="/Theme/Controls/LinksComboBoxTheme.xaml"/>
         <ResourceDictionary Source="/Theme/Controls/ScrollBar.xaml"/>
         <ResourceDictionary Source="/Theme/Controls/ToolTips.xaml"/>
+        <ResourceDictionary Source="/Theme/Controls/TextBoxTheme.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>
