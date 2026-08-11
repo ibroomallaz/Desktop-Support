@@ -173,6 +173,27 @@ namespace DSAMVVM.MVVM.ViewModel
         private int _quickSearchDoubleTapMs;
         public int QuickSearchDoubleTapMs { get => _quickSearchDoubleTapMs; set { if (Set(ref _quickSearchDoubleTapMs, value)) SetModified(); } }
 
+        //ADMIN UI PROPERTIES
+        private bool _hasUnlockedAdmin;
+        public bool HasUnlockedAdmin
+        {
+            get => _hasUnlockedAdmin;
+            set => Set(ref _hasUnlockedAdmin, value);
+        }
+
+        private bool _showAdminView;
+        public bool ShowAdminView
+        {
+            get => _showAdminView;
+            set
+            {
+                if (Set(ref _showAdminView, value))
+                {
+                    SetModified();
+                }
+            }
+        }
+
         // --- Constructors ---
         public SettingsViewModel()
             : this(App.Services.GetRequiredService<ISettingsService>(),
@@ -242,6 +263,10 @@ namespace DSAMVVM.MVVM.ViewModel
             EnableQuickSearch = _settings.QuickSearch.Enabled;
             QuickSearchModifierKey = _settings.QuickSearch.ModifierKeyCode;
             QuickSearchDoubleTapMs = _settings.QuickSearch.DoubleTapThresholdMs;
+
+            //Load Admin State
+            HasUnlockedAdmin = _settings.Ui.HasUnlockedAdmin;
+            ShowAdminView = _settings.Ui.ShowAdminView;
 
             HasUnsavedChanges = false;
             StatusMessage = "Settings are up to date.";
@@ -325,6 +350,10 @@ namespace DSAMVVM.MVVM.ViewModel
                 _settings.QuickSearch.Enabled = EnableQuickSearch;
                 _settings.QuickSearch.ModifierKeyCode = QuickSearchModifierKey;
                 _settings.QuickSearch.DoubleTapThresholdMs = QuickSearchDoubleTapMs;
+
+                //Sync Admin State
+                _settings.Ui.HasUnlockedAdmin = HasUnlockedAdmin;
+                _settings.Ui.ShowAdminView = ShowAdminView;
 
                 _settings.ApplyDefaultsAndClamp();
 

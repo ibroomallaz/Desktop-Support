@@ -182,11 +182,10 @@
                     <StackPanel Grid.Row="1">
 
                         <RadioButton Content="Admin"
-                                     Style="{StaticResource Radio.Menu}"
-                                     Command="{Binding AdminCommand}"
-                                     Visibility="{Binding IsAdminUnlocked, Converter={StaticResource BoolToVis}}"
-                                     IsChecked="{Binding SelectedView, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enums:AppView.Admin}}" />
-
+             Style="{StaticResource Radio.Menu}"
+             Command="{Binding AdminCommand}"
+             Visibility="{Binding ShowAdminView, Converter={StaticResource BoolToVis}}"
+             IsChecked="{Binding SelectedView, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enums:AppView.Admin}}" />
                         <RadioButton Content="Settings"
                                      Tag="{x:Static res:Glyphs.Settings}"
                                      GroupName="MainMenu"

@@ -498,12 +498,20 @@
                         <StackPanel Grid.Column="1" Margin="16">
                             <TextBlock Text="App Maintenance" FontSize="16" FontWeight="SemiBold"
                                        Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,4"/>
+
                             <TextBlock Text="Reset all settings, paths, and UI preferences to factory state." 
                                        Foreground="{DynamicResource Brush.Text.Primary}" Opacity="0.6" FontSize="11" Margin="0,0,0,12"/>
+
                             <Button Command="{Binding ResetDefaultsCommand}" Style="{StaticResource Button.Rounded.Compact}"
                                     HorizontalAlignment="Left" Padding="16,4">
                                 <TextBlock Text="Reset to Factory Defaults" Foreground="White" FontSize="12"/>
                             </Button>
+
+                            <CheckBox Content="Enable Admin Panel"
+                                      IsChecked="{Binding DataContext.ShowAdminView, RelativeSource={RelativeSource AncestorType=Window}}"
+                                      Visibility="{Binding DataContext.HasUnlockedAdmin, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}"
+                                      Foreground="{DynamicResource Brush.Text.Primary}"
+                                      Margin="0,20,0,0"/>
                         </StackPanel>
                     </Grid>
                 </Border>

@@ -59,7 +59,6 @@ namespace DSAMVVM.MVVM.ViewModel
         public RelayCommand ExecuteSearchCommand { get; private set; } = null!;
         public RelayCommand SettingsCommand { get; private set; } = null!;
         public RelayCommand OpenFeedbackCommand { get; private set; } = null!;
-        // NEW: Admin Command
         public RelayCommand AdminCommand { get; private set; } = null!;
 
         public ICommand ShowWindowCommand { get; private set; } = null!;
@@ -125,35 +124,59 @@ namespace DSAMVVM.MVVM.ViewModel
             set { if (_searchQuery != value) { _searchQuery = value; OnPropertyChanged(); } }
         }
 
-        // NEW: Admin Panel State
-        private bool _isAdminUnlocked;
-        public bool IsAdminUnlocked
+
+        // --- ADMIN PANEL STATE ---
+        private bool _hasUnlockedAdmin;
+        public bool HasUnlockedAdmin
         {
-            get => _isAdminUnlocked;
+            get => _hasUnlockedAdmin;
             set
             {
-                _isAdminUnlocked = value;
-                OnPropertyChanged(nameof(IsAdminUnlocked));
+                if (_hasUnlockedAdmin == value) return;
+                _hasUnlockedAdmin = value;
+                OnPropertyChanged(nameof(HasUnlockedAdmin));
+
+                // Save persistence to UI settings
+                var settings = App.Settings;
+                settings.Ui.HasUnlockedAdmin = value;
+                App.Services.GetRequiredService<ISettingsService>().RequestSave(settings, Globals.g_SettingsPath);
+            }
+        }
+
+        private bool _showAdminView;
+        public bool ShowAdminView
+        {
+            get => _showAdminView;
+            set
+            {
+                if (_showAdminView == value) return;
+                _showAdminView = value;
+                OnPropertyChanged(nameof(ShowAdminView));
+
+                // Save persistence to UI settings
+                var settings = App.Settings;
+                settings.Ui.ShowAdminView = value;
+                App.Services.GetRequiredService<ISettingsService>().RequestSave(settings, Globals.g_SettingsPath);
             }
         }
 
         public ObservableCollection<string> SearchHistory { get; } = [];
 
         public MainViewModel(
-            IDepartmentService deptService,
-            IADService adService,
-            ISearchService searchService,
-            IVersionCheckHandler versionHandler,
-            StatusBarViewModel statusBar,
-            IDeepLinkRoutingService linkRouter,
-            IAuthenticationService authService,
-            Func<UserViewModel> userVMFactory,
-            Func<ComputerViewModel> computerVMFactory,
-            Func<GroupViewModel> groupVMFactory,
-            Func<LinksViewModel> linksVMFactory,
-            Func<AdminViewModel> adminVMFactory,
-            IApplicationStateService appStateService,
-            AboutViewModel aboutVM)
+             IDepartmentService deptService,
+             IADService adService,
+             ISearchService searchService,
+             IVersionCheckHandler versionHandler,
+             StatusBarViewModel statusBar,
+             IDeepLinkRoutingService linkRouter,
+             IAuthenticationService authService,
+             Func<UserViewModel> userVMFactory,
+             Func<ComputerViewModel> computerVMFactory,
+             Func<GroupViewModel> groupVMFactory,
+             Func<LinksViewModel> linksVMFactory,
+             Func<AdminViewModel> adminVMFactory,
+             IApplicationStateService appStateService,
+             AboutViewModel aboutVM)
         {
             DeptService = deptService;
             _adService = adService;
@@ -179,6 +202,11 @@ namespace DSAMVVM.MVVM.ViewModel
             // Prevent instance-level duplicate subscriptions
             _linkRouter.NavigationRequested -= OnNavigationRequested;
             _linkRouter.NavigationRequested += OnNavigationRequested;
+
+            //Load Admin persistence from UI settings
+            _hasUnlockedAdmin = App.Settings.Ui.HasUnlockedAdmin;
+            _showAdminView = App.Settings.Ui.ShowAdminView;
+
 
             InitializeViewModels(aboutVM);
             InitializeCommands();
@@ -344,7 +372,6 @@ namespace DSAMVVM.MVVM.ViewModel
             LinksCommand = new RelayCommand(_ => { SelectedView = AppView.Links; RestoreWindow(); });
             AboutCommand = new RelayCommand(_ => { SelectedView = AppView.About; RestoreWindow(); });
             SettingsCommand = new RelayCommand(_ => { SelectedView = AppView.Settings; RestoreWindow(); });
-            // NEW: Admin Command Initialization
             AdminCommand = new RelayCommand(_ => { SelectedView = AppView.Admin; RestoreWindow(); });
 
             ExecuteSearchCommand = new RelayCommand(_ => TriggerSearch());
@@ -395,21 +422,22 @@ namespace DSAMVVM.MVVM.ViewModel
 
             string lowerQuery = query.ToLowerInvariant();
 
-            // ==========================================
-            // NEW: ADMIN CHEAT CODE INTERCEPT
-            // ==========================================
+
+            //Admin intercept
+
             if (lowerQuery == "-admin")
             {
-                IsAdminUnlocked = true;          // Reveal the hidden button
+                HasUnlockedAdmin = true;         // Unhide the checkbox in Settings forever
+                ShowAdminView = true;            // Turn the sidebar button on
                 SearchQuery = string.Empty;      // Clear the search box
                 SelectedView = AppView.Admin;    // Automatically select the Admin tab
 
-                UiNotify.Info("Admin mode unlocked.", showStatusBar: true);
+                UiNotify.Info("Admin mode unlocked! You can now toggle this in Settings.", showStatusBar: true);
                 Log.Info("Admin", "Admin panel unlocked via command prompt.");
                 return;
             }
-            // ==========================================
 
+            // Internal testing toggle intercept
             if (lowerQuery == "-test-" || lowerQuery == "-production-")
             {
                 bool useTest = lowerQuery == "-test-";
@@ -425,7 +453,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 SearchQuery = string.Empty;
                 return;
             }
-
+            // Internal testing error intercept
             if (lowerQuery == "-debug-error-")
             {
                 var bus = App.Services.GetRequiredService<StatusBus>();

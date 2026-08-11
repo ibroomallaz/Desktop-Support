@@ -15,6 +15,8 @@ namespace DSAMVVM.Core.Services
         private const int MinFont = 8;
         private const int MaxFont = 24;
 
+        //Reactive Event Broker
+        public event EventHandler<AppSettings>? SettingsChanged;
 
         // Load / Save (core)
 
@@ -95,6 +97,10 @@ namespace DSAMVVM.Core.Services
                 File.Copy(tmp, path, overwrite: true);
                 File.Delete(tmp);
                 Log.Info(Tag, $"SaveAsync: settings persisted to \"{path}\".");
+
+
+                //Broadcast change to listening ViewModels
+                SettingsChanged?.Invoke(this, settings);
             }
             catch (Exception ex)
             {
@@ -102,7 +108,6 @@ namespace DSAMVVM.Core.Services
                 throw;
             }
         }
-
 
         // Paths
 
@@ -122,7 +127,6 @@ namespace DSAMVVM.Core.Services
         }
 
         // Font sizing
-
 
         public double GetFontSizeFor(string viewName, AppSettings s, double min = MinFont, double max = MaxFont)
         {
@@ -199,12 +203,10 @@ namespace DSAMVVM.Core.Services
             }
         }
 
-
         // Debounced save
 
-
         private readonly Lock _saveGate = new();
-        private System.Threading.Timer? _saveTimer;
+        private Timer? _saveTimer;
         private AppSettings? _pendingSettings;
         private string? _pendingPath;
         private static readonly TimeSpan SaveDebounce = TimeSpan.FromMilliseconds(500);
@@ -213,13 +215,16 @@ namespace DSAMVVM.Core.Services
         {
             if (s is null || string.IsNullOrWhiteSpace(settingsPath)) return;
 
+            // Broadcast change immediately so UI updates instantly
+            SettingsChanged?.Invoke(this, s);
+
             lock (_saveGate)
             {
                 _pendingSettings = s;
                 _pendingPath = Expand(settingsPath);
 
                 _saveTimer?.Dispose();
-                _saveTimer = new System.Threading.Timer(async _ =>
+                _saveTimer = new Timer(async _ =>
                 {
                     AppSettings? toSave;
                     string? path;
@@ -284,7 +289,6 @@ namespace DSAMVVM.Core.Services
                 }
             }
         }
-
 
         // Helpers
 
