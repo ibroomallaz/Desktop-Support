@@ -307,7 +307,6 @@ namespace DSAMVVM.MVVM.ViewModel
             try
             {
                 // 1. Detect changes by comparing UI properties against the current active settings.
-
                 var active = App.Settings;
 
                 bool deptChanged = active.Paths.DepartmentData.UseCustomSource != UseCustomDept ||
@@ -351,7 +350,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 _settings.QuickSearch.ModifierKeyCode = QuickSearchModifierKey;
                 _settings.QuickSearch.DoubleTapThresholdMs = QuickSearchDoubleTapMs;
 
-                //Sync Admin State
+                // Sync Admin State
                 _settings.Ui.HasUnlockedAdmin = HasUnlockedAdmin;
                 _settings.Ui.ShowAdminView = ShowAdminView;
 
@@ -365,9 +364,8 @@ namespace DSAMVVM.MVVM.ViewModel
                 active.Meta = _settings.Meta;
                 active.QuickSearch = _settings.QuickSearch;
 
-                // 4. Save the global object to disk
-                var path = Path.Combine(Globals.g_AppDir, "settings.json");
-                _settingsSvc.RequestSave(active, path);
+                // 4. Save the global object to disk (FIXED PATH)
+                _settingsSvc.RequestSave(active, Globals.g_SettingsPath);
                 TryFlushPendingSaves(_settingsSvc);
 
                 // 5. Update UI state
@@ -382,8 +380,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
                 var quickSearchSvc = App.Services.GetService<IQuickSearchService>();
                 quickSearchSvc?.Configure(active.QuickSearch);
-
-                if (deptChanged) _ = deptService?.ReloadDataAsync();
 
                 if (deptChanged) _ = deptService?.ReloadDataAsync();
                 if (linksChanged) _ = linksService?.ReloadLinksDataAsync();

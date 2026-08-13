@@ -4,6 +4,7 @@ using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
+using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.Services.Status;
 using DSAMVVM.MVVM.View.Dialogs;
 using DSAMVVM.MVVM.View.Resources;
@@ -111,7 +112,7 @@ namespace DSAMVVM.MVVM.ViewModel
                     AppView.Links => LinksVM,
                     AppView.Settings => SettingsVM,
                     AppView.About => AboutVM,
-                    AppView.Admin => AdminVM, // NEW: Route Admin View
+                    AppView.Admin => AdminVM,
                     _ => HomeVM
                 };
             }
@@ -125,7 +126,7 @@ namespace DSAMVVM.MVVM.ViewModel
         }
 
 
-        // --- ADMIN PANEL STATE ---
+        // ADMIN PANEL STATE
         private bool _hasUnlockedAdmin;
         public bool HasUnlockedAdmin
         {
@@ -135,11 +136,6 @@ namespace DSAMVVM.MVVM.ViewModel
                 if (_hasUnlockedAdmin == value) return;
                 _hasUnlockedAdmin = value;
                 OnPropertyChanged(nameof(HasUnlockedAdmin));
-
-                // Save persistence to UI settings
-                var settings = App.Settings;
-                settings.Ui.HasUnlockedAdmin = value;
-                App.Services.GetRequiredService<ISettingsService>().RequestSave(settings, Globals.g_SettingsPath);
             }
         }
 
@@ -152,11 +148,6 @@ namespace DSAMVVM.MVVM.ViewModel
                 if (_showAdminView == value) return;
                 _showAdminView = value;
                 OnPropertyChanged(nameof(ShowAdminView));
-
-                // Save persistence to UI settings
-                var settings = App.Settings;
-                settings.Ui.ShowAdminView = value;
-                App.Services.GetRequiredService<ISettingsService>().RequestSave(settings, Globals.g_SettingsPath);
             }
         }
 
@@ -203,10 +194,15 @@ namespace DSAMVVM.MVVM.ViewModel
             _linkRouter.NavigationRequested -= OnNavigationRequested;
             _linkRouter.NavigationRequested += OnNavigationRequested;
 
-            //Load Admin persistence from UI settings
+            // Load Admin persistence from UI settings on boot directly to fields
             _hasUnlockedAdmin = App.Settings.Ui.HasUnlockedAdmin;
             _showAdminView = App.Settings.Ui.ShowAdminView;
 
+            // ==========================================
+            // NEW: LISTEN FOR SETTINGS APPLY EVENTS
+            // ==========================================
+            var settingsSvc = App.Services.GetRequiredService<ISettingsService>();
+            settingsSvc.SettingsChanged += OnSettingsChanged;
 
             InitializeViewModels(aboutVM);
             InitializeCommands();
@@ -214,6 +210,14 @@ namespace DSAMVVM.MVVM.ViewModel
 
             // Set the initial view state in the application state service to avoid "Unknown" without changing view
             _appStateService.CurrentView = _selectedView.ToString();
+        }
+
+        // Event handler to sync properties when SettingsVM hits "Apply"
+        private void OnSettingsChanged(object? sender, AppSettings newSettings)
+        {
+            // Sync Admin state safely
+            HasUnlockedAdmin = newSettings.Ui.HasUnlockedAdmin;
+            ShowAdminView = newSettings.Ui.ShowAdminView;
         }
 
         //Static lock shared across all ghost VM instances
@@ -422,15 +426,19 @@ namespace DSAMVVM.MVVM.ViewModel
 
             string lowerQuery = query.ToLowerInvariant();
 
-
             //Admin intercept
-
             if (lowerQuery == "-admin")
             {
-                HasUnlockedAdmin = true;         // Unhide the checkbox in Settings forever
-                ShowAdminView = true;            // Turn the sidebar button on
-                SearchQuery = string.Empty;      // Clear the search box
-                SelectedView = AppView.Admin;    // Automatically select the Admin tab
+                HasUnlockedAdmin = true;
+                ShowAdminView = true;
+
+                var settings = App.Settings;
+                settings.Ui.HasUnlockedAdmin = true;
+                settings.Ui.ShowAdminView = true;
+                App.Services.GetRequiredService<ISettingsService>().RequestSave(settings, Globals.g_SettingsPath);
+
+                SearchQuery = string.Empty;
+                SelectedView = AppView.Admin;
 
                 UiNotify.Info("Admin mode unlocked! You can now toggle this in Settings.", showStatusBar: true);
                 Log.Info("Admin", "Admin panel unlocked via command prompt.");

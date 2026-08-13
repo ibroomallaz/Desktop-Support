@@ -508,8 +508,8 @@
                             </Button>
 
                             <CheckBox Content="Enable Admin Panel"
-                                      IsChecked="{Binding DataContext.ShowAdminView, RelativeSource={RelativeSource AncestorType=Window}}"
-                                      Visibility="{Binding DataContext.HasUnlockedAdmin, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}"
+                                      IsChecked="{Binding ShowAdminView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Visibility="{Binding HasUnlockedAdmin, Converter={StaticResource BoolToVis}}"
                                       Foreground="{DynamicResource Brush.Text.Primary}"
                                       Margin="0,20,0,0"/>
                         </StackPanel>
