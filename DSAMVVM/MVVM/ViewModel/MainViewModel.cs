@@ -198,9 +198,8 @@ namespace DSAMVVM.MVVM.ViewModel
             _hasUnlockedAdmin = App.Settings.Ui.HasUnlockedAdmin;
             _showAdminView = App.Settings.Ui.ShowAdminView;
 
-            // ==========================================
-            // NEW: LISTEN FOR SETTINGS APPLY EVENTS
-            // ==========================================
+
+            //Listen for settings changes to sync Admin state across instances
             var settingsSvc = App.Services.GetRequiredService<ISettingsService>();
             settingsSvc.SettingsChanged += OnSettingsChanged;
 
