@@ -2,6 +2,7 @@
 using DSAMVVM.MVVM.Model.Config;
 using SharpHook;
 using SharpHook.Data;
+using SharpHook.Simulation;
 using System.Windows;
 
 namespace DSAMVVM.Core.Services
@@ -12,15 +13,15 @@ namespace DSAMVVM.Core.Services
         private readonly EventSimulator _simulator;
 
         private QuickSearchSettings _settings = new();
-        private long _lastPressTime = 0;
-        private bool _isTriggerKeyDown = false;
+        private long _lastPressTime;
+        private bool _isTriggerKeyDown;
 
         public event EventHandler<string>? QuickSearchTriggered;
 
         public QuickSearchService()
         {
             _hook = new TaskPoolGlobalHook();
-            _simulator = new EventSimulator();
+            _simulator = EventSimulator.Create("Desktop Support App");
 
             _hook.KeyPressed += OnKeyPressed;
             _hook.KeyReleased += OnKeyReleased;
@@ -81,7 +82,7 @@ namespace DSAMVVM.Core.Services
 
         private void ExecuteCapture()
         {
-            Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(async void () =>
             {
                 string capturedText = string.Empty;
 
