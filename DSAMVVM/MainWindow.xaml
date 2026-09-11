@@ -11,6 +11,7 @@
         xmlns:res="clr-namespace:DSAMVVM.MVVM.View.Resources"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=viewModel:MainViewModel}"
         Height="600" Width="920"
         WindowStyle="None"
         ResizeMode="NoResize"

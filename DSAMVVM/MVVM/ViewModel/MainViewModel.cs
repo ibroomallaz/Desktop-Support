@@ -21,13 +21,12 @@ namespace DSAMVVM.MVVM.ViewModel
     {
         // Services
         public IDepartmentService DeptService { get; }
-        private readonly IADService _adService;
         private readonly ISearchService _searchService;
         private readonly IVersionCheckHandler _versionHandler;
         private readonly IDeepLinkRoutingService _linkRouter;
         private readonly IAuthenticationService _authService;
-        private readonly IApplicationStateService _appStateService = null!;
-        public StatusBarViewModel StatusBar { get; } = null!;
+        private readonly IApplicationStateService _appStateService;
+        public StatusBarViewModel StatusBar { get; }
         public bool IsUserSignedIn => _authService.IsAuthenticated;
 
         // VM factories
@@ -123,7 +122,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public MainViewModel(
             IDepartmentService deptService,
-            IADService adService,
             ISearchService searchService,
             IVersionCheckHandler versionHandler,
             StatusBarViewModel statusBar,
@@ -137,7 +135,6 @@ namespace DSAMVVM.MVVM.ViewModel
             AboutViewModel aboutVM)
         {
             DeptService = deptService;
-            _adService = adService;
             _searchService = searchService;
             StatusBar = statusBar;
             _linkRouter = linkRouter;
@@ -205,7 +202,7 @@ namespace DSAMVVM.MVVM.ViewModel
             });
         }
 
-        public void ProcessArgs(string[] args)
+        public void ProcessArgs(string[]? args)
         {
             if (args == null || args.Length == 0) return;
 
@@ -336,7 +333,7 @@ namespace DSAMVVM.MVVM.ViewModel
             });
 
             // Initialize the OpenFeedbackCommand
-            OpenFeedbackCommand = new RelayCommand(param => ExecuteOpenFeedback(param));
+            OpenFeedbackCommand = new RelayCommand(ExecuteOpenFeedback);
         }
 
         private static void ExecuteOpenFeedback(object? parameter)
@@ -352,7 +349,7 @@ namespace DSAMVVM.MVVM.ViewModel
             var mainWindow = Application.Current.MainWindow;
             var window = new FeedbackWindow(targetIndex);
 
-            if (mainWindow != null && mainWindow.IsVisible)
+            if (mainWindow is { IsVisible: true })
             {
                 window.Owner = mainWindow;
             }
@@ -374,69 +371,76 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private async void TriggerSearch()
         {
-            var query = (SearchQuery ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(query)) return;
-
-            string lowerQuery = query.ToLowerInvariant();
-
-            if (lowerQuery == "-test-" || lowerQuery == "-production-")
-            {
-                bool useTest = lowerQuery == "-test-";
-                var appSettings = App.Settings;
-                appSettings.Updates.UseInternalTestingSources = useTest;
-
-                var settingsService = App.Services.GetRequiredService<ISettingsService>();
-                settingsService.RequestSave(appSettings, Globals.g_SettingsPath);
-
-                string mode = useTest ? "TEST" : "PRODUCTION";
-                UiNotify.Info($"Update source toggled to: {mode}", showStatusBar: true);
-
-                SearchQuery = string.Empty;
-                return;
-            }
-
-            if (lowerQuery == "-debug-error-")
-            {
-                var bus = App.Services.GetRequiredService<StatusBus>();
-
-                var testError = new StatusItemBuilder()
-                    .Key("DEBUG_STICKY_ERROR")
-                    .Level(StatusLevel.Error)
-                    .Sticky(true)
-                    .Priority(1)
-                    .Text("DEBUG: This is a persistent high-priority error. Test the ")
-                    .Bold("✕")
-                    .Text(" button!")
-                    .Build();
-
-                bus.Report(testError);
-
-                SearchQuery = string.Empty;
-                return;
-            }
-
-            if (CurrentView is not ISearchableViewModel searchable) return;
-
-            var target = ResolveTargetFromView(CurrentView);
-            if (target is null)
-            {
-                UiNotify.Warn("Search not supported for this view.");
-                return;
-            }
-
-            var key = $"{target}_Search";
-            UiNotify.Info($"Searching {target}...", showStatusBar: true, key: key);
-
             try
             {
-                var context = new SearchContextDTO(query);
-                await searchable.OnSearchUpdated(context, _searchService, target.Value);
-                UiNotify.Success("Search complete.", key: key);
-                SearchQuery = string.Empty;
+                var query = (SearchQuery ?? string.Empty).Trim();
+                if (string.IsNullOrWhiteSpace(query)) return;
+
+                string lowerQuery = query.ToLowerInvariant();
+
+                if (lowerQuery is "-test-" or "-production-")
+                {
+                    bool useTest = lowerQuery == "-test-";
+                    var appSettings = App.Settings;
+                    appSettings.Updates.UseInternalTestingSources = useTest;
+
+                    var settingsService = App.Services.GetRequiredService<ISettingsService>();
+                    settingsService.RequestSave(appSettings, Globals.g_SettingsPath);
+
+                    string mode = useTest ? "TEST" : "PRODUCTION";
+                    UiNotify.Info($"Update source toggled to: {mode}", showStatusBar: true);
+
+                    SearchQuery = string.Empty;
+                    return;
+                }
+
+                if (lowerQuery == "-debug-error-")
+                {
+                    var bus = App.Services.GetRequiredService<StatusBus>();
+
+                    var testError = new StatusItemBuilder()
+                        .Key("DEBUG_STICKY_ERROR")
+                        .Level(StatusLevel.Error)
+                        .Sticky()
+                        .Priority(1)
+                        .Text("DEBUG: This is a persistent high-priority error. Test the ")
+                        .Bold("✕")
+                        .Text(" button!")
+                        .Build();
+
+                    bus.Report(testError);
+
+                    SearchQuery = string.Empty;
+                    return;
+                }
+
+                if (CurrentView is not ISearchableViewModel searchable) return;
+
+                var target = ResolveTargetFromView(CurrentView);
+                if (target is null)
+                {
+                    UiNotify.Warn("Search not supported for this view.");
+                    return;
+                }
+
+                var key = $"{target}_Search";
+                UiNotify.Info($"Searching {target}...", showStatusBar: true, key: key);
+
+                try
+                {
+                    var context = new SearchContextDTO(query);
+                    await searchable.OnSearchUpdated(context, _searchService, target.Value);
+                    UiNotify.Success("Search complete.", key: key);
+                    SearchQuery = string.Empty;
+                }
+                catch (Exception ex)
+                {
+                    UiNotify.Error("Search failed", ex.Message, ex, alsoStatusBar: true, key: key);
+                }
             }
             catch (Exception ex)
             {
-                UiNotify.Error("Search failed", ex.Message, ex, alsoStatusBar: true, key: key);
+                UiNotify.Error("Search error", ex.Message, ex, alsoStatusBar: true);
             }
         }
 
