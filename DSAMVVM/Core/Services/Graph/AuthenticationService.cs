@@ -5,12 +5,13 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Extensibility;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 
 namespace DSAMVVM.Core.Services.Graph
 {
-    public class AuthenticationService : IAuthenticationService
+    public partial class AuthenticationService : IAuthenticationService
     {
         private readonly IPublicClientApplication _pca;
         private readonly TeamsRoutingService _routingService;
@@ -56,7 +57,10 @@ namespace DSAMVVM.Core.Services.Graph
                     Log.Debug("MSAL", message);
                 }, LogLevel.Info, enablePiiLogging: false);
 
-            var brokerOptions = new BrokerOptions(BrokerOptions.OperatingSystems.Windows);
+            var brokerOptions = new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
+            {
+                Title = "Desktop Support App"
+            };
             builder.WithBroker(brokerOptions);
 
             _pca = builder.Build();
@@ -135,29 +139,134 @@ namespace DSAMVVM.Core.Services.Graph
         }
 
         // Interactive token acquisition sequence routing through the WAM broker or fallback web UI
-        public async Task<string> AcquireTokenInteractiveAsync(string[] scopes)
+        public async Task<string> AcquireTokenInteractiveAsync(string[] scopes, IntPtr? parentWindowHandle = null)
         {
-            IntPtr windowHandle = IntPtr.Zero;
+            IntPtr windowHandle = parentWindowHandle ?? IntPtr.Zero;
+            Window? activeWindow = null;
+            var untoppedWindows = new List<Window>();
 
-            // Extracts the native window handle from the primary WPF UI thread
-            Application.Current.Dispatcher.Invoke(() =>
+            // Extracts the native window handle from the active/foreground window on the WPF UI thread
+            if (Application.Current != null)
             {
-                var mainWindow = Application.Current.MainWindow;
-                if (mainWindow != null)
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    windowHandle = new WindowInteropHelper(mainWindow).Handle;
+                    if (windowHandle == IntPtr.Zero)
+                    {
+                        activeWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive && w.IsVisible)
+                                       ?? Application.Current.Windows.OfType<Window>().LastOrDefault(w => w.IsVisible)
+                                       ?? Application.Current.MainWindow;
+
+                        if (activeWindow != null)
+                        {
+                            if (activeWindow.WindowState == WindowState.Minimized)
+                            {
+                                activeWindow.WindowState = WindowState.Normal;
+                            }
+
+                            activeWindow.Activate();
+                            activeWindow.Focus();
+
+                            windowHandle = new WindowInteropHelper(activeWindow).EnsureHandle();
+                        }
+                    }
+                    else
+                    {
+                        activeWindow = Application.Current.Windows.OfType<Window>()
+                            .FirstOrDefault(w => new WindowInteropHelper(w).Handle == windowHandle);
+                    }
+
+                    if (windowHandle != IntPtr.Zero)
+                    {
+                        SwitchToThisWindow(windowHandle, true);
+                        SetForegroundWindow(windowHandle);
+                    }
+
+                    // Any window that has Topmost = true (such as FeedbackWindow) will occlude
+                    // the external MSAL WAM broker or browser prompt. Temporarily disable Topmost.
+                    foreach (Window window in Application.Current.Windows)
+                    {
+                        if (window.IsVisible && window.Topmost)
+                        {
+                            window.Topmost = false;
+                            untoppedWindows.Add(window);
+                        }
+                    }
+                });
+            }
+
+            // Start a lightweight background watcher to bring the MSAL/WAM popup dialog to the front
+            // as soon as it is spawned and attached to the parent window handle.
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            if (windowHandle != IntPtr.Zero)
+            {
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        while (!cts.Token.IsCancellationRequested)
+                        {
+                            await Task.Delay(100, cts.Token);
+                            IntPtr popup = GetWindow(windowHandle, GW_ENABLEDPOPUP);
+                            if (popup != IntPtr.Zero && popup != windowHandle)
+                            {
+                                SetWindowPos(popup, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+                                BringWindowToTop(popup);
+                                SetForegroundWindow(popup);
+                                break;
+                            }
+                        }
+                    }
+                    catch (OperationCanceledException) { }
+                    catch (Exception ex)
+                    {
+                        Log.Debug("AuthService", $"Popup watcher ignored exception: {ex.Message}");
+                    }
+                }, cts.Token);
+            }
+
+            try
+            {
+                // Binds the interactive MSAL security dialog to the parent window process
+                var interactiveBuilder = _pca.AcquireTokenInteractive(scopes)
+                    .WithCustomWebUi(new DeepLinkWebUi(this));
+
+                if (windowHandle != IntPtr.Zero)
+                {
+                    interactiveBuilder = interactiveBuilder.WithParentActivityOrWindow(windowHandle);
                 }
-            });
 
-            // Binds the interactive MSAL security dialog to the application's main window process
-            var result = await _pca.AcquireTokenInteractive(scopes)
-                .WithParentActivityOrWindow(windowHandle)
-                .WithCustomWebUi(new DeepLinkWebUi(this))
-                .ExecuteAsync();
+                var result = await interactiveBuilder.ExecuteAsync();
 
-            ExtractAndApplyRouting(result);
-            IsAuthenticated = true;
-            return result.AccessToken;
+                ExtractAndApplyRouting(result);
+                IsAuthenticated = true;
+                return result.AccessToken;
+            }
+            finally
+            {
+                cts.Cancel();
+
+                // Restore Topmost on any windows that were originally Topmost, and re-activate the parent window
+                if (Application.Current != null)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        foreach (var window in untoppedWindows)
+                        {
+                            window.Topmost = true;
+                        }
+
+                        if (activeWindow != null && activeWindow.IsVisible)
+                        {
+                            activeWindow.Activate();
+                            activeWindow.Focus();
+                            if (windowHandle != IntPtr.Zero)
+                            {
+                                SetForegroundWindow(windowHandle);
+                            }
+                        }
+                    });
+                }
+            }
         }
 
         // Ingests the raw URL passed from single-instance deep link routing interceptions
@@ -212,5 +321,33 @@ namespace DSAMVVM.Core.Services.Graph
                 return new Uri(parent._capturedAuthUri);
             }
         }
+
+        #region Win32 P/Invoke Declarations
+
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool SetForegroundWindow(IntPtr hWnd);
+
+        [LibraryImport("user32.dll", EntryPoint = "SwitchToThisWindow")]
+        private static partial void SwitchToThisWindow(IntPtr hWnd, [MarshalAs(UnmanagedType.Bool)] bool fAltTab);
+
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool BringWindowToTop(IntPtr hWnd);
+
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+        [LibraryImport("user32.dll")]
+        private static partial IntPtr GetWindow(IntPtr hWnd, uint uCmd);
+
+        private static readonly IntPtr HWND_TOP = IntPtr.Zero;
+        private const uint SWP_NOMOVE = 0x0002;
+        private const uint SWP_NOSIZE = 0x0001;
+        private const uint SWP_SHOWWINDOW = 0x0040;
+        private const uint GW_ENABLEDPOPUP = 6;
+
+        #endregion
     }
 }

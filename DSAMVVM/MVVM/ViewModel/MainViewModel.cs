@@ -20,9 +20,9 @@ namespace DSAMVVM.MVVM.ViewModel
     public partial class MainViewModel : ObservableObject
     {
         // Services
-        public IDepartmentService DeptService { get; } = null!;
-        private readonly IADService _adService = null!;
-        private readonly ISearchService _searchService = null!;
+        public IDepartmentService DeptService { get; }
+        private readonly IADService _adService;
+        private readonly ISearchService _searchService;
         private readonly IVersionCheckHandler _versionHandler;
         private readonly IDeepLinkRoutingService _linkRouter;
         private readonly IAuthenticationService _authService;
@@ -349,10 +349,17 @@ namespace DSAMVVM.MVVM.ViewModel
                 targetIndex = parsed;
             }
 
-            var window = new FeedbackWindow(targetIndex)
+            var mainWindow = Application.Current.MainWindow;
+            var window = new FeedbackWindow(targetIndex);
+
+            if (mainWindow != null && mainWindow.IsVisible)
             {
-                Owner = Application.Current.MainWindow
-            };
+                window.Owner = mainWindow;
+            }
+            else
+            {
+                window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            }
 
             window.ShowDialog();
         }

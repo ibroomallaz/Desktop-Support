@@ -15,7 +15,7 @@
         Task<string> GetGraphAccessTokenAsync(string[] scopes);
 
         // Explicitly triggers the interactive authentication flow
-        Task<string> AcquireTokenInteractiveAsync(string[] scopes);
+        Task<string> AcquireTokenInteractiveAsync(string[] scopes, IntPtr? parentWindowHandle = null);
 
         // Ingests deep link query arguments to catch interactive authorization code bounces
         void ProcessAuthRedirect(string url);
