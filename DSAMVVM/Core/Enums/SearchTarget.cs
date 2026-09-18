@@ -4,7 +4,8 @@
     {
         User,
         Computer,
-        Group
+        Group,
+        Admin
         // Add Entra and more later
     }
 }

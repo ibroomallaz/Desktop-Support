@@ -126,7 +126,7 @@ namespace DSAMVVM.MVVM.ViewModel
         }
 
 
-        // ADMIN PANEL STATE
+        //Admin state properties, persisted to settings
         private bool _hasUnlockedAdmin;
         public bool HasUnlockedAdmin
         {
@@ -415,6 +415,7 @@ namespace DSAMVVM.MVVM.ViewModel
             UserViewModel => SearchTarget.User,
             ComputerViewModel => SearchTarget.Computer,
             GroupViewModel => SearchTarget.Group,
+            AdminViewModel => SearchTarget.Admin,
             _ => null
         };
 

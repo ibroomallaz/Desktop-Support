@@ -4,10 +4,13 @@ using DSAMVVM.Core.Models;
 
 namespace DSAMVVM.Core.Services
 {
-
-    public class SearchService(IADService ad, IApplicationStateService appStateService) : ISearchService
+    public class SearchService(
+        IADService ad,
+        IDepartmentService dept,
+        IApplicationStateService appStateService) : ISearchService
     {
         private readonly IADService _ad = ad ?? throw new ArgumentNullException(nameof(ad));
+        private readonly IDepartmentService _dept = dept ?? throw new ArgumentNullException(nameof(dept));
         private readonly IApplicationStateService _appStateService = appStateService ?? throw new ArgumentNullException(nameof(appStateService));
 
         // History state
@@ -65,6 +68,12 @@ namespace DSAMVVM.Core.Services
                 SearchTarget.User => await _ad.GetUserAsync(context.Query),
                 SearchTarget.Computer => await _ad.GetComputerAsync(context.Query),
                 SearchTarget.Group => await _ad.GetGroupAsync(context.Query),
+                SearchTarget.Admin => context.Mode switch
+                {
+                    nameof(AdminSection.Department) => await _dept.GetDepartmentAsync(context.Query),
+                    nameof(AdminSection.SupportTeam) => await _dept.GetSupportTeamAsync(context.Query),
+                    _ => throw new NotSupportedException($"Admin search mode '{context.Mode}' is not supported.")
+                },
                 _ => throw new NotSupportedException($"Search not implemented for '{target}'.")
             };
         }
@@ -74,14 +83,12 @@ namespace DSAMVVM.Core.Services
             if (string.IsNullOrWhiteSpace(query)) return;
             string formattedQuery = query.Trim();
 
-            // Sync state immediately, ensuring the Feedback 
             _appStateService.RecentQuery = formattedQuery;
 
             lock (_gate)
             {
                 if (!_historyEnabled || _historyCap <= 0) return;
 
-                // de-dup case-insensitive, move to front
                 int existing = _history.FindIndex(q => string.Equals(q, formattedQuery, StringComparison.OrdinalIgnoreCase));
                 if (existing >= 0) _history.RemoveAt(existing);
                 _history.Insert(0, formattedQuery);
