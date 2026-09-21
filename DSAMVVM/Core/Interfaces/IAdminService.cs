@@ -19,6 +19,10 @@ namespace DSAMVVM.Core.Interfaces
         Task<IReadOnlyList<string>> GetAvailableLinkTeamsAsync();
         Task<(Link? Link, bool IsCommon, string? Team)> FindLinkAsync(string query);
 
+        // Staging helpers
+        DepartmentListWrapper ApplyDepartmentChanges(DepartmentListWrapper wrapper, IEnumerable<StagedChange> stagedChanges);
+        LinksData ApplyLinkChanges(LinksData linksData, IEnumerable<StagedChange> stagedChanges);
+
         // Persistence
         Task SaveStagedChangesAsync(IEnumerable<StagedChange> stagedChanges);
     }

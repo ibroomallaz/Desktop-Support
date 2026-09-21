@@ -562,6 +562,8 @@ namespace DSAMVVM
             services.AddSingleton<IADService, ADService>();
             services.AddSingleton<ILinksService, LinksService>();
             services.AddSingleton<IAdminService, AdminService>();
+            services.AddSingleton<IFileDialogService, FileDialogService>();
+            services.AddSingleton<IJsonExportService, JsonExportService>();
             services.AddSingleton<ISearchService, SearchService>();
             services.AddSingleton<IUpdaterService, UpdaterService>();
             services.AddSingleton<IDeepLinkRoutingService, DeepLinkRoutingService>();

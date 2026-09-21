@@ -1,4 +1,5 @@
-﻿using DSAMVVM.Core.Enums;
+using System.IO;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
@@ -16,6 +17,8 @@ namespace DSAMVVM.MVVM.ViewModel
         private const string Tag = "AdminVM";
 
         private readonly IAdminService _adminService;
+        private readonly IJsonExportService _jsonExportService;
+        private readonly IFileDialogService _fileDialogService;
 
         // Department tracking state
         private Department? _originalDept;
@@ -342,20 +345,24 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand DiscardAllCommand { get; }
         public ICommand ClearFormCommand { get; }
         public ICommand SaveCommand { get; }
+        public ICommand ExportJsonCommand { get; }
         public ICommand DeleteLinkCommand { get; }
         public ICommand DeleteSupportTeamCommand { get; }
         public ICommand AddDivisionCommand { get; }
         public ICommand RemoveDivisionCommand { get; }
 
-        public AdminViewModel(IAdminService adminService)
+        public AdminViewModel(IAdminService adminService, IJsonExportService jsonExportService, IFileDialogService fileDialogService)
         {
             _adminService = adminService ?? throw new ArgumentNullException(nameof(adminService));
+            _jsonExportService = jsonExportService ?? throw new ArgumentNullException(nameof(jsonExportService));
+            _fileDialogService = fileDialogService ?? throw new ArgumentNullException(nameof(fileDialogService));
 
             ApplyCommand = new RelayCommand(_ => ExecuteApply());
             RemoveStagedItemCommand = new RelayCommand(param => ExecuteRemoveStagedItem(param));
             DiscardAllCommand = new RelayCommand(_ => ExecuteDiscardAll());
             ClearFormCommand = new RelayCommand(_ => ExecuteClearForm());
             SaveCommand = new RelayCommand(async _ => await ExecuteSaveAsync());
+            ExportJsonCommand = new RelayCommand(async _ => await ExecuteExportJsonAsync());
             DeleteLinkCommand = new RelayCommand(_ => StageLinkChange(isDelete: true));
             DeleteSupportTeamCommand = new RelayCommand(_ => StageSupportTeamChange(isDelete: true));
             AddDivisionCommand = new RelayCommand(_ => ExecuteAddDivision());
@@ -1117,6 +1124,69 @@ namespace DSAMVVM.MVVM.ViewModel
             StagedChanges.Clear();
             NotifyStagingChanged();
             UiNotify.Info("All pending staged changes have been discarded.", showStatusBar: true);
+        }
+
+        private async Task ExecuteExportJsonAsync()
+        {
+            try
+            {
+                bool hasDept = StagedChanges.Any(c => c.Section == AdminSection.Department || c.Section == AdminSection.SupportTeam);
+                bool hasLinks = StagedChanges.Any(c => c.Section == AdminSection.Links);
+
+                // Case 1: Both Department/Team and Link changes staged -> prompt for folder
+                if (hasDept && hasLinks)
+                {
+                    var folder = _fileDialogService.SelectFolder("Select destination folder to export JSON files for Box");
+                    if (string.IsNullOrWhiteSpace(folder)) return;
+
+                    var exportedFiles = await _jsonExportService.ExportStagedChangesToFolderAsync(StagedChanges, folder);
+                    UiNotify.Success($"Exported {exportedFiles.Count} JSON file(s) to {folder} for Box upload!");
+                    return;
+                }
+
+                // Case 2: Only Links staged -> prompt for links.json save location
+                if (hasLinks)
+                {
+                    var savePath = _fileDialogService.SaveFile("links.json", "JSON Data (*.json)|*.json", "Export links.json for Box");
+                    if (string.IsNullOrWhiteSpace(savePath)) return;
+
+                    await _jsonExportService.ExportLinksJsonAsync(StagedChanges, savePath);
+                    UiNotify.Success($"Exported links.json to {Path.GetFileName(savePath)} for Box upload!");
+                    return;
+                }
+
+                // Case 3: Only Department/Team staged -> prompt for departments.json save location
+                if (hasDept)
+                {
+                    var savePath = _fileDialogService.SaveFile("departments.json", "JSON Data (*.json)|*.json", "Export departments.json for Box");
+                    if (string.IsNullOrWhiteSpace(savePath)) return;
+
+                    await _jsonExportService.ExportDepartmentsJsonAsync(StagedChanges, savePath);
+                    UiNotify.Success($"Exported departments.json to {Path.GetFileName(savePath)} for Box upload!");
+                    return;
+                }
+
+                // Case 4: No staged changes -> export baseline for currently selected section
+                string defaultName = SelectedSection == AdminSection.Links ? "links.json" : "departments.json";
+                var baselinePath = _fileDialogService.SaveFile(defaultName, "JSON Data (*.json)|*.json", $"Export {defaultName} for Box");
+                if (string.IsNullOrWhiteSpace(baselinePath)) return;
+
+                if (SelectedSection == AdminSection.Links)
+                {
+                    await _jsonExportService.ExportLinksJsonAsync(null, baselinePath);
+                }
+                else
+                {
+                    await _jsonExportService.ExportDepartmentsJsonAsync(null, baselinePath);
+                }
+
+                UiNotify.Success($"Exported {defaultName} to {Path.GetFileName(baselinePath)} for Box upload!");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(Tag, "Failed to export JSON.", ex);
+                UiNotify.Error("Export Failed", ex.Message, ex);
+            }
         }
 
         private async Task ExecuteSaveAsync()

@@ -235,6 +235,155 @@ namespace DSAMVVM.Core.Services
 
         #endregion
 
+        #region Staging Helpers
+
+        public DepartmentListWrapper ApplyDepartmentChanges(DepartmentListWrapper wrapper, IEnumerable<StagedChange> stagedChanges)
+        {
+            ArgumentNullException.ThrowIfNull(wrapper);
+            ArgumentNullException.ThrowIfNull(stagedChanges);
+
+            var deptChanges = stagedChanges.Where(c => c.Section == AdminSection.Department).ToList();
+            var supportTeamChanges = stagedChanges.Where(c => c.Section == AdminSection.SupportTeam).ToList();
+
+            // 1. Apply Department changes
+            foreach (var change in deptChanges)
+            {
+                if (change.StagedData is Department stagedDept)
+                {
+                    var existing = wrapper.DepartmentList.FirstOrDefault(d =>
+                        string.Equals(d.Number, stagedDept.Number, StringComparison.OrdinalIgnoreCase));
+
+                    if (existing != null)
+                    {
+                        existing.SupportKnown = stagedDept.SupportKnown;
+                        existing.Team = stagedDept.Team;
+                        existing.Notes = stagedDept.Notes;
+                        existing.FileRepoPath = stagedDept.FileRepoPath;
+                    }
+                    else
+                    {
+                        wrapper.DepartmentList.Add(stagedDept);
+                    }
+                }
+            }
+
+            // 2. Apply Support Team changes
+            foreach (var change in supportTeamChanges)
+            {
+                if (change.StagedData is StagedSupportTeamData stagedTeam)
+                {
+                    var existing = wrapper.SupportTeams.FirstOrDefault(t =>
+                        string.Equals(t.SupportTeamName, stagedTeam.Team.SupportTeamName, StringComparison.OrdinalIgnoreCase));
+
+                    if (stagedTeam.Action == StagedSupportTeamAction.Delete)
+                    {
+                        if (existing != null) wrapper.SupportTeams.Remove(existing);
+                    }
+                    else
+                    {
+                        if (existing != null)
+                        {
+                            existing.ManagerName = stagedTeam.Team.ManagerName;
+                            existing.ManagerNetID = stagedTeam.Team.ManagerNetID;
+                            existing.PhoneNumber = stagedTeam.Team.PhoneNumber;
+                            existing.SupportedDivisions = stagedTeam.Team.SupportedDivisions;
+                        }
+                        else
+                        {
+                            wrapper.SupportTeams.Add(stagedTeam.Team);
+                        }
+                    }
+                }
+            }
+
+            wrapper.Meta ??= new();
+            wrapper.Meta.LastUpdatedUtc = DateTime.UtcNow;
+
+            return wrapper;
+        }
+
+        public LinksData ApplyLinkChanges(LinksData linksData, IEnumerable<StagedChange> stagedChanges)
+        {
+            ArgumentNullException.ThrowIfNull(linksData);
+            ArgumentNullException.ThrowIfNull(stagedChanges);
+
+            var linkChanges = stagedChanges.Where(c => c.Section == AdminSection.Links).ToList();
+
+            foreach (var change in linkChanges)
+            {
+                if (change.StagedData is StagedLinkData staged)
+                {
+                    if (staged.IsCommon)
+                    {
+                        var existing = linksData.CommonLinks.FirstOrDefault(l =>
+                            string.Equals(l.Name, staged.Link.Name, StringComparison.OrdinalIgnoreCase));
+
+                        if (staged.Action == StagedLinkAction.Delete)
+                        {
+                            if (existing != null) linksData.CommonLinks.Remove(existing);
+                        }
+                        else
+                        {
+                            if (existing != null)
+                            {
+                                existing.Name = staged.Link.Name;
+                                existing.URL = staged.Link.URL;
+                                existing.Description = staged.Link.Description;
+                            }
+                            else
+                            {
+                                linksData.CommonLinks.Add(staged.Link);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        string team = (staged.Team ?? string.Empty).Trim();
+                        var group = linksData.TeamLinks.FirstOrDefault(g =>
+                            string.Equals(g.Team, team, StringComparison.OrdinalIgnoreCase));
+
+                        if (group == null && staged.Action != StagedLinkAction.Delete)
+                        {
+                            group = new TeamLinkGroup { Team = team, Links = [] };
+                            linksData.TeamLinks.Add(group);
+                        }
+
+                        if (group != null)
+                        {
+                            var existing = group.Links.FirstOrDefault(l =>
+                                string.Equals(l.Name, staged.Link.Name, StringComparison.OrdinalIgnoreCase));
+
+                            if (staged.Action == StagedLinkAction.Delete)
+                            {
+                                if (existing != null) group.Links.Remove(existing);
+                            }
+                            else
+                            {
+                                if (existing != null)
+                                {
+                                    existing.Name = staged.Link.Name;
+                                    existing.URL = staged.Link.URL;
+                                    existing.Description = staged.Link.Description;
+                                }
+                                else
+                                {
+                                    group.Links.Add(staged.Link);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            linksData.Meta ??= new();
+            linksData.Meta.SchemaVersion = Globals.g_LinkJSONSchema;
+            linksData.Meta.LastUpdatedUtc = DateTime.UtcNow;
+
+            return linksData;
+        }
+
+        #endregion
+
         #region Persistence
 
         public async Task SaveStagedChangesAsync(IEnumerable<StagedChange> stagedChanges)
@@ -251,59 +400,7 @@ namespace DSAMVVM.Core.Services
             if (deptChanges.Count > 0 || supportTeamChanges.Count > 0)
             {
                 var wrapper = await LoadDepartmentsAsync();
-
-                // Apply Department changes
-                foreach (var change in deptChanges)
-                {
-                    if (change.StagedData is Department stagedDept)
-                    {
-                        var existing = wrapper.DepartmentList.FirstOrDefault(d =>
-                            string.Equals(d.Number, stagedDept.Number, StringComparison.OrdinalIgnoreCase));
-
-                        if (existing != null)
-                        {
-                            existing.SupportKnown = stagedDept.SupportKnown;
-                            existing.Team = stagedDept.Team;
-                            existing.Notes = stagedDept.Notes;
-                            existing.FileRepoPath = stagedDept.FileRepoPath;
-                        }
-                        else
-                        {
-                            wrapper.DepartmentList.Add(stagedDept);
-                        }
-                    }
-                }
-
-                // Apply Support Team changes
-                foreach (var change in supportTeamChanges)
-                {
-                    if (change.StagedData is StagedSupportTeamData stagedTeam)
-                    {
-                        var existing = wrapper.SupportTeams.FirstOrDefault(t =>
-                            string.Equals(t.SupportTeamName, stagedTeam.Team.SupportTeamName, StringComparison.OrdinalIgnoreCase));
-
-                        if (stagedTeam.Action == StagedSupportTeamAction.Delete)
-                        {
-                            if (existing != null) wrapper.SupportTeams.Remove(existing);
-                        }
-                        else
-                        {
-                            if (existing != null)
-                            {
-                                existing.ManagerName = stagedTeam.Team.ManagerName;
-                                existing.ManagerNetID = stagedTeam.Team.ManagerNetID;
-                                existing.PhoneNumber = stagedTeam.Team.PhoneNumber;
-                                existing.SupportedDivisions = stagedTeam.Team.SupportedDivisions;
-                            }
-                            else
-                            {
-                                wrapper.SupportTeams.Add(stagedTeam.Team);
-                            }
-                        }
-                    }
-                }
-
-                wrapper.Meta.LastUpdatedUtc = DateTime.UtcNow;
+                ApplyDepartmentChanges(wrapper, stagedChanges);
 
                 string deptJson = JsonConvert.SerializeObject(wrapper, Formatting.Indented);
                 await File.WriteAllTextAsync(DepartmentTargetPath, deptJson);
@@ -335,76 +432,7 @@ namespace DSAMVVM.Core.Services
             if (linkChanges.Count > 0)
             {
                 var linksData = await LoadLinksDataAsync();
-
-                foreach (var change in linkChanges)
-                {
-                    if (change.StagedData is StagedLinkData staged)
-                    {
-                        if (staged.IsCommon)
-                        {
-                            var existing = linksData.CommonLinks.FirstOrDefault(l =>
-                                string.Equals(l.Name, staged.Link.Name, StringComparison.OrdinalIgnoreCase));
-
-                            if (staged.Action == StagedLinkAction.Delete)
-                            {
-                                if (existing != null) linksData.CommonLinks.Remove(existing);
-                            }
-                            else
-                            {
-                                if (existing != null)
-                                {
-                                    existing.Name = staged.Link.Name;
-                                    existing.URL = staged.Link.URL;
-                                    existing.Description = staged.Link.Description;
-                                }
-                                else
-                                {
-                                    linksData.CommonLinks.Add(staged.Link);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            string team = (staged.Team ?? string.Empty).Trim();
-                            var group = linksData.TeamLinks.FirstOrDefault(g =>
-                                string.Equals(g.Team, team, StringComparison.OrdinalIgnoreCase));
-
-                            if (group == null && staged.Action != StagedLinkAction.Delete)
-                            {
-                                group = new TeamLinkGroup { Team = team, Links = [] };
-                                linksData.TeamLinks.Add(group);
-                            }
-
-                            if (group != null)
-                            {
-                                var existing = group.Links.FirstOrDefault(l =>
-                                    string.Equals(l.Name, staged.Link.Name, StringComparison.OrdinalIgnoreCase));
-
-                                if (staged.Action == StagedLinkAction.Delete)
-                                {
-                                    if (existing != null) group.Links.Remove(existing);
-                                }
-                                else
-                                {
-                                    if (existing != null)
-                                    {
-                                        existing.Name = staged.Link.Name;
-                                        existing.URL = staged.Link.URL;
-                                        existing.Description = staged.Link.Description;
-                                    }
-                                    else
-                                    {
-                                        group.Links.Add(staged.Link);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                linksData.Meta ??= new();
-                linksData.Meta.SchemaVersion = Globals.g_LinkJSONSchema;
-                linksData.Meta.LastUpdatedUtc = DateTime.UtcNow;
+                ApplyLinkChanges(linksData, stagedChanges);
 
                 string linksJson = JsonConvert.SerializeObject(linksData, Formatting.Indented);
                 await File.WriteAllTextAsync(LinksTargetPath, linksJson);

@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="DSAMVVM.MVVM.View.AdminView"
+<UserControl x:Class="DSAMVVM.MVVM.View.AdminView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -535,20 +535,31 @@
                                     Command="{Binding DiscardAllCommand}" 
                                     IsEnabled="{Binding HasPendingChanges}"
                                     HorizontalAlignment="Left"
-                                    Width="80" 
+                                    Width="75" 
                                     Height="28" 
                                     FontSize="11"
                                     Style="{DynamicResource Button.Rounded}"/>
 
-                            <Button Content="Save to JSON" 
-                                    Command="{Binding SaveCommand}" 
-                                    IsEnabled="{Binding HasPendingChanges}"
-                                    HorizontalAlignment="Right"
-                                    Width="120" 
-                                    Height="28" 
-                                    FontSize="11"
-                                    FontWeight="SemiBold"
-                                    Style="{DynamicResource Button.Rounded}"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Content="Export JSON..." 
+                                        Command="{Binding ExportJsonCommand}" 
+                                        ToolTip="Export modified or baseline JSON to a file/folder for Box upload"
+                                        Width="95" 
+                                        Height="28" 
+                                        FontSize="11"
+                                        Margin="0,0,6,0"
+                                        Style="{DynamicResource Button.Rounded}"/>
+
+                                <Button Content="Save to JSON" 
+                                        Command="{Binding SaveCommand}" 
+                                        IsEnabled="{Binding HasPendingChanges}"
+                                        ToolTip="Save staged changes into application and local cache"
+                                        Width="95" 
+                                        Height="28" 
+                                        FontSize="11"
+                                        FontWeight="SemiBold"
+                                        Style="{DynamicResource Button.Rounded}"/>
+                            </StackPanel>
                         </Grid>
                     </Border>
                 </Grid>
