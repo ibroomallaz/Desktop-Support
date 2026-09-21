@@ -22,6 +22,10 @@
     <Color x:Key="Color.Accent.Hover">#4B171A</Color>
     <Color x:Key="Color.Accent.Pressed">#371013</Color>
 
+    <!-- Accent Red (high-visibility red for dark surfaces) -->
+    <Color x:Key="Color.Accent.Red">#B11226</Color>
+    <Color x:Key="Color.Accent.Red.Light">#E57373</Color>
+
     <!-- Info (blue) -->
     <Color x:Key="Color.Info">#3AA0FF</Color>
     <Color x:Key="Color.Info.Light">#5BC3FF</Color>
@@ -63,6 +67,9 @@
     <SolidColorBrush x:Key="Brush.Accent.Hover"    Color="{DynamicResource Color.Accent.Hover}"/>
     <SolidColorBrush x:Key="Brush.Accent.Pressed"  Color="{DynamicResource Color.Accent.Pressed}"/>
 
+    <SolidColorBrush x:Key="Brush.Accent.Red"       Color="{DynamicResource Color.Accent.Red}"/>
+    <SolidColorBrush x:Key="Brush.Accent.Red.Light" Color="{DynamicResource Color.Accent.Red.Light}"/>
+
     <SolidColorBrush x:Key="Brush.Info"            Color="{DynamicResource Color.Info}"/>
     <SolidColorBrush x:Key="Brush.Info.Hover"      Color="{DynamicResource Color.Info.Hover}"/>
     <SolidColorBrush x:Key="Brush.Info.Pressed"    Color="{DynamicResource Color.Info.Pressed}"/>
@@ -83,9 +90,8 @@
                      Color="{DynamicResource Color.Card.Border.Alternate}"/>
 
     <!-- ==== Backward-compatibility aliases ==== -->
-    <!-- Accent Copper / Red / Blue -->
+    <!-- Accent Copper / Blue -->
     <SolidColorBrush x:Key="Brush.Accent.Copper" Color="#B87333"/>
-    <SolidColorBrush x:Key="Brush.Accent.Red"    Color="#B11226"/>
     <SolidColorBrush x:Key="Brush.Accent.Blue"   Color="#001F3F"/>
 
     <!-- Text Aliases -->

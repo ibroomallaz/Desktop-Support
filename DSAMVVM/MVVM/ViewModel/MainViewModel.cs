@@ -21,14 +21,13 @@ namespace DSAMVVM.MVVM.ViewModel
     public partial class MainViewModel : ObservableObject
     {
         // Services
-        public IDepartmentService DeptService { get; } = null!;
-        private readonly IADService _adService = null!;
-        private readonly ISearchService _searchService = null!;
+        public IDepartmentService DeptService { get; }
+        private readonly ISearchService _searchService;
         private readonly IVersionCheckHandler _versionHandler;
         private readonly IDeepLinkRoutingService _linkRouter;
         private readonly IAuthenticationService _authService;
-        private readonly IApplicationStateService _appStateService = null!;
-        public StatusBarViewModel StatusBar { get; } = null!;
+        private readonly IApplicationStateService _appStateService;
+        public StatusBarViewModel StatusBar { get; }
         public bool IsUserSignedIn => _authService.IsAuthenticated;
 
         // VM factories
@@ -155,7 +154,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public MainViewModel(
              IDepartmentService deptService,
-             IADService adService,
              ISearchService searchService,
              IVersionCheckHandler versionHandler,
              StatusBarViewModel statusBar,
@@ -170,7 +168,6 @@ namespace DSAMVVM.MVVM.ViewModel
              AboutViewModel aboutVM)
         {
             DeptService = deptService;
-            _adService = adService;
             _searchService = searchService;
             StatusBar = statusBar;
             _linkRouter = linkRouter;
@@ -256,7 +253,7 @@ namespace DSAMVVM.MVVM.ViewModel
             });
         }
 
-        public void ProcessArgs(string[] args)
+        public void ProcessArgs(string[]? args)
         {
             if (args == null || args.Length == 0) return;
 
@@ -389,7 +386,7 @@ namespace DSAMVVM.MVVM.ViewModel
             });
 
             // Initialize the OpenFeedbackCommand
-            OpenFeedbackCommand = new RelayCommand(param => ExecuteOpenFeedback(param));
+            OpenFeedbackCommand = new RelayCommand(ExecuteOpenFeedback);
         }
 
         private static void ExecuteOpenFeedback(object? parameter)
@@ -446,7 +443,7 @@ namespace DSAMVVM.MVVM.ViewModel
             }
 
             // Internal testing toggle intercept
-            if (lowerQuery == "-test-" || lowerQuery == "-production-")
+            if (lowerQuery is "-test-" or "-production-")
             {
                 bool useTest = lowerQuery == "-test-";
                 var appSettings = App.Settings;

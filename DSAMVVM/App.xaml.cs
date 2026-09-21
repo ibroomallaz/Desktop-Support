@@ -24,13 +24,14 @@ using System.Windows.Shell;
 
 namespace DSAMVVM
 {
-    public partial class App : Application
+    public partial class App
     {
         private IServiceProvider _serviceProvider = null!;
         private AppSettings? _settings;
         private int _persistOnceFlag;
         private SplashWindow? _splash;
         private TaskbarIcon? _appTrayIcon;
+        private readonly CancellationTokenSource _appCts = new();
 
         // Single Instance Identifiers
         private const string UniqueMutexName = "DSAMVVM_Mutex_Global_v1";
@@ -52,8 +53,8 @@ namespace DSAMVVM
 
         public App()
         {
-            this.DispatcherUnhandledException += (_, __) => TryPersistSettingsOnce();
-            AppDomain.CurrentDomain.UnhandledException += (_, __) => TryPersistSettingsOnce();
+            DispatcherUnhandledException += (_, _) => TryPersistSettingsOnce();
+            AppDomain.CurrentDomain.UnhandledException += (_, _) => TryPersistSettingsOnce();
         }
 
         protected override async void OnStartup(StartupEventArgs e)
@@ -83,7 +84,7 @@ namespace DSAMVVM
 
             // 3. Normal Startup Sequence
             _splash = new SplashWindow();
-            _splash.SourceInitialized += (_, __) =>
+            _splash.SourceInitialized += (_, _) =>
             {
                 var area = SystemParameters.WorkArea;
                 _splash.Left = area.Left + (area.Width - _splash.Width) / 2;
@@ -93,13 +94,6 @@ namespace DSAMVVM
             _splash.UpdateStatus("Starting…");
 
             Stopwatch sw = Stopwatch.StartNew();
-            long Mark(string label)
-            {
-                var ms = sw.ElapsedMilliseconds;
-                Log.Debug("Startup", $"{label} @ {ms} ms");
-                _splash?.UpdateStatus(label + "…");
-                return ms;
-            }
 
             ConfigureServices();
             Services = _serviceProvider;
@@ -137,7 +131,7 @@ namespace DSAMVVM
                 Mark("Using default settings");
             }
 
-            this.SessionEnding += App_SessionEnding;
+            SessionEnding += App_SessionEnding;
 
             try
             {
@@ -151,7 +145,7 @@ namespace DSAMVVM
                 if (firstChance == updateTask)
                 {
                     await updateTask.ConfigureAwait(true);
-                    if (this.Dispatcher.HasShutdownStarted || this.Dispatcher.HasShutdownFinished) return;
+                    if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
                     Mark("Update check done");
                 }
                 else
@@ -160,7 +154,7 @@ namespace DSAMVVM
                     try
                     {
                         await updateTask.ConfigureAwait(true);
-                        if (this.Dispatcher.HasShutdownStarted || this.Dispatcher.HasShutdownFinished) return;
+                        if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
                         Mark("Update check done");
                     }
                     catch (Exception ex)
@@ -183,11 +177,11 @@ namespace DSAMVVM
             // --- QUICKSEARCH INITIALIZATION ---
             var quickSearch = Services.GetRequiredService<IQuickSearchService>();
 
-            quickSearch.QuickSearchTriggered += (s, capturedText) =>
+            quickSearch.QuickSearchTriggered += (_, capturedText) =>
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                Dispatcher.Invoke(() =>
                 {
-                    foreach (Window window in Application.Current.Windows)
+                    foreach (Window window in Windows)
                     {
                         if (window is QuickSearchOverlayView)
                         {
@@ -218,7 +212,7 @@ namespace DSAMVVM
                 mainVM.SelectedView = AppView.Home;
             }
 
-            mainWindow.ContentRendered += (_, __) =>
+            mainWindow.ContentRendered += (_, _) =>
             {
                 Mark("First window rendered");
 
@@ -228,7 +222,7 @@ namespace DSAMVVM
                     // ignored
                 }
 
-                this.Dispatcher.BeginInvoke(async () =>
+                Dispatcher.BeginInvoke(async () =>
                 {
                     try
                     {
@@ -244,7 +238,7 @@ namespace DSAMVVM
                 try { mainVM.BootstrapInitialView(); } catch (Exception ex) { Log.Warn("Bootstrap", ex.Message); }
                 try { mainVM.StartWarmup(); } catch (Exception ex) { Log.Warn("Warmup", ex.Message); }
 
-                this.Dispatcher.BeginInvoke(async () =>
+                Dispatcher.BeginInvoke(async () =>
                 {
                     try
                     {
@@ -255,12 +249,12 @@ namespace DSAMVVM
                 }, System.Windows.Threading.DispatcherPriority.Background);
             };
 
-            mainWindow.Closed += (_, __) =>
+            mainWindow.Closed += (_, _) =>
             {
                 TryPersistSettingsOnce();
 
                 // Force-close any floating overlays so the app can terminate cleanly
-                foreach (Window window in Application.Current.Windows)
+                foreach (Window window in Windows)
                 {
                     if (window is QuickSearchOverlayView)
                     {
@@ -293,6 +287,16 @@ namespace DSAMVVM
             {
                 Log.Warn("UpdateScheduler", $"Startup schedule failed: {ex.Message}");
             }
+
+            return;
+
+            long Mark(string label)
+            {
+                var ms = sw.ElapsedMilliseconds;
+                Log.Debug("Startup", $"{label} @ {ms} ms");
+                _splash?.UpdateStatus(label + "…");
+                return ms;
+            }
         }
 
         // --- COMPONENT INITIALIZATION ---
@@ -303,42 +307,42 @@ namespace DSAMVVM
 
             try
             {
-                _appTrayIcon = (TaskbarIcon)FindResource("GlobalAppTrayIcon");
+                if (TryFindResource("GlobalAppTrayIcon") is not TaskbarIcon trayIcon) return;
 
-                if (_appTrayIcon != null)
+                _appTrayIcon = trayIcon;
+                _appTrayIcon.DataContext = mainVM;
+
+                // EXPLICITLY pass the ViewModel to the ContextMenu so the bindings never fail
+                if (_appTrayIcon.ContextMenu is { } menu)
                 {
-                    _appTrayIcon.DataContext = mainVM;
-
-                    // EXPLICITLY pass the ViewModel to the ContextMenu so the bindings never fail
-                    _appTrayIcon.ContextMenu?.DataContext = mainVM;
-
-                    _appTrayIcon.ForceCreate();
+                    menu.DataContext = mainVM;
                 }
+
+                _appTrayIcon.ForceCreate();
             }
             catch (Exception ex)
             {
                 Log.Warn("TrayIcon", $"Failed to initialize system tray icon: {ex.Message}");
             }
         }
+
         // Called dynamically by SettingsViewModel when the user clicks "Apply"
         public void ToggleTrayIcon(bool enable)
         {
-            if (_appTrayIcon == null)
-            {
-                // If it was never created (e.g., they started the app with it disabled), create it now
-                if (enable)
-                {
-                    var mainVM = Services.GetService<MainViewModel>();
-                    if (mainVM != null)
-                    {
-                        InitializeTrayIcon(mainVM);
-                    }
-                }
-            }
-            else
+            if (_appTrayIcon != null)
             {
                 // If it already exists, just hide or show it instead of destroying the object entirely
                 _appTrayIcon.Visibility = enable ? Visibility.Visible : Visibility.Collapsed;
+                return;
+            }
+
+            // If it was never created (e.g., they started the app with it disabled), create it now
+            if (!enable) return;
+
+            var mainVM = Services.GetService<MainViewModel>();
+            if (mainVM != null)
+            {
+                InitializeTrayIcon(mainVM);
             }
         }
 
@@ -366,15 +370,15 @@ namespace DSAMVVM
         // --- SINGLE INSTANCE LOGIC: SERVER ---
         private async Task ListenForArgumentsAsync()
         {
-            while (true)
+            while (!_appCts.IsCancellationRequested)
             {
                 try
                 {
                     await using var server = new NamedPipeServerStream(PipeName, PipeDirection.In);
-                    await server.WaitForConnectionAsync();
+                    await server.WaitForConnectionAsync(_appCts.Token).ConfigureAwait(false);
 
                     using var reader = new StreamReader(server);
-                    var line = await reader.ReadLineAsync();
+                    var line = await reader.ReadLineAsync(_appCts.Token).ConfigureAwait(false);
 
                     // Parse the arguments, stripping out our dummy wake-up signal if it's there
                     var argsToPass = string.IsNullOrWhiteSpace(line) || line == "WAKE_UP"
@@ -382,7 +386,11 @@ namespace DSAMVVM
                         : line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
                     // ALWAYS fire the handler so the window snaps to the front, even if args are empty
-                    Application.Current.Dispatcher.Invoke(() => HandleExternalArgs(argsToPass));
+                    Dispatcher.Invoke(() => HandleExternalArgs(argsToPass));
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
                 }
                 catch
                 {
@@ -484,7 +492,7 @@ namespace DSAMVVM
                     IconResourcePath = exePath
                 });
 
-                JumpList.SetJumpList(Application.Current, jumpList);
+                JumpList.SetJumpList(Current, jumpList);
             }
             catch (Exception ex)
             {
@@ -499,6 +507,9 @@ namespace DSAMVVM
 
         protected override void OnExit(ExitEventArgs e)
         {
+            _appCts.Cancel();
+            _appCts.Dispose();
+
             try { _serviceProvider.GetService<ISettingsService>()?.FlushPendingSaves(); }
             catch
             {
@@ -507,7 +518,7 @@ namespace DSAMVVM
 
             TryPersistSettingsOnce();
 
-            (_serviceProvider.GetService<VersionUpdateScheduler>() as IDisposable)?.Dispose();
+            _serviceProvider.GetService<VersionUpdateScheduler>()?.Dispose();
 
             _serviceProvider.GetService<IQuickSearchService>()?.Stop();
 
@@ -570,7 +581,7 @@ namespace DSAMVVM
             services.AddSingleton<IHttpService, HttpService>();
             services.AddSingleton<ISettingsService, SettingsService>();
 
-            services.AddSingleton<AppSettings>(sp => Settings);
+            services.AddSingleton<AppSettings>(_ => Settings);
 
             services.AddSingleton<IDepartmentService, DepartmentService>();
             services.AddSingleton<IADService, ADService>();
@@ -641,4 +652,3 @@ namespace DSAMVVM
         }
     }
 }
-

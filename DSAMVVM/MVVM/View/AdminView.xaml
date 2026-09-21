@@ -277,7 +277,7 @@
                                                                        Text="{Binding DivAbbrev}" 
                                                                        FontWeight="Bold" 
                                                                        FontSize="10" 
-                                                                       Foreground="{DynamicResource Brush.Accent}"
+                                                                       Foreground="{DynamicResource Brush.Accent.Red.Light}"
                                                                        VerticalAlignment="Center"/>
 
                                                             <TextBlock Grid.Column="1" 

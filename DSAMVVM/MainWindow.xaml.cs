@@ -1,5 +1,4 @@
-﻿using DSAMVVM.MVVM.View.Dialogs;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -48,44 +47,17 @@ namespace DSAMVVM
         // Opens the dropdown context menu on left-click of the warning icon
         private void FeedbackButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.ContextMenu != null)
-            {
-                btn.ContextMenu.PlacementTarget = btn;
-                btn.ContextMenu.IsOpen = true;
-            }
+            if (sender is not Button { ContextMenu: not null } btn) return;
+            btn.ContextMenu.PlacementTarget = btn;
+            btn.ContextMenu.IsOpen = true;
         }
-
-        // Opens feedback window pre-selected to "Report a Bug" (Index 0)
-        private void ReportBug_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFeedbackDialog(0);
-        }
-
-        // Opens feedback window pre-selected to "Request a Feature" (Index 1)
-        private void MakeSuggestion_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFeedbackDialog(1);
-        }
-
-        // Shared helper to launch the dialog modal
-        private void OpenFeedbackDialog(int typeIndex)
-        {
-            var dialog = new FeedbackWindow(typeIndex)
-            {
-                Owner = this
-            };
-
-            // ShowDialog() will return true if it successfully submitted, or false if canceled.
-            if (dialog.ShowDialog() == true)
-            {
-                System.Diagnostics.Debug.WriteLine($"[Feedback] Successfully submitted feedback of type index {typeIndex}.");
-            }
-        }
+        
+        
 
         // Show history dropdown when clicking in the search box
         private void SearchBox_ShowHistory(object sender, MouseButtonEventArgs e)
         {
-            if (sender is ComboBox combo && combo.Items.Count > 0)
+            if (sender is ComboBox { Items.Count: > 0 } combo)
             {
                 combo.IsDropDownOpen = true;
             }
@@ -94,7 +66,7 @@ namespace DSAMVVM
         // Close the dropdown as soon as typing starts to avoid double-Enter issue
         private void SearchBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            if (sender is ComboBox combo && combo.IsDropDownOpen)
+            if (sender is ComboBox { IsDropDownOpen: true } combo)
             {
                 combo.IsDropDownOpen = false;
             }
@@ -104,7 +76,7 @@ namespace DSAMVVM
         {
             if (WindowState == WindowState.Minimized)
             {
-                if (App.Settings != null && App.Settings.Ui.Tray.EnableTrayIcon && App.Settings.Ui.Tray.MinimizeToTray)
+                if (App.Settings.Ui.Tray.EnableTrayIcon && App.Settings.Ui.Tray.MinimizeToTray)
                 {
                     WindowState = WindowState.Normal;
                     this.Hide();

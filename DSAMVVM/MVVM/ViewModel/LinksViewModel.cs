@@ -172,7 +172,7 @@ public class LinksViewModel : ObservableObject
         }
     }
 
-    private void Apply(LinksData data)
+    private void Apply(LinksData? data)
     {
         CommonLinks = data?.CommonLinks ?? [];
         TeamLinks = data?.TeamLinks ?? [];
