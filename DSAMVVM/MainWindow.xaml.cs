@@ -5,7 +5,7 @@ using System.Windows.Input;
 
 namespace DSAMVVM
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         public MainWindow()
         {
@@ -22,7 +22,7 @@ namespace DSAMVVM
         // Minimize window
         private void Minimize_Click(object sender, RoutedEventArgs e)
         {
-            if (App.Settings != null && App.Settings.Ui.Tray.EnableTrayIcon && App.Settings.Ui.Tray.MinimizeToTray)
+            if (App.Settings.Ui.Tray.EnableTrayIcon && App.Settings.Ui.Tray.MinimizeToTray)
             {
                 this.Hide();
             }
@@ -35,7 +35,7 @@ namespace DSAMVVM
         // Close window
         private void Close_Click(object sender, RoutedEventArgs e)
         {
-            if (App.Settings != null && App.Settings.Ui.Tray.EnableTrayIcon && App.Settings.Ui.Tray.CloseToTray)
+            if (App.Settings.Ui.Tray.EnableTrayIcon && App.Settings.Ui.Tray.CloseToTray)
             {
                 this.Hide();
             }

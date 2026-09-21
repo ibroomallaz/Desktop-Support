@@ -54,7 +54,7 @@ namespace DSAMVVM.MVVM.Model
         public static readonly string g_SettingsLegacyDir = Path.Combine(g_AppDir, "settings-legacy");
 
         // Schema versions
-        public const int g_SettingsSchema = 3;
+        public const int g_SettingsSchema = 4;
         public const int g_DepartmentJSONSchema = 3;
         public const int g_LinkJSONSchema = 2;
         public const int g_VersionSchema = 3;

@@ -4,6 +4,7 @@ using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
+using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.Services.Status;
 using DSAMVVM.MVVM.View.Dialogs;
 using DSAMVVM.MVVM.View.Resources;
@@ -20,13 +21,14 @@ namespace DSAMVVM.MVVM.ViewModel
     public partial class MainViewModel : ObservableObject
     {
         // Services
-        public IDepartmentService DeptService { get; }
-        private readonly ISearchService _searchService;
+        public IDepartmentService DeptService { get; } = null!;
+        private readonly IADService _adService = null!;
+        private readonly ISearchService _searchService = null!;
         private readonly IVersionCheckHandler _versionHandler;
         private readonly IDeepLinkRoutingService _linkRouter;
         private readonly IAuthenticationService _authService;
-        private readonly IApplicationStateService _appStateService;
-        public StatusBarViewModel StatusBar { get; }
+        private readonly IApplicationStateService _appStateService = null!;
+        public StatusBarViewModel StatusBar { get; } = null!;
         public bool IsUserSignedIn => _authService.IsAuthenticated;
 
         // VM factories
@@ -34,6 +36,7 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly Func<ComputerViewModel> _computerVMFactory;
         private readonly Func<GroupViewModel> _groupVMFactory;
         private readonly Func<LinksViewModel> _linksVMFactory;
+        private readonly Func<AdminViewModel> _adminVMFactory;
 
         // ViewModels
         public HomeViewModel HomeVM { get; private set; } = null!;
@@ -44,6 +47,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public LinksViewModel LinksVM { get; private set; } = null!;
         public AboutViewModel AboutVM { get; private set; } = null!;
         public SettingsViewModel SettingsVM { get; private set; } = null!;
+        public AdminViewModel AdminVM { get; private set; } = null!;
 
         // Commands
         public RelayCommand HomeViewCommand { get; private set; } = null!;
@@ -56,6 +60,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public RelayCommand ExecuteSearchCommand { get; private set; } = null!;
         public RelayCommand SettingsCommand { get; private set; } = null!;
         public RelayCommand OpenFeedbackCommand { get; private set; } = null!;
+        public RelayCommand AdminCommand { get; private set; } = null!;
 
         public ICommand ShowWindowCommand { get; private set; } = null!;
         public ICommand CheckUpdateCommand { get; private set; } = null!;
@@ -107,6 +112,7 @@ namespace DSAMVVM.MVVM.ViewModel
                     AppView.Links => LinksVM,
                     AppView.Settings => SettingsVM,
                     AppView.About => AboutVM,
+                    AppView.Admin => AdminVM,
                     _ => HomeVM
                 };
             }
@@ -118,23 +124,53 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _searchQuery;
             set { if (_searchQuery != value) { _searchQuery = value; OnPropertyChanged(); } }
         }
+
+
+        //Admin state properties, persisted to settings
+        private bool _hasUnlockedAdmin;
+        public bool HasUnlockedAdmin
+        {
+            get => _hasUnlockedAdmin;
+            set
+            {
+                if (_hasUnlockedAdmin == value) return;
+                _hasUnlockedAdmin = value;
+                OnPropertyChanged(nameof(HasUnlockedAdmin));
+            }
+        }
+
+        private bool _showAdminView;
+        public bool ShowAdminView
+        {
+            get => _showAdminView;
+            set
+            {
+                if (_showAdminView == value) return;
+                _showAdminView = value;
+                OnPropertyChanged(nameof(ShowAdminView));
+            }
+        }
+
         public ObservableCollection<string> SearchHistory { get; } = [];
 
         public MainViewModel(
-            IDepartmentService deptService,
-            ISearchService searchService,
-            IVersionCheckHandler versionHandler,
-            StatusBarViewModel statusBar,
-            IDeepLinkRoutingService linkRouter,
-            IAuthenticationService authService,
-            Func<UserViewModel> userVMFactory,
-            Func<ComputerViewModel> computerVMFactory,
-            Func<GroupViewModel> groupVMFactory,
-            Func<LinksViewModel> linksVMFactory,
-            IApplicationStateService appStateService,
-            AboutViewModel aboutVM)
+             IDepartmentService deptService,
+             IADService adService,
+             ISearchService searchService,
+             IVersionCheckHandler versionHandler,
+             StatusBarViewModel statusBar,
+             IDeepLinkRoutingService linkRouter,
+             IAuthenticationService authService,
+             Func<UserViewModel> userVMFactory,
+             Func<ComputerViewModel> computerVMFactory,
+             Func<GroupViewModel> groupVMFactory,
+             Func<LinksViewModel> linksVMFactory,
+             Func<AdminViewModel> adminVMFactory,
+             IApplicationStateService appStateService,
+             AboutViewModel aboutVM)
         {
             DeptService = deptService;
+            _adService = adService;
             _searchService = searchService;
             StatusBar = statusBar;
             _linkRouter = linkRouter;
@@ -146,6 +182,7 @@ namespace DSAMVVM.MVVM.ViewModel
             _computerVMFactory = computerVMFactory;
             _groupVMFactory = groupVMFactory;
             _linksVMFactory = linksVMFactory;
+            _adminVMFactory = adminVMFactory;
 
             _searchService.HistoryChanged += OnHistoryChanged;
             SyncHistoryFromService();
@@ -157,12 +194,29 @@ namespace DSAMVVM.MVVM.ViewModel
             _linkRouter.NavigationRequested -= OnNavigationRequested;
             _linkRouter.NavigationRequested += OnNavigationRequested;
 
+            // Load Admin persistence from UI settings on boot directly to fields
+            _hasUnlockedAdmin = App.Settings.Ui.HasUnlockedAdmin;
+            _showAdminView = App.Settings.Ui.ShowAdminView;
+
+
+            //Listen for settings changes to sync Admin state across instances
+            var settingsSvc = App.Services.GetRequiredService<ISettingsService>();
+            settingsSvc.SettingsChanged += OnSettingsChanged;
+
             InitializeViewModels(aboutVM);
             InitializeCommands();
             InitializeNavigation();
 
             // Set the initial view state in the application state service to avoid "Unknown" without changing view
             _appStateService.CurrentView = _selectedView.ToString();
+        }
+
+        // Event handler to sync properties when SettingsVM hits "Apply"
+        private void OnSettingsChanged(object? sender, AppSettings newSettings)
+        {
+            // Sync Admin state safely
+            HasUnlockedAdmin = newSettings.Ui.HasUnlockedAdmin;
+            ShowAdminView = newSettings.Ui.ShowAdminView;
         }
 
         //Static lock shared across all ghost VM instances
@@ -202,7 +256,7 @@ namespace DSAMVVM.MVVM.ViewModel
             });
         }
 
-        public void ProcessArgs(string[]? args)
+        public void ProcessArgs(string[] args)
         {
             if (args == null || args.Length == 0) return;
 
@@ -308,6 +362,7 @@ namespace DSAMVVM.MVVM.ViewModel
             ComputerVM = _computerVMFactory();
             GroupVM = _groupVMFactory();
             LinksVM = _linksVMFactory();
+            AdminVM = _adminVMFactory();
         }
 
         private void InitializeCommands()
@@ -320,6 +375,7 @@ namespace DSAMVVM.MVVM.ViewModel
             LinksCommand = new RelayCommand(_ => { SelectedView = AppView.Links; RestoreWindow(); });
             AboutCommand = new RelayCommand(_ => { SelectedView = AppView.About; RestoreWindow(); });
             SettingsCommand = new RelayCommand(_ => { SelectedView = AppView.Settings; RestoreWindow(); });
+            AdminCommand = new RelayCommand(_ => { SelectedView = AppView.Admin; RestoreWindow(); });
 
             ExecuteSearchCommand = new RelayCommand(_ => TriggerSearch());
             ShowWindowCommand = new RelayCommand(_ => RestoreWindow());
@@ -333,7 +389,7 @@ namespace DSAMVVM.MVVM.ViewModel
             });
 
             // Initialize the OpenFeedbackCommand
-            OpenFeedbackCommand = new RelayCommand(ExecuteOpenFeedback);
+            OpenFeedbackCommand = new RelayCommand(param => ExecuteOpenFeedback(param));
         }
 
         private static void ExecuteOpenFeedback(object? parameter)
@@ -346,17 +402,10 @@ namespace DSAMVVM.MVVM.ViewModel
                 targetIndex = parsed;
             }
 
-            var mainWindow = Application.Current.MainWindow;
-            var window = new FeedbackWindow(targetIndex);
-
-            if (mainWindow is { IsVisible: true })
+            var window = new FeedbackWindow(targetIndex)
             {
-                window.Owner = mainWindow;
-            }
-            else
-            {
-                window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            }
+                Owner = Application.Current.MainWindow
+            };
 
             window.ShowDialog();
         }
@@ -366,81 +415,95 @@ namespace DSAMVVM.MVVM.ViewModel
             UserViewModel => SearchTarget.User,
             ComputerViewModel => SearchTarget.Computer,
             GroupViewModel => SearchTarget.Group,
+            AdminViewModel => SearchTarget.Admin,
             _ => null
         };
 
         private async void TriggerSearch()
         {
+            var query = (SearchQuery ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(query)) return;
+
+            string lowerQuery = query.ToLowerInvariant();
+
+            //Admin intercept
+            if (lowerQuery == "-admin")
+            {
+                HasUnlockedAdmin = true;
+                ShowAdminView = true;
+
+                var settings = App.Settings;
+                settings.Ui.HasUnlockedAdmin = true;
+                settings.Ui.ShowAdminView = true;
+                App.Services.GetRequiredService<ISettingsService>().RequestSave(settings, Globals.g_SettingsPath);
+
+                SearchQuery = string.Empty;
+                SelectedView = AppView.Admin;
+
+                UiNotify.Info("Admin mode unlocked! You can now toggle this in Settings.", showStatusBar: true);
+                Log.Info("Admin", "Admin panel unlocked via command prompt.");
+                return;
+            }
+
+            // Internal testing toggle intercept
+            if (lowerQuery == "-test-" || lowerQuery == "-production-")
+            {
+                bool useTest = lowerQuery == "-test-";
+                var appSettings = App.Settings;
+                appSettings.Updates.UseInternalTestingSources = useTest;
+
+                var settingsService = App.Services.GetRequiredService<ISettingsService>();
+                settingsService.RequestSave(appSettings, Globals.g_SettingsPath);
+
+                string mode = useTest ? "TEST" : "PRODUCTION";
+                UiNotify.Info($"Update source toggled to: {mode}", showStatusBar: true);
+
+                SearchQuery = string.Empty;
+                return;
+            }
+            // Internal testing error intercept
+            if (lowerQuery == "-debug-error-")
+            {
+                var bus = App.Services.GetRequiredService<StatusBus>();
+
+                var testError = new StatusItemBuilder()
+                    .Key("DEBUG_STICKY_ERROR")
+                    .Level(StatusLevel.Error)
+                    .Sticky(true)
+                    .Priority(1)
+                    .Text("DEBUG: This is a persistent high-priority error. Test the ")
+                    .Bold("✕")
+                    .Text(" button!")
+                    .Build();
+
+                bus.Report(testError);
+
+                SearchQuery = string.Empty;
+                return;
+            }
+
+            if (CurrentView is not ISearchableViewModel searchable) return;
+
+            var target = ResolveTargetFromView(CurrentView);
+            if (target is null)
+            {
+                UiNotify.Warn("Search not supported for this view.");
+                return;
+            }
+
+            var key = $"{target}_Search";
+            UiNotify.Info($"Searching {target}...", showStatusBar: true, key: key);
+
             try
             {
-                var query = (SearchQuery ?? string.Empty).Trim();
-                if (string.IsNullOrWhiteSpace(query)) return;
-
-                string lowerQuery = query.ToLowerInvariant();
-
-                if (lowerQuery is "-test-" or "-production-")
-                {
-                    bool useTest = lowerQuery == "-test-";
-                    var appSettings = App.Settings;
-                    appSettings.Updates.UseInternalTestingSources = useTest;
-
-                    var settingsService = App.Services.GetRequiredService<ISettingsService>();
-                    settingsService.RequestSave(appSettings, Globals.g_SettingsPath);
-
-                    string mode = useTest ? "TEST" : "PRODUCTION";
-                    UiNotify.Info($"Update source toggled to: {mode}", showStatusBar: true);
-
-                    SearchQuery = string.Empty;
-                    return;
-                }
-
-                if (lowerQuery == "-debug-error-")
-                {
-                    var bus = App.Services.GetRequiredService<StatusBus>();
-
-                    var testError = new StatusItemBuilder()
-                        .Key("DEBUG_STICKY_ERROR")
-                        .Level(StatusLevel.Error)
-                        .Sticky()
-                        .Priority(1)
-                        .Text("DEBUG: This is a persistent high-priority error. Test the ")
-                        .Bold("✕")
-                        .Text(" button!")
-                        .Build();
-
-                    bus.Report(testError);
-
-                    SearchQuery = string.Empty;
-                    return;
-                }
-
-                if (CurrentView is not ISearchableViewModel searchable) return;
-
-                var target = ResolveTargetFromView(CurrentView);
-                if (target is null)
-                {
-                    UiNotify.Warn("Search not supported for this view.");
-                    return;
-                }
-
-                var key = $"{target}_Search";
-                UiNotify.Info($"Searching {target}...", showStatusBar: true, key: key);
-
-                try
-                {
-                    var context = new SearchContextDTO(query);
-                    await searchable.OnSearchUpdated(context, _searchService, target.Value);
-                    UiNotify.Success("Search complete.", key: key);
-                    SearchQuery = string.Empty;
-                }
-                catch (Exception ex)
-                {
-                    UiNotify.Error("Search failed", ex.Message, ex, alsoStatusBar: true, key: key);
-                }
+                var context = new SearchContextDTO(query);
+                await searchable.OnSearchUpdated(context, _searchService, target.Value);
+                UiNotify.Success("Search complete.", key: key);
+                SearchQuery = string.Empty;
             }
             catch (Exception ex)
             {
-                UiNotify.Error("Search error", ex.Message, ex, alsoStatusBar: true);
+                UiNotify.Error("Search failed", ex.Message, ex, alsoStatusBar: true, key: key);
             }
         }
 

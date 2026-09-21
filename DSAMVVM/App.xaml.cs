@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Services;
@@ -37,7 +37,7 @@ namespace DSAMVVM
         private const string PipeName = "DSAMVVM_Pipe_Channel_v1";
         private Mutex? _mutex;
 
-        public static IServiceProvider Services { get; private set; } = default!;
+        public static IServiceProvider Services { get; private set; } = null!;
         public static AppSettings Settings
         {
             get => ((App)Current)._settings ??= new AppSettings();
@@ -70,12 +70,12 @@ namespace DSAMVVM
             }
 
             // 2. Start listening for arguments from future instances (Jump List clicks)
-            _ = Task.Run(() => ListenForArgumentsAsync());
+            _ = Task.Run(ListenForArgumentsAsync);
 
             base.OnStartup(e);
 
             // Capture initial arguments
-            if (e.Args != null && e.Args.Length > 0)
+            if (e.Args.Length > 0)
             {
                 StartupArgs = e.Args;
             }
@@ -222,7 +222,11 @@ namespace DSAMVVM
             {
                 Mark("First window rendered");
 
-                try { _splash?.Close(); _splash = null; } catch { }
+                try { _splash?.Close(); _splash = null; }
+                catch
+                {
+                    // ignored
+                }
 
                 this.Dispatcher.BeginInvoke(async () =>
                 {
@@ -339,14 +343,15 @@ namespace DSAMVVM
         }
 
         // --- SINGLE INSTANCE LOGIC: CLIENT ---
-        private async static Task SendArgsToFirstInstanceAsync(string[] args)
+        private static async Task SendArgsToFirstInstanceAsync(string[] args)
         {
             try
             {
-                using var client = new NamedPipeClientStream(".", PipeName, PipeDirection.Out);
+                await using var client = new NamedPipeClientStream(".", PipeName, PipeDirection.Out);
                 await client.ConnectAsync(1000);
 
-                using var writer = new StreamWriter(client) { AutoFlush = true };
+                await using var writer = new StreamWriter(client);
+                writer.AutoFlush = true;
 
                 // If there are no args, send a dummy "WAKE_UP" signal so the server still triggers
                 var payload = args.Length > 0 ? string.Join(" ", args) : "WAKE_UP";
@@ -365,13 +370,13 @@ namespace DSAMVVM
             {
                 try
                 {
-                    using var server = new NamedPipeServerStream(PipeName, PipeDirection.In);
+                    await using var server = new NamedPipeServerStream(PipeName, PipeDirection.In);
                     await server.WaitForConnectionAsync();
 
                     using var reader = new StreamReader(server);
                     var line = await reader.ReadLineAsync();
 
-                    // Parse the arguments, stripping out our dummy wake up signal if it's there
+                    // Parse the arguments, stripping out our dummy wake-up signal if it's there
                     var argsToPass = string.IsNullOrWhiteSpace(line) || line == "WAKE_UP"
                         ? []
                         : line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -393,7 +398,7 @@ namespace DSAMVVM
             StartupArgs = args;
 
             // Force window to front
-            if (MainWindow is Window w)
+            if (MainWindow is { } w)
             {
                 w.Show();
 
@@ -494,7 +499,12 @@ namespace DSAMVVM
 
         protected override void OnExit(ExitEventArgs e)
         {
-            try { _serviceProvider.GetService<ISettingsService>()?.FlushPendingSaves(); } catch { }
+            try { _serviceProvider.GetService<ISettingsService>()?.FlushPendingSaves(); }
+            catch
+            {
+                // ignored
+            }
+
             TryPersistSettingsOnce();
 
             (_serviceProvider.GetService<VersionUpdateScheduler>() as IDisposable)?.Dispose();
@@ -516,7 +526,11 @@ namespace DSAMVVM
 
         private void App_SessionEnding(object? sender, SessionEndingCancelEventArgs e)
         {
-            try { TryPersistSettingsOnce(); } catch { }
+            try { TryPersistSettingsOnce(); }
+            catch
+            {
+                // ignored
+            }
         }
 
         private void TryPersistSettingsOnce()
@@ -561,6 +575,9 @@ namespace DSAMVVM
             services.AddSingleton<IDepartmentService, DepartmentService>();
             services.AddSingleton<IADService, ADService>();
             services.AddSingleton<ILinksService, LinksService>();
+            services.AddSingleton<IAdminService, AdminService>();
+            services.AddSingleton<IFileDialogService, FileDialogService>();
+            services.AddSingleton<IJsonExportService, JsonExportService>();
             services.AddSingleton<ISearchService, SearchService>();
             services.AddSingleton<IUpdaterService, UpdaterService>();
             services.AddSingleton<IDeepLinkRoutingService, DeepLinkRoutingService>();
@@ -580,6 +597,7 @@ namespace DSAMVVM
             services.AddTransient<ComputerViewModel>();
             services.AddTransient<LinksViewModel>();
             services.AddSingleton<AboutViewModel>();
+            services.AddSingleton<AdminViewModel>();
 
             services.AddSingleton<HomeViewModel>(sp =>
                 new HomeViewModel(
@@ -587,21 +605,17 @@ namespace DSAMVVM
                     {
                         var main = sp.GetRequiredService<MainViewModel>();
                         main.SelectedView = AppView.User;
-                        if (!string.IsNullOrWhiteSpace(q))
-                        {
-                            main.SearchQuery = q;
-                            main.ExecuteSearchCommand.Execute(null);
-                        }
+                        if (string.IsNullOrWhiteSpace(q)) return;
+                        main.SearchQuery = q;
+                        main.ExecuteSearchCommand.Execute(null);
                     },
                     openComputer: q =>
                     {
                         var main = sp.GetRequiredService<MainViewModel>();
                         main.SelectedView = AppView.Computer;
-                        if (!string.IsNullOrWhiteSpace(q))
-                        {
-                            main.SearchQuery = q;
-                            main.ExecuteSearchCommand.Execute(null);
-                        }
+                        if (string.IsNullOrWhiteSpace(q)) return;
+                        main.SearchQuery = q;
+                        main.ExecuteSearchCommand.Execute(null);
                     },
                     goGroups: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.Group,
                     goEntra: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.Entra,
@@ -613,10 +627,11 @@ namespace DSAMVVM
             services.AddTransient<QuickSearchOverlayViewModel>();
             services.AddTransient<EntraViewModel>();
 
-            services.AddTransient<Func<UserViewModel>>(sp => () => sp.GetRequiredService<UserViewModel>());
-            services.AddTransient<Func<GroupViewModel>>(sp => () => sp.GetRequiredService<GroupViewModel>());
-            services.AddTransient<Func<ComputerViewModel>>(sp => () => sp.GetRequiredService<ComputerViewModel>());
-            services.AddTransient<Func<LinksViewModel>>(sp => () => sp.GetRequiredService<LinksViewModel>());
+            services.AddTransient<Func<UserViewModel>>(sp => sp.GetRequiredService<UserViewModel>);
+            services.AddTransient<Func<GroupViewModel>>(sp => sp.GetRequiredService<GroupViewModel>);
+            services.AddTransient<Func<ComputerViewModel>>(sp => sp.GetRequiredService<ComputerViewModel>);
+            services.AddTransient<Func<LinksViewModel>>(sp => sp.GetRequiredService<LinksViewModel>);
+            services.AddTransient<Func<AdminViewModel>>(sp => sp.GetRequiredService<AdminViewModel>);
 
             services.AddSingleton<VersionCheckerUI>();
             services.AddSingleton<IVersionCheckHandler>(sp => sp.GetRequiredService<VersionCheckerUI>());
@@ -626,3 +641,4 @@ namespace DSAMVVM
         }
     }
 }
+

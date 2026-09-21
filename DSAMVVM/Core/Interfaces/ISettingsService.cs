@@ -35,5 +35,7 @@ namespace DSAMVVM.Core.Interfaces
 
         // Force any pending debounced save to flush now (e.g., on shutdown).
         void FlushPendingSaves();
+        // Event raised when settings are changed (after normalization).
+        event EventHandler<AppSettings> SettingsChanged;
     }
 }

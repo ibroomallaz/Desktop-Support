@@ -13,7 +13,7 @@
         public const string Settings = "\uE713";
         public const string Entra = "\uE753";
         public const string About = "\uE946";
-
+        public const string Admin = "\uE7EF;";
         // ===== TOP =====
         public const string Warning = "\uE7BA";
 

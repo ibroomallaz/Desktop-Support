@@ -11,9 +11,9 @@
     <ApplicationIcon>img\MainIcon.ico</ApplicationIcon>
     <RepositoryUrl>https://github.com/ibroomallaz/Desktop-Support</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>4.4.2</AssemblyVersion>
-    <FileVersion>4.4.1300</FileVersion>
-    <Version>4.4.2</Version>
+    <AssemblyVersion>4.5.0</AssemblyVersion>
+    <FileVersion>4.5.1100</FileVersion>
+    <Version>4.5.0</Version>
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Title>Desktop Support App</Title>
@@ -37,10 +37,10 @@
   <ItemGroup>
     <PackageReference Include="H.NotifyIcon.Wpf" Version="2.4.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
-    <PackageReference Include="Microsoft.Graph" Version="6.6.0" />
+    <PackageReference Include="Microsoft.Graph" Version="6.7.0" />
     <PackageReference Include="Microsoft.Graph.Core" Version="4.0.1" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.89.0" />
-    <PackageReference Include="Microsoft.Identity.Client.Broker" Version="4.89.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.90.0" />
+    <PackageReference Include="Microsoft.Identity.Client.Broker" Version="4.90.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="SharpHook" Version="8.0.0" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="10.0.12" />
