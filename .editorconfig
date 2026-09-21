@@ -1,0 +1,21 @@
+﻿# Top-most EditorConfig file
+root = true
+
+[*.cs]
+# Prefer explicit types over var
+csharp_style_var_for_built_in_types = false:none
+csharp_style_var_when_type_is_apparent = false:none
+csharp_style_var_elsewhere = false:none
+
+# Prefer block-scoped namespaces
+csharp_style_namespace_declarations = block_scoped:none
+namespace_body = block_scoped
+
+# JetBrains ReSharper / Rider inspection severities
+resharper_suggest_var_or_type_built_in_types_highlighting = none
+resharper_suggest_var_or_type_simple_types_highlighting = none
+resharper_suggest_var_or_type_elsewhere_highlighting = none
+resharper_arrange_namespace_body_highlighting = none
+resharper_replace_with_field_keyword_highlighting = none
+resharper_member_can_be_private_global_highlighting = none
+resharper_member_can_be_private_local_highlighting = none

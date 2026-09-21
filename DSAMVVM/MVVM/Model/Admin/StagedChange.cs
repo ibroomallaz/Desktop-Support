@@ -9,5 +9,13 @@ namespace DSAMVVM.MVVM.Model.Admin
         public string Summary { get; set; } = string.Empty;
         public object StagedData { get; init; } = null!;
         public DateTime Timestamp { get; init; } = DateTime.Now;
+
+        public string DisplayTitle => Section switch
+        {
+            AdminSection.Department => $"Dept {Key}",
+            AdminSection.SupportTeam => $"Team: {Key}",
+            AdminSection.Links => $"Link: {Key}",
+            _ => Key
+        };
     }
 }

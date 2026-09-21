@@ -2,12 +2,12 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:enums="clr-namespace:DSAMVVM.Core.Enums"
              xmlns:util="clr-namespace:DSAMVVM.Core.Utilities"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             d:DesignHeight="480" d:DesignWidth="840">
+             d:DesignHeight="520" d:DesignWidth="840">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
@@ -91,6 +91,7 @@
                     <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <StackPanel Margin="0,0,4,0">
 
+                            <!-- Department Form -->
                             <Grid Visibility="{Binding IsDepartmentSelected, Converter={StaticResource BoolToVis}}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="105"/>
@@ -120,16 +121,13 @@
                                     <sys:Boolean>False</sys:Boolean>
                                 </ComboBox>
 
-                                <!-- Support Team (Dropdown + Dynamic Write-in) -->
                                 <TextBlock Grid.Row="2" Grid.Column="0" Text="Support Team:" VerticalAlignment="Top" Margin="0,4,8,0" Style="{StaticResource Admin.FieldLabel}"/>
                                 <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,6">
-                                    <!-- Main Teams Dropdown -->
                                     <ComboBox ItemsSource="{Binding AvailableTeams}"
                                               SelectedItem="{Binding SelectedTeamOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                               Height="26"
                                               Style="{DynamicResource Combo.Links.Dropdown}"/>
 
-                                    <!-- Write-in TextBox: Appears ONLY when "Other" is selected -->
                                     <TextBox Margin="0,6,0,0" 
                                              Height="26"
                                              Style="{DynamicResource TextBox.Default}"
@@ -150,37 +148,279 @@
                                          Text="{Binding DeptNotes, UpdateSourceTrigger=PropertyChanged}"/>
                             </Grid>
 
-                            <StackPanel Visibility="{Binding IsSupportTeamSelected, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="Support Team configuration form will be wired here." 
-                                           FontStyle="Italic" 
-                                           Foreground="{DynamicResource Brush.Text.Muted}" 
-                                           Margin="10"/>
-                            </StackPanel>
+                            <!-- Support Team Form -->
+                            <Grid Visibility="{Binding IsSupportTeamSelected, Converter={StaticResource BoolToVis}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="105"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                            <StackPanel Visibility="{Binding IsLinksSelected, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="Quick Links configuration form will be wired here." 
-                                           FontStyle="Italic" 
-                                           Foreground="{DynamicResource Brush.Text.Muted}" 
-                                           Margin="10"/>
-                            </StackPanel>
+                                <!-- Select existing team or [+ New Support Team] -->
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Select Team:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <ComboBox Grid.Row="0" Grid.Column="1" 
+                                          ItemsSource="{Binding AvailableSupportTeamNames}"
+                                          SelectedItem="{Binding SelectedSupportTeamOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          Margin="0,0,0,6"
+                                          Height="26"
+                                          Style="{DynamicResource Combo.Links.Dropdown}"/>
+
+                                <!-- Team Name -->
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Team Name:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" 
+                                         Margin="0,0,0,6" 
+                                         Height="26"
+                                         Style="{DynamicResource TextBox.Default}"
+                                         Text="{Binding TeamName, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <!-- Manager Name -->
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Manager:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" 
+                                         Margin="0,0,0,6" 
+                                         Height="26"
+                                         Style="{DynamicResource TextBox.Default}"
+                                         Text="{Binding TeamManagerName, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <!-- Manager NetID -->
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Manager NetID:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="3" Grid.Column="1" 
+                                         Margin="0,0,0,6" 
+                                         Height="26"
+                                         Style="{DynamicResource TextBox.Default}"
+                                         Text="{Binding TeamManagerNetId, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <!-- Phone Number -->
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Phone #:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="4" Grid.Column="1" 
+                                         Margin="0,0,0,6" 
+                                         Height="26"
+                                         Style="{DynamicResource TextBox.Default}"
+                                         Text="{Binding TeamPhoneNumber, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <!-- Supported Divisions -->
+                                <TextBlock Grid.Row="5" Grid.Column="0" Text="Divisions:" VerticalAlignment="Top" Margin="0,4,8,0" Style="{StaticResource Admin.FieldLabel}"/>
+                                <Border Grid.Row="5" Grid.Column="1" 
+                                        Background="{DynamicResource Brush.Surface.1}" 
+                                        BorderBrush="{DynamicResource Brush.Border}" 
+                                        BorderThickness="1" 
+                                        CornerRadius="6" 
+                                        Padding="6">
+                                    <StackPanel>
+                                        <!-- Add Division Row -->
+                                        <Grid Margin="0,0,0,6">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="65"/>
+                                                <ColumnDefinition Width="4"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="4"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBox Grid.Column="0" 
+                                                     Height="24" 
+                                                     FontSize="11"
+                                                     Style="{DynamicResource TextBox.Default}"
+                                                     ToolTip="Division Abbreviation (e.g. ACDV)"
+                                                     Text="{Binding NewDivAbbrev, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                            <TextBox Grid.Column="2" 
+                                                     Height="24" 
+                                                     FontSize="11"
+                                                     Style="{DynamicResource TextBox.Default}"
+                                                     ToolTip="Full Division Name"
+                                                     Text="{Binding NewDivFullName, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                            <Button Grid.Column="4" 
+                                                    Content="Add" 
+                                                    Command="{Binding AddDivisionCommand}"
+                                                    Width="42" 
+                                                    Height="24" 
+                                                    FontSize="11"
+                                                    FontWeight="SemiBold"
+                                                    Style="{DynamicResource Button.Rounded}"/>
+                                        </Grid>
+
+                                        <!-- List of Supported Divisions -->
+                                        <ItemsControl ItemsSource="{Binding SupportedDivisionsList}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Margin="0,0,0,3" 
+                                                            Background="{DynamicResource Brush.Surface.0}" 
+                                                            BorderBrush="{DynamicResource Brush.Border}" 
+                                                            BorderThickness="1" 
+                                                            CornerRadius="4" 
+                                                            Padding="5,3">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="55"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <TextBlock Grid.Column="0" 
+                                                                       Text="{Binding DivAbbrev}" 
+                                                                       FontWeight="Bold" 
+                                                                       FontSize="10" 
+                                                                       Foreground="{DynamicResource Brush.Accent}"
+                                                                       VerticalAlignment="Center"/>
+
+                                                            <TextBlock Grid.Column="1" 
+                                                                       Text="{Binding DivFullName}" 
+                                                                       FontSize="10" 
+                                                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       VerticalAlignment="Center"/>
+
+                                                            <Button Grid.Column="2" 
+                                                                    Content="✕" 
+                                                                    Command="{Binding DataContext.RemoveDivisionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                    CommandParameter="{Binding}"
+                                                                    ToolTip="Remove Division"
+                                                                    Width="18" 
+                                                                    Height="18" 
+                                                                    FontSize="9"
+                                                                    VerticalAlignment="Center"
+                                                                    Style="{DynamicResource Button.Rounded.Small}"
+                                                                    Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <!-- Links Form -->
+                            <Grid Visibility="{Binding IsLinksSelected, Converter={StaticResource BoolToVis}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="105"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Scope (Common vs Team) -->
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Scope:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,6">
+                                    <RadioButton Content="Common Link" 
+                                                 GroupName="LinkScopeGroup"
+                                                 IsChecked="{Binding IsLinkCommon, Mode=TwoWay}"
+                                                 Margin="0,0,16,0"
+                                                 Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                    <RadioButton Content="Team Link" 
+                                                 GroupName="LinkScopeGroup"
+                                                 IsChecked="{Binding IsLinkTeam, Mode=TwoWay}"
+                                                 Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                </StackPanel>
+
+                                <!-- Target Team (visible only when Team Link is selected) -->
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Target Team:" VerticalAlignment="Top" Margin="0,4,8,0" 
+                                           Style="{StaticResource Admin.FieldLabel}"
+                                           Visibility="{Binding IsLinkTeam, Converter={StaticResource BoolToVis}}"/>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,6"
+                                            Visibility="{Binding IsLinkTeam, Converter={StaticResource BoolToVis}}">
+                                    <ComboBox ItemsSource="{Binding AvailableLinkTeams}"
+                                              SelectedItem="{Binding SelectedLinkTeam, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              Height="26"
+                                              Style="{DynamicResource Combo.Links.Dropdown}"/>
+
+                                    <TextBox Margin="0,6,0,0" 
+                                             Height="26"
+                                             Style="{DynamicResource TextBox.Default}"
+                                             Text="{Binding CustomLinkTeamName, UpdateSourceTrigger=PropertyChanged}"
+                                             Visibility="{Binding IsOtherLinkTeamSelected, Converter={StaticResource BoolToVis}}"/>
+                                </StackPanel>
+
+                                <!-- Select existing link or [+ New Link] -->
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Select Link:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <ComboBox Grid.Row="2" Grid.Column="1" 
+                                          ItemsSource="{Binding ScopeLinksList}"
+                                          SelectedItem="{Binding SelectedScopeLinkOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          Margin="0,0,0,6"
+                                          Height="26"
+                                          Style="{DynamicResource Combo.Links.Dropdown}"/>
+
+                                <!-- Link Name -->
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Name:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="3" Grid.Column="1" 
+                                         Margin="0,0,0,6" 
+                                         Height="26"
+                                         Style="{DynamicResource TextBox.Default}"
+                                         Text="{Binding LinkName, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <!-- URL -->
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="URL:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="4" Grid.Column="1" 
+                                         Margin="0,0,0,6" 
+                                         Height="26"
+                                         Style="{DynamicResource TextBox.Default}"
+                                         Text="{Binding LinkUrl, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <!-- Description -->
+                                <TextBlock Grid.Row="5" Grid.Column="0" Text="Description:" VerticalAlignment="Top" Margin="0,4,8,0" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="5" Grid.Column="1" 
+                                         MinHeight="75" 
+                                         MaxHeight="120"
+                                         TextWrapping="Wrap" 
+                                         AcceptsReturn="True" 
+                                         VerticalScrollBarVisibility="Auto"
+                                         VerticalContentAlignment="Top" 
+                                         Padding="6" 
+                                         Style="{DynamicResource TextBox.Default}"
+                                         Text="{Binding LinkDescription, UpdateSourceTrigger=PropertyChanged}"/>
+                            </Grid>
 
                         </StackPanel>
                     </ScrollViewer>
 
+                    <!-- Footer Actions -->
                     <Border Grid.Row="1" Margin="0,6,0,0" Padding="0,6,0,0" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource Brush.Border}">
                         <Grid>
-                            <Button Content="Clear" 
-                                    Command="{Binding ClearFormCommand}" 
-                                    HorizontalAlignment="Left"
-                                    Width="80" 
-                                    Height="28" 
-                                    FontSize="11"
-                                    Style="{DynamicResource Button.Rounded}"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                <Button Content="Clear" 
+                                        Command="{Binding ClearFormCommand}" 
+                                        Width="70" 
+                                        Height="28" 
+                                        FontSize="11"
+                                        Margin="0,0,6,0"
+                                        Style="{DynamicResource Button.Rounded}"/>
+
+                                <Button Content="Delete Team" 
+                                        Command="{Binding DeleteSupportTeamCommand}" 
+                                        Visibility="{Binding ShowDeleteSupportTeamButton, Converter={StaticResource BoolToVis}}"
+                                        Width="90" 
+                                        Height="28" 
+                                        FontSize="11"
+                                        Margin="0,0,6,0"
+                                        Style="{DynamicResource Button.Rounded}"/>
+
+                                <Button Content="Delete Link" 
+                                        Command="{Binding DeleteLinkCommand}" 
+                                        Visibility="{Binding ShowDeleteLinkButton, Converter={StaticResource BoolToVis}}"
+                                        Width="90" 
+                                        Height="28" 
+                                        FontSize="11"
+                                        Style="{DynamicResource Button.Rounded}"/>
+                            </StackPanel>
 
                             <Button Content="Apply to Queue" 
                                     Command="{Binding ApplyCommand}" 
                                     HorizontalAlignment="Right"
-                                    Width="140" 
+                                    Width="130" 
                                     Height="28" 
                                     FontSize="11"
                                     FontWeight="SemiBold"
@@ -190,6 +430,7 @@
                 </Grid>
             </Border>
 
+            <!-- Staged Changes Section -->
             <Border Grid.Column="2" 
                     Background="{DynamicResource Brush.Surface.1}" 
                     BorderBrush="{DynamicResource Brush.Border}" 
@@ -254,7 +495,7 @@
 
                                                 <StackPanel Grid.Column="0">
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
-                                                        <TextBlock Text="{Binding Key, StringFormat='Dept {0}'}" 
+                                                        <TextBlock Text="{Binding DisplayTitle}" 
                                                                    FontWeight="Bold" 
                                                                    FontSize="11" 
                                                                    Foreground="{DynamicResource Brush.Text.Primary}"/>
@@ -287,37 +528,31 @@
                         </ScrollViewer>
                     </Grid>
 
+                    <!-- Queue Footer Buttons -->
                     <Border Grid.Row="2" Margin="0,6,0,0" Padding="0,6,0,0" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource Brush.Border}">
                         <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Button Grid.Column="0"
-                                    Content="Discard All" 
+                            <Button Content="Discard All" 
                                     Command="{Binding DiscardAllCommand}" 
                                     IsEnabled="{Binding HasPendingChanges}"
+                                    HorizontalAlignment="Left"
+                                    Width="80" 
                                     Height="28" 
-                                    Margin="0,0,4,0"
                                     FontSize="11"
                                     Style="{DynamicResource Button.Rounded}"/>
 
-                            <Button Grid.Column="1"
-                                    Content="Save to JSON" 
+                            <Button Content="Save to JSON" 
                                     Command="{Binding SaveCommand}" 
                                     IsEnabled="{Binding HasPendingChanges}"
+                                    HorizontalAlignment="Right"
+                                    Width="120" 
                                     Height="28" 
-                                    Margin="4,0,0,0"
                                     FontSize="11"
                                     FontWeight="SemiBold"
                                     Style="{DynamicResource Button.Rounded}"/>
                         </Grid>
                     </Border>
-
                 </Grid>
             </Border>
-
         </Grid>
     </Grid>
 </UserControl>

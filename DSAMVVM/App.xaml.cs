@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Services;
@@ -561,6 +561,7 @@ namespace DSAMVVM
             services.AddSingleton<IDepartmentService, DepartmentService>();
             services.AddSingleton<IADService, ADService>();
             services.AddSingleton<ILinksService, LinksService>();
+            services.AddSingleton<IAdminService, AdminService>();
             services.AddSingleton<ISearchService, SearchService>();
             services.AddSingleton<IUpdaterService, UpdaterService>();
             services.AddSingleton<IDeepLinkRoutingService, DeepLinkRoutingService>();
@@ -628,3 +629,4 @@ namespace DSAMVVM
         }
     }
 }
+
