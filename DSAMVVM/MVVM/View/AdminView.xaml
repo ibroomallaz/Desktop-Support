@@ -51,19 +51,28 @@
                 <RadioButton Content="Department" 
                              GroupName="AdminSectionMode"
                              IsChecked="{Binding SelectedSection, Converter={StaticResource EnumEquals}, ConverterParameter={x:Static enums:AdminSection.Department}}"
-                             Margin="0,0,14,0" 
-                             Foreground="{DynamicResource Brush.Text.Primary}"/>
+                             Style="{DynamicResource Radio.GroupView}"
+                             FontSize="11"
+                             Padding="12,3"
+                             MinHeight="26"
+                             Margin="0,0,6,0"/>
 
                 <RadioButton Content="Support Team" 
                              GroupName="AdminSectionMode"
                              IsChecked="{Binding SelectedSection, Converter={StaticResource EnumEquals}, ConverterParameter={x:Static enums:AdminSection.SupportTeam}}"
-                             Margin="0,0,14,0" 
-                             Foreground="{DynamicResource Brush.Text.Primary}"/>
+                             Style="{DynamicResource Radio.GroupView}"
+                             FontSize="11"
+                             Padding="12,3"
+                             MinHeight="26"
+                             Margin="0,0,6,0"/>
 
                 <RadioButton Content="Links" 
                              GroupName="AdminSectionMode"
                              IsChecked="{Binding SelectedSection, Converter={StaticResource EnumEquals}, ConverterParameter={x:Static enums:AdminSection.Links}}"
-                             Foreground="{DynamicResource Brush.Text.Primary}"/>
+                             Style="{DynamicResource Radio.GroupView}"
+                             FontSize="11"
+                             Padding="12,3"
+                             MinHeight="26"/>
             </StackPanel>
         </Grid>
 
@@ -319,12 +328,18 @@
                                     <RadioButton Content="Common Link" 
                                                  GroupName="LinkScopeGroup"
                                                  IsChecked="{Binding IsLinkCommon, Mode=TwoWay}"
-                                                 Margin="0,0,16,0"
-                                                 Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                 Style="{DynamicResource Radio.GroupView}"
+                                                 FontSize="11"
+                                                 Padding="10,2"
+                                                 MinHeight="24"
+                                                 Margin="0,0,6,0"/>
                                     <RadioButton Content="Team Link" 
                                                  GroupName="LinkScopeGroup"
                                                  IsChecked="{Binding IsLinkTeam, Mode=TwoWay}"
-                                                 Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                 Style="{DynamicResource Radio.GroupView}"
+                                                 FontSize="11"
+                                                 Padding="10,2"
+                                                 MinHeight="24"/>
                                 </StackPanel>
 
                                 <!-- Target Team (visible only when Team Link is selected) -->
