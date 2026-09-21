@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model;
@@ -16,7 +16,7 @@ namespace DSAMVVM.Core.Services
         private readonly IDepartmentService _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
         private readonly ILinksService _linksService = linksService ?? throw new ArgumentNullException(nameof(linksService));
 
-        #region Paths
+        // --- Paths ---
 
         private static string DepartmentTargetPath =>
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "departments.json");
@@ -24,9 +24,8 @@ namespace DSAMVVM.Core.Services
         private static string LinksTargetPath =>
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "links.json");
 
-        #endregion
 
-        #region Department Operations
+        // --- Department Operations ---
 
         public async Task<DepartmentListWrapper> LoadDepartmentsAsync()
         {
@@ -97,9 +96,8 @@ namespace DSAMVVM.Core.Services
             return null;
         }
 
-        #endregion
 
-        #region Support Team Operations
+        // --- Support Team Operations ---
 
         public async Task<IReadOnlyList<SupportTeam>> LoadSupportTeamsAsync()
         {
@@ -133,9 +131,8 @@ namespace DSAMVVM.Core.Services
             return await _deptService.GetSupportTeamAsync(trimmed);
         }
 
-        #endregion
 
-        #region Links Operations
+        // --- Links Operations ---
 
         public async Task<LinksData> LoadLinksDataAsync()
         {
@@ -233,9 +230,8 @@ namespace DSAMVVM.Core.Services
             return (null, true, null);
         }
 
-        #endregion
 
-        #region Staging Helpers
+        // --- Staging Helpers ---
 
         public DepartmentListWrapper ApplyDepartmentChanges(DepartmentListWrapper wrapper, IEnumerable<StagedChange> stagedChanges)
         {
@@ -382,9 +378,8 @@ namespace DSAMVVM.Core.Services
             return linksData;
         }
 
-        #endregion
 
-        #region Persistence
+        // --- Persistence ---
 
         public async Task SaveStagedChangesAsync(IEnumerable<StagedChange> stagedChanges)
         {
@@ -461,6 +456,5 @@ namespace DSAMVVM.Core.Services
             }
         }
 
-        #endregion
     }
 }
