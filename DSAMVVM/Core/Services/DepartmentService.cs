@@ -7,7 +7,6 @@ using DSAMVVM.MVVM.Model.Schemas;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Http;
 
 namespace DSAMVVM.Core.Services
 {
@@ -128,10 +127,8 @@ namespace DSAMVVM.Core.Services
                 {
                     Log.Info("Dept.Loader", $"Fetching web data from: {targetUri}");
 
-                    // Web Strategy: Always fetch fresh content to avoid stale data.
-                    using var client = new HttpClient();
-                    client.Timeout = TimeSpan.FromSeconds(5);
-                    var webContent = await client.GetStringAsync(targetUri);
+                    // Web Strategy: Always fetch fresh content to avoid stale data via shared HttpService with 5s timeout.
+                    var webContent = await _http.GetStringAsync(targetUri, TimeSpan.FromSeconds(5));
 
                     // Check existing cache.
                     string cachedContent = string.Empty;

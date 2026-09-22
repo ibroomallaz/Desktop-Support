@@ -1,15 +1,22 @@
 ﻿using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model.Schemas;
+using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Http;
 using System.Windows;
 
 namespace DSAMVVM.Core.Services.Updates
 {
-    public class UpdaterService : IUpdaterService
+    public class UpdaterService(IHttpService http) : IUpdaterService
     {
+        private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
+
+        // Parameterless fallback constructor for backwards-compatibility or design-time instantiation
+        public UpdaterService() : this(App.Services?.GetService<IHttpService>() ?? new HttpService())
+        {
+        }
+
         public async Task DownloadAndInstallAsync(CurrentVersion updateInfo, IProgress<string>? progressReporter = null)
         {
             var tempDir = Path.Combine(Path.GetTempPath(), $"DSA_Update_{Guid.NewGuid():N}");
@@ -25,36 +32,32 @@ namespace DSAMVVM.Core.Services.Updates
             {
                 Log.Info("UpdaterSvc", $"Starting background download to: {tempDir}");
 
-                using (var client = new HttpClient())
+                if (needsFramework && !string.IsNullOrWhiteSpace(updateInfo.SetupUrl) && !string.IsNullOrWhiteSpace(updateInfo.MsiUrl))
                 {
-                    client.Timeout = TimeSpan.FromSeconds(60);
-                    if (needsFramework && !string.IsNullOrWhiteSpace(updateInfo.SetupUrl) && !string.IsNullOrWhiteSpace(updateInfo.MsiUrl))
-                    {
-                        progressReporter?.Report("Downloading .NET bootstrapper...");
-                        await DownloadFileAsync(client, updateInfo.SetupUrl, setupPath);
+                    progressReporter?.Report("Downloading .NET bootstrapper...");
+                    await _http.DownloadFileAsync(updateInfo.SetupUrl, setupPath, TimeSpan.FromSeconds(60));
 
-                        progressReporter?.Report("Downloading update...");
-                        await DownloadFileAsync(client, updateInfo.MsiUrl, msiPath);
+                    progressReporter?.Report("Downloading update...");
+                    await _http.DownloadFileAsync(updateInfo.MsiUrl, msiPath, TimeSpan.FromSeconds(60));
 
-                        progressReporter?.Report("Update ready. App will restart shortly...");
-                        await Task.Delay(1500); // Give tech a moment to read
+                    progressReporter?.Report("Update ready. App will restart shortly...");
+                    await Task.Delay(1500); // Give tech a moment to read
 
-                        ExecuteInstaller(setupPath, "/quiet /norestart");
-                    }
-                    else if (!string.IsNullOrWhiteSpace(updateInfo.MsiUrl))
-                    {
-                        progressReporter?.Report("Downloading update...");
-                        await DownloadFileAsync(client, updateInfo.MsiUrl, msiPath);
+                    ExecuteInstaller(setupPath, "/quiet /norestart");
+                }
+                else if (!string.IsNullOrWhiteSpace(updateInfo.MsiUrl))
+                {
+                    progressReporter?.Report("Downloading update...");
+                    await _http.DownloadFileAsync(updateInfo.MsiUrl, msiPath, TimeSpan.FromSeconds(60));
 
-                        progressReporter?.Report("Update ready. App will restart shortly...");
-                        await Task.Delay(1500);
+                    progressReporter?.Report("Update ready. App will restart shortly...");
+                    await Task.Delay(1500);
 
-                        ExecuteInstaller("msiexec.exe", $"/i \"{msiPath}\" /qn /norestart");
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("No valid download URLs provided.");
-                    }
+                    ExecuteInstaller("msiexec.exe", $"/i \"{msiPath}\" /qn /norestart");
+                }
+                else
+                {
+                    throw new InvalidOperationException("No valid download URLs provided.");
                 }
 
                 // Shutdown current instance so the MSI can overwrite files
@@ -69,20 +72,6 @@ namespace DSAMVVM.Core.Services.Updates
             {
                 progressReporter?.Report("Ready");
             }
-        }
-
-        // --- ATOMIC DOWNLOAD PATTERN ---
-        // Downloads as .download and renames only after successful completion
-        private static async Task DownloadFileAsync(HttpClient client, string url, string destinationPath)
-        {
-            var tempPath = destinationPath + ".download";
-            using (var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
-            {
-                response.EnsureSuccessStatusCode();
-                await using var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None);
-                await response.Content.CopyToAsync(fs);
-            }
-            File.Move(tempPath, destinationPath, true);
         }
 
         // --- POWERSHELL WATCHDOG ---

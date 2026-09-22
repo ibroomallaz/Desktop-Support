@@ -6,7 +6,6 @@ using DSAMVVM.MVVM.Model.Data;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Http;
 using static DSAMVVM.Core.Utilities.UiNotify;
 
 namespace DSAMVVM.Core.Services
@@ -14,7 +13,6 @@ namespace DSAMVVM.Core.Services
     // Service for loading Links data using a Remote-First strategy with local offline fallback.
     public class LinksService(IHttpService http) : ILinksService
     {
-        // Keep injected service to satisfy DI signature
         private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
         private readonly SemaphoreSlim _gate = new(1, 1);
         private readonly string _cachePath = Globals.g_LinksCachePath;
@@ -63,10 +61,8 @@ namespace DSAMVVM.Core.Services
                     {
                         Log.Info("Links.Loader", $"Fetching web data from: {targetUri}");
 
-                        // Web Strategy: Always fetch fresh content to avoid stale data.
-                        using var client = new HttpClient();
-                        client.Timeout = TimeSpan.FromSeconds(5);
-                        var webContent = await client.GetStringAsync(targetUri, ct);
+                        // Web Strategy: Always fetch fresh content to avoid stale data via shared HttpService with 5s timeout.
+                        var webContent = await _http.GetStringAsync(targetUri, TimeSpan.FromSeconds(5), ct);
 
                         // Check existing cache.
                         string cachedContent = string.Empty;
