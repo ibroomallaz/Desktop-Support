@@ -1,6 +1,6 @@
 ﻿namespace DSAMVVM.MVVM.View.Resources
 {
-    // Central glyph hub for the app. Only NAV set is populated for now.
+    // Central glyph hub for the app.
     public static class Glyphs
     {
         // ===== NAV =====
@@ -13,10 +13,16 @@
         public const string Settings = "\uE713";
         public const string Entra = "\uE753";
         public const string About = "\uE946";
-        public const string Admin = "\uE7EF;";
-        // ===== TOP =====
+        public const string Admin = "\uE7EF";
+
+        // ===== TOP / STATUS =====
         public const string Warning = "\uE7BA";
 
+        // ===== SETTINGS CATEGORIES =====
+        public const string Appearance = "\uE790";
+        public const string QuickSearch = "\uE721";
+        public const string DataAndLinks = "\uE774";
+        public const string Maintenance = "\uE90F";
 
         // Optional helper: accept "E721" or "\uE721" and return the single-char glyph.
         public static string From(string code)

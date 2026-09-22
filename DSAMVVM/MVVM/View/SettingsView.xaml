@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:app="clr-namespace:DSAMVVM"
              xmlns:vm="clr-namespace:DSAMVVM.MVVM.ViewModel"
+             xmlns:res="clr-namespace:DSAMVVM.MVVM.View.Resources"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}">
 
@@ -122,404 +123,507 @@
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <ScrollViewer Grid.Row="0"
+        <!-- Navigation Header Bar -->
+        <Border Grid.Row="0" Margin="16,12,16,12"
+                Background="{DynamicResource Brush.Surface.Hover}"
+                BorderBrush="{DynamicResource Brush.Border}"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="16,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding SelectedCategory.Glyph}"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="16"
+                                   Foreground="{DynamicResource Brush.Accent.Red.Light}"
+                                   Margin="0,0,10,0"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding SelectedCategory.Title}"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource Brush.Text.Primary}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding SelectedCategory.Description}"
+                               FontSize="11"
+                               Foreground="{DynamicResource Brush.Text.Muted}"
+                               Margin="26,3,0,0"/>
+                </StackPanel>
+
+                <!-- Section Dropdown Selector -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Section:" 
+                               VerticalAlignment="Center" 
+                               Foreground="{DynamicResource Brush.Text.Muted}" 
+                               FontSize="12" 
+                               Margin="0,0,10,0"/>
+                    <ComboBox Width="230"
+                              Height="32"
+                              Style="{DynamicResource Combo.Links.Dropdown}"
+                              ItemsSource="{Binding Categories}"
+                              SelectedItem="{Binding SelectedCategory, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="2,0">
+                                    <TextBlock Text="{Binding Glyph}" 
+                                               FontFamily="Segoe MDL2 Assets" 
+                                               FontSize="13" 
+                                               Foreground="{DynamicResource Brush.Accent.Red.Light}" 
+                                               Margin="0,0,8,0" 
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Title}" 
+                                               FontSize="12" 
+                                               Foreground="{DynamicResource Brush.Text.Primary}" 
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Category Content Area -->
+        <ScrollViewer Grid.Row="1"
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Margin="16" Orientation="Vertical">
+            <StackPanel Margin="16,0,16,8" Orientation="Vertical">
 
-                <Border Style="{StaticResource Card.Container}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="6"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-                        <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Search text" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-
-                            <Grid Margin="0,0,0,12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="12"/>
-                                    <ColumnDefinition Width="240"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Default search size at launch" Style="{StaticResource FieldLabel}"/>
-                                <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}"
-                                          ItemsSource="{Binding InitialFontSizeOptions}"
-                                          SelectedValue="{Binding DefaultFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                          SelectedValuePath="." ItemTemplate="{StaticResource PtItemTemplate}"/>
-                            </Grid>
-
-                            <Grid Margin="0,0,0,12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="12"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="12"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Default search text size" Style="{StaticResource FieldLabel}"/>
-                                <Slider x:Name="GeneralSizeSlider" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
-                                        IsSnapToTickEnabled="True" Value="{Binding DefaultFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
-                                    <Run Text="{Binding ElementName=GeneralSizeSlider, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
-                                </TextBlock>
-                            </Grid>
-
-                            <CheckBox x:Name="UsePerViewCheck" Foreground="{DynamicResource Brush.Text.Primary}"
-                                      Content="Enable per-tab search size (override default)" Margin="0,0,0,8"
-                                      IsChecked="{Binding UsePerViewOverride, Mode=TwoWay}"/>
-
-                            <StackPanel Visibility="{Binding ElementName=UsePerViewCheck, Path=IsChecked, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="Per-tab search text sizes" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,8"/>
-                                <UniformGrid Columns="2" Rows="2">
-                                    <Grid Margin="0,0,12,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="12"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="12"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="User" Style="{StaticResource FieldLabel}"/>
-                                        <Slider x:Name="UserSize" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
-                                                IsSnapToTickEnabled="True" Value="{Binding UserFontSize, Mode=TwoWay}"/>
-                                        <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}"><Run Text="{Binding ElementName=UserSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/></TextBlock>
-                                    </Grid>
-                                    <Grid Margin="0,0,12,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="12"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="12"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Computer" Style="{StaticResource FieldLabel}"/>
-                                        <Slider x:Name="ComputerSize" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
-                                                IsSnapToTickEnabled="True" Value="{Binding ComputerFontSize, Mode=TwoWay}"/>
-                                        <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}"><Run Text="{Binding ElementName=ComputerSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/></TextBlock>
-                                    </Grid>
-                                    <Grid Margin="0,0,12,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="12"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="12"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Group" Style="{StaticResource FieldLabel}"/>
-                                        <Slider x:Name="GroupSize" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
-                                                IsSnapToTickEnabled="True" Value="{Binding GroupFontSize, Mode=TwoWay}"/>
-                                        <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}"><Run Text="{Binding ElementName=GroupSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/></TextBlock>
-                                    </Grid>
-                                    <Grid Margin="0,0,12,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="12"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="12"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Entra" Style="{StaticResource FieldLabel}"/>
-                                        <Slider x:Name="EntraSize" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
-                                                IsSnapToTickEnabled="True" Value="{Binding EntraFontSize, Mode=TwoWay}"/>
-                                        <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}"><Run Text="{Binding ElementName=EntraSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/></TextBlock>
-                                    </Grid>
-                                </UniformGrid>
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <Border Style="{StaticResource Card.Container}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="6"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-                        <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="System Tray" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-                            <CheckBox x:Name="EnableTrayCheck" Foreground="{DynamicResource Brush.Text.Primary}" Content="Enable System Tray Icon" Margin="0,0,0,8" IsChecked="{Binding EnableTrayIcon, Mode=TwoWay}"/>
-                            <StackPanel Visibility="{Binding ElementName=EnableTrayCheck, Path=IsChecked, Converter={StaticResource BoolToVis}}" Margin="0,4,0,0">
-                                <CheckBox Foreground="{DynamicResource Brush.Text.Primary}" Content="Minimize window to Tray" Margin="24,0,0,8" IsChecked="{Binding MinimizeToTray, Mode=TwoWay}"/>
-                                <CheckBox Foreground="{DynamicResource Brush.Text.Primary}" Content="Close button (X) minimizes to Tray" Margin="24,0,0,0" IsChecked="{Binding CloseToTray, Mode=TwoWay}"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-                <Border Style="{StaticResource Card.Container}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="6"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-
-                        <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Quick Search (Overlay)" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-
-                            <CheckBox x:Name="EnableQuickSearchCheck" Foreground="{DynamicResource Brush.Text.Primary}" 
-                      Content="Enable Double-Tap Quick Search" Margin="0,0,0,12" 
-                      IsChecked="{Binding EnableQuickSearch, Mode=TwoWay}"/>
-
-                            <StackPanel Visibility="{Binding ElementName=EnableQuickSearchCheck, Path=IsChecked, Converter={StaticResource BoolToVis}}" Margin="0,4,0,0">
+                <!-- ============================================== -->
+                <!-- 1. APPEARANCE & INTERFACE SECTION              -->
+                <!-- ============================================== -->
+                <StackPanel Visibility="{Binding IsAppearanceSelected, Converter={StaticResource BoolToVis}}">
+                    <!-- Search Text & Typography -->
+                    <Border Style="{StaticResource Card.Container}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
+                            <StackPanel Grid.Column="1" Margin="16">
+                                <TextBlock Text="Search text" FontSize="16" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
 
                                 <Grid Margin="0,0,0,12">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="12"/>
-                                        <ColumnDefinition Width="200"/>
+                                        <ColumnDefinition Width="240"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Double-Tap Key" Style="{StaticResource FieldLabel}"/>
-
-                                    <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}" 
-                                              ItemsSource="{Binding ModifierKeyOptions}" 
-                                              DisplayMemberPath="Value" 
-                                              SelectedValuePath="Key"
-                                              SelectedValue="{Binding QuickSearchModifierKey, Mode=TwoWay}"/>
+                                    <TextBlock Text="Default search size at launch" Style="{StaticResource FieldLabel}"/>
+                                    <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}"
+                                              ItemsSource="{Binding InitialFontSizeOptions}"
+                                              SelectedValue="{Binding DefaultFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              SelectedValuePath="." ItemTemplate="{StaticResource PtItemTemplate}"/>
                                 </Grid>
 
-                                <Grid Margin="0,0,0,8">
+                                <Grid Margin="0,0,0,12">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="12"/>
-                                        <ColumnDefinition Width="200"/>
+                                        <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="12"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Double-Tap Speed" Style="{StaticResource FieldLabel}"/>
-                                    <Slider x:Name="DoubleTapSlider" Grid.Column="2" Minimum="100" Maximum="1000" TickFrequency="50" 
-                            IsSnapToTickEnabled="True" Value="{Binding QuickSearchDoubleTapMs, Mode=TwoWay}"/>
+                                    <TextBlock Text="Default search text size" Style="{StaticResource FieldLabel}"/>
+                                    <Slider x:Name="GeneralSizeSlider" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
+                                            IsSnapToTickEnabled="True" Value="{Binding DefaultFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                     <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
-                        <Run Text="{Binding ElementName=DoubleTapSlider, Path=Value, StringFormat=F0}"/><Run Text=" ms"/>
+                                        <Run Text="{Binding ElementName=GeneralSizeSlider, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
                                     </TextBlock>
                                 </Grid>
 
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-                <Border Style="{StaticResource Card.Container}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="6"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-                        <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Application Updates" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-                            <CheckBox Foreground="{DynamicResource Brush.Text.Primary}" Content="Opt-in to Pre-Release Channels" IsChecked="{Binding EnablePreReleaseChannel, Mode=TwoWay}" ToolTip="Download preview builds for testing."/>
-                        </StackPanel>
-                    </Grid>
-                </Border>
+                                <CheckBox x:Name="UsePerViewCheck" Foreground="{DynamicResource Brush.Text.Primary}"
+                                          Content="Enable per-tab search size (override default)" Margin="0,0,0,8"
+                                          IsChecked="{Binding UsePerViewOverride, Mode=TwoWay}"/>
 
-                <Border Style="{StaticResource Card.Container}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="6"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-                        <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Data Management" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-                            <TextBlock Text="Department Data" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,8"/>
-                            <CheckBox Content="Override Default Location" IsChecked="{Binding UseCustomDept}" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-                            <Grid Margin="0,0,0,16" Visibility="{Binding UseCustomDept, Converter={StaticResource BoolToVis}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition Width="12"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="12"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" Text="Source" Style="{StaticResource FieldLabel}"/>
-                                <ComboBox Grid.Row="0" Grid.Column="2" ItemsSource="{Binding DataSourceOptions}" SelectedItem="{Binding DeptSource}" Style="{DynamicResource Combo.Links.Dropdown}" HorizontalAlignment="Left" Width="140"/>
-                                <TextBlock Grid.Row="2" Text="Location" Style="{StaticResource FieldLabel}"/>
-                                <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding DeptUri, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBox.Settings}"/>
-                                <Button Grid.Row="2" Grid.Column="3" Command="{Binding BrowseDeptCommand}" Content="Browse" Width="60" Margin="8,0,0,0">
-                                    <Button.Style>
-                                        <Style TargetType="Button" BasedOn="{StaticResource Button.Rounded.Compact}">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding DeptSource}" Value="File">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Button.Style>
-                                </Button>
-                            </Grid>
-                            <TextBlock Text="Links Data" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,8"/>
-                            <CheckBox Content="Override Default Location" IsChecked="{Binding UseCustomLinks}" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-                            <Grid Visibility="{Binding UseCustomLinks, Converter={StaticResource BoolToVis}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition Width="12"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="12"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" Text="Source" Style="{StaticResource FieldLabel}"/>
-                                <ComboBox Grid.Row="0" Grid.Column="2" ItemsSource="{Binding DataSourceOptions}" SelectedItem="{Binding LinksSource}" Style="{DynamicResource Combo.Links.Dropdown}" HorizontalAlignment="Left" Width="140"/>
-                                <TextBlock Grid.Row="2" Text="Location" Style="{StaticResource FieldLabel}"/>
-                                <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding LinksUri, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBox.Settings}"/>
-                                <Button Grid.Row="2" Grid.Column="3" Command="{Binding BrowseLinksCommand}" Content="Browse" Width="60" Margin="8,0,0,0">
-                                    <Button.Style>
-                                        <Style TargetType="Button" BasedOn="{StaticResource Button.Rounded.Compact}">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding LinksSource}" Value="File">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Button.Style>
-                                </Button>
-                            </Grid>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <Border Style="{StaticResource Card.Container}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="6"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-                        <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Links Start Mode" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-                            <StackPanel Margin="0,0,0,8">
-                                <RadioButton GroupName="LinksStartMode" Content="Start with last viewed team" Foreground="{DynamicResource Brush.Text.Primary}" IsChecked="{Binding LinksSettings.OpenLastViewedFirst, Mode=TwoWay}"/>
-                                <RadioButton GroupName="LinksStartMode" Content="Start with a specific team" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,6,0,0" IsChecked="{Binding LinksSettings.OverrideEnabled, Mode=TwoWay}"/>
-                            </StackPanel>
-                            <Grid Visibility="{Binding LinksSettings.OverrideEnabled, Converter={StaticResource BoolToVis}}" Margin="0,0,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="12"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Override team" Style="{StaticResource FieldLabel}"/>
-                                <ComboBox Grid.Column="2" Width="220" Height="28" Style="{DynamicResource Combo.Links.Dropdown}"
-                                          ItemsSource="{Binding DataContext.LinksVM.TeamNames, RelativeSource={RelativeSource AncestorType=Window}}"
-                                          SelectedItem="{Binding LinksSettings.OverrideTeam, Mode=TwoWay}">
-                                    <ComboBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Brush.Text.Primary}"/>
-                                        </DataTemplate>
-                                    </ComboBox.ItemTemplate>
-                                </ComboBox>
-                            </Grid>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <Border Style="{StaticResource Card.Container}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="6"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-                        <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Logs" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-                            <Grid Margin="0,0,0,12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="12"/>
-                                    <ColumnDefinition Width="240"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Log level" Style="{StaticResource FieldLabel}"/>
-                                <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}" ItemsSource="{Binding LogLevels}" SelectedItem="{Binding MinimumLogLevel, Mode=TwoWay}"/>
-                            </Grid>
-                            <Grid Margin="0,0,0,12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="12"/>
-                                    <ColumnDefinition Width="240"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Log retention" Style="{StaticResource FieldLabel}"/>
-                                <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}" ItemsSource="{Binding RetentionOptions}" SelectedItem="{Binding RetentionDays, Mode=TwoWay}" ItemTemplate="{StaticResource DaysItemTemplate}"/>
-                            </Grid>
-                            <Button Command="{Binding OpenLogsCommand}" Style="{StaticResource Button.Rounded.Compact}" HorizontalAlignment="Left">
-                                <StackPanel Orientation="Horizontal">
-                                    <Image Source="pack://application:,,,/img/fileicon.png" Width="18" Height="18" Margin="0,0,8,0"/>
-                                    <TextBlock Text="Open logs folder" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                <StackPanel Visibility="{Binding ElementName=UsePerViewCheck, Path=IsChecked, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="Per-tab search text sizes" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,8"/>
+                                    <UniformGrid Columns="2" Rows="2">
+                                        <Grid Margin="0,0,12,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="User" Style="{StaticResource FieldLabel}"/>
+                                            <Slider x:Name="UserSize" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
+                                                    IsSnapToTickEnabled="True" Value="{Binding UserFontSize, Mode=TwoWay}"/>
+                                            <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}"><Run Text="{Binding ElementName=UserSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/></TextBlock>
+                                        </Grid>
+                                        <Grid Margin="0,0,12,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Computer" Style="{StaticResource FieldLabel}"/>
+                                            <Slider x:Name="ComputerSize" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
+                                                    IsSnapToTickEnabled="True" Value="{Binding ComputerFontSize, Mode=TwoWay}"/>
+                                            <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}"><Run Text="{Binding ElementName=ComputerSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/></TextBlock>
+                                        </Grid>
+                                        <Grid Margin="0,0,12,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Group" Style="{StaticResource FieldLabel}"/>
+                                            <Slider x:Name="GroupSize" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
+                                                    IsSnapToTickEnabled="True" Value="{Binding GroupFontSize, Mode=TwoWay}"/>
+                                            <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}"><Run Text="{Binding ElementName=GroupSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/></TextBlock>
+                                        </Grid>
+                                        <Grid Margin="0,0,12,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Entra" Style="{StaticResource FieldLabel}"/>
+                                            <Slider x:Name="EntraSize" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
+                                                    IsSnapToTickEnabled="True" Value="{Binding EntraFontSize, Mode=TwoWay}"/>
+                                            <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}"><Run Text="{Binding ElementName=EntraSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/></TextBlock>
+                                        </Grid>
+                                    </UniformGrid>
                                 </StackPanel>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
-                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
 
-                <Border Style="{StaticResource Card.Container}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="6"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-                        <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="Search History" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="12"/>
-                                    <ColumnDefinition Width="240"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="History size" Style="{StaticResource FieldLabel}"/>
-                                <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}" ItemsSource="{Binding HistorySizeOptions}" SelectedValue="{Binding MaxSearchHistory, Mode=TwoWay}" SelectedValuePath="." ItemTemplate="{StaticResource HistoryItemTemplate}"/>
-                            </Grid>
-                        </StackPanel>
-                    </Grid>
-                </Border>
+                    <!-- System Tray -->
+                    <Border Style="{StaticResource Card.Container}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
+                            <StackPanel Grid.Column="1" Margin="16">
+                                <TextBlock Text="System Tray" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                                <CheckBox x:Name="EnableTrayCheck" Foreground="{DynamicResource Brush.Text.Primary}" Content="Enable System Tray Icon" Margin="0,0,0,8" IsChecked="{Binding EnableTrayIcon, Mode=TwoWay}"/>
+                                <StackPanel Visibility="{Binding ElementName=EnableTrayCheck, Path=IsChecked, Converter={StaticResource BoolToVis}}" Margin="0,4,0,0">
+                                    <CheckBox Foreground="{DynamicResource Brush.Text.Primary}" Content="Minimize window to Tray" Margin="24,0,0,8" IsChecked="{Binding MinimizeToTray, Mode=TwoWay}"/>
+                                    <CheckBox Foreground="{DynamicResource Brush.Text.Primary}" Content="Close button (X) minimizes to Tray" Margin="24,0,0,0" IsChecked="{Binding CloseToTray, Mode=TwoWay}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
 
-                <Border Style="{StaticResource Card.Container}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="6"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-                        <StackPanel Grid.Column="1" Margin="16">
-                            <TextBlock Text="App Maintenance" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,4"/>
+                    <!-- Search History -->
+                    <Border Style="{StaticResource Card.Container}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
+                            <StackPanel Grid.Column="1" Margin="16">
+                                <TextBlock Text="Search History" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="240"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="History size" Style="{StaticResource FieldLabel}"/>
+                                    <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}" ItemsSource="{Binding HistorySizeOptions}" SelectedValue="{Binding MaxSearchHistory, Mode=TwoWay}" SelectedValuePath="." ItemTemplate="{StaticResource HistoryItemTemplate}"/>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
 
-                            <TextBlock Text="Reset all settings, paths, and UI preferences to factory state." 
-                                       Foreground="{DynamicResource Brush.Text.Primary}" Opacity="0.6" FontSize="11" Margin="0,0,0,12"/>
+                <!-- ============================================== -->
+                <!-- 2. QUICK SEARCH SECTION                         -->
+                <!-- ============================================== -->
+                <StackPanel Visibility="{Binding IsQuickSearchSelected, Converter={StaticResource BoolToVis}}">
+                    <Border Style="{StaticResource Card.Container}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
 
-                            <Button Command="{Binding ResetDefaultsCommand}" Style="{StaticResource Button.Rounded.Compact}"
-                                    HorizontalAlignment="Left" Padding="16,4">
-                                <TextBlock Text="Reset to Factory Defaults" Foreground="White" FontSize="12"/>
-                            </Button>
+                            <StackPanel Grid.Column="1" Margin="16">
+                                <TextBlock Text="Quick Search (Overlay)" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
 
-                            <CheckBox Content="Enable Admin Panel"
-                                      IsChecked="{Binding ShowAdminView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      Visibility="{Binding HasUnlockedAdmin, Converter={StaticResource BoolToVis}}"
-                                      Foreground="{DynamicResource Brush.Text.Primary}"
-                                      Margin="0,20,0,0"/>
-                        </StackPanel>
-                    </Grid>
-                </Border>
+                                <CheckBox x:Name="EnableQuickSearchCheck" Foreground="{DynamicResource Brush.Text.Primary}" 
+                                          Content="Enable Double-Tap Quick Search" Margin="0,0,0,12" 
+                                          IsChecked="{Binding EnableQuickSearch, Mode=TwoWay}"/>
+
+                                <StackPanel Visibility="{Binding ElementName=EnableQuickSearchCheck, Path=IsChecked, Converter={StaticResource BoolToVis}}" Margin="0,4,0,0">
+
+                                    <Grid Margin="0,0,0,12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="140"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="200"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Double-Tap Key" Style="{StaticResource FieldLabel}"/>
+
+                                        <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}" 
+                                                  ItemsSource="{Binding ModifierKeyOptions}" 
+                                                  SelectedItem="{Binding SelectedModifierKeyOption, Mode=TwoWay}">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding DisplayName}" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="140"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="200"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Double-Tap Speed" Style="{StaticResource FieldLabel}"/>
+                                        <Slider x:Name="DoubleTapSlider" Grid.Column="2" Minimum="100" Maximum="1000" TickFrequency="50" 
+                                                IsSnapToTickEnabled="True" Value="{Binding QuickSearchDoubleTapMs, Mode=TwoWay}"/>
+                                        <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
+                                            <Run Text="{Binding ElementName=DoubleTapSlider, Path=Value, StringFormat=F0}"/><Run Text=" ms"/>
+                                        </TextBlock>
+                                    </Grid>
+
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+
+                <!-- ============================================== -->
+                <!-- 3. DATA & LINKS SECTION                         -->
+                <!-- ============================================== -->
+                <StackPanel Visibility="{Binding IsDataAndLinksSelected, Converter={StaticResource BoolToVis}}">
+                    <!-- Data Management -->
+                    <Border Style="{StaticResource Card.Container}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
+                            <StackPanel Grid.Column="1" Margin="16">
+                                <TextBlock Text="Data Management" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                                <TextBlock Text="Department Data" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,8"/>
+                                <CheckBox Content="Override Default Location" IsChecked="{Binding UseCustomDept}" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                                <Grid Margin="0,0,0,16" Visibility="{Binding UseCustomDept, Converter={StaticResource BoolToVis}}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="12"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Text="Source" Style="{StaticResource FieldLabel}"/>
+                                    <ComboBox Grid.Row="0" Grid.Column="2" ItemsSource="{Binding DataSourceOptions}" SelectedItem="{Binding DeptSource}" Style="{DynamicResource Combo.Links.Dropdown}" HorizontalAlignment="Left" Width="140"/>
+                                    <TextBlock Grid.Row="2" Text="Location" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding DeptUri, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBox.Settings}"/>
+                                    <Button Grid.Row="2" Grid.Column="3" Command="{Binding BrowseDeptCommand}" Content="Browse" Width="60" Margin="8,0,0,0">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource Button.Rounded.Compact}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding DeptSource}" Value="File">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </Grid>
+                                <TextBlock Text="Links Data" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,8"/>
+                                <CheckBox Content="Override Default Location" IsChecked="{Binding UseCustomLinks}" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                                <Grid Visibility="{Binding UseCustomLinks, Converter={StaticResource BoolToVis}}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="12"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Text="Source" Style="{StaticResource FieldLabel}"/>
+                                    <ComboBox Grid.Row="0" Grid.Column="2" ItemsSource="{Binding DataSourceOptions}" SelectedItem="{Binding LinksSource}" Style="{DynamicResource Combo.Links.Dropdown}" HorizontalAlignment="Left" Width="140"/>
+                                    <TextBlock Grid.Row="2" Text="Location" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding LinksUri, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBox.Settings}"/>
+                                    <Button Grid.Row="2" Grid.Column="3" Command="{Binding BrowseLinksCommand}" Content="Browse" Width="60" Margin="8,0,0,0">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource Button.Rounded.Compact}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding LinksSource}" Value="File">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Links Start Mode -->
+                    <Border Style="{StaticResource Card.Container}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
+                            <StackPanel Grid.Column="1" Margin="16">
+                                <TextBlock Text="Links Start Mode" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                                <StackPanel Margin="0,0,0,8">
+                                    <RadioButton GroupName="LinksStartMode" Content="Start with last viewed team" Foreground="{DynamicResource Brush.Text.Primary}" IsChecked="{Binding LinksSettings.OpenLastViewedFirst, Mode=TwoWay}"/>
+                                    <RadioButton GroupName="LinksStartMode" Content="Start with a specific team" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,6,0,0" IsChecked="{Binding LinksSettings.OverrideEnabled, Mode=TwoWay}"/>
+                                </StackPanel>
+                                <Grid Visibility="{Binding LinksSettings.OverrideEnabled, Converter={StaticResource BoolToVis}}" Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Override team" Style="{StaticResource FieldLabel}"/>
+                                    <ComboBox Grid.Column="2" Width="220" Height="28" Style="{DynamicResource Combo.Links.Dropdown}"
+                                              ItemsSource="{Binding DataContext.LinksVM.TeamNames, RelativeSource={RelativeSource AncestorType=Window}}"
+                                              SelectedItem="{Binding LinksSettings.OverrideTeam, Mode=TwoWay}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+
+                <!-- ============================================== -->
+                <!-- 4. SYSTEM & MAINTENANCE SECTION                 -->
+                <!-- ============================================== -->
+                <StackPanel Visibility="{Binding IsSystemAndMaintenanceSelected, Converter={StaticResource BoolToVis}}">
+                    <!-- Application Updates -->
+                    <Border Style="{StaticResource Card.Container}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
+                            <StackPanel Grid.Column="1" Margin="16">
+                                <TextBlock Text="Application Updates" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                                <CheckBox Foreground="{DynamicResource Brush.Text.Primary}" Content="Opt-in to Pre-Release Channels" IsChecked="{Binding EnablePreReleaseChannel, Mode=TwoWay}" ToolTip="Download preview builds for testing."/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Logs -->
+                    <Border Style="{StaticResource Card.Container}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
+                            <StackPanel Grid.Column="1" Margin="16">
+                                <TextBlock Text="Logs" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="240"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Log level" Style="{StaticResource FieldLabel}"/>
+                                    <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}" ItemsSource="{Binding LogLevels}" SelectedItem="{Binding MinimumLogLevel, Mode=TwoWay}"/>
+                                </Grid>
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="240"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Log retention" Style="{StaticResource FieldLabel}"/>
+                                    <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}" ItemsSource="{Binding RetentionOptions}" SelectedItem="{Binding RetentionDays, Mode=TwoWay}" ItemTemplate="{StaticResource DaysItemTemplate}"/>
+                                </Grid>
+                                <Button Command="{Binding OpenLogsCommand}" Style="{StaticResource Button.Rounded.Compact}" HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="pack://application:,,,/img/fileicon.png" Width="18" Height="18" Margin="0,0,8,0"/>
+                                        <TextBlock Text="Open logs folder" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- App Maintenance -->
+                    <Border Style="{StaticResource Card.Container}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
+                            <StackPanel Grid.Column="1" Margin="16">
+                                <TextBlock Text="App Maintenance" FontSize="16" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,4"/>
+
+                                <TextBlock Text="Reset all settings, paths, and UI preferences to factory state." 
+                                           Foreground="{DynamicResource Brush.Text.Primary}" Opacity="0.6" FontSize="11" Margin="0,0,0,12"/>
+
+                                <Button Command="{Binding ResetDefaultsCommand}" Style="{StaticResource Button.Rounded.Compact}"
+                                        HorizontalAlignment="Left" Padding="16,4">
+                                    <TextBlock Text="Reset to Factory Defaults" Foreground="White" FontSize="12"/>
+                                </Button>
+
+                                <CheckBox Content="Enable Admin Panel"
+                                          IsChecked="{Binding ShowAdminView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          Visibility="{Binding HasUnlockedAdmin, Converter={StaticResource BoolToVis}}"
+                                          Foreground="{DynamicResource Brush.Text.Primary}"
+                                          Margin="0,20,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
 
             </StackPanel>
         </ScrollViewer>
 
-        <Grid Grid.Row="1" Margin="16,0,16,16">
+        <!-- Footer Bar with Status and Action Buttons -->
+        <Grid Grid.Row="2" Margin="16,0,16,16">
             <Border x:Name="FooterBorder" BorderThickness="1" CornerRadius="12" Padding="12,8">
                 <Border.Style>
                     <Style TargetType="Border">
@@ -527,8 +631,8 @@
                         <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding HasUnsavedChanges}" Value="True">
-                                <Setter Property="Background" Value="#1A1A00"/>
-                                <Setter Property="BorderBrush" Value="Yellow"/>
+                                <Setter Property="Background" Value="#231E17"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Warning}"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -540,9 +644,9 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="⚠" Foreground="Yellow" FontSize="18" FontWeight="Bold" Margin="0,0,12,0" VerticalAlignment="Center"
+                        <TextBlock Text="{x:Static res:Glyphs.Warning}" FontFamily="Segoe MDL2 Assets" Foreground="{DynamicResource Brush.Warning}" FontSize="18" Margin="0,0,12,0" VerticalAlignment="Center"
                                    Visibility="{Binding HasUnsavedChanges, Converter={StaticResource BoolToVis}}"/>
-                        <TextBlock VerticalAlignment="Center" Foreground="White">
+                        <TextBlock VerticalAlignment="Center" Foreground="{DynamicResource Brush.Text.Primary}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Text" Value="{Binding StatusMessage}"/>
@@ -550,7 +654,7 @@
                                         <DataTrigger Binding="{Binding HasUnsavedChanges}" Value="True">
                                             <Setter Property="Text" Value="Changes detected. Remember to click Apply!"/>
                                             <Setter Property="FontWeight" Value="SemiBold"/>
-                                            <Setter Property="Foreground" Value="Yellow"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource Brush.Warning}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -561,9 +665,19 @@
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <Button Command="{Binding DiscardCommand}" Content="Discard" Style="{StaticResource Button.Rounded.Compact}"
                                 Margin="0,0,10,0" Padding="14,0" Visibility="{Binding HasUnsavedChanges, Converter={StaticResource BoolToVis}}"/>
-                        <Button x:Name="BtnApply" Style="{StaticResource Button.Rounded}" Command="{Binding ApplyCommand}"
+                        <Button x:Name="BtnApply" Command="{Binding ApplyCommand}"
                                 MinHeight="32" Height="36" MinWidth="92" Padding="14,6">
-                            <TextBlock Text="Apply" Foreground="{DynamicResource Brush.Text.Primary}" FontWeight="Bold"/>
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource Button.Rounded}">
+                                    <Setter Property="Background" Value="{DynamicResource Brush.Gradient.Grey}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasUnsavedChanges}" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource ButtonGradient.Primary}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <TextBlock Text="Apply" Foreground="{DynamicResource Brush.Text.OnAccent}" FontWeight="Bold"/>
                         </Button>
                     </StackPanel>
                 </Grid>

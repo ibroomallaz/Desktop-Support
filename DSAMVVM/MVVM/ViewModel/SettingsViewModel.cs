@@ -5,6 +5,7 @@ using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.Model.Config.UI;
+using DSAMVVM.MVVM.View.Resources;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using SharpHook.Data;
@@ -15,6 +16,24 @@ using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
+    public class SettingsCategoryItem
+    {
+        public SettingsCategory Category { get; init; }
+        public string Title { get; init; } = string.Empty;
+        public string Description { get; init; } = string.Empty;
+        public string Glyph { get; init; } = string.Empty;
+
+        public override string ToString() => Title;
+    }
+
+    public class ModifierKeyOption
+    {
+        public KeyCode Key { get; init; }
+        public string DisplayName { get; init; } = string.Empty;
+
+        public override string ToString() => DisplayName;
+    }
+
     public class SettingsViewModel : ObservableObject
     {
         private readonly ISettingsService _settingsSvc;
@@ -22,6 +41,60 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly ISearchService? _searchSvc;
 
         private AppSettings _settings;
+
+        // --- Navigation / Categories ---
+        public IReadOnlyList<SettingsCategoryItem> Categories { get; } =
+        [
+            new SettingsCategoryItem
+            {
+                Category = SettingsCategory.Appearance,
+                Title = "Appearance & Interface",
+                Description = "Search text sizes, per-tab overrides, system tray options, and history limit.",
+                Glyph = Glyphs.Appearance
+            },
+            new SettingsCategoryItem
+            {
+                Category = SettingsCategory.QuickSearch,
+                Title = "Quick Search (Overlay)",
+                Description = "Global double-tap hotkey overlay and activation threshold speed.",
+                Glyph = Glyphs.QuickSearch
+            },
+            new SettingsCategoryItem
+            {
+                Category = SettingsCategory.DataAndLinks,
+                Title = "Data & Links",
+                Description = "Data source locations (Departments & Links) and default links start mode.",
+                Glyph = Glyphs.DataAndLinks
+            },
+            new SettingsCategoryItem
+            {
+                Category = SettingsCategory.SystemAndMaintenance,
+                Title = "System & Maintenance",
+                Description = "Application update channels, diagnostic logs, and factory reset.",
+                Glyph = Glyphs.Maintenance
+            }
+        ];
+
+        private SettingsCategoryItem _selectedCategory;
+        public SettingsCategoryItem SelectedCategory
+        {
+            get => _selectedCategory;
+            set
+            {
+                if (Set(ref _selectedCategory, value))
+                {
+                    OnPropertyChanged(nameof(IsAppearanceSelected));
+                    OnPropertyChanged(nameof(IsQuickSearchSelected));
+                    OnPropertyChanged(nameof(IsDataAndLinksSelected));
+                    OnPropertyChanged(nameof(IsSystemAndMaintenanceSelected));
+                }
+            }
+        }
+
+        public bool IsAppearanceSelected => SelectedCategory?.Category == SettingsCategory.Appearance;
+        public bool IsQuickSearchSelected => SelectedCategory?.Category == SettingsCategory.QuickSearch;
+        public bool IsDataAndLinksSelected => SelectedCategory?.Category == SettingsCategory.DataAndLinks;
+        public bool IsSystemAndMaintenanceSelected => SelectedCategory?.Category == SettingsCategory.SystemAndMaintenance;
 
         // --- State Flags ---
         private bool _hasUnsavedChanges;
@@ -53,15 +126,16 @@ namespace DSAMVVM.MVVM.ViewModel
         public IReadOnlyList<int> RetentionOptions { get; } =
             [7, 14, 30, 90, 180, 365, -1];
 
-        public IReadOnlyDictionary<KeyCode, string> ModifierKeyOptions { get; } = new Dictionary<KeyCode, string>
-            {
-                { KeyCode.VcLeftControl, "Left Control" },
-                { KeyCode.VcRightControl, "Right Control" },
-                { KeyCode.VcLeftAlt, "Left Alt" },
-                { KeyCode.VcRightAlt, "Right Alt" },
-                { KeyCode.VcLeftShift, "Left Shift" },
-                { KeyCode.VcRightShift, "Right Shift" }
-            };
+        public IReadOnlyList<ModifierKeyOption> ModifierKeyOptions { get; } =
+        [
+            new ModifierKeyOption { Key = KeyCode.VcLeftControl, DisplayName = "Left Control" },
+            new ModifierKeyOption { Key = KeyCode.VcRightControl, DisplayName = "Right Control" },
+            new ModifierKeyOption { Key = KeyCode.VcLeftAlt, DisplayName = "Left Alt" },
+            new ModifierKeyOption { Key = KeyCode.VcRightAlt, DisplayName = "Right Alt" },
+            new ModifierKeyOption { Key = KeyCode.VcLeftShift, DisplayName = "Left Shift" },
+            new ModifierKeyOption { Key = KeyCode.VcRightShift, DisplayName = "Right Shift" }
+        ];
+
         public List<int> HistorySizeOptions { get; } = [0, 5, 10, 15, 20, 25];
 
         public IReadOnlyList<double> InitialFontSizeOptions { get; } =
@@ -168,7 +242,35 @@ namespace DSAMVVM.MVVM.ViewModel
         public bool EnableQuickSearch { get => _enableQuickSearch; set { if (Set(ref _enableQuickSearch, value)) SetModified(); } }
 
         private KeyCode _quickSearchModifierKey;
-        public KeyCode QuickSearchModifierKey { get => _quickSearchModifierKey; set { if (Set(ref _quickSearchModifierKey, value)) SetModified(); } }
+        public KeyCode QuickSearchModifierKey
+        {
+            get => _quickSearchModifierKey;
+            set
+            {
+                if (Set(ref _quickSearchModifierKey, value))
+                {
+                    if (_selectedModifierKeyOption?.Key != value)
+                    {
+                        _selectedModifierKeyOption = ModifierKeyOptions.FirstOrDefault(x => x.Key == value);
+                        OnPropertyChanged(nameof(SelectedModifierKeyOption));
+                    }
+                    SetModified();
+                }
+            }
+        }
+
+        private ModifierKeyOption? _selectedModifierKeyOption;
+        public ModifierKeyOption? SelectedModifierKeyOption
+        {
+            get => _selectedModifierKeyOption;
+            set
+            {
+                if (Set(ref _selectedModifierKeyOption, value) && value != null)
+                {
+                    QuickSearchModifierKey = value.Key;
+                }
+            }
+        }
 
         private int _quickSearchDoubleTapMs;
         public int QuickSearchDoubleTapMs { get => _quickSearchDoubleTapMs; set { if (Set(ref _quickSearchDoubleTapMs, value)) SetModified(); } }
@@ -215,6 +317,7 @@ namespace DSAMVVM.MVVM.ViewModel
             _searchSvc = searchSvc;
 
             _settings = App.Settings ?? new AppSettings();
+            _selectedCategory = Categories[0];
 
             LoadValuesFromSettings();
 
@@ -262,6 +365,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
             EnableQuickSearch = _settings.QuickSearch.Enabled;
             QuickSearchModifierKey = _settings.QuickSearch.ModifierKeyCode;
+            SelectedModifierKeyOption = ModifierKeyOptions.FirstOrDefault(x => x.Key == _settings.QuickSearch.ModifierKeyCode) ?? ModifierKeyOptions[0];
             QuickSearchDoubleTapMs = _settings.QuickSearch.DoubleTapThresholdMs;
 
             //Load Admin State
@@ -347,7 +451,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 _settings.Updates.EnablePreReleaseChannel = EnablePreReleaseChannel;
 
                 _settings.QuickSearch.Enabled = EnableQuickSearch;
-                _settings.QuickSearch.ModifierKeyCode = QuickSearchModifierKey;
+                _settings.QuickSearch.ModifierKeyCode = SelectedModifierKeyOption?.Key ?? QuickSearchModifierKey;
                 _settings.QuickSearch.DoubleTapThresholdMs = QuickSearchDoubleTapMs;
 
                 // Sync Admin State
