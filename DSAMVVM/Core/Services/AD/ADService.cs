@@ -5,18 +5,14 @@ using DSAMVVM.MVVM.Model.AD;
 
 namespace DSAMVVM.Core.Services.AD
 {
-    public abstract class ADService : IADService
+    public class ADService(string ldapPath) : IADService
     {
-        private readonly ADUserService _userService;
-        private readonly ADComputerService _computerService;
-        private readonly ADGroupService _groupService;
+        private readonly ADUserService _userService = new(ldapPath);
+        private readonly ADComputerService _computerService = new(ldapPath);
+        private readonly ADGroupService _groupService = new(ldapPath);
 
-        public ADService(string? ldapPath = null)
+        public ADService() : this(Globals.g_domainPathLDAP)
         {
-            var path = ldapPath ?? Globals.g_domainPathLDAP;
-            _userService = new ADUserService(path);
-            _computerService = new ADComputerService(path);
-            _groupService = new ADGroupService(path);
         }
 
         // User

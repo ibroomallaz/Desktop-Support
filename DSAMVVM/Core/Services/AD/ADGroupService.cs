@@ -1,5 +1,4 @@
 ﻿using DSAMVVM.Core.Utilities;
-using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
 using System.DirectoryServices;
 

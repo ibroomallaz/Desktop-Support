@@ -22,6 +22,8 @@ namespace DSAMVVM.Core.Services.AD
 
         public static SearchResult? FindUserBySam(string ldap, string sam)
         {
+            if (string.IsNullOrWhiteSpace(ldap) || string.IsNullOrWhiteSpace(sam)) return null;
+
             using var root = Bind(ldap);
             using var ds = NewSearcher(root,
                 $"(&(objectCategory=person)(objectClass=user)(sAMAccountName={Escape(sam)}))",
@@ -31,6 +33,8 @@ namespace DSAMVVM.Core.Services.AD
 
         public static SearchResult? FindUserByEmployeeId(string ldap, string employeeId)
         {
+            if (string.IsNullOrWhiteSpace(ldap) || string.IsNullOrWhiteSpace(employeeId)) return null;
+
             using var root = Bind(ldap);
             using var ds = NewSearcher(root,
                 $"(&(objectCategory=person)(objectClass=user)(employeeID={Escape(employeeId)}))",
@@ -40,14 +44,19 @@ namespace DSAMVVM.Core.Services.AD
 
         public static SearchResult? FindDivisionRollupGroup(string ldap, string userDn)
         {
+            if (string.IsNullOrWhiteSpace(ldap) || string.IsNullOrWhiteSpace(userDn)) return null;
+
             using var root = Bind(ldap);
             using var ds = NewSearcher(root,
                 $"(&(objectCategory=group)(member={Escape(userDn)})(cn=*MIM-DivisionRollup*))",
                 sizeLimit: 1, props: ["cn"]);
             return ds.FindOne();
         }
+
         public static bool HasMimWrkstGroup(string ldap, string userDn)
         {
+            if (string.IsNullOrWhiteSpace(ldap) || string.IsNullOrWhiteSpace(userDn)) return false;
+
             try
             {
                 using var root = Bind(ldap);
@@ -62,23 +71,26 @@ namespace DSAMVVM.Core.Services.AD
                 return false;
             }
         }
+
         public static IReadOnlyList<string> GetUserGroupsBySam(string ldap, string sam)
         {
+            if (string.IsNullOrWhiteSpace(ldap) || string.IsNullOrWhiteSpace(sam)) return [];
+
             using var root = Bind(ldap);
             using var ds = NewSearcher(root,
                 $"(&(objectCategory=person)(objectClass=user)(sAMAccountName={Escape(sam)}))",
                 sizeLimit: 1, props: ["memberOf"]);
 
             var r = ds.FindOne();
-            if (r == null) return [];
-
-            return GetStrings(r, "memberOf");
+            return r == null ? [] : GetStrings(r, "memberOf");
         }
 
         // ---- computer lookups ----
 
         public static SearchResult? FindComputerByCn(string ldap, string cn)
         {
+            if (string.IsNullOrWhiteSpace(ldap) || string.IsNullOrWhiteSpace(cn)) return null;
+
             using var root = Bind(ldap);
             using var ds = NewSearcher(root,
                 $"(&(objectCategory=computer)(cn={Escape(cn)}))",
@@ -90,6 +102,8 @@ namespace DSAMVVM.Core.Services.AD
 
         public static IReadOnlyList<string> FindGroupCnsByMemberDn(string ldap, string userDn, string? cnContains = null)
         {
+            if (string.IsNullOrWhiteSpace(ldap) || string.IsNullOrWhiteSpace(userDn)) return [];
+
             using var root = Bind(ldap);
             using var ds = NewSearcher(root,
                 $"(&(objectCategory=group)(member={Escape(userDn)}))",
@@ -108,8 +122,10 @@ namespace DSAMVVM.Core.Services.AD
         }
 
         // safe, bounded ranged retrieval of very large group membership
-        public static IReadOnlyList<string> GetAllMemberDns(SearchResult groupResult, int chunk = 1500, int maxMembers = 200_000, int maxIterations = 5_000)
+        public static IReadOnlyList<string> GetAllMemberDns(SearchResult? groupResult, int chunk = 1500, int maxMembers = 200_000, int maxIterations = 5_000)
         {
+            if (groupResult == null) return [];
+
             if (chunk < 1) chunk = 1;
             if (chunk > 5000) chunk = 5000;
 
@@ -134,14 +150,11 @@ namespace DSAMVVM.Core.Services.AD
                 lastKey = key;
 
                 var vals = de.Properties[key];
-                if (vals != null)
+                foreach (var v in vals)
                 {
-                    foreach (var v in vals)
-                    {
-                        var s = v?.ToString();
-                        if (!string.IsNullOrEmpty(s) && seen.Add(s)) members.Add(s);
-                        if (members.Count >= maxMembers) break;
-                    }
+                    var s = v?.ToString();
+                    if (!string.IsNullOrEmpty(s) && seen.Add(s)) members.Add(s);
+                    if (members.Count >= maxMembers) break;
                 }
 
                 var m = DirectoryUtilRegex().Match(key);
@@ -156,18 +169,14 @@ namespace DSAMVVM.Core.Services.AD
                 start = next;
             }
 
-            if (members.Count == 0)
+            if (members.Count > 0) return members;
+
+            var fallback = de.Properties["member"];
+            foreach (var v in fallback)
             {
-                var fallback = de.Properties["member"];
-                if (fallback != null)
-                {
-                    foreach (var v in fallback)
-                    {
-                        var s = v?.ToString();
-                        if (!string.IsNullOrEmpty(s) && seen.Add(s)) members.Add(s);
-                        if (members.Count >= maxMembers) break;
-                    }
-                }
+                var s = v?.ToString();
+                if (!string.IsNullOrEmpty(s) && seen.Add(s)) members.Add(s);
+                if (members.Count >= maxMembers) break;
             }
 
             return members;
@@ -175,54 +184,53 @@ namespace DSAMVVM.Core.Services.AD
 
         // ---- property helpers ----
 
-        public static bool IsMemberOf(SearchResult r, string exactGroupCn)
+        public static bool IsMemberOf(SearchResult? r, string exactGroupCn)
         {
-            if (!r.Properties.Contains("memberOf")) return false;
+            if (r == null || string.IsNullOrWhiteSpace(exactGroupCn) || !r.Properties.Contains("memberOf")) return false;
 
             var searchTarget = $"CN={exactGroupCn},";
-
-            foreach (var v in r.Properties["memberOf"])
-            {
-                if (v?.ToString()?.Contains(searchTarget, StringComparison.OrdinalIgnoreCase) == true)
-                {
-                    return true;
-                }
-            }
-            return false;
+            return r.Properties["memberOf"]
+                .Cast<object?>()
+                .Any(v => v?.ToString()?.Contains(searchTarget, StringComparison.OrdinalIgnoreCase) == true);
         }
 
-        public static string? GetString(SearchResult r, string prop)
+        public static string? GetString(SearchResult? r, string prop)
         {
-            return (r.Properties.Contains(prop) && r.Properties[prop].Count > 0)
-                ? r.Properties[prop][0]?.ToString()
+            if (r == null || string.IsNullOrWhiteSpace(prop)) return null;
+
+            return r.Properties.Contains(prop) && r.Properties[prop].Count > 0
+                ? r.Properties[prop][0].ToString()
                 : null;
         }
 
-        public static IReadOnlyList<string> GetStrings(SearchResult r, string prop)
+        public static IReadOnlyList<string> GetStrings(SearchResult? r, string prop)
         {
-            if (!r.Properties.Contains(prop) || r.Properties[prop].Count == 0) return [];
+            if (r == null || string.IsNullOrWhiteSpace(prop) || !r.Properties.Contains(prop) || r.Properties[prop].Count == 0)
+                return [];
+
             return [.. r.Properties[prop].Cast<object>().Select(o => o?.ToString() ?? string.Empty)];
         }
 
-        public static bool GetEnabledFromUac(SearchResult r)
+        public static bool GetEnabledFromUac(SearchResult? r)
         {
-            if (!r.Properties.Contains("userAccountControl") || r.Properties["userAccountControl"].Count == 0) return false;
+            if (r == null || !r.Properties.Contains("userAccountControl") || r.Properties["userAccountControl"].Count == 0)
+                return false;
+
             var uac = Convert.ToInt32(r.Properties["userAccountControl"][0]);
             const int ACCOUNTDISABLE = 0x2;
             return (uac & ACCOUNTDISABLE) == 0;
         }
 
+        // ReSharper disable once GrammarMistakeInComment
         // Quick lockout check, checks bit value only, not time-based policies
-        public static bool? GetLockedQuick(SearchResult r)
+        public static bool? GetLockedQuick(SearchResult? r)
         {
+            if (r == null || !r.Properties.Contains("msDS-User-Account-Control-Computed") || r.Properties["msDS-User-Account-Control-Computed"].Count == 0)
+                return null;
+
             const int UF_LOCKOUT = 0x0010;
-            if (r.Properties.Contains("msDS-User-Account-Control-Computed") &&
-                r.Properties["msDS-User-Account-Control-Computed"].Count > 0)
-            {
-                var v = Convert.ToInt32(r.Properties["msDS-User-Account-Control-Computed"][0]);
-                return (v & UF_LOCKOUT) == UF_LOCKOUT;
-            }
-            return null;
+            var v = Convert.ToInt32(r.Properties["msDS-User-Account-Control-Computed"][0]);
+            return (v & UF_LOCKOUT) == UF_LOCKOUT;
         }
 
         // ---- internals ----
@@ -240,13 +248,18 @@ namespace DSAMVVM.Core.Services.AD
                 PageSize = pageSize,
                 ReferralChasing = ReferralChasingOption.None
             };
-            if (props != null) foreach (var p in props) ds.PropertiesToLoad.Add(p);
+            if (props != null)
+            {
+                ds.PropertiesToLoad.AddRange(props);
+            }
             return ds;
         }
 
         // RFC2254 escaping for \ * ( ) NUL
-        private static string Escape(string s)
+        private static string Escape(string? s)
         {
+            if (string.IsNullOrEmpty(s)) return string.Empty;
+
             var sb = new StringBuilder(s.Length);
             foreach (var c in s)
             {
