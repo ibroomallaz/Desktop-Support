@@ -247,18 +247,32 @@ namespace DSAMVVM.Core.Services
                 }
                 else
                 {
-                    try { Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true }); } catch { }
+                    try { Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true }); }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
                 e.Handled = true;
             };
 
             var menu = new ContextMenu();
             var open = new MenuItem { Header = "Open link" };
-            open.Click += (_, __) => { try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); } catch { } };
+            open.Click += (_, _) => { try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
+                catch
+                {
+                    // ignored
+                }
+            };
             menu.Items.Add(open);
 
             var copy = new MenuItem { Header = "Copy link address" };
-            copy.Click += (_, __) => { try { Clipboard.SetText(url); } catch { } };
+            copy.Click += (_, _) => { try { Clipboard.SetText(url); }
+                catch
+                {
+                    // ignored
+                }
+            };
             menu.Items.Add(copy);
 
             try
@@ -270,7 +284,10 @@ namespace DSAMVVM.Core.Services
                     copy.Style = miStyle;
                 }
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
 
             link.ContextMenu = menu;
             link.Cursor = Cursors.Hand;

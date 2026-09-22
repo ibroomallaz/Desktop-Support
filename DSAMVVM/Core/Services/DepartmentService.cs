@@ -56,7 +56,7 @@ namespace DSAMVVM.Core.Services
             if (_teamMap.TryGetValue(teamName.Trim(), out var team))
             {
                 // Caches the resolved support team in the application state
-                _appStateService.RecentSupportTeam = team.SupportTeamName ?? teamName.Trim();
+                _appStateService.RecentSupportTeam = team.SupportTeamName;
             }
 
             return team;
@@ -74,8 +74,7 @@ namespace DSAMVVM.Core.Services
 
             var search = divAbbrev.Trim();
             return _teamMap.Values
-                .Where(t => t.SupportedDivisions?
-                    .Any(d => string.Equals(d.DivAbbrev, search, StringComparison.OrdinalIgnoreCase)) == true);
+                .Where(t => t.SupportedDivisions.Any(d => string.Equals(d.DivAbbrev, search, StringComparison.OrdinalIgnoreCase)));
         }
 
         public async Task ReloadDataAsync()
@@ -109,11 +108,11 @@ namespace DSAMVVM.Core.Services
             UiNotify.Progress(key, isReload ? "Refreshing department data…" : "Loading department data…", priority: 0);
 
             // Resolve source, defaulting to global web URL unless a valid custom source is enabled.
-            var settings = App.Settings?.Paths?.DepartmentData;
+            var settings = App.Settings?.Paths.DepartmentData;
             string source = "Web";
             string targetUri = Globals.g_DepartmentJSONURL;
 
-            if (settings != null && settings.UseCustomSource && !string.IsNullOrWhiteSpace(settings.Uri))
+            if (settings is { UseCustomSource: true } && !string.IsNullOrWhiteSpace(settings.Uri))
             {
                 source = settings.Source;
                 targetUri = settings.Uri;
@@ -157,7 +156,7 @@ namespace DSAMVVM.Core.Services
                 }
                 else if (string.Equals(source, "File", StringComparison.OrdinalIgnoreCase))
                 {
-                    // File Strategy: Read directly. Do not backup to cache to prevent dev/test files from polluting production fallback.
+                    // File Strategy: Read directly. Do not back up to cache to prevent dev/test files from polluting production fallback.
                     Log.Info("Dept.Loader", $"Loading local file: {targetUri}");
 
                     if (File.Exists(targetUri))
@@ -204,21 +203,17 @@ namespace DSAMVVM.Core.Services
                     _meta = wrapper.Meta;
 
                     // Build fast lookup dictionary for Support Teams.
-                    _teamMap = wrapper.SupportTeams?
-                        .Where(t => !string.IsNullOrWhiteSpace(t.SupportTeamName))
-                        .ToDictionary(t => t.SupportTeamName.Trim(), StringComparer.OrdinalIgnoreCase)
-                        ?? [];
+                    _teamMap = wrapper.SupportTeams.Where(t => !string.IsNullOrWhiteSpace(t.SupportTeamName))
+                        .ToDictionary(t => t.SupportTeamName.Trim(), StringComparer.OrdinalIgnoreCase);
 
                     Log.Info("Dept.Loader", $"Loaded {_teamMap.Count} support team definitions.");
 
                     // Hydrate Departments and link to Support Teams.
-                    _departments = [.. (wrapper.DepartmentList ?? []).Select(d =>
+                    _departments = [.. (wrapper.DepartmentList).Select(d =>
                     {
                         SupportTeam? matchedTeam = null;
-                        if (!string.IsNullOrWhiteSpace(d.Team))
-                        {
-                            if (_teamMap.TryGetValue(d.Team.Trim(), out var t)) matchedTeam = t;
-                        }
+                        if (string.IsNullOrWhiteSpace(d.Team)) return new DepartmentAdapter(d, matchedTeam);
+                        if (_teamMap.TryGetValue(d.Team.Trim(), out var t)) matchedTeam = t;
                         return new DepartmentAdapter(d, matchedTeam);
                     })];
 

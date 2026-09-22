@@ -6,7 +6,7 @@ using System.Net.Http;
 namespace DSAMVVM.Core.Services
 {
     // Shared HTTP utility. HttpClient is reused app-wide.
-    public sealed class HttpService : IHttpService, IDisposable
+    public sealed class HttpService : IHttpService
     {
         private readonly HttpClient _client;
         private bool _disposed;

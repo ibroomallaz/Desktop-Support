@@ -43,11 +43,11 @@ namespace DSAMVVM.Core.Services
                 UiNotify.Progress(key, isReload ? "Refreshing links…" : "Loading links…", priority: 0);
 
                 // Resolve effective source, defaulting to global web URL unless a valid custom source is enabled.
-                var settings = App.Settings?.Paths?.LinksData;
+                var settings = App.Settings.Paths.LinksData;
                 string source = "Web";
                 string targetUri = Globals.g_LinksJSON;
 
-                if (settings != null && settings.UseCustomSource && !string.IsNullOrWhiteSpace(settings.Uri))
+                if (settings is { UseCustomSource: true } && !string.IsNullOrWhiteSpace(settings.Uri))
                 {
                     source = settings.Source;
                     targetUri = settings.Uri;
@@ -91,7 +91,7 @@ namespace DSAMVVM.Core.Services
                     }
                     else if (string.Equals(source, "File", StringComparison.OrdinalIgnoreCase))
                     {
-                        // File Strategy: Read directly. Do not backup to cache to prevent dev/test files from polluting production fallback.
+                        // File Strategy: Read directly. Do not back up to cache to prevent dev/test files from polluting production fallback.
                         Log.Info("Links.Loader", $"Loading local file: {targetUri}");
 
                         if (File.Exists(targetUri))
@@ -171,7 +171,7 @@ namespace DSAMVVM.Core.Services
                         var model = JsonConvert.DeserializeObject<LinksData>(jsonContent);
 
                         // normalize meta if needed
-                        model?.Meta?.Normalize();
+                        model?.Meta.Normalize();
 
                         _cache = model;
                     }
