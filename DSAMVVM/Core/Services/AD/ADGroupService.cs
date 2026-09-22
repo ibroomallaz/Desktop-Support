@@ -3,14 +3,15 @@ using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
 using System.DirectoryServices;
 
-
 namespace DSAMVVM.Core.Services.AD
 {
-    public class ADGroupService
+    public class ADGroupService(string ldapPath)
     {
-        private static DirectoryEntry Root() => new(Globals.g_domainPathLDAP);
+        private readonly string _ldapPath = ldapPath;
 
-        public static Task<MimLookupResult> GetUserMimGroupsAsync(string netid) =>
+        private DirectoryEntry Root() => new(_ldapPath);
+
+        public Task<MimLookupResult> GetUserMimGroupsAsync(string netid) =>
             Task.Run(() =>
             {
                 if (string.IsNullOrWhiteSpace(netid))
@@ -19,7 +20,7 @@ namespace DSAMVVM.Core.Services.AD
                 try
                 {
                     // user lookup loads memberOf so we can pull direct MIM memberships
-                    var sr = DirectoryUtility.FindUserBySam(Globals.g_domainPathLDAP, netid);
+                    var sr = DirectoryUtility.FindUserBySam(_ldapPath, netid);
                     if (sr == null)
                         return new MimLookupResult { Exists = false, Error = "User not found." };
 
@@ -44,7 +45,7 @@ namespace DSAMVVM.Core.Services.AD
                         var userDn = DirectoryUtility.GetString(sr, "distinguishedName");
                         if (!string.IsNullOrWhiteSpace(userDn))
                         {
-                            var byMember = DirectoryUtility.FindGroupCnsByMemberDn(Globals.g_domainPathLDAP, userDn, "MIM");
+                            var byMember = DirectoryUtility.FindGroupCnsByMemberDn(_ldapPath, userDn, "MIM");
                             if (byMember.Count > 0) groups.AddRange(byMember);
                         }
                     }
@@ -75,7 +76,7 @@ namespace DSAMVVM.Core.Services.AD
                 }
             });
 
-        public static Task<ADGroupInfo> GetGroupAsync(string groupName) =>
+        public Task<ADGroupInfo> GetGroupAsync(string groupName) =>
             Task.Run(() =>
             {
                 var info = new ADGroupInfo();

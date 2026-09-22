@@ -5,11 +5,19 @@ using DSAMVVM.MVVM.Model.AD;
 
 namespace DSAMVVM.Core.Services.AD
 {
-    public class ADService : IADService
+    public abstract class ADService : IADService
     {
-        private readonly ADUserService _userService = new(Globals.g_domainPathLDAP);
-        private readonly ADComputerService _computerService = new(Globals.g_domainPathLDAP);
-        private readonly ADGroupService _groupService = new();
+        private readonly ADUserService _userService;
+        private readonly ADComputerService _computerService;
+        private readonly ADGroupService _groupService;
+
+        public ADService(string? ldapPath = null)
+        {
+            var path = ldapPath ?? Globals.g_domainPathLDAP;
+            _userService = new ADUserService(path);
+            _computerService = new ADComputerService(path);
+            _groupService = new ADGroupService(path);
+        }
 
         // User
 
@@ -30,9 +38,9 @@ namespace DSAMVVM.Core.Services.AD
         // Group
 
         public Task<ADGroupInfo> GetGroupAsync(string groupName)
-            => ADGroupService.GetGroupAsync(groupName);
+            => _groupService.GetGroupAsync(groupName);
 
         public Task<MimLookupResult> GetUserMimGroupsAsync(string netid)
-            => ADGroupService.GetUserMimGroupsAsync(netid);
+            => _groupService.GetUserMimGroupsAsync(netid);
     }
 }
