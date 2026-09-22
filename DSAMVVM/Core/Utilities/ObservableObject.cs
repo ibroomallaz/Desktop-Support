@@ -20,7 +20,7 @@ namespace DSAMVVM.Core.Utilities
         }
 
         // Set with callback (e.g., to sync related props)
-        protected bool Set<T>(ref T field, T value, Action onChanged, [CallerMemberName] string? propertyName = null)
+        protected bool Set<T>(ref T field, T value, Action? onChanged, [CallerMemberName] string? propertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value)) return false;
             field = value;

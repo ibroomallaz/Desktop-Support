@@ -5,11 +5,10 @@ namespace DSAMVVM.Core.Utilities
 {
     public class EnumEqualsConverter : IValueConverter
     {
-        public EnumEqualsConverter() { }
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
             => value != null && parameter != null && value.Equals(parameter);
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-            => value is bool b && b && parameter != null ? parameter : Binding.DoNothing;
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+            => value is bool and true && parameter != null ? parameter : Binding.DoNothing;
     }
 }

@@ -17,7 +17,7 @@ public static class IdentityUtility
 
     public static string GetFirstName()
     {
-        if (!string.IsNullOrEmpty(_cached)) return _cached!;
+        if (!string.IsNullOrEmpty(_cached)) return _cached;
 
         // 1. Try Claims first (fastest, works if WAM caching is active)
         var id = WindowsIdentity.GetCurrent();

@@ -263,7 +263,7 @@ namespace DSAMVVM.Core.Utilities
             if (obj == null) return string.Empty;
             foreach (var p in obj.Properties())
                 if (string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase))
-                    return p.Value?.ToString() ?? string.Empty;
+                    return p.Value.ToString();
             return string.Empty;
         }
 
@@ -273,11 +273,11 @@ namespace DSAMVVM.Core.Utilities
             if (obj == null) return false;
             foreach (var p in obj.Properties())
                 if (string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase))
-                    return p.Value?.Type == JTokenType.Boolean && p.Value!.Value<bool>();
+                    return p.Value.Type == JTokenType.Boolean && p.Value.Value<bool>();
             return false;
         }
 
-        private static string Val(string? s) => string.IsNullOrWhiteSpace(s) ? "(none)" : s!;
+        private static string Val(string? s) => string.IsNullOrWhiteSpace(s) ? "(none)" : s;
 
         // Base + optional prerelease with optional dash/dot separator
         [GeneratedRegex(@"^(?<base>\d+(\.\d+){1,3})(?:-(?<label>alpha|beta|rc)(?:[-\.]?(?<number>\d+))?)?$",
@@ -285,6 +285,9 @@ namespace DSAMVVM.Core.Utilities
         private static partial Regex VersionRegex();
 
         // Optional wrapper contract
-        private sealed class VersionWrapper { public VersionInfo? Version { get; set; } }
+        private sealed class VersionWrapper(VersionInfo? version)
+        {
+            public VersionInfo? Version { get; set; } = version;
+        }
     }
 }
