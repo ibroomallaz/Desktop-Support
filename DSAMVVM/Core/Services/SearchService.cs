@@ -56,7 +56,7 @@ namespace DSAMVVM.Core.Services
                 return [.. _history];
         }
 
-        public async Task<object?> SearchAsync(SearchContextDTO context, SearchTarget target)
+        public async Task<object?> SearchAsync(SearchContextDTO? context, SearchTarget target)
         {
             if (string.IsNullOrWhiteSpace(context?.Query))
                 throw new ArgumentException("Search query cannot be empty.", nameof(context));

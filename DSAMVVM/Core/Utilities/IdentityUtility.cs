@@ -21,8 +21,8 @@ public static class IdentityUtility
 
         // 1. Try Claims first (fastest, works if WAM caching is active)
         var id = WindowsIdentity.GetCurrent();
-        var claim = id?.Claims?.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value;
-        if (!string.IsNullOrWhiteSpace(claim)) return _cached = claim!;
+        var claim = id.Claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value;
+        if (!string.IsNullOrWhiteSpace(claim)) return _cached = claim;
 
         // 2. Try Traditional AD (Fails immediately on Pure Entra machines)
         try

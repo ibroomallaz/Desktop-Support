@@ -133,7 +133,6 @@ namespace DSAMVVM.Core.Services
             double result;
             if (s.Ui.Font.ViewFontSizeOverride &&
                 s.Ui.ViewFontSizes.TryGetValue(viewName, out var v) &&
-                v is not null &&
                 v.FontSize > 0)
             {
                 result = Math.Clamp(v.FontSize, min, max);
@@ -158,7 +157,7 @@ namespace DSAMVVM.Core.Services
                 var current = GetFontSizeFor(viewName, s, MinFont, MaxFont);
                 var next = (int)Math.Clamp(current + delta, MinFont, MaxFont);
 
-                if (!s.Ui.ViewFontSizes.TryGetValue(viewName, out var entry) || entry is null)
+                if (!s.Ui.ViewFontSizes.TryGetValue(viewName, out var entry))
                 {
                     entry = new ViewFontSetting();
                     s.Ui.ViewFontSizes[viewName] = entry;
@@ -211,7 +210,7 @@ namespace DSAMVVM.Core.Services
         private string? _pendingPath;
         private static readonly TimeSpan SaveDebounce = TimeSpan.FromMilliseconds(500);
 
-        public void RequestSave(AppSettings s, string settingsPath)
+        public void RequestSave(AppSettings? s, string settingsPath)
         {
             if (s is null || string.IsNullOrWhiteSpace(settingsPath)) return;
 
@@ -292,7 +291,7 @@ namespace DSAMVVM.Core.Services
 
         // Helpers
 
-        private static string Expand(string path) =>
+        private static string Expand(string? path) =>
             Environment.ExpandEnvironmentVariables(path ?? string.Empty);
 
         private static void TryTouchMeta(AppSettings s)
@@ -300,7 +299,7 @@ namespace DSAMVVM.Core.Services
             try
             {
                 var meta = s.Meta;
-                var prop = meta?.GetType()?.GetProperty("LastUpdatedUtc");
+                var prop = meta.GetType().GetProperty("LastUpdatedUtc");
                 if (prop != null && prop.CanWrite)
                 {
                     prop.SetValue(meta, DateTime.UtcNow);
