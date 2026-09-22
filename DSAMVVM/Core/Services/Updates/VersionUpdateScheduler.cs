@@ -61,7 +61,12 @@ namespace DSAMVVM.Core.Services.Updates
         {
             lock (_gate)
             {
-                try { _cts?.Cancel(); } catch { }
+                try { _cts?.Cancel(); }
+                catch
+                {
+                    // ignored
+                }
+
                 _timer?.Dispose();
                 _cts?.Dispose();
                 _timer = null;

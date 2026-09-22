@@ -16,7 +16,7 @@ namespace DSAMVVM.Core.Services.Graph
         }
     }
 
-    public class GraphTeamsService
+    public abstract class GraphTeamsService
     {
         // Executes a diagnostic post to verify Entra Token routing GUIDs.
         public static async Task<bool> RunDiagnosticPostTestAsync(GraphServiceClient graphClient, string teamId, string channelId)

@@ -44,7 +44,7 @@ namespace DSAMVVM.Core.Services.AD
                         var userDn = DirectoryUtility.GetString(sr, "distinguishedName");
                         if (!string.IsNullOrWhiteSpace(userDn))
                         {
-                            var byMember = DirectoryUtility.FindGroupCnsByMemberDn(Globals.g_domainPathLDAP, userDn!, "MIM");
+                            var byMember = DirectoryUtility.FindGroupCnsByMemberDn(Globals.g_domainPathLDAP, userDn, "MIM");
                             if (byMember.Count > 0) groups.AddRange(byMember);
                         }
                     }
@@ -89,17 +89,15 @@ namespace DSAMVVM.Core.Services.AD
                 try
                 {
                     using var root = Root();
-                    using var ds = new DirectorySearcher(root)
-                    {
-                        // match by CN or sAMAccountName
-                        Filter = $"(&(objectClass=group)(|(cn={Esc(name)})(sAMAccountName={Esc(name)})))",
-                        SearchScope = SearchScope.Subtree,
-                        CacheResults = true,
-                        Asynchronous = true,
-                        ServerTimeLimit = TimeSpan.FromSeconds(3),
-                        PageSize = 0,
-                        SizeLimit = 1
-                    };
+                    using var ds = new DirectorySearcher(root);
+                    // match by CN or sAMAccountName
+                    ds.Filter = $"(&(objectClass=group)(|(cn={Esc(name)})(sAMAccountName={Esc(name)})))";
+                    ds.SearchScope = SearchScope.Subtree;
+                    ds.CacheResults = true;
+                    ds.Asynchronous = true;
+                    ds.ServerTimeLimit = TimeSpan.FromSeconds(3);
+                    ds.PageSize = 0;
+                    ds.SizeLimit = 1;
                     ds.ReferralChasing = ReferralChasingOption.None;
                     ds.PropertiesToLoad.Add("member");
 

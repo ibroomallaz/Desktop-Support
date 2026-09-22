@@ -25,8 +25,9 @@ namespace DSAMVVM.Core.Services.Updates
             {
                 Log.Info("UpdaterSvc", $"Starting background download to: {tempDir}");
 
-                using (var client = new HttpClient { Timeout = TimeSpan.FromSeconds(60) })
+                using (var client = new HttpClient())
                 {
+                    client.Timeout = TimeSpan.FromSeconds(60);
                     if (needsFramework && !string.IsNullOrWhiteSpace(updateInfo.SetupUrl) && !string.IsNullOrWhiteSpace(updateInfo.MsiUrl))
                     {
                         progressReporter?.Report("Downloading .NET bootstrapper...");
@@ -78,7 +79,7 @@ namespace DSAMVVM.Core.Services.Updates
             using (var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
             {
                 response.EnsureSuccessStatusCode();
-                using var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None);
+                await using var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None);
                 await response.Content.CopyToAsync(fs);
             }
             File.Move(tempPath, destinationPath, true);
@@ -124,7 +125,11 @@ namespace DSAMVVM.Core.Services.Updates
 
         private static void HandleFailure(string userMessage, string? fallbackUrl, string tempDir)
         {
-            try { if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true); } catch { }
+            try { if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true); }
+            catch
+            {
+                // ignored
+            }
 
             var result = MessageBox.Show($"{userMessage}\n\nDownload manually?", "Update Failed", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result == MessageBoxResult.Yes && !string.IsNullOrWhiteSpace(fallbackUrl))
@@ -142,10 +147,17 @@ namespace DSAMVVM.Core.Services.Updates
                 {
                     foreach (var dir in Directory.GetDirectories(Path.GetTempPath(), "DSA_Update_*"))
                     {
-                        try { Directory.Delete(dir, true); } catch { }
+                        try { Directory.Delete(dir, true); }
+                        catch
+                        {
+                            // ignored
+                        }
                     }
                 }
-                catch { }
+                catch
+                {
+                    // ignored
+                }
             });
         }
     }

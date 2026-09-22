@@ -31,6 +31,7 @@ namespace DSAMVVM.Core.Services.AD
                     info.DisplayName = DirectoryUtility.GetString(r, "displayName") ?? "Unknown";
                     info.Enabled = DirectoryUtility.GetEnabledFromUac(r);
 
+                    // ReSharper disable once GrammarMistakeInComment
                     // Quick, informational lockout check (computed bit only)
                     info.Locked = DirectoryUtility.GetLockedQuick(r);
 
@@ -38,7 +39,7 @@ namespace DSAMVVM.Core.Services.AD
                                ?? DirectoryUtility.GetString(r, "Department")
                                ?? "None";
                     info.DepartmentName = dept;
-                    info.DepartmentNumber = dept?.Length >= 4 ? dept[..4] : (string?)null;
+                    info.DepartmentNumber = dept.Length >= 4 ? dept[..4] : null;
 
                     info.EduAffiliation = DirectoryUtility.GetString(r, "eduPersonPrimaryAffiliation") ?? "Unknown";
 
@@ -50,16 +51,16 @@ namespace DSAMVVM.Core.Services.AD
                     var userDn = DirectoryUtility.GetString(r, "distinguishedName");
 
                     info.HasMimWrkstGroup = !string.IsNullOrWhiteSpace(userDn) &&
-                                            DirectoryUtility.HasMimWrkstGroup(_ldap, userDn!);
+                                            DirectoryUtility.HasMimWrkstGroup(_ldap, userDn);
 
                     // Second query only if needed to resolve Division rollup group
                     var result = !string.IsNullOrWhiteSpace(userDn)
-                        ? DirectoryUtility.FindDivisionRollupGroup(_ldap, userDn!)
+                        ? DirectoryUtility.FindDivisionRollupGroup(_ldap, userDn)
                         : null;
 
-                    if (result?.Properties["cn"]?.Count > 0)
+                    if (result?.Properties["cn"].Count > 0)
                     {
-                        var cn = result.Properties["cn"][0]?.ToString();
+                        var cn = result.Properties["cn"][0].ToString();
                         info.Division = cn?.Length >= 4 ? cn[..4] : "N/A";
                     }
                     else

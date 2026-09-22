@@ -25,21 +25,20 @@ namespace DSAMVVM.Core.Services.Graph
             get => _isAuthenticated;
             private set
             {
-                if (_isAuthenticated != value)
-                {
-                    _isAuthenticated = value;
+                if (_isAuthenticated == value) return;
 
-                    if (Application.Current != null)
-                    {
-                        Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            AuthenticationStateChanged?.Invoke(_isAuthenticated);
-                        });
-                    }
-                    else
+                _isAuthenticated = value;
+
+                if (Application.Current != null)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
                     {
                         AuthenticationStateChanged?.Invoke(_isAuthenticated);
-                    }
+                    });
+                }
+                else
+                {
+                    AuthenticationStateChanged?.Invoke(_isAuthenticated);
                 }
             }
         }
@@ -47,12 +46,12 @@ namespace DSAMVVM.Core.Services.Graph
         public AuthenticationService(TeamsRoutingService routingService)
         {
             _routingService = routingService;
-            var authorityUrl = $"{Globals.EntraInstanceUrl}{Globals.EntraTenantId}";
+            const string authorityUrl = $"{Globals.EntraInstanceUrl}{Globals.EntraTenantId}";
 
             var builder = PublicClientApplicationBuilder.Create(Globals.EntraClientId)
                 .WithAuthority(authorityUrl)
                 .WithRedirectUri(Globals.EntraRedirectUri)
-                .WithLogging((level, message, containsPii) =>
+                .WithLogging((_, message, _) =>
                 {
                     Log.Debug("MSAL", message);
                 }, LogLevel.Info, enablePiiLogging: false);
@@ -66,13 +65,11 @@ namespace DSAMVVM.Core.Services.Graph
             _pca = builder.Build();
         }
 
-        private void ExtractAndApplyRouting(AuthenticationResult result)
+        private void ExtractAndApplyRouting(AuthenticationResult? result)
         {
-            if (result?.ClaimsPrincipal?.Claims != null)
-            {
-                _routingService.InitializeFromClaims(result.ClaimsPrincipal.Claims);
-                Log.Info("AuthService", "Teams routing configuration extracted and applied from ID Token.");
-            }
+            if (result?.ClaimsPrincipal?.Claims == null) return;
+            _routingService.InitializeFromClaims(result.ClaimsPrincipal.Claims);
+            Log.Info("AuthService", "Teams routing configuration extracted and applied from ID Token.");
         }
 
         // Silent authentication check for UI state binding prior to Graph execution
@@ -152,7 +149,7 @@ namespace DSAMVVM.Core.Services.Graph
                 {
                     if (windowHandle == IntPtr.Zero)
                     {
-                        activeWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive && w.IsVisible)
+                        activeWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w is { IsActive: true, IsVisible: true })
                                        ?? Application.Current.Windows.OfType<Window>().LastOrDefault(w => w.IsVisible)
                                        ?? Application.Current.MainWindow;
 
@@ -185,11 +182,9 @@ namespace DSAMVVM.Core.Services.Graph
                     // the external MSAL WAM broker or browser prompt. Temporarily disable Topmost.
                     foreach (Window window in Application.Current.Windows)
                     {
-                        if (window.IsVisible && window.Topmost)
-                        {
-                            window.Topmost = false;
-                            untoppedWindows.Add(window);
-                        }
+                        if (window is not { IsVisible: true, Topmost: true }) continue;
+                        window.Topmost = false;
+                        untoppedWindows.Add(window);
                     }
                 });
             }
@@ -197,23 +192,25 @@ namespace DSAMVVM.Core.Services.Graph
             // Start a lightweight background watcher to bring the MSAL/WAM popup dialog to the front
             // as soon as it is spawned and attached to the parent window handle.
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            CancellationToken token = cts.Token;
+            Task? popupWatcherTask = null;
+
             if (windowHandle != IntPtr.Zero)
             {
-                _ = Task.Run(async () =>
+                popupWatcherTask = Task.Run(async () =>
                 {
                     try
                     {
-                        while (!cts.Token.IsCancellationRequested)
+                        while (!token.IsCancellationRequested)
                         {
-                            await Task.Delay(100, cts.Token);
+                            await Task.Delay(100, token);
                             IntPtr popup = GetWindow(windowHandle, GW_ENABLEDPOPUP);
-                            if (popup != IntPtr.Zero && popup != windowHandle)
-                            {
-                                SetWindowPos(popup, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
-                                BringWindowToTop(popup);
-                                SetForegroundWindow(popup);
-                                break;
-                            }
+                            if (popup == IntPtr.Zero || popup == windowHandle) continue;
+
+                            SetWindowPos(popup, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+                            BringWindowToTop(popup);
+                            SetForegroundWindow(popup);
+                            break;
                         }
                     }
                     catch (OperationCanceledException) { }
@@ -221,7 +218,7 @@ namespace DSAMVVM.Core.Services.Graph
                     {
                         Log.Debug("AuthService", $"Popup watcher ignored exception: {ex.Message}");
                     }
-                }, cts.Token);
+                }, token);
             }
 
             try
@@ -235,7 +232,7 @@ namespace DSAMVVM.Core.Services.Graph
                     interactiveBuilder = interactiveBuilder.WithParentActivityOrWindow(windowHandle);
                 }
 
-                var result = await interactiveBuilder.ExecuteAsync();
+                var result = await interactiveBuilder.ExecuteAsync(CancellationToken.None);
 
                 ExtractAndApplyRouting(result);
                 IsAuthenticated = true;
@@ -243,7 +240,18 @@ namespace DSAMVVM.Core.Services.Graph
             }
             finally
             {
-                cts.Cancel();
+                await cts.CancelAsync();
+                if (popupWatcherTask != null)
+                {
+                    try
+                    {
+                        await popupWatcherTask;
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                }
 
                 // Restore Topmost on any windows that were originally Topmost, and re-activate the parent window
                 if (Application.Current != null)
@@ -255,14 +263,12 @@ namespace DSAMVVM.Core.Services.Graph
                             window.Topmost = true;
                         }
 
-                        if (activeWindow != null && activeWindow.IsVisible)
+                        if (activeWindow is not { IsVisible: true }) return;
+                        activeWindow.Activate();
+                        activeWindow.Focus();
+                        if (windowHandle != IntPtr.Zero)
                         {
-                            activeWindow.Activate();
-                            activeWindow.Focus();
-                            if (windowHandle != IntPtr.Zero)
-                            {
-                                SetForegroundWindow(windowHandle);
-                            }
+                            SetForegroundWindow(windowHandle);
                         }
                     });
                 }
@@ -272,21 +278,19 @@ namespace DSAMVVM.Core.Services.Graph
         // Ingests the raw URL passed from single-instance deep link routing interceptions
         public void ProcessAuthRedirect(string url)
         {
-            if (!string.IsNullOrWhiteSpace(url))
-            {
-                _capturedAuthUri = url;
-                Log.Info("AuthService", "Authorization URI cleanly extracted from active link tracking handle.");
-            }
+            if (string.IsNullOrWhiteSpace(url)) return;
+
+            _capturedAuthUri = url;
+            Log.Info("AuthService", "Authorization URI cleanly extracted from active link tracking handle.");
         }
 
         public async Task SignOutAsync()
         {
-            var accounts = await _pca.GetAccountsAsync();
+            var accounts = (await _pca.GetAccountsAsync()).ToList();
 
-            while (accounts.Any())
+            foreach (var account in accounts)
             {
-                await _pca.RemoveAsync(accounts.First());
-                accounts = await _pca.GetAccountsAsync();
+                await _pca.RemoveAsync(account);
             }
 
             IsAuthenticated = false;
@@ -313,31 +317,23 @@ namespace DSAMVVM.Core.Services.Graph
                     await Task.Delay(250, cancellationToken);
                 }
 
-                if (parent._capturedAuthUri == null)
-                {
-                    throw new TimeoutException("The technician SSO verification sequence timed out in the system browser.");
-                }
-
-                return new Uri(parent._capturedAuthUri);
+                return new Uri(parent._capturedAuthUri ?? throw new TimeoutException("The technician SSO verification sequence timed out in the system browser."));
             }
         }
 
         #region Win32 P/Invoke Declarations
 
         [LibraryImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static partial bool SetForegroundWindow(IntPtr hWnd);
+        private static partial void SetForegroundWindow(IntPtr hWnd);
 
         [LibraryImport("user32.dll", EntryPoint = "SwitchToThisWindow")]
         private static partial void SwitchToThisWindow(IntPtr hWnd, [MarshalAs(UnmanagedType.Bool)] bool fAltTab);
 
         [LibraryImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static partial bool BringWindowToTop(IntPtr hWnd);
+        private static partial void BringWindowToTop(IntPtr hWnd);
 
         [LibraryImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static partial bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+        private static partial void SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
         [LibraryImport("user32.dll")]
         private static partial IntPtr GetWindow(IntPtr hWnd, uint uCmd);
