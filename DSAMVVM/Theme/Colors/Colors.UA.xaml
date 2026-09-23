@@ -71,6 +71,7 @@
     <SolidColorBrush x:Key="Brush.Accent.Red.Light" Color="{DynamicResource Color.Accent.Red.Light}"/>
 
     <SolidColorBrush x:Key="Brush.Info"            Color="{DynamicResource Color.Info}"/>
+    <SolidColorBrush x:Key="Brush.Info.Light"      Color="{DynamicResource Color.Info.Light}"/>
     <SolidColorBrush x:Key="Brush.Info.Hover"      Color="{DynamicResource Color.Info.Hover}"/>
     <SolidColorBrush x:Key="Brush.Info.Pressed"    Color="{DynamicResource Color.Info.Pressed}"/>
 

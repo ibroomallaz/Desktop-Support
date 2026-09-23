@@ -1,9 +1,56 @@
 ﻿using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
+using DSAMVVM.MVVM.View.Resources;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
+    public class RecentActivityMockItem
+    {
+        public string Icon { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string Subtitle { get; set; } = "";
+        public string TypeTag { get; set; } = "";
+        public string IconColor { get; set; } = "#5BC3FF";
+        public string PillBg { get; set; } = "#121E2C";
+        public string PillBorder { get; set; } = "#243E5C";
+        public ICommand? ActionCommand { get; set; }
+    }
+
+    public class HomeShortcutMockItem
+    {
+        public string Icon { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string Url { get; set; } = "";
+        public string AccentBg { get; set; } = "#152538";
+        public string AccentBorder { get; set; } = "#264366";
+        public string AccentFg { get; set; } = "#5BC3FF";
+        public ICommand? OpenCommand { get; set; }
+    }
+
+    public class ServiceMeowMockPet
+    {
+        public string Name { get; set; } = "";
+        public string Species { get; set; } = "Cat";
+        public string Breed { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string Owner { get; set; } = "";
+        public string FunFact { get; set; } = "";
+        public string GlowColor { get; set; } = "#4A2538"; // Radial aura color
+        public string AccentTagColor { get; set; } = "#FFAEC0";
+        public string AccentTagBg { get; set; } = "#381824";
+    }
+
+    public class NetworkTypeMockState
+    {
+        public string Label { get; set; } = "";
+        public string Glyph { get; set; } = "";
+        public string DotColor { get; set; } = "";
+    }
+
     public class HomeViewModel : ObservableObject
     {
         // Callbacks provided by MainViewModel
@@ -16,11 +63,10 @@ namespace DSAMVVM.MVVM.ViewModel
 
         // Header
         public string Title { get; } = $"Welcome, {IdentityUtility.GetFirstName()}";
-
-        public string Subtitle { get; } = "Jump into common tasks.";
+        public string Subtitle { get; } = $"Desktop Support Assistant · v{Globals.g_AppVersion}";
         public static string AppVersion => $"Version: {Globals.g_AppVersion}";
 
-        // Quick-panel inputs (kept for your XAML bindings)
+        // Quick-panel inputs (preserved for compatibility)
         private string _userQuery = "";
         public string UserQuery
         {
@@ -35,13 +81,126 @@ namespace DSAMVVM.MVVM.ViewModel
             set { _computerQuery = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
         }
 
-        // Commands (RelayCommand expects parameterized delegates in your project)
+        // Standard Navigation Commands
         public ICommand OpenUserCommand { get; }
         public ICommand OpenComputerCommand { get; }
         public ICommand GoGroupsCommand { get; }
         public ICommand GoEntraCommand { get; }
         public ICommand GoLinksCommand { get; }
         public ICommand GoAboutCommand { get; }
+
+        // --- Visual Mockup: Network Type State ---
+        private readonly List<NetworkTypeMockState> _networkStates =
+        [
+            new() { Label = "Campus Network (Wired)", Glyph = "\uE839", DotColor = "#3CD070" },
+            new() { Label = "Campus Wi-Fi (UAWiFi)", Glyph = "\uE701", DotColor = "#3CD070" },
+            new() { Label = "GlobalProtect VPN", Glyph = "\uE72E", DotColor = "#5BC3FF" },
+            new() { Label = "Off-Campus / External", Glyph = "\uE774", DotColor = "#FFB84D" }
+        ];
+
+        private int _currentNetworkIndex;
+
+        public string NetworkStatusText => _networkStates[_currentNetworkIndex].Label;
+        public string NetworkStatusGlyph => _networkStates[_currentNetworkIndex].Glyph;
+        public string NetworkStatusDotColor => _networkStates[_currentNetworkIndex].DotColor;
+
+        public ICommand CycleNetworkStatusCommand { get; }
+
+        // --- Visual Mockup: Entra / Azure Status ---
+        private bool _isEntraSignedIn = true;
+        public bool IsEntraSignedIn
+        {
+            get => _isEntraSignedIn;
+            set { _isEntraSignedIn = value; OnPropertyChanged(); }
+        }
+
+        private string _entraAccountName = $"{Environment.UserName.ToLowerInvariant()}@arizona.edu";
+        public string EntraAccountName
+        {
+            get => _entraAccountName;
+            set { _entraAccountName = value; OnPropertyChanged(); }
+        }
+
+        // --- Visual Mockup: AD Domain Controller Status ---
+        private bool _isDcConnected = true;
+        public bool IsDcConnected
+        {
+            get => _isDcConnected;
+            set { _isDcConnected = value; OnPropertyChanged(); }
+        }
+
+        private string _dcStatusText = "bluecat.arizona.edu · 14ms";
+        public string DcStatusText
+        {
+            get => _dcStatusText;
+            set { _dcStatusText = value; OnPropertyChanged(); }
+        }
+
+        private bool _isTestingDc;
+        public bool IsTestingDc
+        {
+            get => _isTestingDc;
+            set { _isTestingDc = value; OnPropertyChanged(); }
+        }
+
+        public ICommand TestDcCommand { get; }
+
+        // --- Visual Mockup: Recent Activity & Shortcuts ---
+        public ObservableCollection<RecentActivityMockItem> RecentActivities { get; } = [];
+        public ObservableCollection<HomeShortcutMockItem> Shortcuts { get; } = [];
+        public ICommand CustomizeShortcutsCommand { get; }
+
+        // --- Visual Mockup: ServiceMeow ---
+        private readonly List<ServiceMeowMockPet> _mockPets =
+        [
+            new()
+            {
+                Name = "Barnaby",
+                Species = "Cat",
+                Breed = "Orange Tabby · 3 yrs",
+                Title = "Chief Cable Inspector & Morale Officer",
+                Owner = "Alex M. · Desktop Support",
+                FunFact = "Guaranteed to sleep through all P1 escalation alerts without breaking eye contact.",
+                GlowColor = "#4A2538",
+                AccentTagColor = "#FFAEC0",
+                AccentTagBg = "#381824"
+            },
+            new()
+            {
+                Name = "Pixel",
+                Species = "Dog",
+                Breed = "Golden Retriever · 2 yrs",
+                Title = "Director of Bark-End Infrastructure",
+                Owner = "Sarah K. · Endpoint Engineering",
+                FunFact = "Fetches missing DLLs and tennis balls with equal enthusiasm and 99.9% uptime.",
+                GlowColor = "#4A3E1E",
+                AccentTagColor = "#FFD15C",
+                AccentTagBg = "#3D3012"
+            },
+            new()
+            {
+                Name = "Mochi",
+                Species = "Dog",
+                Breed = "French Bulldog · 4 yrs",
+                Title = "Senior Packet Sniffer & Snack QA",
+                Owner = "Dave T. · Network Operations",
+                FunFact = "Snorts aggressively whenever DNS is prematurely blamed for an outage.",
+                GlowColor = "#223B4A",
+                AccentTagColor = "#74D5FF",
+                AccentTagBg = "#132D3B"
+            }
+        ];
+
+        private int _currentPetIndex;
+        private ServiceMeowMockPet _currentPet = null!;
+        public ServiceMeowMockPet CurrentPet
+        {
+            get => _currentPet;
+            set { _currentPet = value; OnPropertyChanged(); }
+        }
+
+        public ICommand NextPetCommand { get; }
+        public ICommand SubmitPetCommand { get; }
 
         public HomeViewModel(
             Action<string?>? openUser = null,
@@ -70,6 +229,153 @@ namespace DSAMVVM.MVVM.ViewModel
             GoEntraCommand = new RelayCommand(_ => _goEntra?.Invoke());
             GoLinksCommand = new RelayCommand(_ => _goLinks?.Invoke());
             GoAboutCommand = new RelayCommand(_ => _goAbout?.Invoke());
+
+            // Cycle network state for visual preview
+            CycleNetworkStatusCommand = new RelayCommand(_ =>
+            {
+                _currentNetworkIndex = (_currentNetworkIndex + 1) % _networkStates.Count;
+                OnPropertyChanged(nameof(NetworkStatusText));
+                OnPropertyChanged(nameof(NetworkStatusGlyph));
+                OnPropertyChanged(nameof(NetworkStatusDotColor));
+                UiNotify.Info($"Simulated network: {NetworkStatusText}", showStatusBar: true);
+            });
+
+            // Mock DC test command
+            TestDcCommand = new RelayCommand(async _ =>
+            {
+                if (IsTestingDc) return;
+                IsTestingDc = true;
+                DcStatusText = "Pinging domain controllers...";
+                await Task.Delay(600);
+                IsTestingDc = false;
+                IsDcConnected = true;
+                DcStatusText = "bluecat.arizona.edu · 12ms";
+                UiNotify.Info("✔ AD Domain Controllers responding normally.", showStatusBar: true);
+            });
+
+            // Mock customize shortcuts command
+            CustomizeShortcutsCommand = new RelayCommand(_ =>
+            {
+                UiNotify.Info("Shortcut customizer preview: Pins will sync with your Links favorites.", showStatusBar: true);
+            });
+
+            // ServiceMeow setup
+            _currentPet = _mockPets[0];
+
+            NextPetCommand = new RelayCommand(_ =>
+            {
+                _currentPetIndex = (_currentPetIndex + 1) % _mockPets.Count;
+                CurrentPet = _mockPets[_currentPetIndex];
+            });
+
+            SubmitPetCommand = new RelayCommand(_ =>
+            {
+                UiNotify.Info("ServiceMeow: Pet submission portal will open in browser.", showStatusBar: true);
+            });
+
+            // Seed Mock Recent Activities with high-contrast color cues
+            RecentActivities.Add(new RecentActivityMockItem
+            {
+                Icon = Glyphs.User,
+                Title = "jsmith",
+                Subtitle = "Faculty · Engineering",
+                TypeTag = "User",
+                IconColor = "#5BC3FF",
+                PillBg = "#132338",
+                PillBorder = "#224268",
+                ActionCommand = new RelayCommand(_ => _openUser?.Invoke("jsmith"))
+            });
+            RecentActivities.Add(new RecentActivityMockItem
+            {
+                Icon = Glyphs.Computer,
+                Title = "ENG-LAB-042",
+                Subtitle = "Windows 11 · Online",
+                TypeTag = "Device",
+                IconColor = "#3CD070",
+                PillBg = "#112A20",
+                PillBorder = "#1F523B",
+                ActionCommand = new RelayCommand(_ => _openComputer?.Invoke("ENG-LAB-042"))
+            });
+            RecentActivities.Add(new RecentActivityMockItem
+            {
+                Icon = Glyphs.Group,
+                Title = "UA-MIM-Wrkst-AllDiv",
+                Subtitle = "MIM Security Group",
+                TypeTag = "Group",
+                IconColor = "#C084FC",
+                PillBg = "#281738",
+                PillBorder = "#4F2A6E",
+                ActionCommand = new RelayCommand(_ => _goGroups?.Invoke())
+            });
+            RecentActivities.Add(new RecentActivityMockItem
+            {
+                Icon = Glyphs.Computer,
+                Title = "BIO-DESK-11",
+                Subtitle = "Windows 10 · Offline",
+                TypeTag = "Device",
+                IconColor = "#FFB84D",
+                PillBg = "#2B2113",
+                PillBorder = "#563F1D",
+                ActionCommand = new RelayCommand(_ => _openComputer?.Invoke("BIO-DESK-11"))
+            });
+
+            // Seed Mock Shortcuts with Segoe MDL2 glyphs and jewel-tone color accents
+            Shortcuts.Add(new HomeShortcutMockItem
+            {
+                Icon = "\uE8EC", // Ticket / Work Order
+                Title = "ServiceNow",
+                Description = "Incident & request queue",
+                Url = "https://service-now.arizona.edu",
+                AccentBg = "#12263F",
+                AccentBorder = "#234975",
+                AccentFg = "#5BC3FF",
+                OpenCommand = new RelayCommand(_ => OpenUrl("https://service-now.arizona.edu"))
+            });
+            Shortcuts.Add(new HomeShortcutMockItem
+            {
+                Icon = "\uE8D7", // Key / Credentials
+                Title = "NetID Portal",
+                Description = "Password reset & 2FA tools",
+                Url = "https://netid.arizona.edu",
+                AccentBg = "#2C2013",
+                AccentBorder = "#5C4123",
+                AccentFg = "#FFB84D",
+                OpenCommand = new RelayCommand(_ => OpenUrl("https://netid.arizona.edu"))
+            });
+            Shortcuts.Add(new HomeShortcutMockItem
+            {
+                Icon = "\uE774", // Globe / Network
+                Title = "IT Status",
+                Description = "Campus outage dashboard",
+                Url = "https://it.arizona.edu/status",
+                AccentBg = "#102C1F",
+                AccentBorder = "#1F593D",
+                AccentFg = "#48D588",
+                OpenCommand = new RelayCommand(_ => OpenUrl("https://it.arizona.edu/status"))
+            });
+            Shortcuts.Add(new HomeShortcutMockItem
+            {
+                Icon = "\uE82D", // Library / Book / Knowledge
+                Title = "Knowledge Base",
+                Description = "Desktop Support SOPs",
+                Url = "https://it.arizona.edu",
+                AccentBg = "#301522",
+                AccentBorder = "#61243E",
+                AccentFg = "#FFAEC0",
+                OpenCommand = new RelayCommand(_ => _goLinks?.Invoke())
+            });
+        }
+
+        private static void OpenUrl(string url)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                UiNotify.Warn($"Could not open link: {ex.Message}");
+            }
         }
 
         public static Task OnSearchUpdated(string _) => Task.CompletedTask; // no-op
