@@ -594,6 +594,7 @@ namespace DSAMVVM
             services.AddSingleton<IDeepLinkRoutingService, DeepLinkRoutingService>();
             services.AddSingleton<IAuthenticationService, AuthenticationService>();
             services.AddSingleton<IApplicationStateService, ApplicationStateService>();
+            services.AddSingleton<INetworkDetectionService, NetworkDetectionService>();
 
             services.AddSingleton<IOutputTextSettingsProvider>(sp =>
                 new OutputTextSettingsProvider(
@@ -631,7 +632,8 @@ namespace DSAMVVM
                     goGroups: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.Group,
                     goEntra: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.Entra,
                     goLinks: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.Links,
-                    goAbout: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.About
+                    goAbout: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.About,
+                    networkService: sp.GetRequiredService<INetworkDetectionService>()
                 )
             );
 

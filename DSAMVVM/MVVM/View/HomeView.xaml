@@ -124,12 +124,12 @@
                                Margin="0,2,0,0"/>
                 </StackPanel>
 
-                <!-- Network Type Status Badge (Interactive Simulation) -->
+                <!-- Network Type Status Badge -->
                 <Button Grid.Column="1"
                         VerticalAlignment="Center"
                         Style="{StaticResource SubtleLinkButton}"
-                        Command="{Binding CycleNetworkStatusCommand}"
-                        ToolTip="Network Connection Type (Click to preview states)">
+                        Command="{Binding RefreshNetworkStatusCommand}"
+                        ToolTip="{Binding NetworkStatusToolTip}">
                     <Border CornerRadius="12"
                             Background="#18FFFFFF"
                             BorderBrush="#30FFFFFF"

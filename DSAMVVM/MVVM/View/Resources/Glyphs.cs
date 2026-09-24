@@ -18,6 +18,13 @@
         // ===== TOP / STATUS =====
         public const string Warning = "\uE7BA";
 
+        // ===== NETWORK =====
+        public const string NetworkWired = "\uE839";
+        public const string NetworkWiFi = "\uE701";
+        public const string NetworkVpn = "\uE72E";
+        public const string NetworkOffCampus = "\uE774";
+        public const string NetworkDisconnected = "\uEB55";
+
         // ===== SETTINGS CATEGORIES =====
         public const string Appearance = "\uE790";
         public const string QuickSearch = "\uE721";

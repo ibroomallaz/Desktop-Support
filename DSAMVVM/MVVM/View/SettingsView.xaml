@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:app="clr-namespace:DSAMVVM"
              xmlns:vm="clr-namespace:DSAMVVM.MVVM.ViewModel"
              xmlns:res="clr-namespace:DSAMVVM.MVVM.View.Resources"
              mc:Ignorable="d"
@@ -204,7 +203,7 @@
                 <!-- 1. APPEARANCE & INTERFACE SECTION              -->
                 <!-- ============================================== -->
                 <StackPanel Visibility="{Binding IsAppearanceSelected, Converter={StaticResource BoolToVis}}">
-                    <!-- Search Text & Typography -->
+                    <!-- Search History -->
                     <Border Style="{StaticResource Card.Container}">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -213,7 +212,30 @@
                             </Grid.ColumnDefinitions>
                             <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
                             <StackPanel Grid.Column="1" Margin="16">
-                                <TextBlock Text="Search text" FontSize="16" FontWeight="SemiBold"
+                                <TextBlock Text="Search History" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="240"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="History size" Style="{StaticResource FieldLabel}"/>
+                                    <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}" ItemsSource="{Binding HistorySizeOptions}" SelectedValue="{Binding MaxSearchHistory, Mode=TwoWay}" SelectedValuePath="." ItemTemplate="{StaticResource HistoryItemTemplate}"/>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Search text & Typography -->
+                    <Border Style="{StaticResource Card.Container}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
+                            <StackPanel Grid.Column="1" Margin="16">
+                                <TextBlock Text="Search Text" FontSize="16" FontWeight="SemiBold"
                                            Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
 
                                 <Grid Margin="0,0,0,12">
@@ -329,29 +351,6 @@
                             </StackPanel>
                         </Grid>
                     </Border>
-
-                    <!-- Search History -->
-                    <Border Style="{StaticResource Card.Container}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="6"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-                            <StackPanel Grid.Column="1" Margin="16">
-                                <TextBlock Text="Search History" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="12"/>
-                                        <ColumnDefinition Width="240"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="History size" Style="{StaticResource FieldLabel}"/>
-                                    <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}" ItemsSource="{Binding HistorySizeOptions}" SelectedValue="{Binding MaxSearchHistory, Mode=TwoWay}" SelectedValuePath="." ItemTemplate="{StaticResource HistoryItemTemplate}"/>
-                                </Grid>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
                 </StackPanel>
 
                 <!-- ============================================== -->
@@ -446,7 +445,7 @@
                                     </Grid.RowDefinitions>
                                     <TextBlock Grid.Row="0" Text="Source" Style="{StaticResource FieldLabel}"/>
                                     <ComboBox Grid.Row="0" Grid.Column="2" ItemsSource="{Binding DataSourceOptions}" SelectedItem="{Binding DeptSource}" Style="{DynamicResource Combo.Links.Dropdown}" HorizontalAlignment="Left" Width="140"/>
-                                    <TextBlock Grid.Row="2" Text="Location" Style="{StaticResource FieldLabel}"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Location" Style="{StaticResource FieldLabel}"/>
                                     <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding DeptUri, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBox.Settings}"/>
                                     <Button Grid.Row="2" Grid.Column="3" Command="{Binding BrowseDeptCommand}" Content="Browse" Width="60" Margin="8,0,0,0">
                                         <Button.Style>
@@ -477,7 +476,7 @@
                                     </Grid.RowDefinitions>
                                     <TextBlock Grid.Row="0" Text="Source" Style="{StaticResource FieldLabel}"/>
                                     <ComboBox Grid.Row="0" Grid.Column="2" ItemsSource="{Binding DataSourceOptions}" SelectedItem="{Binding LinksSource}" Style="{DynamicResource Combo.Links.Dropdown}" HorizontalAlignment="Left" Width="140"/>
-                                    <TextBlock Grid.Row="2" Text="Location" Style="{StaticResource FieldLabel}"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Location" Style="{StaticResource FieldLabel}"/>
                                     <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding LinksUri, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBox.Settings}"/>
                                     <Button Grid.Row="2" Grid.Column="3" Command="{Binding BrowseLinksCommand}" Content="Browse" Width="60" Margin="8,0,0,0">
                                         <Button.Style>
@@ -589,7 +588,7 @@
                         </Grid>
                     </Border>
 
-                    <!-- App Maintenance -->
+                    <!-- Reset -->
                     <Border Style="{StaticResource Card.Container}">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -598,7 +597,7 @@
                             </Grid.ColumnDefinitions>
                             <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
                             <StackPanel Grid.Column="1" Margin="16">
-                                <TextBlock Text="App Maintenance" FontSize="16" FontWeight="SemiBold"
+                                <TextBlock Text="Reset" FontSize="16" FontWeight="SemiBold"
                                            Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,4"/>
 
                                 <TextBlock Text="Reset all settings, paths, and UI preferences to factory state." 
@@ -669,7 +668,6 @@
                                 MinHeight="32" Height="36" MinWidth="92" Padding="14,6">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource Button.Rounded}">
-                                    <Setter Property="Background" Value="{DynamicResource Brush.Gradient.Grey}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding HasUnsavedChanges}" Value="True">
                                             <Setter Property="Background" Value="{DynamicResource ButtonGradient.Primary}"/>

@@ -1,8 +1,12 @@
-﻿using DSAMVVM.Core.Utilities;
+﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Models;
+using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.View.Resources;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Windows;
 using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel
@@ -44,13 +48,6 @@ namespace DSAMVVM.MVVM.ViewModel
         public string AccentTagBg { get; set; } = "#381824";
     }
 
-    public class NetworkTypeMockState
-    {
-        public string Label { get; set; } = "";
-        public string Glyph { get; set; } = "";
-        public string DotColor { get; set; } = "";
-    }
-
     public class HomeViewModel : ObservableObject
     {
         // Callbacks provided by MainViewModel
@@ -89,22 +86,30 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand GoLinksCommand { get; }
         public ICommand GoAboutCommand { get; }
 
-        // --- Visual Mockup: Network Type State ---
-        private readonly List<NetworkTypeMockState> _networkStates =
-        [
-            new() { Label = "Campus Network (Wired)", Glyph = "\uE839", DotColor = "#3CD070" },
-            new() { Label = "Campus Wi-Fi (UAWiFi)", Glyph = "\uE701", DotColor = "#3CD070" },
-            new() { Label = "GlobalProtect VPN", Glyph = "\uE72E", DotColor = "#5BC3FF" },
-            new() { Label = "Off-Campus / External", Glyph = "\uE774", DotColor = "#FFB84D" }
-        ];
+        // --- Live Network Detection State ---
+        private readonly INetworkDetectionService? _networkService;
+        private NetworkStateInfo _networkState = new();
 
-        private int _currentNetworkIndex;
+        public string NetworkStatusText => _networkState.Label;
+        public string NetworkStatusGlyph => _networkState.ConnectionType switch
+        {
+            NetworkConnectionType.CampusWired => Glyphs.NetworkWired,
+            NetworkConnectionType.CampusWiFi => Glyphs.NetworkWiFi,
+            NetworkConnectionType.Vpn => Glyphs.NetworkVpn,
+            NetworkConnectionType.OffCampus => Glyphs.NetworkOffCampus,
+            _ => Glyphs.NetworkDisconnected
+        };
+        public string NetworkStatusDotColor => _networkState.ConnectionType switch
+        {
+            NetworkConnectionType.CampusWired => "#3CD070",
+            NetworkConnectionType.CampusWiFi => "#3CD070",
+            NetworkConnectionType.Vpn => "#5BC3FF",
+            NetworkConnectionType.OffCampus => "#FFB84D",
+            _ => "#FF5252"
+        };
+        public string NetworkStatusToolTip => _networkState.ToolTipText;
 
-        public string NetworkStatusText => _networkStates[_currentNetworkIndex].Label;
-        public string NetworkStatusGlyph => _networkStates[_currentNetworkIndex].Glyph;
-        public string NetworkStatusDotColor => _networkStates[_currentNetworkIndex].DotColor;
-
-        public ICommand CycleNetworkStatusCommand { get; }
+        public ICommand RefreshNetworkStatusCommand { get; }
 
         // --- Visual Mockup: Entra / Azure Status ---
         private bool _isEntraSignedIn = true;
@@ -121,7 +126,7 @@ namespace DSAMVVM.MVVM.ViewModel
             set { _entraAccountName = value; OnPropertyChanged(); }
         }
 
-        // --- Visual Mockup: AD Domain Controller Status ---
+        // --- Visual Mockup: Domain Controller Status ---
         private bool _isDcConnected = true;
         public bool IsDcConnected
         {
@@ -145,48 +150,61 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public ICommand TestDcCommand { get; }
 
-        // --- Visual Mockup: Recent Activity & Shortcuts ---
+        // --- Dynamic Content Collections ---
         public ObservableCollection<RecentActivityMockItem> RecentActivities { get; } = [];
         public ObservableCollection<HomeShortcutMockItem> Shortcuts { get; } = [];
+
         public ICommand CustomizeShortcutsCommand { get; }
 
-        // --- Visual Mockup: ServiceMeow ---
+        // --- Pet of the Day (ServiceMeow) ---
         private readonly List<ServiceMeowMockPet> _mockPets =
         [
             new()
             {
-                Name = "Barnaby",
+                Name = "Nimbus",
                 Species = "Cat",
-                Breed = "Orange Tabby · 3 yrs",
-                Title = "Chief Cable Inspector & Morale Officer",
-                Owner = "Alex M. · Desktop Support",
-                FunFact = "Guaranteed to sleep through all P1 escalation alerts without breaking eye contact.",
+                Breed = "British Shorthair",
+                Title = "Chief Packet Sniffer",
+                Owner = "Dave T. · Network Operations",
+                FunFact = "Discovered a loose patch cable by chewing on the boot.",
+                GlowColor = "#2C3E50",
+                AccentTagColor = "#68D391",
+                AccentTagBg = "#1C4532"
+            },
+            new()
+            {
+                Name = "Pixel",
+                Species = "Cat",
+                Breed = "Calico",
+                Title = "Senior Cable Untangler",
+                Owner = "Sarah M. · Service Desk",
+                FunFact = "Sleeps exclusively on warm Cisco switch exhausts.",
                 GlowColor = "#4A2538",
                 AccentTagColor = "#FFAEC0",
                 AccentTagBg = "#381824"
             },
             new()
             {
-                Name = "Pixel",
+                Name = "Barnaby",
                 Species = "Dog",
-                Breed = "Golden Retriever · 2 yrs",
-                Title = "Director of Bark-End Infrastructure",
-                Owner = "Sarah K. · Endpoint Engineering",
-                FunFact = "Fetches missing DLLs and tennis balls with equal enthusiasm and 99.9% uptime.",
-                GlowColor = "#4A3E1E",
-                AccentTagColor = "#FFD15C",
-                AccentTagBg = "#3D3012"
+                Breed = "Golden Retriever",
+                Title = "Director of Morale",
+                Owner = "Elena R. · Classroom Tech",
+                FunFact = "Knows how to high-five whenever a ticket is marked resolved.",
+                GlowColor = "#4A3B18",
+                AccentTagColor = "#FBD38D",
+                AccentTagBg = "#3D2B0F"
             },
             new()
             {
                 Name = "Mochi",
-                Species = "Dog",
-                Breed = "French Bulldog · 4 yrs",
-                Title = "Senior Packet Sniffer & Snack QA",
-                Owner = "Dave T. · Network Operations",
-                FunFact = "Snorts aggressively whenever DNS is prematurely blamed for an outage.",
-                GlowColor = "#223B4A",
-                AccentTagColor = "#74D5FF",
+                Species = "Cat",
+                Breed = "Scottish Fold",
+                Title = "Lead Code Reviewer",
+                Owner = "Marcus K. · Systems",
+                FunFact = "Reviews PRs by walking across the mechanical keyboard at 2am.",
+                GlowColor = "#1D3A44",
+                AccentTagColor = "#76E4F7",
                 AccentTagBg = "#132D3B"
             }
         ];
@@ -208,7 +226,8 @@ namespace DSAMVVM.MVVM.ViewModel
             Action? goGroups = null,
             Action? goEntra = null,
             Action? goLinks = null,
-            Action? goAbout = null)
+            Action? goAbout = null,
+            INetworkDetectionService? networkService = null)
         {
             _openUser = openUser;
             _openComputer = openComputer;
@@ -216,6 +235,23 @@ namespace DSAMVVM.MVVM.ViewModel
             _goEntra = goEntra;
             _goLinks = goLinks;
             _goAbout = goAbout;
+            _networkService = networkService;
+
+            if (_networkService != null)
+            {
+                _networkState = _networkService.CurrentState;
+                _networkService.NetworkStateChanged += (_, state) =>
+                {
+                    Application.Current?.Dispatcher?.Invoke(() =>
+                    {
+                        _networkState = state;
+                        OnPropertyChanged(nameof(NetworkStatusText));
+                        OnPropertyChanged(nameof(NetworkStatusGlyph));
+                        OnPropertyChanged(nameof(NetworkStatusDotColor));
+                        OnPropertyChanged(nameof(NetworkStatusToolTip));
+                    });
+                };
+            }
 
             OpenUserCommand = new RelayCommand(
                 _ => _openUser?.Invoke(UserQuery),
@@ -230,14 +266,14 @@ namespace DSAMVVM.MVVM.ViewModel
             GoLinksCommand = new RelayCommand(_ => _goLinks?.Invoke());
             GoAboutCommand = new RelayCommand(_ => _goAbout?.Invoke());
 
-            // Cycle network state for visual preview
-            CycleNetworkStatusCommand = new RelayCommand(_ =>
+            // Refresh network state
+            RefreshNetworkStatusCommand = new RelayCommand(async _ =>
             {
-                _currentNetworkIndex = (_currentNetworkIndex + 1) % _networkStates.Count;
-                OnPropertyChanged(nameof(NetworkStatusText));
-                OnPropertyChanged(nameof(NetworkStatusGlyph));
-                OnPropertyChanged(nameof(NetworkStatusDotColor));
-                UiNotify.Info($"Simulated network: {NetworkStatusText}", showStatusBar: true);
+                if (_networkService != null)
+                {
+                    var state = await _networkService.RefreshAsync();
+                    UiNotify.Info($"Network: {state.Label}", showStatusBar: true);
+                }
             });
 
             // Mock DC test command

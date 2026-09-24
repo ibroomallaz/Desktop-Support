@@ -91,10 +91,10 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        public bool IsAppearanceSelected => SelectedCategory?.Category == SettingsCategory.Appearance;
-        public bool IsQuickSearchSelected => SelectedCategory?.Category == SettingsCategory.QuickSearch;
-        public bool IsDataAndLinksSelected => SelectedCategory?.Category == SettingsCategory.DataAndLinks;
-        public bool IsSystemAndMaintenanceSelected => SelectedCategory?.Category == SettingsCategory.SystemAndMaintenance;
+        public bool IsAppearanceSelected => SelectedCategory.Category == SettingsCategory.Appearance;
+        public bool IsQuickSearchSelected => SelectedCategory.Category == SettingsCategory.QuickSearch;
+        public bool IsDataAndLinksSelected => SelectedCategory.Category == SettingsCategory.DataAndLinks;
+        public bool IsSystemAndMaintenanceSelected => SelectedCategory.Category == SettingsCategory.SystemAndMaintenance;
 
         // --- State Flags ---
         private bool _hasUnsavedChanges;
@@ -316,7 +316,7 @@ namespace DSAMVVM.MVVM.ViewModel
             _notifier = notifier;
             _searchSvc = searchSvc;
 
-            _settings = App.Settings ?? new AppSettings();
+            _settings = App.Settings;
             _selectedCategory = Categories[0];
 
             LoadValuesFromSettings();
@@ -505,7 +505,7 @@ namespace DSAMVVM.MVVM.ViewModel
                     StatusMessage = "Settings are up to date.";
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 StatusMessage = "Error saving settings.";
                 UiNotify.Error("Settings Error", ex.Message, alsoStatusBar: true);
@@ -516,7 +516,11 @@ namespace DSAMVVM.MVVM.ViewModel
         private void OpenLogsFolder()
         {
             var dir = ResolveLogDirCompat(_settingsSvc, _settings);
-            try { Process.Start(new ProcessStartInfo(dir) { UseShellExecute = true }); } catch { }
+            try { Process.Start(new ProcessStartInfo(dir) { UseShellExecute = true }); }
+            catch
+            {
+                // ignored
+            }
         }
 
         private static void BrowseForFile(Action<string> onPathSelected)
@@ -545,21 +549,19 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private double GetViewSize(string key, double fallback)
         {
-            if (_settings.Ui.ViewFontSizes.TryGetValue(key, out var entry) && entry != null && entry.FontSize > 0)
+            if (_settings.Ui.ViewFontSizes.TryGetValue(key, out var entry) && entry is { FontSize: > 0 })
                 return UiLimits.ClampFontSize(entry.FontSize);
             return UiLimits.ClampFontSize(fallback);
         }
 
         private void UpsertViewSize(string key, double size)
         {
-            if (!_settings.Ui.ViewFontSizes.TryGetValue(key, out var entry) || entry == null)
+            if (!_settings.Ui.ViewFontSizes.TryGetValue(key, out var entry))
                 _settings.Ui.ViewFontSizes[key] = entry = new ViewFontSetting();
 
-            if (entry.FontSize != size)
-            {
-                entry.FontSize = UiLimits.ClampFontSize(size);
-                SetModified();
-            }
+            if (entry.FontSize == size) return;
+            entry.FontSize = UiLimits.ClampFontSize(size);
+            SetModified();
         }
 
         private void EnsureHistoryOption(int value)
@@ -579,7 +581,10 @@ namespace DSAMVVM.MVVM.ViewModel
                 var methodInfo = svc.GetType().GetMethod("FlushPendingSaves", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
                 methodInfo?.Invoke(svc, null);
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
         }
 
         private static string ResolveLogDirCompat(ISettingsService svc, AppSettings s)
@@ -590,10 +595,14 @@ namespace DSAMVVM.MVVM.ViewModel
                 if (methodInfo != null)
                 {
                     var val = methodInfo.Invoke(svc, [s]) as string;
-                    if (!string.IsNullOrWhiteSpace(val)) return val!;
+                    if (!string.IsNullOrWhiteSpace(val)) return val;
                 }
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
+
             Directory.CreateDirectory(Globals.g_LogsDir);
             return Globals.g_LogsDir;
         }
