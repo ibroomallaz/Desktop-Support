@@ -13,10 +13,13 @@ namespace DSAMVVM.Core.Services.Graph
 {
     public partial class AuthenticationService : IAuthenticationService
     {
+        private static readonly string[] DefaultScopes = ["User.Read"];
+
         private readonly IPublicClientApplication _pca;
         private readonly TeamsRoutingService _routingService;
         internal string? _capturedAuthUri;
         private bool _isAuthenticated;
+        private string? _currentAccountUpn;
 
         public event Action<bool>? AuthenticationStateChanged;
 
@@ -43,6 +46,12 @@ namespace DSAMVVM.Core.Services.Graph
             }
         }
 
+        public string? CurrentAccountUpn
+        {
+            get => _currentAccountUpn;
+            private set => _currentAccountUpn = value;
+        }
+
         public AuthenticationService(TeamsRoutingService routingService)
         {
             _routingService = routingService;
@@ -67,9 +76,28 @@ namespace DSAMVVM.Core.Services.Graph
 
         private void ExtractAndApplyRouting(AuthenticationResult? result)
         {
+            if (result?.Account?.Username != null)
+            {
+                CurrentAccountUpn = result.Account.Username;
+            }
+
             if (result?.ClaimsPrincipal?.Claims == null) return;
             _routingService.InitializeFromClaims(result.ClaimsPrincipal.Claims);
             Log.Info("AuthService", "Teams routing configuration extracted and applied from ID Token.");
+        }
+
+        // Silent token cache verification with default scopes
+        public async Task<bool> CheckCachedSignInAsync()
+        {
+            try
+            {
+                return await ValidateAuthenticationAsync(DefaultScopes).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("AuthService", $"CheckCachedSignInAsync error: {ex.Message}");
+                return false;
+            }
         }
 
         // Silent authentication check for UI state binding prior to Graph execution
@@ -83,6 +111,8 @@ namespace DSAMVVM.Core.Services.Graph
                 IsAuthenticated = false;
                 return false;
             }
+
+            CurrentAccountUpn = account.Username;
 
             try
             {
@@ -293,6 +323,7 @@ namespace DSAMVVM.Core.Services.Graph
                 await _pca.RemoveAsync(account);
             }
 
+            CurrentAccountUpn = null;
             IsAuthenticated = false;
             Log.Info("AuthService", "User signed out successfully and token cache cleared.");
         }

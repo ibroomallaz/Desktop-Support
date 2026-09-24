@@ -50,7 +50,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
     public class HomeViewModel : ObservableObject
     {
-        // Callbacks provided by MainViewModel
         private readonly Action<string?>? _openUser;
         private readonly Action<string?>? _openComputer;
         private readonly Action? _goGroups;
@@ -58,27 +57,38 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly Action? _goLinks;
         private readonly Action? _goAbout;
 
-        // Header
-        public string Title { get; } = $"Welcome, {IdentityUtility.GetFirstName()}";
-        public string Subtitle { get; } = $"Desktop Support Assistant · v{Globals.g_AppVersion}";
-        public static string AppVersion => $"Version: {Globals.g_AppVersion}";
+        private readonly INetworkDetectionService? _networkService;
+        private readonly IADDetectionService? _adDetectionService;
+        private readonly IAuthenticationService? _authService;
 
-        // Quick-panel inputs (preserved for compatibility)
-        private string _userQuery = "";
+        private NetworkStateInfo _networkState = NetworkStateInfo.Disconnected();
+        private ADStateInfo _adState = ADStateInfo.Checking();
+
+        // --- Quick Search Inputs ---
+        private string _userQuery = string.Empty;
         public string UserQuery
         {
             get => _userQuery;
-            set { _userQuery = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
+            set
+            {
+                _userQuery = value;
+                OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested();
+            }
         }
 
-        private string _computerQuery = "";
+        private string _computerQuery = string.Empty;
         public string ComputerQuery
         {
             get => _computerQuery;
-            set { _computerQuery = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
+            set
+            {
+                _computerQuery = value;
+                OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested();
+            }
         }
 
-        // Standard Navigation Commands
         public ICommand OpenUserCommand { get; }
         public ICommand OpenComputerCommand { get; }
         public ICommand GoGroupsCommand { get; }
@@ -86,10 +96,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand GoLinksCommand { get; }
         public ICommand GoAboutCommand { get; }
 
-        // --- Live Network Detection State ---
-        private readonly INetworkDetectionService? _networkService;
-        private NetworkStateInfo _networkState = new();
-
+        // --- Network Connection Status ---
         public string NetworkStatusText => _networkState.Label;
         public string NetworkStatusGlyph => _networkState.ConnectionType switch
         {
@@ -111,41 +118,47 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public ICommand RefreshNetworkStatusCommand { get; }
 
-        // --- Visual Mockup: Entra / Azure Status ---
-        private bool _isEntraSignedIn = true;
-        public bool IsEntraSignedIn
-        {
-            get => _isEntraSignedIn;
-            set { _isEntraSignedIn = value; OnPropertyChanged(); }
-        }
+        // --- Entra / Microsoft 365 Status ---
+        public bool IsEntraSignedIn => _authService?.IsAuthenticated ?? false;
 
-        private string _entraAccountName = $"{Environment.UserName.ToLowerInvariant()}@arizona.edu";
         public string EntraAccountName
         {
-            get => _entraAccountName;
-            set { _entraAccountName = value; OnPropertyChanged(); }
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(_authService?.CurrentAccountUpn))
+                    return _authService.CurrentAccountUpn;
+
+                return $"{Environment.UserName.ToLowerInvariant()}@arizona.edu";
+            }
         }
 
-        // --- Visual Mockup: Domain Controller Status ---
-        private bool _isDcConnected = true;
-        public bool IsDcConnected
-        {
-            get => _isDcConnected;
-            set { _isDcConnected = value; OnPropertyChanged(); }
-        }
+        public string EntraStatusDotColor => IsEntraSignedIn ? "#3CD070" : "#FFA000";
 
-        private string _dcStatusText = "bluecat.arizona.edu · 14ms";
-        public string DcStatusText
-        {
-            get => _dcStatusText;
-            set { _dcStatusText = value; OnPropertyChanged(); }
-        }
+        public string EntraStatusToolTip => IsEntraSignedIn
+            ? $"Signed in to Microsoft Entra ID\nAccount: {EntraAccountName}\nClick to view Entra tools"
+            : $"Entra ID Session: Standby / Not signed in\nAccount: {EntraAccountName}\nClick to sign in or view Entra tools";
+
+        // --- Active Directory Domain Controller Status ---
+        public bool IsDcConnected => _adState.IsReachable;
+
+        public string DcStatusText => IsTestingDc ? "Probing domain controllers..." : _adState.StatusText;
+
+        public string DcStatusToolTip => _adState.ToolTipText;
+
+        public string DcStatusDotColor => IsTestingDc ? "#FFA000" : (_adState.IsReachable ? "#3CD070" : "#FF5252");
 
         private bool _isTestingDc;
         public bool IsTestingDc
         {
             get => _isTestingDc;
-            set { _isTestingDc = value; OnPropertyChanged(); }
+            set
+            {
+                _isTestingDc = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DcStatusText));
+                OnPropertyChanged(nameof(DcStatusDotColor));
+                CommandManager.InvalidateRequerySuggested();
+            }
         }
 
         public ICommand TestDcCommand { get; }
@@ -178,39 +191,27 @@ namespace DSAMVVM.MVVM.ViewModel
                 Breed = "Calico",
                 Title = "Senior Cable Untangler",
                 Owner = "Sarah M. · Service Desk",
-                FunFact = "Sleeps exclusively on warm Cisco switch exhausts.",
+                FunFact = "Always sleeps directly on top of the warmest switch rack.",
                 GlowColor = "#4A2538",
                 AccentTagColor = "#FFAEC0",
                 AccentTagBg = "#381824"
             },
             new()
             {
-                Name = "Barnaby",
+                Name = "Rusty",
                 Species = "Dog",
                 Breed = "Golden Retriever",
-                Title = "Director of Morale",
-                Owner = "Elena R. · Classroom Tech",
-                FunFact = "Knows how to high-five whenever a ticket is marked resolved.",
-                GlowColor = "#4A3B18",
+                Title = "Lead Morale Specialist",
+                Owner = "Marcus K. · Systems Team",
+                FunFact = "Has a 99.9% success rate resolving escalated user stress tickets.",
+                GlowColor = "#3A3015",
                 AccentTagColor = "#FBD38D",
-                AccentTagBg = "#3D2B0F"
-            },
-            new()
-            {
-                Name = "Mochi",
-                Species = "Cat",
-                Breed = "Scottish Fold",
-                Title = "Lead Code Reviewer",
-                Owner = "Marcus K. · Systems",
-                FunFact = "Reviews PRs by walking across the mechanical keyboard at 2am.",
-                GlowColor = "#1D3A44",
-                AccentTagColor = "#76E4F7",
-                AccentTagBg = "#132D3B"
+                AccentTagBg = "#382910"
             }
         ];
 
         private int _currentPetIndex;
-        private ServiceMeowMockPet _currentPet = null!;
+        private ServiceMeowMockPet _currentPet;
         public ServiceMeowMockPet CurrentPet
         {
             get => _currentPet;
@@ -227,7 +228,9 @@ namespace DSAMVVM.MVVM.ViewModel
             Action? goEntra = null,
             Action? goLinks = null,
             Action? goAbout = null,
-            INetworkDetectionService? networkService = null)
+            INetworkDetectionService? networkService = null,
+            IADDetectionService? adDetectionService = null,
+            IAuthenticationService? authService = null)
         {
             _openUser = openUser;
             _openComputer = openComputer;
@@ -236,6 +239,8 @@ namespace DSAMVVM.MVVM.ViewModel
             _goLinks = goLinks;
             _goAbout = goAbout;
             _networkService = networkService;
+            _adDetectionService = adDetectionService;
+            _authService = authService;
 
             if (_networkService != null)
             {
@@ -251,6 +256,49 @@ namespace DSAMVVM.MVVM.ViewModel
                         OnPropertyChanged(nameof(NetworkStatusToolTip));
                     });
                 };
+            }
+
+            if (_adDetectionService != null)
+            {
+                _adState = _adDetectionService.CurrentState;
+                _adDetectionService.StateChanged += state =>
+                {
+                    Application.Current?.Dispatcher?.Invoke(() =>
+                    {
+                        _adState = state;
+                        OnPropertyChanged(nameof(IsDcConnected));
+                        OnPropertyChanged(nameof(DcStatusText));
+                        OnPropertyChanged(nameof(DcStatusToolTip));
+                        OnPropertyChanged(nameof(DcStatusDotColor));
+                    });
+                };
+            }
+
+            if (_authService != null)
+            {
+                _authService.AuthenticationStateChanged += _ =>
+                {
+                    Application.Current?.Dispatcher?.Invoke(() =>
+                    {
+                        OnPropertyChanged(nameof(IsEntraSignedIn));
+                        OnPropertyChanged(nameof(EntraAccountName));
+                        OnPropertyChanged(nameof(EntraStatusDotColor));
+                        OnPropertyChanged(nameof(EntraStatusToolTip));
+                    });
+                };
+
+                // Asynchronously verify cached sign-in without blocking UI startup
+                _ = Task.Run(async () =>
+                {
+                    await _authService.CheckCachedSignInAsync().ConfigureAwait(false);
+                    Application.Current?.Dispatcher?.Invoke(() =>
+                    {
+                        OnPropertyChanged(nameof(IsEntraSignedIn));
+                        OnPropertyChanged(nameof(EntraAccountName));
+                        OnPropertyChanged(nameof(EntraStatusDotColor));
+                        OnPropertyChanged(nameof(EntraStatusToolTip));
+                    });
+                });
             }
 
             OpenUserCommand = new RelayCommand(
@@ -276,18 +324,35 @@ namespace DSAMVVM.MVVM.ViewModel
                 }
             });
 
-            // Mock DC test command
+            // Live AD DC test command
             TestDcCommand = new RelayCommand(async _ =>
             {
                 if (IsTestingDc) return;
                 IsTestingDc = true;
-                DcStatusText = "Pinging domain controllers...";
-                await Task.Delay(600);
-                IsTestingDc = false;
-                IsDcConnected = true;
-                DcStatusText = "bluecat.arizona.edu · 12ms";
-                UiNotify.Info("✔ AD Domain Controllers responding normally.", showStatusBar: true);
-            });
+                try
+                {
+                    if (_adDetectionService != null)
+                    {
+                        var state = await _adDetectionService.ProbeDomainControllerAsync();
+                        if (state.IsReachable)
+                        {
+                            UiNotify.Info($"AD: Connected to {state.DcHost} ({state.LatencyMs}ms)", showStatusBar: true);
+                        }
+                        else
+                        {
+                            UiNotify.Warn($"AD: {state.StatusText}");
+                        }
+                    }
+                    else
+                    {
+                        await Task.Delay(500);
+                    }
+                }
+                finally
+                {
+                    IsTestingDc = false;
+                }
+            }, _ => !IsTestingDc);
 
             // Mock customize shortcuts command
             CustomizeShortcutsCommand = new RelayCommand(_ =>
@@ -355,7 +420,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 ActionCommand = new RelayCommand(_ => _openComputer?.Invoke("BIO-DESK-11"))
             });
 
-            // Seed Mock Shortcuts with Segoe MDL2 glyphs and jewel-tone color accents
+            // Seed Mock Shortcuts with Segoe字体 glyphs and jewel-tone color accents
             Shortcuts.Add(new HomeShortcutMockItem
             {
                 Icon = "\uE8EC", // Ticket / Work Order
@@ -408,12 +473,10 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
             }
-            catch (Exception ex)
+            catch
             {
-                UiNotify.Warn($"Could not open link: {ex.Message}");
+                // ignored
             }
         }
-
-        public static Task OnSearchUpdated(string _) => Task.CompletedTask; // no-op
     }
 }

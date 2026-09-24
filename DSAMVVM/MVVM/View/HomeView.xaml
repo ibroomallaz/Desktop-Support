@@ -193,26 +193,33 @@
                             </Grid.ColumnDefinitions>
 
                             <!-- Left: Entra ID Status -->
-                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="{x:Static res:Glyphs.Entra}"
-                                           FontFamily="Segoe MDL2 Assets"
-                                           FontSize="15"
-                                           Foreground="#5BC3FF"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,6,0"/>
-                                <Ellipse Width="6" Height="6" Fill="#3CD070" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="Entra:"
-                                           Foreground="{DynamicResource Brush.Text.Muted}"
-                                           FontSize="11"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,4,0"/>
-                                <TextBlock Text="{Binding EntraAccountName}"
-                                           Foreground="{DynamicResource Brush.Text.Primary}"
-                                           FontSize="11"
-                                           FontWeight="SemiBold"
-                                           VerticalAlignment="Center"
-                                           TextTrimming="CharacterEllipsis"/>
-                            </StackPanel>
+                            <Button Grid.Column="0"
+                                    Style="{StaticResource SubtleLinkButton}"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding GoEntraCommand}"
+                                    ToolTip="{Binding EntraStatusToolTip}">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Static res:Glyphs.Entra}"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="15"
+                                               Foreground="#5BC3FF"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,6,0"/>
+                                    <Ellipse Width="6" Height="6" Fill="{Binding EntraStatusDotColor}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Entra:"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               FontSize="11"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,4,0"/>
+                                    <TextBlock Text="{Binding EntraAccountName}"
+                                               Foreground="{DynamicResource Brush.Text.Primary}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                            </Button>
 
                             <!-- Vertical Divider -->
                             <Rectangle Grid.Column="1" Fill="#25FFFFFF" Height="22" VerticalAlignment="Center" Margin="6,0"/>
@@ -224,14 +231,14 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="&#xE774;"
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" ToolTip="{Binding DcStatusToolTip}">
+                                    <TextBlock Text="{x:Static res:Glyphs.Server}"
                                                FontFamily="Segoe MDL2 Assets"
                                                FontSize="14"
                                                Foreground="#5BC3FF"
                                                VerticalAlignment="Center"
                                                Margin="0,0,6,0"/>
-                                    <Ellipse Width="6" Height="6" Fill="#3CD070" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                    <Ellipse Width="6" Height="6" Fill="{Binding DcStatusDotColor}" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                     <TextBlock Text="AD:"
                                                Foreground="{DynamicResource Brush.Text.Muted}"
                                                FontSize="11"
@@ -251,7 +258,7 @@
                                         ToolTip="Probe Active Directory Domain Controllers"
                                         Command="{Binding TestDcCommand}">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="&#xE72C;"
+                                        <TextBlock Text="{x:Static res:Glyphs.Sync}"
                                                    FontFamily="Segoe MDL2 Assets"
                                                    FontSize="11"
                                                    VerticalAlignment="Center"

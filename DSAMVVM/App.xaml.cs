@@ -595,6 +595,7 @@ namespace DSAMVVM
             services.AddSingleton<IAuthenticationService, AuthenticationService>();
             services.AddSingleton<IApplicationStateService, ApplicationStateService>();
             services.AddSingleton<INetworkDetectionService, NetworkDetectionService>();
+            services.AddSingleton<IADDetectionService, ADDetectionService>();
 
             services.AddSingleton<IOutputTextSettingsProvider>(sp =>
                 new OutputTextSettingsProvider(
@@ -633,7 +634,9 @@ namespace DSAMVVM
                     goEntra: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.Entra,
                     goLinks: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.Links,
                     goAbout: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.About,
-                    networkService: sp.GetRequiredService<INetworkDetectionService>()
+                    networkService: sp.GetRequiredService<INetworkDetectionService>(),
+                    adDetectionService: sp.GetRequiredService<IADDetectionService>(),
+                    authService: sp.GetRequiredService<IAuthenticationService>()
                 )
             );
 

@@ -17,6 +17,8 @@
 
         // ===== TOP / STATUS =====
         public const string Warning = "\uE7BA";
+        public const string Server = "\uE82D";
+        public const string Sync = "\uE72C";
 
         // ===== NETWORK =====
         public const string NetworkWired = "\uE839";

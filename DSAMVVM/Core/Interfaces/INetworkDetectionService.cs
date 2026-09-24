@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using DSAMVVM.Core.Models;
+﻿using DSAMVVM.Core.Models;
 
 namespace DSAMVVM.Core.Interfaces
 {
