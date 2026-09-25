@@ -8,6 +8,8 @@
         public LinksUiSettings Links { get; set; } = new();
         public TrayUiSettings Tray { get; set; } = new();
         public ServiceMeowUiSettings ServiceMeow { get; set; } = new();
+        public HomeShortcutsSettings Shortcuts { get; set; } = new();
+
         //Admin panel settings
         public bool HasUnlockedAdmin { get; set; } = false;
         public bool ShowAdminView { get; set; } = false;
@@ -19,6 +21,7 @@
             Tray?.Normalize();
             Links?.Normalize();
             ServiceMeow?.Normalize();
+            Shortcuts?.Normalize();
 
             if (ViewFontSizes != null && !ReferenceEquals(ViewFontSizes.Comparer, StringComparer.OrdinalIgnoreCase))
             {

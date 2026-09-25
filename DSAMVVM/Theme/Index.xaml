@@ -3,6 +3,7 @@
     <ResourceDictionary.MergedDictionaries>
         <!-- Colors  -->
         <ResourceDictionary Source="/Theme/Colors/Colors.UA.xaml"/>
+        <ResourceDictionary Source="/Theme/Colors/Shortcuts.Palette.xaml"/>
         <ResourceDictionary Source="/Theme/Decor/Gradient.UA.xaml"/>
         <!-- Effects etc-->
         <ResourceDictionary Source="/Theme/Decor/Effects.xaml"/>

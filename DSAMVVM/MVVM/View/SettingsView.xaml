@@ -15,6 +15,7 @@
                 <ResourceDictionary Source="/Theme/Decor/Gradient.UA.xaml"/>
                 <ResourceDictionary Source="/Theme/Controls/Button.Rounded.xaml"/>
                 <ResourceDictionary Source="/Theme/Controls/LinksComboBoxTheme.xaml"/>
+                <ResourceDictionary Source="/Theme/Colors/Shortcuts.Palette.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <Style x:Key="Card.Container" TargetType="Border">
@@ -194,7 +195,8 @@
         </Border>
 
         <!-- Category Content Area -->
-        <ScrollViewer Grid.Row="1"
+        <ScrollViewer x:Name="SettingsScrollViewer"
+                      Grid.Row="1"
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="16,0,16,8" Orientation="Vertical">
@@ -204,7 +206,7 @@
                 <!-- ============================================== -->
                 <StackPanel Visibility="{Binding IsAppearanceSelected, Converter={StaticResource BoolToVis}}">
                     <!-- Search History -->
-                    <Border Style="{StaticResource Card.Container}">
+                    <Border x:Name="CardSearchHistory" Style="{StaticResource Card.Container}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="6"/>
@@ -227,7 +229,7 @@
                     </Border>
 
                     <!-- Search text & Typography -->
-                    <Border Style="{StaticResource Card.Container}">
+                    <Border x:Name="CardSearchTypography" Style="{StaticResource Card.Container}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="6"/>
@@ -247,7 +249,7 @@
                                     <TextBlock Text="Default search size at launch" Style="{StaticResource FieldLabel}"/>
                                     <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}"
                                               ItemsSource="{Binding InitialFontSizeOptions}"
-                                              SelectedValue="{Binding DefaultFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              SelectedValue="{Binding LinksSettings.InitialFontSize, Mode=TwoWay}"
                                               SelectedValuePath="." ItemTemplate="{StaticResource PtItemTemplate}"/>
                                 </Grid>
 
@@ -334,7 +336,7 @@
                     </Border>
 
                     <!-- System Tray -->
-                    <Border Style="{StaticResource Card.Container}">
+                    <Border x:Name="CardSystemTray" Style="{StaticResource Card.Container}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="6"/>
@@ -357,7 +359,7 @@
                 <!-- 2. QUICK SEARCH SECTION                         -->
                 <!-- ============================================== -->
                 <StackPanel Visibility="{Binding IsQuickSearchSelected, Converter={StaticResource BoolToVis}}">
-                    <Border Style="{StaticResource Card.Container}">
+                    <Border x:Name="CardQuickSearch" Style="{StaticResource Card.Container}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="6"/>
@@ -420,7 +422,7 @@
                 <!-- ============================================== -->
                 <StackPanel Visibility="{Binding IsDataAndLinksSelected, Converter={StaticResource BoolToVis}}">
                     <!-- Data Management -->
-                    <Border Style="{StaticResource Card.Container}">
+                    <Border x:Name="CardDataManagement" Style="{StaticResource Card.Container}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="6"/>
@@ -496,7 +498,7 @@
                     </Border>
 
                     <!-- Links Start Mode -->
-                    <Border Style="{StaticResource Card.Container}">
+                    <Border x:Name="CardLinksStartMode" Style="{StaticResource Card.Container}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="6"/>
@@ -529,6 +531,177 @@
                             </StackPanel>
                         </Grid>
                     </Border>
+
+                    <!-- Home Quick Shortcuts Management -->
+                    <Border x:Name="CardHomeShortcuts" Style="{StaticResource Card.Container}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
+                            <StackPanel Grid.Column="1" Margin="16">
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Home Dashboard Shortcuts" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                        <TextBlock Text="Manage cards displayed on the Home view. Maximum 6 shortcuts." FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Shortcuts.Count, StringFormat={}{0} / 6 active}"
+                                                   Foreground="{DynamicResource Brush.Text.Muted}" FontSize="12" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                        <Button Content="Reset Defaults" Command="{Binding ResetShortcutsCommand}"
+                                                Style="{StaticResource Button.Rounded.Compact}" Padding="10,2"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- Current Shortcuts List -->
+                                <TextBlock Text="Active Shortcuts" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,8"/>
+                                <ItemsControl ItemsSource="{Binding Shortcuts}" Margin="0,0,0,16">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource Brush.Surface.1}"
+                                                    BorderBrush="{DynamicResource Brush.Border}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="8"
+                                                    Padding="12,10"
+                                                    Margin="0,0,0,8">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="36"/>
+                                                        <ColumnDefinition Width="12"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="12"/>
+                                                        <ColumnDefinition Width="110"/>
+                                                        <ColumnDefinition Width="12"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!-- Icon Preview with Selected Jewel-Tone Style -->
+                                                    <Border Grid.Column="0" Width="36" Height="36" Style="{StaticResource ShortcutIconPlate}">
+                                                        <TextBlock Text="{Binding Icon}"
+                                                                   FontFamily="Segoe MDL2 Assets"
+                                                                   FontSize="16"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   Style="{StaticResource ShortcutFgText}"/>
+                                                    </Border>
+
+                                                    <!-- Shortcut Info -->
+                                                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13" Style="{StaticResource ShortcutFgText}"/>
+                                                            <Border Margin="8,0,0,0" Padding="6,1" CornerRadius="4" Background="{DynamicResource Brush.Surface.2}" VerticalAlignment="Center"
+                                                                    Visibility="{Binding IsCustom, Converter={StaticResource BoolToVis}}">
+                                                                <TextBlock Text="Custom" FontSize="10" Foreground="{DynamicResource Brush.Accent.Red.Light}"/>
+                                                            </Border>
+                                                        </StackPanel>
+                                                        <TextBlock Text="{Binding Target}" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+                                                    </StackPanel>
+
+                                                    <!-- Color Preset Selector with Color Dots -->
+                                                    <ComboBox Grid.Column="4" Height="28" VerticalAlignment="Center"
+                                                              Style="{DynamicResource Combo.Links.Dropdown}"
+                                                              ItemsSource="{Binding DataContext.AvailableColorPresets, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                              SelectedItem="{Binding ColorPreset, Mode=TwoWay}"
+                                                              ItemTemplate="{StaticResource ColorPresetItemTemplate}"/>
+
+                                                    <!-- Action buttons (Up, Down, Delete) -->
+                                                    <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <Button Style="{StaticResource Button.Rounded.Compact}" Width="30" Height="28" Margin="0,0,4,0" ToolTip="Move Up"
+                                                                Command="{Binding DataContext.MoveShortcutUpCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding}">
+                                                            <TextBlock Text="&#xE74A;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                        </Button>
+                                                        <Button Style="{StaticResource Button.Rounded.Compact}" Width="30" Height="28" Margin="0,0,4,0" ToolTip="Move Down"
+                                                                Command="{Binding DataContext.MoveShortcutDownCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding}">
+                                                            <TextBlock Text="&#xE74B;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                        </Button>
+                                                        <Button Style="{StaticResource Button.Rounded.Compact}" Width="30" Height="28" ToolTip="Remove Shortcut"
+                                                                Command="{Binding DataContext.RemoveShortcutCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding}">
+                                                            <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource Brush.Accent.Red.Light}"/>
+                                                        </Button>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <!-- Add Custom Shortcut Form -->
+                                <Border Background="{DynamicResource Brush.Surface.2}" BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1" CornerRadius="8" Padding="14">
+                                    <StackPanel>
+                                        <TextBlock Text="Add Custom Shortcut" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,10"/>
+                                        <Grid Margin="0,0,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="Title" Style="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
+                                                <TextBox Text="{Binding NewShortcutTitle, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBox.Settings}" ToolTip="Display name on the shortcut card"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Target URL or App Route (e.g. https://... or app://links)" Style="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
+                                                <TextBox Text="{Binding NewShortcutTarget, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBox.Settings}" ToolTip="Web URL or internal deep link (app://links, app://entra, app://user, etc.)"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="1.5*"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="1.2*"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="Description (Optional)" Style="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
+                                                <TextBox Text="{Binding NewShortcutDescription, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBox.Settings}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Icon" Style="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
+                                                <ComboBox Style="{DynamicResource Combo.Links.Dropdown}" Height="28"
+                                                          ItemsSource="{Binding AvailableGlyphs}"
+                                                          SelectedValue="{Binding NewShortcutGlyph, Mode=TwoWay}"
+                                                          SelectedValuePath="Glyph">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="{Binding Glyph}" FontFamily="Segoe MDL2 Assets" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                                <TextBlock Text="{Binding Name}" FontSize="11" VerticalAlignment="Center" Foreground="{DynamicResource Brush.Text.Primary}" TextTrimming="CharacterEllipsis"/>
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="4">
+                                                <TextBlock Text="Color Theme" Style="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
+                                                <ComboBox Style="{DynamicResource Combo.Links.Dropdown}" Height="28"
+                                                          ItemsSource="{Binding AvailableColorPresets}"
+                                                          SelectedItem="{Binding NewShortcutColor, Mode=TwoWay}"
+                                                          ItemTemplate="{StaticResource ColorPresetItemTemplate}"/>
+                                            </StackPanel>
+                                            <Button Grid.Column="6" Content="+ Add Shortcut"
+                                                    Command="{Binding AddCustomShortcutCommand}"
+                                                    IsEnabled="{Binding CanAddShortcut}"
+                                                    Style="{StaticResource Button.Rounded.Compact}"
+                                                    VerticalAlignment="Bottom"
+                                                    Padding="14,4"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </StackPanel>
 
                 <!-- ============================================== -->
@@ -536,7 +709,7 @@
                 <!-- ============================================== -->
                 <StackPanel Visibility="{Binding IsSystemAndMaintenanceSelected, Converter={StaticResource BoolToVis}}">
                     <!-- Application Updates -->
-                    <Border Style="{StaticResource Card.Container}">
+                    <Border x:Name="CardUpdates" Style="{StaticResource Card.Container}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="6"/>
@@ -551,7 +724,7 @@
                     </Border>
 
                     <!-- Logs -->
-                    <Border Style="{StaticResource Card.Container}">
+                    <Border x:Name="CardLogs" Style="{StaticResource Card.Container}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="6"/>
@@ -589,7 +762,7 @@
                     </Border>
 
                     <!-- Reset -->
-                    <Border Style="{StaticResource Card.Container}">
+                    <Border x:Name="CardReset" Style="{StaticResource Card.Container}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="6"/>

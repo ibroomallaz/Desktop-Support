@@ -10,104 +10,110 @@
              d:DesignWidth="800">
 
     <UserControl.Resources>
-        <!-- Card hover/press overlay button -->
-        <Style x:Key="CardOverlayButton" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="Focusable" Value="False"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Overlay" Background="{TemplateBinding Background}" Opacity="0" CornerRadius="10"/>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Overlay" Property="Background" Value="#25FFFFFF"/>
-                                <Setter TargetName="Overlay" Property="Opacity" Value="0.40"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Overlay" Property="Background" Value="#40FFFFFF"/>
-                                <Setter TargetName="Overlay" Property="Opacity" Value="0.50"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Theme/Colors/Shortcuts.Palette.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
-        <!-- Subtle Text Link Button -->
-        <Style x:Key="SubtleLinkButton" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="4,2"/>
-            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Muted}"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" CornerRadius="4">
-                            <ContentPresenter x:Name="ContentHost"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="{DynamicResource Brush.Info.Light}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+            <!-- Card hover/press overlay button -->
+            <Style x:Key="CardOverlayButton" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Focusable" Value="False"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Overlay" Background="{TemplateBinding Background}" Opacity="0" CornerRadius="10"/>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Overlay" Property="Background" Value="#25FFFFFF"/>
+                                    <Setter TargetName="Overlay" Property="Opacity" Value="0.40"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Overlay" Property="Background" Value="#40FFFFFF"/>
+                                    <Setter TargetName="Overlay" Property="Opacity" Value="0.50"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
 
-        <!-- Dynamic Themed Pill Button for Recent Queries -->
-        <Style x:Key="RecentPillButton" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Root"
-                                Background="{DynamicResource Brush.Pill.User.Bg}"
-                                BorderBrush="{DynamicResource Brush.Pill.User.Border}"
-                                BorderThickness="1"
-                                CornerRadius="12"
-                                Padding="9,4">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.User}">
-                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.User.Bg}"/>
-                                <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.User.Border}"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Computer}">
-                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.Device.Bg}"/>
-                                <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.Device.Border}"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Group}">
-                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.Group.Bg}"/>
-                                <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.Group.Border}"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Admin}">
-                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.Admin.Bg}"/>
-                                <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.Admin.Border}"/>
-                            </DataTrigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Root" Property="BorderBrush" Value="#80FFFFFF"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Root" Property="Background" Value="#30FFFFFF"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+            <!-- Subtle Text Link Button -->
+            <Style x:Key="SubtleLinkButton" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="4,2"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Muted}"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" CornerRadius="4">
+                                <ContentPresenter x:Name="ContentHost"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource Brush.Info.Light}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Dynamic Themed Pill Button for Recent Queries -->
+            <Style x:Key="RecentPillButton" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Root"
+                                    Background="{DynamicResource Brush.Pill.User.Bg}"
+                                    BorderBrush="{DynamicResource Brush.Pill.User.Border}"
+                                    BorderThickness="1"
+                                    CornerRadius="12"
+                                    Padding="9,4">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.User}">
+                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.User.Bg}"/>
+                                    <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.User.Border}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Computer}">
+                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.Device.Bg}"/>
+                                    <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.Device.Border}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Group}">
+                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.Group.Bg}"/>
+                                    <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.Group.Border}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Admin}">
+                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.Admin.Bg}"/>
+                                    <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.Admin.Border}"/>
+                                </DataTrigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Root" Property="BorderBrush" Value="#80FFFFFF"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Root" Property="Background" Value="#30FFFFFF"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <Border Padding="14,4,14,10"
@@ -192,7 +198,7 @@
                         <!-- Quick Shortcuts with Color Variation -->
                     </Grid.RowDefinitions>
 
-                    <!-- Row 0: Slim Unified Environment Status Ribbon (saves 35px height, eliminates box clutter) -->
+                    <!-- Row 0: Slim Unified Environment Status Ribbon -->
                     <Border Grid.Row="0"
                             Margin="0,0,0,12"
                             Height="44"
@@ -388,6 +394,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <!-- Section Header -->
@@ -409,24 +416,77 @@
                                            FontWeight="SemiBold"/>
                             </StackPanel>
 
-                            <Button Grid.Column="1"
-                                    Style="{StaticResource SubtleLinkButton}"
-                                    VerticalAlignment="Center"
-                                    Command="{Binding CustomizeShortcutsCommand}">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="&#xE713;"
-                                               FontFamily="Segoe MDL2 Assets"
-                                               FontSize="11"
-                                               VerticalAlignment="Center"
-                                               Margin="0,0,4,0"/>
-                                    <TextBlock Text="Customize"
-                                               FontSize="11"
-                                               VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Button>
+                            <!-- Header Actions -->
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <!-- Advanced Settings Button (visible in Edit Mode) -->
+                                <Button VerticalAlignment="Center"
+                                        Margin="0,0,6,0"
+                                        ToolTip="Open shortcut manager in Settings"
+                                        Command="{Binding GoSettingsShortcutsCommand}">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource SubtleLinkButton}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Static res:Glyphs.Settings}"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="11"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,4,0"/>
+                                        <TextBlock Text="Advanced..."
+                                                   FontSize="11"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Toggle Edit Mode / Done Button -->
+                                <Button Style="{StaticResource SubtleLinkButton}"
+                                        VerticalAlignment="Center"
+                                        Command="{Binding ToggleEditModeCommand}">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="11"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,4,0">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="{x:Static res:Glyphs.Settings}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Muted}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                                            <Setter Property="Text" Value="{x:Static res:Glyphs.Checkmark}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource Brush.Success}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBlock FontSize="11" VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="Customize"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                                            <Setter Property="Text" Value="Done"/>
+                                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource Brush.Success}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
                         </Grid>
 
-                        <!-- 2x2 Shortcuts Grid with Jewel-Tone Theme Variations -->
+                        <!-- Shortcuts Uniform Grid with Jewel-Tone Theme Variations -->
                         <ItemsControl Grid.Row="1" ItemsSource="{Binding Shortcuts}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -435,17 +495,12 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Margin="3"
-                                            MinHeight="56"
-                                            CornerRadius="10"
-                                            Background="{Binding AccentBg}"
-                                            BorderBrush="{Binding AccentBorder}"
-                                            BorderThickness="1"
-                                            Padding="10,8">
+                                    <Border Style="{StaticResource ShortcutCardBorder}">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="32"/>
                                                 <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
 
                                             <!-- Distinct Colored Icon Plate with High-Contrast Foreground -->
@@ -459,7 +514,7 @@
                                                 <TextBlock Text="{Binding Icon}"
                                                            FontFamily="Segoe MDL2 Assets"
                                                            FontSize="15"
-                                                           Foreground="{Binding AccentFg}"
+                                                           Style="{StaticResource ShortcutFgText}"
                                                            VerticalAlignment="Center"
                                                            HorizontalAlignment="Center"/>
                                             </Border>
@@ -467,7 +522,7 @@
                                             <!-- Title & Subtitle -->
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
                                                 <TextBlock Text="{Binding Title}"
-                                                           Foreground="{Binding AccentFg}"
+                                                           Style="{StaticResource ShortcutFgText}"
                                                            FontSize="12"
                                                            FontWeight="Bold"
                                                            TextTrimming="CharacterEllipsis"/>
@@ -478,15 +533,94 @@
                                                            TextTrimming="CharacterEllipsis"/>
                                             </StackPanel>
 
-                                            <!-- Click Overlay Button -->
-                                            <Button Grid.ColumnSpan="2"
-                                                    Style="{StaticResource CardOverlayButton}"
-                                                    Command="{Binding OpenCommand}"/>
+                                            <!-- Click Overlay Button (active when not in Edit Mode) -->
+                                            <Button Grid.ColumnSpan="3"
+                                                    Command="{Binding OpenCommand}">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource CardOverlayButton}">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding DataContext.IsEditMode, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+
+                                            <!-- Delete / Remove Badge [✕] (visible only in Edit Mode) -->
+                                            <Button Grid.Column="2"
+                                                    Width="22"
+                                                    Height="22"
+                                                    VerticalAlignment="Center"
+                                                    HorizontalAlignment="Right"
+                                                    ToolTip="Remove shortcut"
+                                                    Command="{Binding DataContext.RemoveShortcutCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource SubtleLinkButton}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding DataContext.IsEditMode, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                                <Border Width="18" Height="18" CornerRadius="9" Background="#40000000" BorderBrush="#50FFFFFF" BorderThickness="1">
+                                                    <TextBlock Text="{x:Static res:Glyphs.Dismiss}"
+                                                               FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="9"
+                                                               Foreground="{DynamicResource Brush.Accent.Red.Light}"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center"/>
+                                                </Border>
+                                            </Button>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+
+                        <!-- Add Shortcut Slot Tile (visible in edit mode when capacity allows) -->
+                        <Button Grid.Row="2"
+                                Margin="3,6,3,0"
+                                Height="40"
+                                Command="{Binding AddShortcutCommand}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource SubtleLinkButton}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding IsEditMode}" Value="True"/>
+                                                <Condition Binding="{Binding CanAddShortcut}" Value="True"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <Border CornerRadius="8"
+                                    BorderBrush="{DynamicResource Brush.Border.Active}"
+                                    BorderThickness="1"
+                                    Background="#10FFFFFF"
+                                    Padding="10,0">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Static res:Glyphs.Add}"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource Brush.Info.Light}"
+                                               Margin="0,0,6,0"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="Add / Manage Shortcuts in Settings..."
+                                               Foreground="{DynamicResource Brush.Text.Primary}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </Button>
                     </Grid>
                 </Grid>
 

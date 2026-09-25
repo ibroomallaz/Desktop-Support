@@ -4,6 +4,7 @@ using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
+using DSAMVVM.MVVM.Model.Config.UI;
 using DSAMVVM.MVVM.Model.Data;
 using DSAMVVM.MVVM.View.Resources;
 using System.Collections.ObjectModel;
@@ -24,18 +25,6 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand? ActionCommand { get; init; }
     }
 
-    public class HomeShortcutMockItem
-    {
-        public string Icon { get; set; } = "";
-        public string Title { get; set; } = "";
-        public string Description { get; set; } = "";
-        public string Url { get; set; } = "";
-        public string AccentBg { get; set; } = "#152538";
-        public string AccentBorder { get; set; } = "#264366";
-        public string AccentFg { get; set; } = "#5BC3FF";
-        public ICommand? OpenCommand { get; set; }
-    }
-
     public class HomeViewModel : ObservableObject
     {
         private readonly Action<string?>? _openUser;
@@ -51,6 +40,8 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly ISearchService? _searchService;
         private readonly IDeepLinkRoutingService? _linkRouter;
         private readonly IImageCacheService? _imageCacheService;
+        private readonly ISettingsService? _settingsService;
+        private readonly ILinksService? _linksService;
 
         private NetworkStateInfo _networkState = NetworkStateInfo.Disconnected();
         private ADStateInfo _adState = ADStateInfo.Checking();
@@ -129,9 +120,33 @@ namespace DSAMVVM.MVVM.ViewModel
 
         // --- Dynamic Content Collections ---
         public ObservableCollection<RecentActivityItem> RecentActivities { get; } = [];
-        public ObservableCollection<HomeShortcutMockItem> Shortcuts { get; } = [];
+        public ObservableCollection<HomeShortcutItem> Shortcuts { get; } = [];
 
-        public ICommand CustomizeShortcutsCommand { get; }
+        // --- Shortcuts Edit Mode & Customization ---
+        private bool _isEditMode;
+        public bool IsEditMode
+        {
+            get => _isEditMode;
+            set
+            {
+                if (Set(ref _isEditMode, value))
+                {
+                    OnPropertyChanged(nameof(CanAddShortcut));
+                    if (!value)
+                    {
+                        // Exited edit mode: flush any reordered or updated items to disk
+                        _settingsService?.RequestSave(App.Settings, Globals.g_SettingsPath);
+                    }
+                }
+            }
+        }
+
+        public bool CanAddShortcut => Shortcuts.Count < HomeShortcutsSettings.MaxShortcuts;
+
+        public ICommand ToggleEditModeCommand { get; }
+        public ICommand GoSettingsShortcutsCommand { get; }
+        public ICommand RemoveShortcutCommand { get; }
+        public ICommand AddShortcutCommand { get; }
 
         // --- Pet of the Day (ServiceMeow) ---
         private readonly List<ServiceMeowOwner> _mockOwners =
@@ -232,7 +247,9 @@ namespace DSAMVVM.MVVM.ViewModel
             IAuthenticationService? authService = null,
             ISearchService? searchService = null,
             IDeepLinkRoutingService? linkRouter = null,
-            IImageCacheService? imageCacheService = null)
+            IImageCacheService? imageCacheService = null,
+            ISettingsService? settingsService = null,
+            ILinksService? linksService = null)
         {
             _openUser = openUser;
             _openComputer = openComputer;
@@ -246,6 +263,8 @@ namespace DSAMVVM.MVVM.ViewModel
             _searchService = searchService;
             _linkRouter = linkRouter;
             _imageCacheService = imageCacheService;
+            _settingsService = settingsService;
+            _linksService = linksService;
 
             if (_networkService != null)
             {
@@ -367,11 +386,63 @@ namespace DSAMVVM.MVVM.ViewModel
                 }
             }, _ => !IsTestingDc);
 
-            // Mock customize shortcuts command
-            CustomizeShortcutsCommand = new RelayCommand(_ =>
+            // Toggle In-Place Edit Mode
+            ToggleEditModeCommand = new RelayCommand(_ =>
             {
-                UiNotify.Info("Shortcut customizer preview: Pins will sync with your Links favorites.", showStatusBar: true);
+                IsEditMode = !IsEditMode;
             });
+
+            // Navigate to Settings shortcuts page
+            GoSettingsShortcutsCommand = new RelayCommand(_ =>
+            {
+                if (_linkRouter != null)
+                {
+                    _linkRouter.RequestNavigation("settings", "shortcuts");
+                }
+                else
+                {
+                    UiNotify.Info("Configure shortcuts in Settings -> Data & Links.", showStatusBar: true);
+                }
+            });
+
+            // Remove Shortcut In-Place
+            RemoveShortcutCommand = new RelayCommand(param =>
+            {
+                if (param is HomeShortcutItem item)
+                {
+                    Shortcuts.Remove(item);
+                    App.Settings.Ui.Shortcuts.Items.RemoveAll(x => x.Id == item.Id);
+                    App.Settings.Ui.Shortcuts.Normalize();
+                    _settingsService?.RequestSave(App.Settings, Globals.g_SettingsPath);
+                    OnPropertyChanged(nameof(CanAddShortcut));
+                    UiNotify.Info($"Removed shortcut '{item.Title}'", showStatusBar: true);
+                }
+            });
+
+            // Add Shortcut Slot Action (navigates to Settings)
+            AddShortcutCommand = new RelayCommand(_ =>
+            {
+                if (_linkRouter != null)
+                {
+                    _linkRouter.RequestNavigation("settings", "shortcuts");
+                }
+                else
+                {
+                    UiNotify.Info("Add new shortcuts in Settings -> Data & Links.", showStatusBar: true);
+                }
+            });
+
+            // Load initial shortcuts from AppSettings
+            LoadShortcutsFromSettings();
+
+            // Listen for external updates from SettingsView
+            if (_settingsService != null)
+            {
+                _settingsService.SettingsChanged += (_, _) =>
+                {
+                    UiNotify.RunOnUiAsync(LoadShortcutsFromSettings);
+                };
+            }
 
             // ServiceMeow setup
             foreach (var owner in _mockOwners)
@@ -419,52 +490,49 @@ namespace DSAMVVM.MVVM.ViewModel
                 _searchService.HistoryChanged += OnSearchHistoryChanged;
                 SyncRecentActivities();
             }
+        }
 
-            // Seed Mock Shortcuts with Segoe glyphs and jewel-tone color accents
-            Shortcuts.Add(new HomeShortcutMockItem
+        private void LoadShortcutsFromSettings()
+        {
+            App.Settings.Ui.Shortcuts.Normalize();
+            var items = App.Settings.Ui.Shortcuts.Items;
+
+            Shortcuts.Clear();
+            foreach (var item in items.OrderBy(x => x.Order))
             {
-                Icon = "\uE8EC", // Ticket / Work Order
-                Title = "ServiceNow",
-                Description = "Incident & request queue",
-                Url = "https://service-now.arizona.edu",
-                AccentBg = "#12263F",
-                AccentBorder = "#234975",
-                AccentFg = "#5BC3FF",
-                OpenCommand = new RelayCommand(_ => OpenUrl("https://service-now.arizona.edu"))
-            });
-            Shortcuts.Add(new HomeShortcutMockItem
+                var copy = item.Clone();
+                copy.OpenCommand = new RelayCommand(_ => ExecuteShortcut(copy));
+                Shortcuts.Add(copy);
+            }
+            OnPropertyChanged(nameof(CanAddShortcut));
+        }
+
+        private void ExecuteShortcut(HomeShortcutItem item)
+        {
+            if (IsEditMode || string.IsNullOrWhiteSpace(item.Target)) return;
+
+            try
             {
-                Icon = "\uE8D7", // Key / Credentials
-                Title = "NetID Portal",
-                Description = "Password reset & 2FA tools",
-                Url = "https://netid.arizona.edu",
-                AccentBg = "#2C2013",
-                AccentBorder = "#5C4123",
-                AccentFg = "#FFB84D",
-                OpenCommand = new RelayCommand(_ => OpenUrl("https://netid.arizona.edu"))
-            });
-            Shortcuts.Add(new HomeShortcutMockItem
+                if (item.Target.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                    item.Target.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                {
+                    OpenUrl(item.Target);
+                }
+                else if (item.Target.StartsWith("app://", StringComparison.OrdinalIgnoreCase) ||
+                         item.Target.StartsWith("dsa://", StringComparison.OrdinalIgnoreCase))
+                {
+                    _ = _linkRouter?.HandleLinkAsync(item.Target);
+                }
+                else
+                {
+                    // Fallback to https for standard domain inputs like "service-now.arizona.edu"
+                    OpenUrl("https://" + item.Target);
+                }
+            }
+            catch (Exception ex)
             {
-                Icon = "\uE774", // Globe / Network
-                Title = "IT Status",
-                Description = "Campus outage dashboard",
-                Url = "https://it.arizona.edu/status",
-                AccentBg = "#102C1F",
-                AccentBorder = "#1F593D",
-                AccentFg = "#48D588",
-                OpenCommand = new RelayCommand(_ => OpenUrl("https://it.arizona.edu/status"))
-            });
-            Shortcuts.Add(new HomeShortcutMockItem
-            {
-                Icon = "\uE82D", // Library / Book / Knowledge
-                Title = "Knowledge Base",
-                Description = "Desktop Support SOPs",
-                Url = "https://it.arizona.edu",
-                AccentBg = "#301522",
-                AccentBorder = "#61243E",
-                AccentFg = "#FFAEC0",
-                OpenCommand = new RelayCommand(_ => _goLinks?.Invoke())
-            });
+                UiNotify.Warn($"Could not open shortcut: {ex.Message}");
+            }
         }
 
         private async Task LoadPetImageAsync(bool forceRefresh)

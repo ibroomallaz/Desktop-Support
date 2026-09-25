@@ -124,78 +124,102 @@ namespace DSAMVVM.MVVM.ViewModel
             set { if (_searchQuery != value) { _searchQuery = value; OnPropertyChanged(); } }
         }
 
-
-        //Admin state properties, persisted to settings
-        private bool _hasUnlockedAdmin;
-        public bool HasUnlockedAdmin
-        {
-            get => _hasUnlockedAdmin;
-            set
-            {
-                if (_hasUnlockedAdmin == value) return;
-                _hasUnlockedAdmin = value;
-                OnPropertyChanged(nameof(HasUnlockedAdmin));
-            }
-        }
-
         private bool _showAdminView;
         public bool ShowAdminView
         {
             get => _showAdminView;
             set
             {
-                if (_showAdminView == value) return;
-                _showAdminView = value;
-                OnPropertyChanged(nameof(ShowAdminView));
+                if (_showAdminView != value)
+                {
+                    _showAdminView = value;
+                    OnPropertyChanged();
+                    SyncAdminNavItem();
+                }
             }
         }
 
-        public ReadOnlyObservableCollection<string> SearchHistory => _searchService.SearchHistory;
+        private bool _hasUnlockedAdmin;
+        public bool HasUnlockedAdmin
+        {
+            get => _hasUnlockedAdmin;
+            set
+            {
+                if (_hasUnlockedAdmin != value)
+                {
+                    _hasUnlockedAdmin = value;
+                    OnPropertyChanged();
+                    SyncAdminNavItem();
+                }
+            }
+        }
+
+        private void SyncAdminNavItem()
+        {
+            var adminItem = NavItems.FirstOrDefault(n => n.View == AppView.Admin);
+
+            if (_hasUnlockedAdmin && _showAdminView)
+            {
+                if (adminItem == null)
+                {
+                    var settingsIndex = NavItems.IndexOf(NavItems.First(n => n.View == AppView.Settings));
+                    NavItems.Insert(settingsIndex, new NavItem
+                    {
+                        Title = "Admin",
+                        Glyph = Glyphs.Admin,
+                        View = AppView.Admin,
+                        Command = AdminCommand
+                    });
+                }
+            }
+            else
+            {
+                if (adminItem != null)
+                {
+                    NavItems.Remove(adminItem);
+                    if (SelectedView == AppView.Admin)
+                    {
+                        SelectedView = AppView.Home;
+                    }
+                }
+            }
+        }
 
         public MainViewModel(
-             IDepartmentService deptService,
-             ISearchService searchService,
-             IVersionCheckHandler versionHandler,
-             StatusBarViewModel statusBar,
-             IDeepLinkRoutingService linkRouter,
-             IAuthenticationService authService,
-             Func<UserViewModel> userVMFactory,
-             Func<ComputerViewModel> computerVMFactory,
-             Func<GroupViewModel> groupVMFactory,
-             Func<LinksViewModel> linksVMFactory,
-             Func<AdminViewModel> adminVMFactory,
-             IApplicationStateService appStateService,
-             AboutViewModel aboutVM)
+            IDepartmentService deptService,
+            ISearchService searchService,
+            IVersionCheckHandler versionHandler,
+            IDeepLinkRoutingService linkRouter,
+            IAuthenticationService authService,
+            IApplicationStateService appStateService,
+            StatusBarViewModel statusBar,
+            AboutViewModel aboutVM,
+            Func<UserViewModel> userVMFactory,
+            Func<ComputerViewModel> computerVMFactory,
+            Func<GroupViewModel> groupVMFactory,
+            Func<LinksViewModel> linksVMFactory,
+            Func<AdminViewModel> adminVMFactory)
         {
             DeptService = deptService;
             _searchService = searchService;
-            StatusBar = statusBar;
-            _linkRouter = linkRouter;
             _versionHandler = versionHandler;
-
+            _linkRouter = linkRouter;
             _authService = authService;
             _appStateService = appStateService;
+            StatusBar = statusBar;
+
             _userVMFactory = userVMFactory;
             _computerVMFactory = computerVMFactory;
             _groupVMFactory = groupVMFactory;
             _linksVMFactory = linksVMFactory;
             _adminVMFactory = adminVMFactory;
 
-            // --- SUBSCRIBE TO AUTH STATE ---
+            _linkRouter.NavigationRequested += OnNavigationRequested;
             _authService.AuthenticationStateChanged += OnAuthenticationStateChanged;
 
-            // Prevent instance-level duplicate subscriptions
-            _linkRouter.NavigationRequested -= OnNavigationRequested;
-            _linkRouter.NavigationRequested += OnNavigationRequested;
-
-            // Load Admin persistence from UI settings on boot directly to fields
-            _hasUnlockedAdmin = App.Settings.Ui.HasUnlockedAdmin;
-            _showAdminView = App.Settings.Ui.ShowAdminView;
-
-
-            //Listen for settings changes to sync Admin state across instances
-            var settingsSvc = App.Services.GetRequiredService<ISettingsService>();
-            settingsSvc.SettingsChanged += OnSettingsChanged;
+            // Subscribe to SettingsService changes
+            var settingsService = App.Services.GetRequiredService<ISettingsService>();
+            settingsService.SettingsChanged += OnSettingsChanged;
 
             InitializeViewModels(aboutVM);
             InitializeCommands();
@@ -208,9 +232,12 @@ namespace DSAMVVM.MVVM.ViewModel
         // Event handler to sync properties when SettingsVM hits "Apply"
         private void OnSettingsChanged(object? sender, AppSettings newSettings)
         {
-            // Sync Admin state safely
-            HasUnlockedAdmin = newSettings.Ui.HasUnlockedAdmin;
-            ShowAdminView = newSettings.Ui.ShowAdminView;
+            UiNotify.RunOnUiAsync(() =>
+            {
+                // Sync Admin state safely
+                HasUnlockedAdmin = newSettings.Ui.HasUnlockedAdmin;
+                ShowAdminView = newSettings.Ui.ShowAdminView;
+            });
         }
 
         //Static lock shared across all ghost VM instances
@@ -226,15 +253,40 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 RestoreWindow();
 
-                AppView targetAppView = targetView.ToLowerInvariant() switch
+                string normView = (targetView ?? string.Empty).Trim();
+                string normQuery = (targetQuery ?? string.Empty).Trim();
+
+                // If path delimiters or query string was included in targetView
+                int qIdx = normView.IndexOf('?');
+                if (qIdx >= 0)
+                {
+                    if (string.IsNullOrEmpty(normQuery)) normQuery = normView[(qIdx + 1)..];
+                    normView = normView[..qIdx];
+                }
+                else
+                {
+                    int sIdx = normView.IndexOf('/');
+                    if (sIdx >= 0)
+                    {
+                        if (string.IsNullOrEmpty(normQuery)) normQuery = normView[(sIdx + 1)..];
+                        normView = normView[..sIdx];
+                    }
+                }
+
+                AppView targetAppView = normView.ToLowerInvariant() switch
                 {
                     "user" => AppView.User,
                     "computer" => AppView.Computer,
                     "group" => AppView.Group,
+                    "entra" => AppView.Entra,
+                    "links" => AppView.Links,
+                    "about" => AppView.About,
+                    "settings" => AppView.Settings,
+                    "admin" => AppView.Admin,
                     _ => AppView.Home
                 };
 
-                if (targetAppView == AppView.Home) return;
+                if (targetAppView == AppView.Home && !normView.Equals("home", StringComparison.OrdinalIgnoreCase)) return;
 
                 SelectedView = targetAppView;
 
@@ -245,8 +297,16 @@ namespace DSAMVVM.MVVM.ViewModel
                     OnPropertyChanged(nameof(SelectedNav));
                 }
 
-                SearchQuery = targetQuery;
-                TriggerSearch();
+                if (targetAppView == AppView.Settings)
+                {
+                    var (category, anchor) = ResolveSettingsTarget(normQuery);
+                    SettingsVM?.SelectCategoryAndAnchor(category, anchor);
+                }
+                else
+                {
+                    SearchQuery = normQuery;
+                    TriggerSearch();
+                }
             });
         }
 
@@ -270,7 +330,15 @@ namespace DSAMVVM.MVVM.ViewModel
                     case "user": SelectedView = AppView.User; break;
                     case "computer": SelectedView = AppView.Computer; break;
                     case "group": SelectedView = AppView.Group; break;
-                    case "settings": SelectedView = AppView.Settings; break;
+                    case "settings":
+                        SelectedView = AppView.Settings;
+                        string? section = GetArgValue(args, "--section") ?? GetArgValue(args, "--tab") ?? GetArgValue(args, "--card");
+                        if (!string.IsNullOrEmpty(section))
+                        {
+                            var (category, anchor) = ResolveSettingsTarget(section);
+                            SettingsVM?.SelectCategoryAndAnchor(category, anchor);
+                        }
+                        break;
                     case "links": SelectedView = AppView.Links; break;
                     case "entra": SelectedView = AppView.Entra; break;
                     case "about": SelectedView = AppView.About; break;
@@ -292,6 +360,74 @@ namespace DSAMVVM.MVVM.ViewModel
                     ExecuteSearchCommand.Execute(null);
                 }
             }
+        }
+
+        private static (SettingsCategory Category, string? Anchor) ResolveSettingsTarget(string? query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return (SettingsCategory.Appearance, null);
+            }
+
+            var tokens = query.ToLowerInvariant().Split(['/', '?', '&', '=', '#'], StringSplitOptions.RemoveEmptyEntries);
+
+            // 1. Check for specific card anchors first
+            foreach (var token in tokens)
+            {
+                switch (token)
+                {
+                    case "shortcuts" or "quickshortcuts" or "customshortcuts":
+                        return (SettingsCategory.DataAndLinks, "CardHomeShortcuts");
+
+                    case "links-mode" or "linksmode" or "startmode" or "override":
+                        return (SettingsCategory.DataAndLinks, "CardLinksStartMode");
+
+                    case "data" or "department" or "dept" or "links-data" or "datalocation":
+                        return (SettingsCategory.DataAndLinks, "CardDataManagement");
+
+                    case "tray" or "systemtray" or "minimizetotray":
+                        return (SettingsCategory.Appearance, "CardSystemTray");
+
+                    case "history" or "searchhistory":
+                        return (SettingsCategory.Appearance, "CardSearchHistory");
+
+                    case "searchtext" or "typography" or "fontsize" or "font" or "scaling" or "fontscaling":
+                        return (SettingsCategory.Appearance, "CardSearchTypography");
+
+                    case "quicksearch" or "overlay" or "hotkey" or "doubletap":
+                        return (SettingsCategory.QuickSearch, "CardQuickSearch");
+
+                    case "updates" or "update" or "prerelease" or "channels":
+                        return (SettingsCategory.SystemAndMaintenance, "CardUpdates");
+
+                    case "logs" or "log" or "logging" or "logretention":
+                        return (SettingsCategory.SystemAndMaintenance, "CardLogs");
+
+                    case "reset" or "factory":
+                        return (SettingsCategory.SystemAndMaintenance, "CardReset");
+                }
+            }
+
+            // 2. If no specific card anchor matched, check broad category tokens
+            foreach (var token in tokens)
+            {
+                switch (token)
+                {
+                    case "dataandlinks" or "data-links" or "datalinks" or "links":
+                        return (SettingsCategory.DataAndLinks, null);
+
+                    case "appearance" or "interface" or "ui":
+                        return (SettingsCategory.Appearance, null);
+
+                    case "quicksearch" or "search":
+                        return (SettingsCategory.QuickSearch, null);
+
+                    case "system" or "maintenance":
+                        return (SettingsCategory.SystemAndMaintenance, null);
+                }
+            }
+
+            return (SettingsCategory.Appearance, null);
         }
 
         private static string? GetArgValue(string[] args, string key)

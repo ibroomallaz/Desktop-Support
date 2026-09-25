@@ -640,7 +640,9 @@ namespace DSAMVVM
                     authService: sp.GetRequiredService<IAuthenticationService>(),
                     searchService: sp.GetRequiredService<ISearchService>(),
                     linkRouter: sp.GetRequiredService<IDeepLinkRoutingService>(),
-                    imageCacheService: sp.GetRequiredService<IImageCacheService>()
+                    imageCacheService: sp.GetRequiredService<IImageCacheService>(),
+                    settingsService: sp.GetRequiredService<ISettingsService>(),
+                    linksService: sp.GetRequiredService<ILinksService>()
                 )
             );
 

@@ -26,26 +26,41 @@ namespace DSAMVVM.Core.Services
 
             try
             {
+                string? navPayload = null;
                 if (url.StartsWith("dsa://nav/", StringComparison.OrdinalIgnoreCase))
                 {
-                    var segments = url["dsa://nav/".Length..].Split('/');
-                    if (segments.Length >= 2)
+                    navPayload = url["dsa://nav/".Length..];
+                }
+                else if (url.StartsWith("app://", StringComparison.OrdinalIgnoreCase))
+                {
+                    navPayload = url["app://".Length..];
+                }
+
+                if (navPayload != null)
+                {
+                    var trimmed = navPayload.TrimStart('/');
+                    string targetView = trimmed;
+                    string targetQuery = string.Empty;
+
+                    int qIdx = trimmed.IndexOf('?');
+                    if (qIdx >= 0)
                     {
-                        var targetView = segments[0];
-                        var targetQuery = segments[1];
-
-                        Log.Info("LinkRouter", $"Parsed navigation link: View={targetView}, Query={targetQuery}");
-
-                        // Fire the event that MainViewModel and QuickSearchOverlayViewModel listen to
-                        NavigationRequested?.Invoke(targetView, targetQuery);
-
-                        Log.Debug("LinkRouter", "NavigationRequested event successfully invoked.");
+                        targetView = trimmed[..qIdx];
+                        targetQuery = trimmed[(qIdx + 1)..];
                     }
                     else
                     {
-                        Log.Warn("LinkRouter", $"Nav link segments missing in URL: '{url}'");
+                        var parts = trimmed.Split('/', 2, StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length > 0) targetView = parts[0];
+                        if (parts.Length > 1) targetQuery = parts[1];
                     }
 
+                    Log.Info("LinkRouter", $"Parsed navigation link: View={targetView}, Query={targetQuery}");
+
+                    // Fire the event that MainViewModel and QuickSearchOverlayViewModel listen to
+                    NavigationRequested?.Invoke(targetView, targetQuery);
+
+                    Log.Debug("LinkRouter", "NavigationRequested event successfully invoked.");
                     return string.Empty;
                 }
 

@@ -33,6 +33,19 @@
         public const string DataAndLinks = "\uE774";
         public const string Maintenance = "\uE90F";
 
+        // ===== ACTIONS & SHORTCUTS =====
+        public const string Ticket = "\uE8EC";
+        public const string Key = "\uE8D7";
+        public const string Star = "\uE734";
+        public const string Terminal = "\uE756";
+        public const string Support = "\uE719";
+        public const string Note = "\uE70F";
+        public const string Checklist = "\uE8F1";
+        public const string OpenInNew = "\uE8A7";
+        public const string Add = "\uE710";
+        public const string Dismiss = "\uE711";
+        public const string Checkmark = "\uE73E";
+
         // Optional helper: accept "E721" or "\uE721" and return the single-char glyph.
         public static string From(string code)
         {

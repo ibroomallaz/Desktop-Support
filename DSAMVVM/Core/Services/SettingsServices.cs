@@ -1,4 +1,5 @@
 ﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Utilities;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
@@ -99,8 +100,8 @@ namespace DSAMVVM.Core.Services
                 Log.Info(Tag, $"SaveAsync: settings persisted to \"{path}\".");
 
 
-                //Broadcast change to listening ViewModels
-                SettingsChanged?.Invoke(this, settings);
+                //Broadcast change to listening ViewModels safely on UI thread
+                UiNotify.RunOnUiAsync(() => SettingsChanged?.Invoke(this, settings));
             }
             catch (Exception ex)
             {
@@ -215,7 +216,7 @@ namespace DSAMVVM.Core.Services
             if (s is null || string.IsNullOrWhiteSpace(settingsPath)) return;
 
             // Broadcast change immediately so UI updates instantly
-            SettingsChanged?.Invoke(this, s);
+            UiNotify.RunOnUiAsync(() => SettingsChanged?.Invoke(this, s));
 
             lock (_saveGate)
             {

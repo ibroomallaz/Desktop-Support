@@ -63,7 +63,7 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 Category = SettingsCategory.DataAndLinks,
                 Title = "Data & Links",
-                Description = "Data source locations (Departments & Links) and default links start mode.",
+                Description = "Data source locations (Departments & Links), links start mode, and quick shortcuts.",
                 Glyph = Glyphs.DataAndLinks
             },
             new SettingsCategoryItem
@@ -96,6 +96,34 @@ namespace DSAMVVM.MVVM.ViewModel
         public bool IsDataAndLinksSelected => SelectedCategory.Category == SettingsCategory.DataAndLinks;
         public bool IsSystemAndMaintenanceSelected => SelectedCategory.Category == SettingsCategory.SystemAndMaintenance;
 
+        public void SelectCategory(SettingsCategory category)
+        {
+            var match = Categories.FirstOrDefault(x => x.Category == category);
+            if (match != null)
+            {
+                SelectedCategory = match;
+            }
+        }
+
+        public string? PendingAnchor { get; set; }
+
+        public event Action<string>? ScrollToAnchorRequested;
+
+        public void RequestScrollToAnchor(string anchor)
+        {
+            PendingAnchor = anchor;
+            ScrollToAnchorRequested?.Invoke(anchor);
+        }
+
+        public void SelectCategoryAndAnchor(SettingsCategory category, string? anchor = null)
+        {
+            SelectCategory(category);
+            if (!string.IsNullOrWhiteSpace(anchor))
+            {
+                RequestScrollToAnchor(anchor);
+            }
+        }
+
         // --- State Flags ---
         private bool _hasUnsavedChanges;
         public bool HasUnsavedChanges
@@ -118,6 +146,13 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand BrowseLinksCommand { get; }
         public ICommand DiscardCommand { get; }
         public ICommand ResetDefaultsCommand { get; }
+
+        // --- Shortcut Commands ---
+        public ICommand AddCustomShortcutCommand { get; }
+        public ICommand RemoveShortcutCommand { get; }
+        public ICommand MoveShortcutUpCommand { get; }
+        public ICommand MoveShortcutDownCommand { get; }
+        public ICommand ResetShortcutsCommand { get; }
 
         // --- Collections ---
         public IReadOnlyList<AppLogLevel> LogLevels { get; } =
@@ -142,6 +177,47 @@ namespace DSAMVVM.MVVM.ViewModel
             [10d, 12d, 14d, 16d, 18d, 20d, 22d];
 
         public ObservableCollection<string> DataSourceOptions { get; } = ["Web", "File"];
+
+        // --- Shortcuts Options & State ---
+        public ObservableCollection<HomeShortcutItem> Shortcuts { get; } = [];
+        public IReadOnlyList<ShortcutGlyphOption> AvailableGlyphs => ShortcutGlyphs.Options;
+        public IReadOnlyList<string> AvailableColorPresets => ShortcutColorPresets.Presets;
+        public bool CanAddShortcut => Shortcuts.Count < HomeShortcutsSettings.MaxShortcuts;
+
+        private string _newShortcutTitle = string.Empty;
+        public string NewShortcutTitle
+        {
+            get => _newShortcutTitle;
+            set => Set(ref _newShortcutTitle, value);
+        }
+
+        private string _newShortcutDescription = string.Empty;
+        public string NewShortcutDescription
+        {
+            get => _newShortcutDescription;
+            set => Set(ref _newShortcutDescription, value);
+        }
+
+        private string _newShortcutTarget = string.Empty;
+        public string NewShortcutTarget
+        {
+            get => _newShortcutTarget;
+            set => Set(ref _newShortcutTarget, value);
+        }
+
+        private string _newShortcutGlyph = Glyphs.Links;
+        public string NewShortcutGlyph
+        {
+            get => _newShortcutGlyph;
+            set => Set(ref _newShortcutGlyph, value);
+        }
+
+        private string _newShortcutColor = "Blue";
+        public string NewShortcutColor
+        {
+            get => _newShortcutColor;
+            set => Set(ref _newShortcutColor, value);
+        }
 
         // --- Exposed Sub-Settings ---
         // These point directly into the _settings object
@@ -328,6 +404,13 @@ namespace DSAMVVM.MVVM.ViewModel
             OpenLogsCommand = new RelayCommand(_ => OpenLogsFolder());
             BrowseDeptCommand = new RelayCommand(_ => BrowseForFile(path => DeptUri = path));
             BrowseLinksCommand = new RelayCommand(_ => BrowseForFile(path => LinksUri = path));
+
+            // Shortcuts Commands
+            AddCustomShortcutCommand = new RelayCommand(_ => AddCustomShortcut());
+            RemoveShortcutCommand = new RelayCommand(p => RemoveShortcut(p as HomeShortcutItem));
+            MoveShortcutUpCommand = new RelayCommand(p => MoveShortcutUp(p as HomeShortcutItem));
+            MoveShortcutDownCommand = new RelayCommand(p => MoveShortcutDown(p as HomeShortcutItem));
+            ResetShortcutsCommand = new RelayCommand(_ => ResetShortcutsToDefaults());
         }
 
         // --- Logic ---
@@ -368,6 +451,17 @@ namespace DSAMVVM.MVVM.ViewModel
             SelectedModifierKeyOption = ModifierKeyOptions.FirstOrDefault(x => x.Key == _settings.QuickSearch.ModifierKeyCode) ?? ModifierKeyOptions[0];
             QuickSearchDoubleTapMs = _settings.QuickSearch.DoubleTapThresholdMs;
 
+            // Load Shortcuts
+            Shortcuts.Clear();
+            _settings.Ui.Shortcuts.Normalize();
+            foreach (var s in _settings.Ui.Shortcuts.Items.OrderBy(x => x.Order))
+            {
+                var clone = s.Clone();
+                clone.PropertyChanged += (_, _) => SetModified();
+                Shortcuts.Add(clone);
+            }
+            OnPropertyChanged(nameof(CanAddShortcut));
+
             //Load Admin State
             HasUnlockedAdmin = _settings.Ui.HasUnlockedAdmin;
             ShowAdminView = _settings.Ui.ShowAdminView;
@@ -399,6 +493,102 @@ namespace DSAMVVM.MVVM.ViewModel
             HasUnsavedChanges = true;
             StatusMessage = "Factory defaults loaded. Click Apply to save.";
             UiNotify.Info("Defaults loaded. Apply to confirm.", showStatusBar: true);
+        }
+
+        private void AddCustomShortcut()
+        {
+            if (Shortcuts.Count >= HomeShortcutsSettings.MaxShortcuts)
+            {
+                UiNotify.Warn($"Maximum of {HomeShortcutsSettings.MaxShortcuts} shortcuts reached.");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(NewShortcutTitle) || string.IsNullOrWhiteSpace(NewShortcutTarget))
+            {
+                UiNotify.Warn("Please provide both a Title and Target URL/route for the shortcut.");
+                return;
+            }
+
+            var item = new HomeShortcutItem
+            {
+                Id = Guid.NewGuid().ToString("N")[..8],
+                Title = NewShortcutTitle.Trim(),
+                Description = NewShortcutDescription.Trim(),
+                Target = NewShortcutTarget.Trim(),
+                Icon = string.IsNullOrWhiteSpace(NewShortcutGlyph) ? Glyphs.Links : NewShortcutGlyph,
+                ColorPreset = ShortcutColorPresets.Normalize(NewShortcutColor),
+                IsCustom = true,
+                Order = Shortcuts.Count
+            };
+
+            item.PropertyChanged += (_, _) => SetModified();
+            Shortcuts.Add(item);
+            OnPropertyChanged(nameof(CanAddShortcut));
+
+            NewShortcutTitle = string.Empty;
+            NewShortcutDescription = string.Empty;
+            NewShortcutTarget = string.Empty;
+            NewShortcutGlyph = Glyphs.Links;
+            NewShortcutColor = "Blue";
+
+            SetModified();
+            UiNotify.Info($"Added shortcut '{item.Title}'. Click Apply to save.", showStatusBar: true);
+        }
+
+        private void RemoveShortcut(HomeShortcutItem? item)
+        {
+            if (item == null) return;
+            if (Shortcuts.Remove(item))
+            {
+                for (int i = 0; i < Shortcuts.Count; i++) Shortcuts[i].Order = i;
+                OnPropertyChanged(nameof(CanAddShortcut));
+                SetModified();
+            }
+        }
+
+        private void MoveShortcutUp(HomeShortcutItem? item)
+        {
+            if (item == null) return;
+            int idx = Shortcuts.IndexOf(item);
+            if (idx > 0)
+            {
+                Shortcuts.Move(idx, idx - 1);
+                for (int i = 0; i < Shortcuts.Count; i++) Shortcuts[i].Order = i;
+                SetModified();
+            }
+        }
+
+        private void MoveShortcutDown(HomeShortcutItem? item)
+        {
+            if (item == null) return;
+            int idx = Shortcuts.IndexOf(item);
+            if (idx >= 0 && idx < Shortcuts.Count - 1)
+            {
+                Shortcuts.Move(idx, idx + 1);
+                for (int i = 0; i < Shortcuts.Count; i++) Shortcuts[i].Order = i;
+                SetModified();
+            }
+        }
+
+        private void ResetShortcutsToDefaults()
+        {
+            var res = System.Windows.MessageBox.Show(
+                "Reset Quick Shortcuts to factory defaults?",
+                "Reset Shortcuts", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+
+            if (res != System.Windows.MessageBoxResult.Yes) return;
+
+            Shortcuts.Clear();
+            var defaults = new HomeShortcutsSettings();
+            defaults.Normalize();
+            foreach (var s in defaults.Items)
+            {
+                s.PropertyChanged += (_, _) => SetModified();
+                Shortcuts.Add(s);
+            }
+            OnPropertyChanged(nameof(CanAddShortcut));
+            SetModified();
+            UiNotify.Info("Shortcuts reset to defaults. Click Apply to save.", showStatusBar: true);
         }
 
         private void SetModified()
@@ -454,6 +644,15 @@ namespace DSAMVVM.MVVM.ViewModel
                 _settings.QuickSearch.ModifierKeyCode = SelectedModifierKeyOption?.Key ?? QuickSearchModifierKey;
                 _settings.QuickSearch.DoubleTapThresholdMs = QuickSearchDoubleTapMs;
 
+                // Sync Shortcuts
+                _settings.Ui.Shortcuts.Items = Shortcuts.Select((s, idx) =>
+                {
+                    var clone = s.Clone();
+                    clone.Order = idx;
+                    return clone;
+                }).ToList();
+                _settings.Ui.Shortcuts.Normalize();
+
                 // Sync Admin State
                 _settings.Ui.HasUnlockedAdmin = HasUnlockedAdmin;
                 _settings.Ui.ShowAdminView = ShowAdminView;
@@ -469,8 +668,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 active.QuickSearch = _settings.QuickSearch;
 
                 // 4. Save the global object to disk (FIXED PATH)
-                _settingsSvc.RequestSave(active, Globals.g_SettingsPath);
-                TryFlushPendingSaves(_settingsSvc);
+                await _settingsSvc.SaveAsync(active, Globals.g_SettingsPath);
 
                 // 5. Update UI state
                 HasUnsavedChanges = false;
@@ -490,7 +688,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
                 if (trayChanged)
                 {
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    UiNotify.RunOnUi(() =>
                     {
                         if (System.Windows.Application.Current is App myApp) myApp.ToggleTrayIcon(EnableTrayIcon);
                     });
