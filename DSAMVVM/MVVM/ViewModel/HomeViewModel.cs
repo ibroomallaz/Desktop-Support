@@ -11,16 +11,14 @@ using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
-    public class RecentActivityMockItem
+    public sealed class RecentActivityItem
     {
-        public string Icon { get; set; } = "";
-        public string Title { get; set; } = "";
-        public string Subtitle { get; set; } = "";
-        public string TypeTag { get; set; } = "";
-        public string IconColor { get; set; } = "#5BC3FF";
-        public string PillBg { get; set; } = "#121E2C";
-        public string PillBorder { get; set; } = "#243E5C";
-        public ICommand? ActionCommand { get; set; }
+        public string Query { get; init; } = "";
+        public string Title { get; init; } = "";
+        public SearchTarget Target { get; init; } = SearchTarget.User;
+        public string TypeTag { get; init; } = "";
+        public string Icon { get; init; } = "";
+        public ICommand? ActionCommand { get; init; }
     }
 
     public class HomeShortcutMockItem
@@ -60,37 +58,12 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly INetworkDetectionService? _networkService;
         private readonly IADDetectionService? _adDetectionService;
         private readonly IAuthenticationService? _authService;
+        private readonly ISearchService? _searchService;
+        private readonly IDeepLinkRoutingService? _linkRouter;
 
         private NetworkStateInfo _networkState = NetworkStateInfo.Disconnected();
         private ADStateInfo _adState = ADStateInfo.Checking();
 
-        // --- Quick Search Inputs ---
-        private string _userQuery = string.Empty;
-        public string UserQuery
-        {
-            get => _userQuery;
-            set
-            {
-                _userQuery = value;
-                OnPropertyChanged();
-                CommandManager.InvalidateRequerySuggested();
-            }
-        }
-
-        private string _computerQuery = string.Empty;
-        public string ComputerQuery
-        {
-            get => _computerQuery;
-            set
-            {
-                _computerQuery = value;
-                OnPropertyChanged();
-                CommandManager.InvalidateRequerySuggested();
-            }
-        }
-
-        public ICommand OpenUserCommand { get; }
-        public ICommand OpenComputerCommand { get; }
         public ICommand GoGroupsCommand { get; }
         public ICommand GoEntraCommand { get; }
         public ICommand GoLinksCommand { get; }
@@ -164,7 +137,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand TestDcCommand { get; }
 
         // --- Dynamic Content Collections ---
-        public ObservableCollection<RecentActivityMockItem> RecentActivities { get; } = [];
+        public ObservableCollection<RecentActivityItem> RecentActivities { get; } = [];
         public ObservableCollection<HomeShortcutMockItem> Shortcuts { get; } = [];
 
         public ICommand CustomizeShortcutsCommand { get; }
@@ -230,7 +203,9 @@ namespace DSAMVVM.MVVM.ViewModel
             Action? goAbout = null,
             INetworkDetectionService? networkService = null,
             IADDetectionService? adDetectionService = null,
-            IAuthenticationService? authService = null)
+            IAuthenticationService? authService = null,
+            ISearchService? searchService = null,
+            IDeepLinkRoutingService? linkRouter = null)
         {
             _openUser = openUser;
             _openComputer = openComputer;
@@ -241,6 +216,8 @@ namespace DSAMVVM.MVVM.ViewModel
             _networkService = networkService;
             _adDetectionService = adDetectionService;
             _authService = authService;
+            _searchService = searchService;
+            _linkRouter = linkRouter;
 
             if (_networkService != null)
             {
@@ -301,18 +278,26 @@ namespace DSAMVVM.MVVM.ViewModel
                 });
             }
 
-            OpenUserCommand = new RelayCommand(
-                _ => _openUser?.Invoke(UserQuery),
-                _ => !string.IsNullOrWhiteSpace(UserQuery));
-
-            OpenComputerCommand = new RelayCommand(
-                _ => _openComputer?.Invoke(ComputerQuery),
-                _ => !string.IsNullOrWhiteSpace(ComputerQuery));
-
-            GoGroupsCommand = new RelayCommand(_ => _goGroups?.Invoke());
-            GoEntraCommand = new RelayCommand(_ => _goEntra?.Invoke());
-            GoLinksCommand = new RelayCommand(_ => _goLinks?.Invoke());
-            GoAboutCommand = new RelayCommand(_ => _goAbout?.Invoke());
+            GoGroupsCommand = new RelayCommand(_ =>
+            {
+                if (_linkRouter != null) _linkRouter.RequestNavigation("group", string.Empty);
+                else _goGroups?.Invoke();
+            });
+            GoEntraCommand = new RelayCommand(_ =>
+            {
+                if (_linkRouter != null) _linkRouter.RequestNavigation("entra", string.Empty);
+                else _goEntra?.Invoke();
+            });
+            GoLinksCommand = new RelayCommand(_ =>
+            {
+                if (_linkRouter != null) _linkRouter.RequestNavigation("links", string.Empty);
+                else _goLinks?.Invoke();
+            });
+            GoAboutCommand = new RelayCommand(_ =>
+            {
+                if (_linkRouter != null) _linkRouter.RequestNavigation("about", string.Empty);
+                else _goAbout?.Invoke();
+            });
 
             // Refresh network state
             RefreshNetworkStatusCommand = new RelayCommand(async _ =>
@@ -374,51 +359,12 @@ namespace DSAMVVM.MVVM.ViewModel
                 UiNotify.Info("ServiceMeow: Pet submission portal will open in browser.", showStatusBar: true);
             });
 
-            // Seed Mock Recent Activities with high-contrast color cues
-            RecentActivities.Add(new RecentActivityMockItem
+            // Wire search service history for real recent searches
+            if (_searchService != null)
             {
-                Icon = Glyphs.User,
-                Title = "jsmith",
-                Subtitle = "Faculty · Engineering",
-                TypeTag = "User",
-                IconColor = "#5BC3FF",
-                PillBg = "#132338",
-                PillBorder = "#224268",
-                ActionCommand = new RelayCommand(_ => _openUser?.Invoke("jsmith"))
-            });
-            RecentActivities.Add(new RecentActivityMockItem
-            {
-                Icon = Glyphs.Computer,
-                Title = "ENG-LAB-042",
-                Subtitle = "Windows 11 · Online",
-                TypeTag = "Device",
-                IconColor = "#3CD070",
-                PillBg = "#112A20",
-                PillBorder = "#1F523B",
-                ActionCommand = new RelayCommand(_ => _openComputer?.Invoke("ENG-LAB-042"))
-            });
-            RecentActivities.Add(new RecentActivityMockItem
-            {
-                Icon = Glyphs.Group,
-                Title = "UA-MIM-Wrkst-AllDiv",
-                Subtitle = "MIM Security Group",
-                TypeTag = "Group",
-                IconColor = "#C084FC",
-                PillBg = "#281738",
-                PillBorder = "#4F2A6E",
-                ActionCommand = new RelayCommand(_ => _goGroups?.Invoke())
-            });
-            RecentActivities.Add(new RecentActivityMockItem
-            {
-                Icon = Glyphs.Computer,
-                Title = "BIO-DESK-11",
-                Subtitle = "Windows 10 · Offline",
-                TypeTag = "Device",
-                IconColor = "#FFB84D",
-                PillBg = "#2B2113",
-                PillBorder = "#563F1D",
-                ActionCommand = new RelayCommand(_ => _openComputer?.Invoke("BIO-DESK-11"))
-            });
+                _searchService.HistoryChanged += OnSearchHistoryChanged;
+                SyncRecentActivities();
+            }
 
             // Seed Mock Shortcuts with Segoe字体 glyphs and jewel-tone color accents
             Shortcuts.Add(new HomeShortcutMockItem
@@ -465,6 +411,69 @@ namespace DSAMVVM.MVVM.ViewModel
                 AccentFg = "#FFAEC0",
                 OpenCommand = new RelayCommand(_ => _goLinks?.Invoke())
             });
+        }
+
+        private void OnSearchHistoryChanged(object? sender, EventArgs e)
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher != null && !dispatcher.CheckAccess())
+            {
+                dispatcher.BeginInvoke(SyncRecentActivities);
+            }
+            else
+            {
+                SyncRecentActivities();
+            }
+        }
+
+        private void SyncRecentActivities()
+        {
+            if (_searchService == null) return;
+
+            RecentActivities.Clear();
+            var entries = _searchService.GetRecentSearchesSnapshot();
+
+            foreach (var entry in entries)
+            {
+                var glyph = entry.Target switch
+                {
+                    SearchTarget.User => Glyphs.User,
+                    SearchTarget.Computer => Glyphs.Computer,
+                    SearchTarget.Group => Glyphs.Group,
+                    SearchTarget.Admin => Glyphs.Admin,
+                    _ => Glyphs.Search
+                };
+
+                var tag = entry.Target switch
+                {
+                    SearchTarget.User => "User",
+                    SearchTarget.Computer => "Device",
+                    SearchTarget.Group => "Group",
+                    SearchTarget.Admin => "Admin",
+                    _ => "Search"
+                };
+
+                RecentActivities.Add(new RecentActivityItem
+                {
+                    Query = entry.Query,
+                    Title = entry.Query,
+                    Target = entry.Target,
+                    Icon = glyph,
+                    TypeTag = tag,
+                    ActionCommand = new RelayCommand(_ =>
+                    {
+                        string viewName = entry.Target switch
+                        {
+                            SearchTarget.User => "user",
+                            SearchTarget.Computer => "computer",
+                            SearchTarget.Group => "group",
+                            SearchTarget.Admin => "admin",
+                            _ => "home"
+                        };
+                        _linkRouter?.RequestNavigation(viewName, entry.Query);
+                    })
+                });
+            }
         }
 
         private static void OpenUrl(string url)

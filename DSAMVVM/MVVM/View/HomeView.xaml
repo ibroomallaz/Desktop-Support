@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:res="clr-namespace:DSAMVVM.MVVM.View.Resources"
+             xmlns:enums="clr-namespace:DSAMVVM.Core.Enums"
              mc:Ignorable="d"
              d:DesignHeight="450"
              d:DesignWidth="800">
@@ -61,7 +62,7 @@
             </Setter>
         </Style>
 
-        <!-- Dynamic Colored Pill Button for Recent Queries -->
+        <!-- Dynamic Themed Pill Button for Recent Queries -->
         <Style x:Key="RecentPillButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -72,14 +73,30 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="Root"
-                                Background="{Binding PillBg}"
-                                BorderBrush="{Binding PillBorder}"
+                                Background="{DynamicResource Brush.Pill.User.Bg}"
+                                BorderBrush="{DynamicResource Brush.Pill.User.Border}"
                                 BorderThickness="1"
                                 CornerRadius="12"
                                 Padding="9,4">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.User}">
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.User.Bg}"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.User.Border}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Computer}">
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.Device.Bg}"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.Device.Border}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Group}">
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.Group.Bg}"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.Group.Border}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Admin}">
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.Admin.Bg}"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.Admin.Border}"/>
+                            </DataTrigger>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Root" Property="BorderBrush" Value="#80FFFFFF"/>
                             </Trigger>
@@ -293,7 +310,25 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Recent Activity Colored Chips -->
+                        <!-- Empty state placeholder when no searches yet -->
+                        <TextBlock Text="No recent searches in this session"
+                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                   FontSize="11"
+                                   FontStyle="Italic"
+                                   Margin="2,2,0,4">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RecentActivities.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <!-- Recent Activity Themed Chips -->
                         <ItemsControl ItemsSource="{Binding RecentActivities}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -309,9 +344,28 @@
                                             <TextBlock Text="{Binding Icon}"
                                                        FontFamily="Segoe MDL2 Assets"
                                                        FontSize="12"
-                                                       Foreground="{Binding IconColor}"
                                                        VerticalAlignment="Center"
-                                                       Margin="0,0,6,0"/>
+                                                       Margin="0,0,6,0">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource Brush.Pill.User.Icon}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.User}">
+                                                                <Setter Property="Foreground" Value="{DynamicResource Brush.Pill.User.Icon}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Computer}">
+                                                                <Setter Property="Foreground" Value="{DynamicResource Brush.Pill.Device.Icon}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Group}">
+                                                                <Setter Property="Foreground" Value="{DynamicResource Brush.Pill.Group.Icon}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Admin}">
+                                                                <Setter Property="Foreground" Value="{DynamicResource Brush.Pill.Admin.Icon}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                             <TextBlock Text="{Binding Title}"
                                                        Foreground="{DynamicResource Brush.Text.Primary}"
                                                        FontSize="11"

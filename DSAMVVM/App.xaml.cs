@@ -636,7 +636,9 @@ namespace DSAMVVM
                     goAbout: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.About,
                     networkService: sp.GetRequiredService<INetworkDetectionService>(),
                     adDetectionService: sp.GetRequiredService<IADDetectionService>(),
-                    authService: sp.GetRequiredService<IAuthenticationService>()
+                    authService: sp.GetRequiredService<IAuthenticationService>(),
+                    searchService: sp.GetRequiredService<ISearchService>(),
+                    linkRouter: sp.GetRequiredService<IDeepLinkRoutingService>()
                 )
             );
 

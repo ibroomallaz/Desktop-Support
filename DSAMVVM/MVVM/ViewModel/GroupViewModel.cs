@@ -186,6 +186,8 @@ namespace DSAMVVM.MVVM.ViewModel
             headerDoc.AddLabelValue("Query: ", context.Query);
             SearchLog += headerDoc.ToString();
 
+            searchService.AddToHistory(context.Query, target);
+
             try
             {
                 IsLoading = true;

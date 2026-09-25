@@ -49,6 +49,22 @@
     <Color x:Key="Color.Card.Alternate">#3A4B6E</Color>
     <Color x:Key="Color.Card.Border.Alternate">#44536F</Color>
 
+    <!-- Pill Badges (Search Targets) -->
+    <Color x:Key="Color.Pill.User.Bg">#132338</Color>
+    <Color x:Key="Color.Pill.User.Border">#224268</Color>
+    <Color x:Key="Color.Pill.User.Icon">#5BC3FF</Color>
+
+    <Color x:Key="Color.Pill.Device.Bg">#112A20</Color>
+    <Color x:Key="Color.Pill.Device.Border">#1F523B</Color>
+    <Color x:Key="Color.Pill.Device.Icon">#3CD070</Color>
+
+    <Color x:Key="Color.Pill.Group.Bg">#281738</Color>
+    <Color x:Key="Color.Pill.Group.Border">#4F2A6E</Color>
+    <Color x:Key="Color.Pill.Group.Icon">#C084FC</Color>
+
+    <Color x:Key="Color.Pill.Admin.Bg">#2B2113</Color>
+    <Color x:Key="Color.Pill.Admin.Border">#563F1D</Color>
+    <Color x:Key="Color.Pill.Admin.Icon">#FFB84D</Color>
 
     <!-- ==== Brush wrappers ==== -->
     <SolidColorBrush x:Key="Brush.Surface"         Color="{DynamicResource Color.Surface.0}"/>
@@ -89,6 +105,23 @@
                      Color="{DynamicResource Color.Card.Alternate}"/>
     <SolidColorBrush x:Key="Brush.Card.Border.Alternate"
                      Color="{DynamicResource Color.Card.Border.Alternate}"/>
+
+    <!-- Pill Brushes (Search Targets) -->
+    <SolidColorBrush x:Key="Brush.Pill.User.Bg"     Color="{DynamicResource Color.Pill.User.Bg}"/>
+    <SolidColorBrush x:Key="Brush.Pill.User.Border" Color="{DynamicResource Color.Pill.User.Border}"/>
+    <SolidColorBrush x:Key="Brush.Pill.User.Icon"   Color="{DynamicResource Color.Pill.User.Icon}"/>
+
+    <SolidColorBrush x:Key="Brush.Pill.Device.Bg"     Color="{DynamicResource Color.Pill.Device.Bg}"/>
+    <SolidColorBrush x:Key="Brush.Pill.Device.Border" Color="{DynamicResource Color.Pill.Device.Border}"/>
+    <SolidColorBrush x:Key="Brush.Pill.Device.Icon"   Color="{DynamicResource Color.Pill.Device.Icon}"/>
+
+    <SolidColorBrush x:Key="Brush.Pill.Group.Bg"     Color="{DynamicResource Color.Pill.Group.Bg}"/>
+    <SolidColorBrush x:Key="Brush.Pill.Group.Border" Color="{DynamicResource Color.Pill.Group.Border}"/>
+    <SolidColorBrush x:Key="Brush.Pill.Group.Icon"   Color="{DynamicResource Color.Pill.Group.Icon}"/>
+
+    <SolidColorBrush x:Key="Brush.Pill.Admin.Bg"     Color="{DynamicResource Color.Pill.Admin.Bg}"/>
+    <SolidColorBrush x:Key="Brush.Pill.Admin.Border" Color="{DynamicResource Color.Pill.Admin.Border}"/>
+    <SolidColorBrush x:Key="Brush.Pill.Admin.Icon"   Color="{DynamicResource Color.Pill.Admin.Icon}"/>
 
     <!-- ==== Backward-compatibility aliases ==== -->
     <!-- Accent Copper / Blue -->

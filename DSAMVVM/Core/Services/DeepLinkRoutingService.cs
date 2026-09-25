@@ -12,6 +12,11 @@ namespace DSAMVVM.Core.Services
 
         public event Action<string, string>? NavigationRequested;
 
+        public void RequestNavigation(string targetView, string targetQuery)
+        {
+            NavigationRequested?.Invoke(targetView, targetQuery);
+        }
+
         public async Task<string> HandleLinkAsync(string url, string? contextNetId = null)
         {
             if (string.IsNullOrWhiteSpace(url)) return string.Empty;

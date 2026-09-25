@@ -150,7 +150,7 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        public ObservableCollection<string> SearchHistory { get; } = [];
+        public ReadOnlyObservableCollection<string> SearchHistory => _searchService.SearchHistory;
 
         public MainViewModel(
              IDepartmentService deptService,
@@ -180,9 +180,6 @@ namespace DSAMVVM.MVVM.ViewModel
             _groupVMFactory = groupVMFactory;
             _linksVMFactory = linksVMFactory;
             _adminVMFactory = adminVMFactory;
-
-            _searchService.HistoryChanged += OnHistoryChanged;
-            SyncHistoryFromService();
 
             // --- SUBSCRIBE TO AUTH STATE ---
             _authService.AuthenticationStateChanged += OnAuthenticationStateChanged;
@@ -491,6 +488,8 @@ namespace DSAMVVM.MVVM.ViewModel
             var key = $"{target}_Search";
             UiNotify.Info($"Searching {target}...", showStatusBar: true, key: key);
 
+            _searchService.AddToHistory(query, target.Value);
+
             try
             {
                 var context = new SearchContextDTO(query);
@@ -502,20 +501,6 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 UiNotify.Error("Search failed", ex.Message, ex, alsoStatusBar: true, key: key);
             }
-        }
-
-        private void OnHistoryChanged(object? s, EventArgs e)
-        {
-            var d = Application.Current?.Dispatcher;
-            if (d?.CheckAccess() == true) SyncHistoryFromService();
-            else d?.BeginInvoke(new Action(SyncHistoryFromService));
-        }
-
-        private void SyncHistoryFromService()
-        {
-            var snap = _searchService.GetHistorySnapshot();
-            SearchHistory.Clear();
-            foreach (var q in snap) SearchHistory.Add(q);
         }
 
         private void OnAuthenticationStateChanged(bool isAuthenticated)
