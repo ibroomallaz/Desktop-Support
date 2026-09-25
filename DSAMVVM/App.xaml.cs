@@ -199,7 +199,7 @@ namespace DSAMVVM
                 });
             };
 
-            quickSearch.Start();
+            quickSearch.Configure(Settings.QuickSearch);
 
             // Handle initial view routing
             if (StartupArgs.Length > 0)
