@@ -1,13 +1,16 @@
 ﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
+using DSAMVVM.MVVM.Model.Data;
 using DSAMVVM.MVVM.View.Resources;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -33,19 +36,6 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand? OpenCommand { get; set; }
     }
 
-    public class ServiceMeowMockPet
-    {
-        public string Name { get; set; } = "";
-        public string Species { get; set; } = "Cat";
-        public string Breed { get; set; } = "";
-        public string Title { get; set; } = "";
-        public string Owner { get; set; } = "";
-        public string FunFact { get; set; } = "";
-        public string GlowColor { get; set; } = "#4A2538"; // Radial aura color
-        public string AccentTagColor { get; set; } = "#FFAEC0";
-        public string AccentTagBg { get; set; } = "#381824";
-    }
-
     public class HomeViewModel : ObservableObject
     {
         private readonly Action<string?>? _openUser;
@@ -60,6 +50,7 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IAuthenticationService? _authService;
         private readonly ISearchService? _searchService;
         private readonly IDeepLinkRoutingService? _linkRouter;
+        private readonly IImageCacheService? _imageCacheService;
 
         private NetworkStateInfo _networkState = NetworkStateInfo.Disconnected();
         private ADStateInfo _adState = ADStateInfo.Checking();
@@ -143,7 +134,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand CustomizeShortcutsCommand { get; }
 
         // --- Pet of the Day (ServiceMeow) ---
-        private readonly List<ServiceMeowMockPet> _mockPets =
+        private readonly List<ServiceMeowPet> _mockPets =
         [
             new()
             {
@@ -151,11 +142,9 @@ namespace DSAMVVM.MVVM.ViewModel
                 Species = "Cat",
                 Breed = "British Shorthair",
                 Title = "Chief Packet Sniffer",
-                Owner = "Dave T. · Network Operations",
-                FunFact = "Discovered a loose patch cable by chewing on the boot.",
-                GlowColor = "#2C3E50",
-                AccentTagColor = "#68D391",
-                AccentTagBg = "#1C4532"
+                Owner = "Dave T.",
+                OwnerTeam = "Network Operations",
+                Blurb = "Discovered a loose patch cable by chewing on the boot."
             },
             new()
             {
@@ -163,11 +152,9 @@ namespace DSAMVVM.MVVM.ViewModel
                 Species = "Cat",
                 Breed = "Calico",
                 Title = "Senior Cable Untangler",
-                Owner = "Sarah M. · Service Desk",
-                FunFact = "Always sleeps directly on top of the warmest switch rack.",
-                GlowColor = "#4A2538",
-                AccentTagColor = "#FFAEC0",
-                AccentTagBg = "#381824"
+                Owner = "Sarah M.",
+                OwnerTeam = "Service Desk",
+                Blurb = "Always sleeps directly on top of the warmest switch rack."
             },
             new()
             {
@@ -175,23 +162,49 @@ namespace DSAMVVM.MVVM.ViewModel
                 Species = "Dog",
                 Breed = "Golden Retriever",
                 Title = "Lead Morale Specialist",
-                Owner = "Marcus K. · Systems Team",
-                FunFact = "Has a 99.9% success rate resolving escalated user stress tickets.",
-                GlowColor = "#3A3015",
-                AccentTagColor = "#FBD38D",
-                AccentTagBg = "#382910"
+                Owner = "Marcus K.",
+                OwnerTeam = "Systems Team",
+                Blurb = "Has a 99.9% success rate resolving escalated user stress tickets."
             }
         ];
 
         private int _currentPetIndex;
-        private ServiceMeowMockPet _currentPet;
-        public ServiceMeowMockPet CurrentPet
+        private ServiceMeowPet _currentPet;
+        public ServiceMeowPet CurrentPet
         {
             get => _currentPet;
-            set { _currentPet = value; OnPropertyChanged(); }
+            set
+            {
+                _currentPet = value;
+                OnPropertyChanged();
+                _ = LoadPetImageAsync(forceRefresh: false);
+            }
+        }
+
+        private ImageSource? _currentPetImage;
+        public ImageSource? CurrentPetImage
+        {
+            get => _currentPetImage;
+            set
+            {
+                _currentPetImage = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _isImageRefreshing;
+        public bool IsImageRefreshing
+        {
+            get => _isImageRefreshing;
+            set
+            {
+                _isImageRefreshing = value;
+                OnPropertyChanged();
+            }
         }
 
         public ICommand NextPetCommand { get; }
+        public ICommand RefreshPetImageCommand { get; }
         public ICommand SubmitPetCommand { get; }
 
         public HomeViewModel(
@@ -205,7 +218,8 @@ namespace DSAMVVM.MVVM.ViewModel
             IADDetectionService? adDetectionService = null,
             IAuthenticationService? authService = null,
             ISearchService? searchService = null,
-            IDeepLinkRoutingService? linkRouter = null)
+            IDeepLinkRoutingService? linkRouter = null,
+            IImageCacheService? imageCacheService = null)
         {
             _openUser = openUser;
             _openComputer = openComputer;
@@ -218,6 +232,7 @@ namespace DSAMVVM.MVVM.ViewModel
             _authService = authService;
             _searchService = searchService;
             _linkRouter = linkRouter;
+            _imageCacheService = imageCacheService;
 
             if (_networkService != null)
             {
@@ -354,10 +369,28 @@ namespace DSAMVVM.MVVM.ViewModel
                 CurrentPet = _mockPets[_currentPetIndex];
             });
 
+            RefreshPetImageCommand = new RelayCommand(async _ =>
+            {
+                if (IsImageRefreshing) return;
+                IsImageRefreshing = true;
+                try
+                {
+                    UiNotify.Info($"Refreshing photo for {CurrentPet.Name}...", showStatusBar: true);
+                    await LoadPetImageAsync(forceRefresh: true);
+                }
+                finally
+                {
+                    IsImageRefreshing = false;
+                }
+            }, _ => !IsImageRefreshing);
+
             SubmitPetCommand = new RelayCommand(_ =>
             {
                 UiNotify.Info("ServiceMeow: Pet submission portal will open in browser.", showStatusBar: true);
             });
+
+            // Load initial mascot image from cache/disk
+            _ = LoadPetImageAsync(forceRefresh: false);
 
             // Wire search service history for real recent searches
             if (_searchService != null)
@@ -366,7 +399,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 SyncRecentActivities();
             }
 
-            // Seed Mock Shortcuts with Segoe字体 glyphs and jewel-tone color accents
+            // Seed Mock Shortcuts with Segoe glyphs and jewel-tone color accents
             Shortcuts.Add(new HomeShortcutMockItem
             {
                 Icon = "\uE8EC", // Ticket / Work Order
@@ -411,6 +444,26 @@ namespace DSAMVVM.MVVM.ViewModel
                 AccentFg = "#FFAEC0",
                 OpenCommand = new RelayCommand(_ => _goLinks?.Invoke())
             });
+        }
+
+        private async Task LoadPetImageAsync(bool forceRefresh)
+        {
+            if (_imageCacheService == null || string.IsNullOrWhiteSpace(CurrentPet?.ImageUrl))
+            {
+                CurrentPetImage = null;
+                return;
+            }
+
+            try
+            {
+                var image = await _imageCacheService.GetImageAsync(CurrentPet.ImageUrl, forceRefresh: forceRefresh);
+                CurrentPetImage = image;
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("HomeVM", $"Failed to load image for mascot '{CurrentPet.Name}': {ex.Message}");
+                CurrentPetImage = null;
+            }
         }
 
         private void OnSearchHistoryChanged(object? sender, EventArgs e)

@@ -29,6 +29,7 @@ namespace DSAMVVM.MVVM.Model
         public const string g_LinksJSON = "https://arizona.box.com/shared/static/zg9sd4zpbfse7vk060e4fsegqabhdacs.json";
         public const string g_NewsJSON = "https://arizona.box.com/shared/static/z3nbs9pyehw27len70mhz0p71q4xxidz.json";
         public const string g_DepartmentTestJSONURL = "https://arizona.box.com/shared/static/nuiy4gqgxqwzlnzzz893id5bnmal2f86.json";
+        public const string g_ServiceMeowJSON = "https://arizona.box.com/shared/static/placeholder_servicemeow.json";
 
         // Links
         public const string g_SharepointHome = "https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/ProjectHome.aspx";
@@ -45,9 +46,11 @@ namespace DSAMVVM.MVVM.Model
         public const string g_SettingsFileName = "settings.json";
         public static readonly string g_SettingsPath = Path.Combine(g_AppDir, g_SettingsFileName);
 
-        // Backup/cache files (local)
+        // Backup/cache files and directories (local)
         public static readonly string g_DepartmentCachePath = Path.Combine(g_DataDir, "departments.json");
         public static readonly string g_LinksCachePath = Path.Combine(g_DataDir, "links.json");
+        public static readonly string g_ServiceMeowCachePath = Path.Combine(g_DataDir, "servicemeow.json");
+        public static readonly string g_ServiceMeowImageCacheDir = Path.Combine(g_DataDir, "servicemeow_images");
 
         // Logs + legacy settings dirs
         public static readonly string g_LogsDir = Path.Combine(g_AppDir, "logs");
@@ -58,6 +61,7 @@ namespace DSAMVVM.MVVM.Model
         public const int g_DepartmentJSONSchema = 3;
         public const int g_LinkJSONSchema = 2;
         public const int g_VersionSchema = 3;
+        public const int g_ServiceMeowJSONSchema = 1;
 
         //.NET runtime requirement check for the update installer
         public static bool IsTargetRuntimePresent(string? requiredVersion)
@@ -83,6 +87,7 @@ namespace DSAMVVM.MVVM.Model
             EnsureDirSafe(g_LogsDir);
             EnsureDirSafe(g_SettingsLegacyDir);
             EnsureDirSafe(g_DataDir);
+            EnsureDirSafe(g_ServiceMeowImageCacheDir);
         }
 
         // Best-effort creation; returns false and sets error on failure

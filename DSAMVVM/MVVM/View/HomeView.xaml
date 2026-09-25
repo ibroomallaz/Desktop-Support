@@ -506,12 +506,12 @@
                             <RowDefinition Height="Auto"/>
                             <!-- Pet Bio & Role -->
                             <RowDefinition Height="Auto"/>
-                            <!-- Fun Fact Callout -->
+                            <!-- Blurb Callout -->
                             <RowDefinition Height="Auto"/>
                             <!-- Footer & Submit Link -->
                         </Grid.RowDefinitions>
 
-                        <!-- Header with Crimson Mascot Tag -->
+                        <!-- Header with Arizona Red Support Mascot Tag -->
                         <Grid Grid.Row="0" Margin="0,0,0,8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -527,18 +527,18 @@
 
                             <Border Grid.Column="1"
                                     CornerRadius="6"
-                                    Background="{Binding CurrentPet.AccentTagBg}"
-                                    BorderBrush="{Binding CurrentPet.AccentTagColor}"
+                                    Background="#20B11226"
+                                    BorderBrush="{DynamicResource Brush.Accent.Red.Light}"
                                     BorderThickness="1"
                                     Padding="7,2">
                                 <TextBlock Text="Support Mascot"
-                                           Foreground="{Binding CurrentPet.AccentTagColor}"
+                                           Foreground="{DynamicResource Brush.Accent.Red.Light}"
                                            FontSize="9"
                                            FontWeight="Bold"/>
                             </Border>
                         </Grid>
 
-                        <!-- Large Hero Pet Photo Frame (Expanded to 215+ px tall for maximum visual delight) -->
+                        <!-- Large Hero Pet Photo Frame (Expanded to 210+ px tall for maximum visual delight) -->
                         <Border Grid.Row="1"
                                 MinHeight="210"
                                 CornerRadius="12"
@@ -548,19 +548,46 @@
                                 ClipToBounds="True"
                                 Margin="0,0,0,8">
                             <Grid>
-                                <!-- Rich Ambient Colored Radial Aura -->
+                                <!-- Clean Ambient Radial Aura -->
                                 <Rectangle>
                                     <Rectangle.Fill>
                                         <RadialGradientBrush Center="0.5,0.45" RadiusX="0.65" RadiusY="0.65">
-                                            <GradientStop Color="#45263B" Offset="0.0"/>
-                                            <GradientStop Color="#1F1E2C" Offset="0.55"/>
+                                            <GradientStop Color="#1A283E" Offset="0.0"/>
+                                            <GradientStop Color="#101826" Offset="0.55"/>
                                             <GradientStop Color="#090E17" Offset="1.0"/>
                                         </RadialGradientBrush>
                                     </Rectangle.Fill>
                                 </Rectangle>
 
-                                <!-- Large Stylized Mascot Vector Graphic -->
+                                <!-- Remote Pet Image (loaded from local disk cache) -->
+                                <Image Source="{Binding CurrentPetImage}"
+                                       Stretch="UniformToFill"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center">
+                                    <Image.Style>
+                                        <Style TargetType="Image">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="Source" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+
+                                <!-- Large Stylized Mascot Vector Graphic Fallback (when CurrentPetImage is null) -->
                                 <Viewbox Width="145" Height="145" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <Viewbox.Style>
+                                        <Style TargetType="Viewbox">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding CurrentPetImage}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Viewbox.Style>
                                     <Canvas Width="100" Height="100">
                                         <!-- Cat Ears -->
                                         <Path Data="M 28,45 L 18,16 L 43,30 Z" Fill="#5A6D8C"/>
@@ -592,25 +619,38 @@
                                     </Canvas>
                                 </Viewbox>
 
-                                <!-- Floating Shuffle / Next Pet Button (Top Right Glass Button) -->
+                                <!-- Floating Mascot Actions (Top Right Glass Bar) -->
                                 <Border HorizontalAlignment="Right"
                                         VerticalAlignment="Top"
                                         Margin="8"
                                         CornerRadius="14"
                                         Background="#660B111A"
                                         BorderBrush="#40FFFFFF"
-                                        BorderThickness="1">
-                                    <Button Width="28"
-                                            Height="28"
-                                            Style="{StaticResource SubtleLinkButton}"
-                                            Content="&#xE72C;"
-                                            FontFamily="Segoe MDL2 Assets"
-                                            FontSize="12"
-                                            ToolTip="Shuffle / Next Mascot"
-                                            Command="{Binding NextPetCommand}"/>
+                                        BorderThickness="1"
+                                        Padding="2">
+                                    <StackPanel Orientation="Horizontal">
+                                        <!-- Reload / Force Refresh Image -->
+                                        <Button Width="26"
+                                                Height="26"
+                                                Style="{StaticResource SubtleLinkButton}"
+                                                Content="&#xE72C;"
+                                                FontFamily="Segoe MDL2 Assets"
+                                                FontSize="11"
+                                                ToolTip="Reload Mascot Photo"
+                                                Command="{Binding RefreshPetImageCommand}"/>
+                                        <!-- Next Mascot -->
+                                        <Button Width="26"
+                                                Height="26"
+                                                Style="{StaticResource SubtleLinkButton}"
+                                                Content="&#xE76C;"
+                                                FontFamily="Segoe MDL2 Assets"
+                                                FontSize="11"
+                                                ToolTip="Next Mascot"
+                                                Command="{Binding NextPetCommand}"/>
+                                    </StackPanel>
                                 </Border>
 
-                                <!-- Breed / Age Tag (Bottom Left Glass Tag) -->
+                                <!-- Breed Tag (Bottom Left Glass Tag) -->
                                 <Border HorizontalAlignment="Left"
                                         VerticalAlignment="Bottom"
                                         Margin="8"
@@ -634,14 +674,14 @@
                                        FontSize="17"
                                        FontWeight="Bold"/>
                             <TextBlock Text="{Binding CurrentPet.Title}"
-                                       Foreground="{Binding CurrentPet.AccentTagColor}"
+                                       Foreground="{DynamicResource Brush.Info.Light}"
                                        FontSize="11"
                                        FontWeight="SemiBold"
                                        Margin="0,1,0,0"
                                        TextTrimming="CharacterEllipsis"/>
                         </StackPanel>
 
-                        <!-- Fun Fact Callout -->
+                        <!-- Blurb Callout -->
                         <Border Grid.Row="3"
                                 CornerRadius="7"
                                 Background="#12FFFFFF"
@@ -649,7 +689,7 @@
                                 BorderThickness="1"
                                 Padding="8,5"
                                 Margin="0,2,0,6">
-                            <TextBlock Text="{Binding CurrentPet.FunFact}"
+                            <TextBlock Text="{Binding CurrentPet.Blurb}"
                                        Foreground="{DynamicResource Brush.Text.Muted}"
                                        FontSize="10"
                                        FontStyle="Italic"
@@ -664,9 +704,9 @@
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Grid.Column="0"
-                                       Text="{Binding CurrentPet.Owner}"
+                                       Text="{Binding CurrentPet.OwnerDisplay}"
                                        Foreground="{DynamicResource Brush.Text.Muted}"
-                                       FontSize="9"
+                                       FontSize="10"
                                        VerticalAlignment="Center"
                                        TextTrimming="CharacterEllipsis"/>
 

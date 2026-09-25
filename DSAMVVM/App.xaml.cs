@@ -579,6 +579,7 @@ namespace DSAMVVM
             services.AddSingleton<IQuickSearchService, QuickSearchService>();
 
             services.AddSingleton<IHttpService, HttpService>();
+            services.AddSingleton<IImageCacheService, ImageCacheService>();
             services.AddSingleton<ISettingsService, SettingsService>();
 
             services.AddSingleton<AppSettings>(_ => Settings);
@@ -638,7 +639,8 @@ namespace DSAMVVM
                     adDetectionService: sp.GetRequiredService<IADDetectionService>(),
                     authService: sp.GetRequiredService<IAuthenticationService>(),
                     searchService: sp.GetRequiredService<ISearchService>(),
-                    linkRouter: sp.GetRequiredService<IDeepLinkRoutingService>()
+                    linkRouter: sp.GetRequiredService<IDeepLinkRoutingService>(),
+                    imageCacheService: sp.GetRequiredService<IImageCacheService>()
                 )
             );
 
