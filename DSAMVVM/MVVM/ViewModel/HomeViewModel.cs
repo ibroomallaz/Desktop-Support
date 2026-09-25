@@ -134,40 +134,53 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand CustomizeShortcutsCommand { get; }
 
         // --- Pet of the Day (ServiceMeow) ---
-        private readonly List<ServiceMeowPet> _mockPets =
+        private readonly List<ServiceMeowOwner> _mockOwners =
         [
             new()
             {
-                Name = "Nimbus",
-                Species = "Cat",
-                Breed = "British Shorthair",
-                Title = "Chief Packet Sniffer",
-                Owner = "Dave T.",
-                OwnerTeam = "Network Operations",
-                Blurb = "Discovered a loose patch cable by chewing on the boot."
+                NetId = "davet",
+                Name = "Dave T.",
+                Team = "Network Operations",
+                Pets =
+                [
+                    new()
+                    {
+                        Name = "Nimbus",
+                        Species = "Cat",
+                        Breed = "British Shorthair",
+                        Title = "Chief Packet Sniffer",
+                        Blurb = "Discovered a loose patch cable by chewing on the boot."
+                    },
+                    new()
+                    {
+                        Name = "Barnaby",
+                        Species = "Dog",
+                        Breed = "Golden Retriever",
+                        Title = "Lead Morale Specialist",
+                        Blurb = "Has a 99.9% success rate resolving escalated user stress tickets."
+                    }
+                ]
             },
             new()
             {
-                Name = "Pixel",
-                Species = "Cat",
-                Breed = "Calico",
-                Title = "Senior Cable Untangler",
-                Owner = "Sarah M.",
-                OwnerTeam = "Service Desk",
-                Blurb = "Always sleeps directly on top of the warmest switch rack."
-            },
-            new()
-            {
-                Name = "Rusty",
-                Species = "Dog",
-                Breed = "Golden Retriever",
-                Title = "Lead Morale Specialist",
-                Owner = "Marcus K.",
-                OwnerTeam = "Systems Team",
-                Blurb = "Has a 99.9% success rate resolving escalated user stress tickets."
+                NetId = "sarahm",
+                Name = "Sarah M.",
+                Team = "Service Desk",
+                Pets =
+                [
+                    new()
+                    {
+                        Name = "Pixel",
+                        Species = "Cat",
+                        Breed = "Calico",
+                        Title = "Senior Cable Untangler",
+                        Blurb = "Always sleeps directly on top of the warmest switch rack."
+                    }
+                ]
             }
         ];
 
+        private readonly List<ServiceMeowPet> _mockPets;
         private int _currentPetIndex;
         private ServiceMeowPet _currentPet;
         public ServiceMeowPet CurrentPet
@@ -361,6 +374,14 @@ namespace DSAMVVM.MVVM.ViewModel
             });
 
             // ServiceMeow setup
+            foreach (var owner in _mockOwners)
+            {
+                foreach (var pet in owner.Pets)
+                {
+                    pet.Owner = owner;
+                }
+            }
+            _mockPets = _mockOwners.SelectMany(o => o.Pets).ToList();
             _currentPet = _mockPets[0];
 
             NextPetCommand = new RelayCommand(_ =>

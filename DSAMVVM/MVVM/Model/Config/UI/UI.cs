@@ -7,6 +7,7 @@
         public SearchSettings Search { get; set; } = new();
         public LinksUiSettings Links { get; set; } = new();
         public TrayUiSettings Tray { get; set; } = new();
+        public ServiceMeowUiSettings ServiceMeow { get; set; } = new();
         //Admin panel settings
         public bool HasUnlockedAdmin { get; set; } = false;
         public bool ShowAdminView { get; set; } = false;
@@ -17,6 +18,7 @@
             Font?.Clamp();
             Tray?.Normalize();
             Links?.Normalize();
+            ServiceMeow?.Normalize();
 
             if (ViewFontSizes != null && !ReferenceEquals(ViewFontSizes.Comparer, StringComparer.OrdinalIgnoreCase))
             {
