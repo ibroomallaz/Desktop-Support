@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Utilities;
+using DSAMVVM.Core.Utilities;
 using System.IO;
 
 namespace DSAMVVM.MVVM.Model
@@ -50,7 +50,9 @@ namespace DSAMVVM.MVVM.Model
         public static readonly string g_DepartmentCachePath = Path.Combine(g_DataDir, "departments.json");
         public static readonly string g_LinksCachePath = Path.Combine(g_DataDir, "links.json");
         public static readonly string g_ServiceMeowCachePath = Path.Combine(g_DataDir, "servicemeow.json");
-        public static readonly string g_ServiceMeowImageCacheDir = Path.Combine(g_DataDir, "servicemeow_images");
+        // Images directory (local)
+        public static readonly string g_ImgDir = Path.Combine(g_AppDir, "img");
+        public static readonly string g_ServiceMeowImageCacheDir = Path.Combine(g_ImgDir, "sm");
 
         // Logs + legacy settings dirs
         public static readonly string g_LogsDir = Path.Combine(g_AppDir, "logs");
@@ -115,3 +117,4 @@ namespace DSAMVVM.MVVM.Model
         }
     }
 }
+

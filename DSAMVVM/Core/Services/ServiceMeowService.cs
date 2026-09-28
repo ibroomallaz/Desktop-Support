@@ -76,6 +76,8 @@ namespace DSAMVVM.Core.Services
                 var sw = Stopwatch.StartNew();
                 string jsonContent = string.Empty;
                 bool loadedFromCache = false;
+                bool jsonChanged = false;
+                ServiceMeowData? previousModel = _cache;
 
                 try
                 {
@@ -90,11 +92,20 @@ namespace DSAMVVM.Core.Services
                         if (File.Exists(_cachePath))
                         {
                             cachedContent = await File.ReadAllTextAsync(_cachePath, ct).ConfigureAwait(false);
+                            if (previousModel == null)
+                            {
+                                try
+                                {
+                                    previousModel = JsonConvert.DeserializeObject<ServiceMeowData>(cachedContent);
+                                }
+                                catch { /* best-effort parse */ }
+                            }
                         }
 
                         // Write-on-Change: Only overwrite disk cache if content differs
                         if (!string.Equals(webContent, cachedContent, StringComparison.Ordinal))
                         {
+                            jsonChanged = true;
                             EnsureDirectory(_cachePath);
                             await File.WriteAllTextAsync(_cachePath, webContent, ct).ConfigureAwait(false);
                             Log.Info(Tag, "Remote ServiceMeow data changed. Disk backup cache updated.");
@@ -189,6 +200,12 @@ namespace DSAMVVM.Core.Services
                             }
                             model.Meta?.Normalize();
                             _cache = model;
+
+                            // When JSON changes, reconcile image cache (re-download updated images, purge removed images)
+                            if (jsonChanged && previousModel != null)
+                            {
+                                _ = SyncChangedImagesAsync(previousModel, model, ct);
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -214,6 +231,50 @@ namespace DSAMVVM.Core.Services
             }
         }
 
+        private async Task SyncChangedImagesAsync(ServiceMeowData oldData, ServiceMeowData newData, CancellationToken ct)
+        {
+            try
+            {
+                var oldUrls = oldData.AllPets
+                    .Select(p => p.ImageUrl)
+                    .Where(url => !string.IsNullOrWhiteSpace(url))
+                    .Cast<string>()
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                var newUrls = newData.AllPets
+                    .Select(p => p.ImageUrl)
+                    .Where(url => !string.IsNullOrWhiteSpace(url))
+                    .Cast<string>()
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                // Purge removed images
+                foreach (var removedUrl in oldUrls.Except(newUrls))
+                {
+                    var path = _imageCacheService.GetCachedFilePath(removedUrl);
+                    if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                    {
+                        try
+                        {
+                            File.Delete(path);
+                            Log.Info(Tag, $"Purged removed pet image from cache: {path}");
+                        }
+                        catch { /* best-effort delete */ }
+                    }
+                }
+
+                // Pre-cache newly added or updated images
+                foreach (var addedUrl in newUrls.Except(oldUrls))
+                {
+                    Log.Info(Tag, $"Pre-caching new pet image: {addedUrl}");
+                    _ = _imageCacheService.GetImageAsync(addedUrl, forceRefresh: true, ct: ct);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warn(Tag, $"SyncChangedImagesAsync encountered non-critical error: {ex.Message}");
+            }
+        }
+
         private static void EnsureDirectory(string filePath)
         {
             var dir = Path.GetDirectoryName(filePath);
@@ -224,4 +285,3 @@ namespace DSAMVVM.Core.Services
         }
     }
 }
-
