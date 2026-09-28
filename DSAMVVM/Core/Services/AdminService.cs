@@ -4,6 +4,7 @@ using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Admin;
 using DSAMVVM.MVVM.Model.Data;
+using DSAMVVM.MVVM.Model.Schemas;
 using Newtonsoft.Json;
 using System.IO;
 
@@ -23,6 +24,9 @@ namespace DSAMVVM.Core.Services
 
         private static string LinksTargetPath =>
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "links.json");
+
+        private static string ServiceMeowTargetPath =>
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "servicemeow.json");
 
 
         // --- Department Operations ---
@@ -225,6 +229,145 @@ namespace DSAMVVM.Core.Services
         }
 
 
+        // --- ServiceMeow Operations ---
+
+        private static ServiceMeowData CreateDefaultServiceMeowData()
+        {
+            return new ServiceMeowData
+            {
+                Meta = new ServiceMeowMeta
+                {
+                    SchemaVersion = Globals.g_ServiceMeowJSONSchema,
+                    LastUpdatedUtc = DateTime.UtcNow
+                },
+                Owners =
+                [
+                    new ServiceMeowOwner
+                    {
+                        NetId = "davet",
+                        Name = "Dave T.",
+                        Team = "Network Operations",
+                        Pets =
+                        [
+                            new ServiceMeowPet
+                            {
+                                Name = "Nimbus",
+                                Species = "Cat",
+                                Breed = "British Shorthair",
+                                Title = "Chief Packet Sniffer",
+                                Blurb = "Discovered a loose patch cable by chewing on the boot."
+                            },
+                            new ServiceMeowPet
+                            {
+                                Name = "Barnaby",
+                                Species = "Dog",
+                                Breed = "Golden Retriever",
+                                Title = "Lead Morale Specialist",
+                                Blurb = "Has a 99.9% success rate resolving escalated user stress tickets."
+                            }
+                        ]
+                    },
+                    new ServiceMeowOwner
+                    {
+                        NetId = "sarahm",
+                        Name = "Sarah M.",
+                        Team = "Service Desk",
+                        Pets =
+                        [
+                            new ServiceMeowPet
+                            {
+                                Name = "Pixel",
+                                Species = "Cat",
+                                Breed = "Calico",
+                                Title = "Senior Cable Untangler",
+                                Blurb = "Always sleeps directly on top of the warmest switch rack."
+                            }
+                        ]
+                    }
+                ]
+            };
+        }
+
+        public async Task<ServiceMeowData> LoadServiceMeowDataAsync()
+        {
+            try
+            {
+                string targetPath = ServiceMeowTargetPath;
+                if (!File.Exists(targetPath) && File.Exists(Globals.g_ServiceMeowCachePath))
+                {
+                    targetPath = Globals.g_ServiceMeowCachePath;
+                }
+
+                if (File.Exists(targetPath))
+                {
+                    string json = await File.ReadAllTextAsync(targetPath);
+                    var data = JsonConvert.DeserializeObject<ServiceMeowData>(json);
+                    if (data != null)
+                    {
+                        foreach (var owner in data.Owners)
+                        {
+                            foreach (var pet in owner.Pets)
+                            {
+                                pet.Owner = owner;
+                            }
+                        }
+                        return data;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warn(Tag, $"Failed to load servicemeow data: {ex.Message}");
+            }
+
+            var fallback = CreateDefaultServiceMeowData();
+            foreach (var owner in fallback.Owners)
+            {
+                foreach (var pet in owner.Pets)
+                {
+                    pet.Owner = owner;
+                }
+            }
+            return fallback;
+        }
+
+        public async Task<ServiceMeowPet?> FindPetAsync(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return null;
+
+            var trimmed = query.Trim();
+            var data = await LoadServiceMeowDataAsync();
+            var allPets = data.AllPets;
+
+            // 1. Exact match on Pet Name
+            var match = allPets.FirstOrDefault(p =>
+                string.Equals(p.Name, trimmed, StringComparison.OrdinalIgnoreCase));
+            if (match != null) return match;
+
+            // 2. Exact match on Owner NetID
+            match = allPets.FirstOrDefault(p =>
+                string.Equals(p.Owner?.NetId, trimmed, StringComparison.OrdinalIgnoreCase));
+            if (match != null) return match;
+
+            // 3. Exact match on Owner Name
+            match = allPets.FirstOrDefault(p =>
+                string.Equals(p.Owner?.Name, trimmed, StringComparison.OrdinalIgnoreCase));
+            if (match != null) return match;
+
+            // 4. Partial match on Pet Name
+            match = allPets.FirstOrDefault(p =>
+                p.Name.Contains(trimmed, StringComparison.OrdinalIgnoreCase));
+            if (match != null) return match;
+
+            // 5. Partial match on Owner Name or NetID
+            match = allPets.FirstOrDefault(p =>
+                (p.Owner?.Name != null && p.Owner.Name.Contains(trimmed, StringComparison.OrdinalIgnoreCase)) ||
+                (p.Owner?.NetId != null && p.Owner.NetId.Contains(trimmed, StringComparison.OrdinalIgnoreCase)));
+
+            return match;
+        }
+
+
         // --- Staging Helpers ---
 
         public DepartmentListWrapper ApplyDepartmentChanges(DepartmentListWrapper wrapper, IEnumerable<StagedChange> stagedChanges)
@@ -368,6 +511,107 @@ namespace DSAMVVM.Core.Services
             return linksData;
         }
 
+        public ServiceMeowData ApplyServiceMeowChanges(ServiceMeowData meowData, IEnumerable<StagedChange> stagedChanges)
+        {
+            ArgumentNullException.ThrowIfNull(meowData);
+            ArgumentNullException.ThrowIfNull(stagedChanges);
+
+            var changesList = stagedChanges as IReadOnlyList<StagedChange> ?? [.. stagedChanges];
+            var petChanges = changesList.Where(c => c.Section == AdminSection.ServiceMeow);
+
+            foreach (var change in petChanges)
+            {
+                if (change.StagedData is not StagedServiceMeowData staged) continue;
+
+                if (staged.Action == StagedServiceMeowAction.Delete)
+                {
+                    foreach (var owner in meowData.Owners)
+                    {
+                        var petToRemove = owner.Pets.FirstOrDefault(p =>
+                            string.Equals(p.Id, staged.Pet.Id, StringComparison.OrdinalIgnoreCase) ||
+                            (string.Equals(p.Name, staged.Pet.Name, StringComparison.OrdinalIgnoreCase) &&
+                             string.Equals(owner.NetId, staged.OwnerNetId, StringComparison.OrdinalIgnoreCase)));
+
+                        if (petToRemove != null)
+                        {
+                            owner.Pets.Remove(petToRemove);
+                            break;
+                        }
+                    }
+
+                    meowData.Owners.RemoveAll(o => o.Pets.Count == 0);
+                    continue;
+                }
+
+                // If reassigned from a different owner, remove from old owner
+                if (!string.IsNullOrWhiteSpace(staged.OriginalOwnerNetId) &&
+                    !string.Equals(staged.OriginalOwnerNetId, staged.OwnerNetId, StringComparison.OrdinalIgnoreCase))
+                {
+                    var oldOwner = meowData.Owners.FirstOrDefault(o =>
+                        string.Equals(o.NetId, staged.OriginalOwnerNetId, StringComparison.OrdinalIgnoreCase));
+                    if (oldOwner != null)
+                    {
+                        oldOwner.Pets.RemoveAll(p =>
+                            string.Equals(p.Id, staged.Pet.Id, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(p.Name, staged.Pet.Name, StringComparison.OrdinalIgnoreCase));
+                        if (oldOwner.Pets.Count == 0)
+                        {
+                            meowData.Owners.Remove(oldOwner);
+                        }
+                    }
+                }
+
+                // Find target owner or create new
+                var targetOwner = meowData.Owners.FirstOrDefault(o =>
+                    string.Equals(o.NetId, staged.OwnerNetId, StringComparison.OrdinalIgnoreCase));
+
+                if (targetOwner == null)
+                {
+                    targetOwner = new ServiceMeowOwner
+                    {
+                        NetId = staged.OwnerNetId.Trim(),
+                        Name = staged.OwnerName.Trim(),
+                        Team = staged.OwnerTeam.Trim(),
+                        Pets = []
+                    };
+                    meowData.Owners.Add(targetOwner);
+                }
+                else
+                {
+                    if (!string.IsNullOrWhiteSpace(staged.OwnerName))
+                        targetOwner.Name = staged.OwnerName.Trim();
+                    if (!string.IsNullOrWhiteSpace(staged.OwnerTeam))
+                        targetOwner.Team = staged.OwnerTeam.Trim();
+                }
+
+                // Find or add pet under target owner
+                var existingPet = targetOwner.Pets.FirstOrDefault(p =>
+                    string.Equals(p.Id, staged.Pet.Id, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(p.Name, staged.Pet.Name, StringComparison.OrdinalIgnoreCase));
+
+                if (existingPet != null)
+                {
+                    existingPet.Name = staged.Pet.Name;
+                    existingPet.Species = staged.Pet.Species;
+                    existingPet.Breed = staged.Pet.Breed;
+                    existingPet.Title = staged.Pet.Title;
+                    existingPet.Blurb = staged.Pet.Blurb;
+                    existingPet.Images = [.. staged.Pet.Images];
+                    existingPet.Owner = targetOwner;
+                }
+                else
+                {
+                    staged.Pet.Owner = targetOwner;
+                    targetOwner.Pets.Add(staged.Pet);
+                }
+            }
+
+            meowData.Meta.SchemaVersion = Globals.g_ServiceMeowJSONSchema;
+            meowData.Meta.LastUpdatedUtc = DateTime.UtcNow;
+
+            return meowData;
+        }
+
 
         // --- Persistence ---
 
@@ -379,8 +623,9 @@ namespace DSAMVVM.Core.Services
             var deptChanges = changesList.Where(c => c.Section == AdminSection.Department).ToList();
             var supportTeamChanges = changesList.Where(c => c.Section == AdminSection.SupportTeam).ToList();
             var linkChanges = changesList.Where(c => c.Section == AdminSection.Links).ToList();
+            var petChanges = changesList.Where(c => c.Section == AdminSection.ServiceMeow).ToList();
 
-            if (deptChanges.Count == 0 && supportTeamChanges.Count == 0 && linkChanges.Count == 0) return;
+            if (deptChanges.Count == 0 && supportTeamChanges.Count == 0 && linkChanges.Count == 0 && petChanges.Count == 0) return;
 
             // 1. Persist Department & Support Team changes to departments.json
             if (deptChanges.Count > 0 || supportTeamChanges.Count > 0)
@@ -445,7 +690,29 @@ namespace DSAMVVM.Core.Services
 
                 Log.Info(Tag, $"Persisted {linkChanges.Count} link change(s).");
             }
-        }
 
+            // 3. Persist ServiceMeow changes to servicemeow.json
+            if (petChanges.Count > 0)
+            {
+                var meowData = await LoadServiceMeowDataAsync();
+                ApplyServiceMeowChanges(meowData, changesList);
+
+                string meowJson = JsonConvert.SerializeObject(meowData, Formatting.Indented);
+                await File.WriteAllTextAsync(ServiceMeowTargetPath, meowJson);
+
+                try
+                {
+                    var cacheDir = Path.GetDirectoryName(Globals.g_ServiceMeowCachePath);
+                    if (!string.IsNullOrEmpty(cacheDir)) Directory.CreateDirectory(cacheDir);
+                    await File.WriteAllTextAsync(Globals.g_ServiceMeowCachePath, meowJson);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn(Tag, $"Could not mirror servicemeow.json to cache: {ex.Message}");
+                }
+
+                Log.Info(Tag, $"Persisted {petChanges.Count} ServiceMeow change(s).");
+            }
+        }
     }
 }

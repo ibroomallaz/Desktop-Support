@@ -24,7 +24,7 @@ namespace DSAMVVM.MVVM.Model.Data
     public sealed class Department
     {
         public string Number { get; set; } = string.Empty;
-        public bool SupportKnown { get; set; } = false;
+        public bool SupportKnown { get; set; }
         public string? Team { get; set; }
         public string? Notes { get; set; }
         public string? FileRepoPath { get; set; }

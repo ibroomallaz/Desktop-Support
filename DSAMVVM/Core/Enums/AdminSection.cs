@@ -4,6 +4,7 @@
     {
         Department,
         SupportTeam,
-        Links
+        Links,
+        ServiceMeow
     }
 }

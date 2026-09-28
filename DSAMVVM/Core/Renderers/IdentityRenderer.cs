@@ -74,7 +74,7 @@ namespace DSAMVVM.Core.Renderers
             }
 
             if (r.Enabled == false) doc.AddLabelValue("Enabled: ", "False", false);
-            doc.AddLabelValue("Total MIM groups: ", r.Groups?.Count.ToString() ?? "0", false);
+            doc.AddLabelValue("Total MIM groups: ", r.Groups.Count.ToString(), false);
 
             if (r.Groups is { Count: > 0 })
                 foreach (var g in r.Groups) doc.AddListItem(g);
@@ -90,7 +90,7 @@ namespace DSAMVVM.Core.Renderers
             doc.AddRaw(string.Empty);
             doc.AddTitle($"Members of group '{groupName}'");
 
-            if (info.Exists && info.MemberCount is int c)
+            if (info is { Exists: true, MemberCount: { } c })
             {
                 doc.AddLabelValue("Total members: ", c.ToString(), false);
                 if (c == 0) doc.AddRaw("[cyan]No group members exist.[/cyan]");

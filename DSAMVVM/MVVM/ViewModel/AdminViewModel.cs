@@ -12,6 +12,8 @@ using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
+    public record AdminSectionOption(AdminSection Section, string DisplayName);
+
     public class AdminViewModel : ObservableObject, ISearchableViewModel
     {
         private const string Tag = "AdminVM";
@@ -34,6 +36,33 @@ namespace DSAMVVM.MVVM.ViewModel
         private bool _originalLinkIsCommon = true;
         private string? _originalLinkTeam;
 
+        // ServiceMeow tracking state
+        private ServiceMeowPet? _originalPet;
+        private string? _originalPetOwnerNetId;
+        private bool _isNewPet = true;
+
+        // Section dropdown selection
+        public IReadOnlyList<AdminSectionOption> AvailableSections { get; } =
+        [
+            new(AdminSection.Department, "Department"),
+            new(AdminSection.SupportTeam, "Support Team"),
+            new(AdminSection.Links, "Links"),
+            new(AdminSection.ServiceMeow, "ServiceMeow")
+        ];
+
+        private AdminSectionOption? _selectedSectionOption;
+        public AdminSectionOption? SelectedSectionOption
+        {
+            get => _selectedSectionOption ??= AvailableSections.FirstOrDefault(s => s.Section == _selectedSection);
+            set
+            {
+                if (value == null || _selectedSectionOption == value) return;
+                _selectedSectionOption = value;
+                SelectedSection = value.Section;
+                OnPropertyChanged(nameof(SelectedSectionOption));
+            }
+        }
+
         // Section selection
         private AdminSection _selectedSection = AdminSection.Department;
         public AdminSection SelectedSection
@@ -43,18 +72,23 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 if (_selectedSection == value) return;
                 _selectedSection = value;
+                _selectedSectionOption = AvailableSections.FirstOrDefault(s => s.Section == value);
                 OnPropertyChanged(nameof(SelectedSection));
+                OnPropertyChanged(nameof(SelectedSectionOption));
                 OnPropertyChanged(nameof(IsDepartmentSelected));
                 OnPropertyChanged(nameof(IsSupportTeamSelected));
                 OnPropertyChanged(nameof(IsLinksSelected));
+                OnPropertyChanged(nameof(IsServiceMeowSelected));
                 OnPropertyChanged(nameof(ShowDeleteSupportTeamButton));
                 OnPropertyChanged(nameof(ShowDeleteLinkButton));
+                OnPropertyChanged(nameof(ShowDeleteServiceMeowButton));
             }
         }
 
         public bool IsDepartmentSelected => SelectedSection == AdminSection.Department;
         public bool IsSupportTeamSelected => SelectedSection == AdminSection.SupportTeam;
         public bool IsLinksSelected => SelectedSection == AdminSection.Links;
+        public bool IsServiceMeowSelected => SelectedSection == AdminSection.ServiceMeow;
 
         // Staging queue props
         public ObservableCollection<StagedChange> StagedChanges { get; } = [];
@@ -339,6 +373,102 @@ namespace DSAMVVM.MVVM.ViewModel
 
         #endregion
 
+        #region ServiceMeow Section Properties
+
+        public ObservableCollection<string> AvailablePetsList { get; } = [];
+
+        private string? _selectedPetOption;
+        public string? SelectedPetOption
+        {
+            get => _selectedPetOption;
+            set
+            {
+                if (_selectedPetOption == value) return;
+                _selectedPetOption = value;
+                OnPropertyChanged(nameof(SelectedPetOption));
+                _ = OnPetSelectionChangedAsync(value);
+            }
+        }
+
+        // Owner fields
+        private string _petOwnerNetId = string.Empty;
+        public string PetOwnerNetId
+        {
+            get => _petOwnerNetId;
+            set { _petOwnerNetId = value; OnPropertyChanged(nameof(PetOwnerNetId)); }
+        }
+
+        private string _petOwnerName = string.Empty;
+        public string PetOwnerName
+        {
+            get => _petOwnerName;
+            set { _petOwnerName = value; OnPropertyChanged(nameof(PetOwnerName)); }
+        }
+
+        private string _petOwnerTeam = string.Empty;
+        public string PetOwnerTeam
+        {
+            get => _petOwnerTeam;
+            set { _petOwnerTeam = value; OnPropertyChanged(nameof(PetOwnerTeam)); }
+        }
+
+        // Pet fields
+        private string _petName = string.Empty;
+        public string PetName
+        {
+            get => _petName;
+            set
+            {
+                if (_petName == value) return;
+                _petName = value;
+                OnPropertyChanged(nameof(PetName));
+                OnPropertyChanged(nameof(CanDeletePet));
+                OnPropertyChanged(nameof(ShowDeleteServiceMeowButton));
+            }
+        }
+
+        private string _petSpecies = "Cat";
+        public string PetSpecies
+        {
+            get => _petSpecies;
+            set { _petSpecies = value; OnPropertyChanged(nameof(PetSpecies)); }
+        }
+
+        public ObservableCollection<string> AvailableSpecies { get; } = ["Cat", "Dog", "Bird", "Reptile", "Fish", "Other"];
+
+        private string _petBreed = string.Empty;
+        public string PetBreed
+        {
+            get => _petBreed;
+            set { _petBreed = value; OnPropertyChanged(nameof(PetBreed)); }
+        }
+
+        private string _petTitle = string.Empty;
+        public string PetTitle
+        {
+            get => _petTitle;
+            set { _petTitle = value; OnPropertyChanged(nameof(PetTitle)); }
+        }
+
+        private string _petBlurb = string.Empty;
+        public string PetBlurb
+        {
+            get => _petBlurb;
+            set { _petBlurb = value; OnPropertyChanged(nameof(PetBlurb)); }
+        }
+
+        private string _petImageUrl = string.Empty;
+        public string PetImageUrl
+        {
+            get => _petImageUrl;
+            set { _petImageUrl = value; OnPropertyChanged(nameof(PetImageUrl)); }
+        }
+
+        public bool CanDeletePet => !_isNewPet && !string.IsNullOrWhiteSpace(PetName);
+        public bool ShowDeleteServiceMeowButton => IsServiceMeowSelected && CanDeletePet;
+
+        #endregion
+
         // Commands
         public ICommand ApplyCommand { get; }
         public ICommand RemoveStagedItemCommand { get; }
@@ -348,6 +478,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand ExportJsonCommand { get; }
         public ICommand DeleteLinkCommand { get; }
         public ICommand DeleteSupportTeamCommand { get; }
+        public ICommand DeleteServiceMeowCommand { get; }
         public ICommand AddDivisionCommand { get; }
         public ICommand RemoveDivisionCommand { get; }
 
@@ -365,6 +496,7 @@ namespace DSAMVVM.MVVM.ViewModel
             ExportJsonCommand = new RelayCommand(async _ => await ExecuteExportJsonAsync());
             DeleteLinkCommand = new RelayCommand(_ => StageLinkChange(isDelete: true));
             DeleteSupportTeamCommand = new RelayCommand(_ => StageSupportTeamChange(isDelete: true));
+            DeleteServiceMeowCommand = new RelayCommand(_ => StageServiceMeowChange(isDelete: true));
             AddDivisionCommand = new RelayCommand(_ => ExecuteAddDivision());
             RemoveDivisionCommand = new RelayCommand(param => ExecuteRemoveDivision(param));
 
@@ -377,6 +509,7 @@ namespace DSAMVVM.MVVM.ViewModel
             await LoadAvailableSupportTeamsAsync();
             await LoadAvailableLinkTeamsAsync();
             await RefreshScopeLinksListAsync();
+            await RefreshPetsListAsync();
         }
 
         #region Department Methods
@@ -932,6 +1065,230 @@ namespace DSAMVVM.MVVM.ViewModel
 
         #endregion
 
+        #region ServiceMeow Methods
+
+        private async Task RefreshPetsListAsync()
+        {
+            AvailablePetsList.Clear();
+            AvailablePetsList.Add("[+ New Pet]");
+
+            var data = await _adminService.LoadServiceMeowDataAsync();
+            foreach (var pet in data.AllPets.OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase))
+            {
+                if (!string.IsNullOrWhiteSpace(pet.Name))
+                {
+                    string label = string.IsNullOrWhiteSpace(pet.Owner?.NetId)
+                        ? pet.Name
+                        : $"{pet.Name} ({pet.Owner.NetId})";
+                    AvailablePetsList.Add(label);
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(SelectedPetOption) || !AvailablePetsList.Contains(SelectedPetOption))
+            {
+                _selectedPetOption = "[+ New Pet]";
+                OnPropertyChanged(nameof(SelectedPetOption));
+            }
+        }
+
+        private async Task OnPetSelectionChangedAsync(string? selected)
+        {
+            if (string.IsNullOrWhiteSpace(selected) || selected == "[+ New Pet]")
+            {
+                ResetPetForm();
+                return;
+            }
+
+            var data = await _adminService.LoadServiceMeowDataAsync();
+            var match = data.AllPets.FirstOrDefault(p =>
+            {
+                string label = string.IsNullOrWhiteSpace(p.Owner?.NetId)
+                    ? p.Name
+                    : $"{p.Name} ({p.Owner.NetId})";
+                return string.Equals(label, selected, StringComparison.OrdinalIgnoreCase) ||
+                       string.Equals(p.Name, selected, StringComparison.OrdinalIgnoreCase);
+            });
+
+            if (match != null)
+            {
+                LoadPetIntoForm(match, isNew: false, syncSelector: false);
+            }
+        }
+
+        private void LoadPetIntoForm(ServiceMeowPet pet, bool isNew, bool syncSelector = true)
+        {
+            _isNewPet = isNew;
+            _originalPet = isNew ? null : new ServiceMeowPet
+            {
+                Id = pet.Id,
+                Name = pet.Name,
+                Species = pet.Species,
+                Breed = pet.Breed,
+                Title = pet.Title,
+                Blurb = pet.Blurb,
+                Images = [.. pet.Images]
+            };
+            _originalPetOwnerNetId = pet.Owner?.NetId;
+
+            PetOwnerNetId = pet.Owner?.NetId ?? string.Empty;
+            PetOwnerName = pet.Owner?.Name ?? string.Empty;
+            PetOwnerTeam = pet.Owner?.Team ?? string.Empty;
+
+            PetName = pet.Name;
+            PetSpecies = string.IsNullOrWhiteSpace(pet.Species) ? "Cat" : pet.Species;
+            PetBreed = pet.Breed ?? string.Empty;
+            PetTitle = pet.Title ?? string.Empty;
+            PetBlurb = pet.Blurb ?? string.Empty;
+            PetImageUrl = pet.Images.Count > 0 ? string.Join(", ", pet.Images) : string.Empty;
+
+            OnPropertyChanged(nameof(CanDeletePet));
+            OnPropertyChanged(nameof(ShowDeleteServiceMeowButton));
+
+            if (syncSelector)
+            {
+                string label = string.IsNullOrWhiteSpace(pet.Owner?.NetId)
+                    ? pet.Name
+                    : $"{pet.Name} ({pet.Owner.NetId})";
+                _selectedPetOption = isNew ? "[+ New Pet]" : label;
+                OnPropertyChanged(nameof(SelectedPetOption));
+            }
+        }
+
+        private void ResetPetForm()
+        {
+            _isNewPet = true;
+            _originalPet = null;
+            _originalPetOwnerNetId = null;
+
+            PetOwnerNetId = string.Empty;
+            PetOwnerName = string.Empty;
+            PetOwnerTeam = string.Empty;
+
+            PetName = string.Empty;
+            PetSpecies = "Cat";
+            PetBreed = string.Empty;
+            PetTitle = string.Empty;
+            PetBlurb = string.Empty;
+            PetImageUrl = string.Empty;
+
+            OnPropertyChanged(nameof(CanDeletePet));
+            OnPropertyChanged(nameof(ShowDeleteServiceMeowButton));
+        }
+
+        private void StageServiceMeowChange(bool isDelete = false)
+        {
+            string petName = (PetName ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(petName))
+            {
+                UiNotify.Warn("Please enter a valid Pet Name.");
+                return;
+            }
+
+            string ownerNetId = (PetOwnerNetId ?? string.Empty).Trim();
+            if (!isDelete && string.IsNullOrWhiteSpace(ownerNetId))
+            {
+                UiNotify.Warn("Please enter an Owner NetID for this pet.");
+                return;
+            }
+
+            string ownerName = (PetOwnerName ?? string.Empty).Trim();
+            string ownerTeam = (PetOwnerTeam ?? string.Empty).Trim();
+            string species = string.IsNullOrWhiteSpace(PetSpecies) ? "Cat" : PetSpecies.Trim();
+            string breed = (PetBreed ?? string.Empty).Trim();
+            string title = (PetTitle ?? string.Empty).Trim();
+            string blurb = (PetBlurb ?? string.Empty).Trim();
+            string stagedKey = string.IsNullOrWhiteSpace(ownerNetId) ? petName : $"{petName} ({ownerNetId})";
+
+            var diff = new StringBuilder();
+
+            if (isDelete)
+            {
+                diff.Append($"Delete pet '{petName}' ({ownerNetId})");
+            }
+            else if (_isNewPet)
+            {
+                diff.Append($"Created new pet '{petName}' for {ownerName} ({ownerNetId})");
+            }
+            else if (_originalPet != null)
+            {
+                if (_originalPet.Name != petName)
+                    diff.Append($"Name: \"{_originalPet.Name}\" -> \"{petName}\"; ");
+                if (_originalPet.Species != species)
+                    diff.Append($"Species: \"{_originalPet.Species}\" -> \"{species}\"; ");
+                if ((_originalPet.Breed ?? string.Empty) != breed)
+                    diff.Append($"Breed: \"{_originalPet.Breed}\" -> \"{breed}\"; ");
+                if ((_originalPet.Title ?? string.Empty) != title)
+                    diff.Append($"Title: \"{_originalPet.Title}\" -> \"{title}\"; ");
+                if ((_originalPet.Blurb ?? string.Empty) != blurb)
+                    diff.Append("Blurb updated; ");
+
+                string origImages = string.Join(", ", _originalPet.Images);
+                if (origImages != (PetImageUrl ?? string.Empty).Trim())
+                    diff.Append("Photo URL updated; ");
+
+                if ((_originalPetOwnerNetId ?? string.Empty) != ownerNetId)
+                    diff.Append($"Owner NetID: \"{_originalPetOwnerNetId}\" -> \"{ownerNetId}\"; ");
+
+                if (diff.Length == 0)
+                {
+                    UiNotify.Info("No modifications detected to apply.", showStatusBar: true);
+                    return;
+                }
+            }
+
+            var imageList = (PetImageUrl ?? string.Empty)
+                .Split([',', ';', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList();
+
+            var petObj = new ServiceMeowPet
+            {
+                Id = _originalPet?.Id ?? Guid.NewGuid().ToString("N")[..8],
+                Name = petName,
+                Species = species,
+                Breed = breed,
+                Title = title,
+                Blurb = blurb,
+                Images = imageList
+            };
+
+            var stagedMeowData = new StagedServiceMeowData
+            {
+                OriginalOwnerNetId = _originalPetOwnerNetId,
+                OwnerNetId = ownerNetId,
+                OwnerName = ownerName,
+                OwnerTeam = ownerTeam,
+                Pet = petObj,
+                Action = isDelete ? StagedServiceMeowAction.Delete : StagedServiceMeowAction.AddOrUpdate
+            };
+
+            // Remove previous staged change for this pet
+            var existing = StagedChanges.FirstOrDefault(c =>
+                c.Section == AdminSection.ServiceMeow &&
+                (c.Key == stagedKey ||
+                 (_originalPetOwnerNetId != null && c.Key == $"{petName} ({_originalPetOwnerNetId})") ||
+                 (c.StagedData is StagedServiceMeowData sd && sd.Pet.Id == petObj.Id)));
+
+            if (existing != null) StagedChanges.Remove(existing);
+
+            StagedChanges.Add(new StagedChange
+            {
+                Section = AdminSection.ServiceMeow,
+                Key = stagedKey,
+                Summary = diff.ToString().TrimEnd(' ', ';'),
+                StagedData = stagedMeowData
+            });
+
+            NotifyStagingChanged();
+            string actionVerb = isDelete ? "deletion of" : "changes for";
+            UiNotify.Success($"Staged {actionVerb} pet '{petName}'. ({PendingChangesCount} pending)");
+
+            ResetPetForm();
+            _selectedPetOption = "[+ New Pet]";
+            OnPropertyChanged(nameof(SelectedPetOption));
+        }
+
+        #endregion
+
         private void ExecuteClearForm()
         {
             if (SelectedSection == AdminSection.Department)
@@ -960,6 +1317,12 @@ namespace DSAMVVM.MVVM.ViewModel
                 OnPropertyChanged(nameof(SelectedScopeLinkOption));
                 OnPropertyChanged(nameof(CanDeleteLink));
                 OnPropertyChanged(nameof(ShowDeleteLinkButton));
+            }
+            else if (SelectedSection == AdminSection.ServiceMeow)
+            {
+                ResetPetForm();
+                _selectedPetOption = "[+ New Pet]";
+                OnPropertyChanged(nameof(SelectedPetOption));
             }
         }
 
@@ -1081,6 +1444,49 @@ namespace DSAMVVM.MVVM.ViewModel
                         UiNotify.Info($"Link '{query}' not found. Ready to create.", showStatusBar: true);
                     }
                     break;
+
+                case AdminSection.ServiceMeow:
+                    if (string.IsNullOrWhiteSpace(query)) return;
+
+                    var existingStagedMeow = StagedChanges.FirstOrDefault(c =>
+                        c.Section == AdminSection.ServiceMeow &&
+                        (c.Key.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                         (c.StagedData is StagedServiceMeowData md &&
+                          (md.Pet.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                           md.OwnerNetId.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                           md.OwnerName.Contains(query, StringComparison.OrdinalIgnoreCase)))));
+
+                    if (existingStagedMeow?.StagedData is StagedServiceMeowData stagedMeow)
+                    {
+                        var petToLoad = stagedMeow.Pet;
+                        petToLoad.Owner = new ServiceMeowOwner
+                        {
+                            NetId = stagedMeow.OwnerNetId,
+                            Name = stagedMeow.OwnerName,
+                            Team = stagedMeow.OwnerTeam
+                        };
+                        LoadPetIntoForm(petToLoad, isNew: false);
+                        UiNotify.Info($"Loaded pet '{petToLoad.Name}' from pending staged changes.", showStatusBar: true);
+                        return;
+                    }
+
+                    var foundPet = await _adminService.FindPetAsync(query);
+                    if (foundPet != null)
+                    {
+                        LoadPetIntoForm(foundPet, isNew: false);
+                        string ownerDesc = foundPet.Owner != null ? $" ({foundPet.Owner.Name})" : string.Empty;
+                        UiNotify.Success($"Loaded pet '{foundPet.Name}'{ownerDesc}.");
+                    }
+                    else
+                    {
+                        ResetPetForm();
+                        PetName = query;
+                        _selectedPetOption = "[+ New Pet]";
+                        OnPropertyChanged(nameof(SelectedPetOption));
+
+                        UiNotify.Info($"Pet '{query}' not found. Ready to create.", showStatusBar: true);
+                    }
+                    break;
             }
         }
 
@@ -1103,6 +1509,10 @@ namespace DSAMVVM.MVVM.ViewModel
 
                 case AdminSection.Links:
                     StageLinkChange(isDelete: false);
+                    break;
+
+                case AdminSection.ServiceMeow:
+                    StageServiceMeowChange(isDelete: false);
                     break;
             }
         }
@@ -1132,9 +1542,12 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 bool hasDept = StagedChanges.Any(c => c.Section == AdminSection.Department || c.Section == AdminSection.SupportTeam);
                 bool hasLinks = StagedChanges.Any(c => c.Section == AdminSection.Links);
+                bool hasMeow = StagedChanges.Any(c => c.Section == AdminSection.ServiceMeow);
 
-                // Case 1: Both Department/Team and Link changes staged -> prompt for folder
-                if (hasDept && hasLinks)
+                int stagedTypes = (hasDept ? 1 : 0) + (hasLinks ? 1 : 0) + (hasMeow ? 1 : 0);
+
+                // Case 1: Multiple sections staged -> prompt for folder
+                if (stagedTypes > 1)
                 {
                     var folder = _fileDialogService.SelectFolder("Select destination folder to export JSON files for Box");
                     if (string.IsNullOrWhiteSpace(folder)) return;
@@ -1144,7 +1557,18 @@ namespace DSAMVVM.MVVM.ViewModel
                     return;
                 }
 
-                // Case 2: Only Links staged -> prompt for links.json save location
+                // Case 2: Only ServiceMeow staged -> prompt for servicemeow.json save location
+                if (hasMeow)
+                {
+                    var savePath = _fileDialogService.SaveFile("servicemeow.json", "JSON Data (*.json)|*.json", "Export servicemeow.json for Box");
+                    if (string.IsNullOrWhiteSpace(savePath)) return;
+
+                    await _jsonExportService.ExportServiceMeowJsonAsync(StagedChanges, savePath);
+                    UiNotify.Success($"Exported servicemeow.json to {Path.GetFileName(savePath)} for Box upload!");
+                    return;
+                }
+
+                // Case 3: Only Links staged -> prompt for links.json save location
                 if (hasLinks)
                 {
                     var savePath = _fileDialogService.SaveFile("links.json", "JSON Data (*.json)|*.json", "Export links.json for Box");
@@ -1155,7 +1579,7 @@ namespace DSAMVVM.MVVM.ViewModel
                     return;
                 }
 
-                // Case 3: Only Department/Team staged -> prompt for departments.json save location
+                // Case 4: Only Department/Team staged -> prompt for departments.json save location
                 if (hasDept)
                 {
                     var savePath = _fileDialogService.SaveFile("departments.json", "JSON Data (*.json)|*.json", "Export departments.json for Box");
@@ -1166,14 +1590,23 @@ namespace DSAMVVM.MVVM.ViewModel
                     return;
                 }
 
-                // Case 4: No staged changes -> export baseline for currently selected section
-                string defaultName = SelectedSection == AdminSection.Links ? "links.json" : "departments.json";
+                // Case 5: No staged changes -> export baseline for currently selected section
+                string defaultName = SelectedSection switch
+                {
+                    AdminSection.Links => "links.json",
+                    AdminSection.ServiceMeow => "servicemeow.json",
+                    _ => "departments.json"
+                };
                 var baselinePath = _fileDialogService.SaveFile(defaultName, "JSON Data (*.json)|*.json", $"Export {defaultName} for Box");
                 if (string.IsNullOrWhiteSpace(baselinePath)) return;
 
                 if (SelectedSection == AdminSection.Links)
                 {
                     await _jsonExportService.ExportLinksJsonAsync(null, baselinePath);
+                }
+                else if (SelectedSection == AdminSection.ServiceMeow)
+                {
+                    await _jsonExportService.ExportServiceMeowJsonAsync(null, baselinePath);
                 }
                 else
                 {
@@ -1200,6 +1633,7 @@ namespace DSAMVVM.MVVM.ViewModel
             int deptCount = StagedChanges.Count(c => c.Section == AdminSection.Department);
             int teamCount = StagedChanges.Count(c => c.Section == AdminSection.SupportTeam);
             int linkCount = StagedChanges.Count(c => c.Section == AdminSection.Links);
+            int petCount = StagedChanges.Count(c => c.Section == AdminSection.ServiceMeow);
 
             try
             {
@@ -1212,6 +1646,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 await LoadAvailableSupportTeamsAsync();
                 await LoadAvailableLinkTeamsAsync();
                 await RefreshScopeLinksListAsync();
+                await RefreshPetsListAsync();
 
                 var report = new List<string>();
                 if (deptCount > 0 || teamCount > 0)
@@ -1222,6 +1657,7 @@ namespace DSAMVVM.MVVM.ViewModel
                     report.Add($"{string.Join(" and ", deptParts)} to departments.json");
                 }
                 if (linkCount > 0) report.Add($"{linkCount} link(s) to links.json");
+                if (petCount > 0) report.Add($"{petCount} pet(s) to servicemeow.json");
                 UiNotify.Success($"Saved {string.Join(" and ", report)}!");
             }
             catch (Exception ex)

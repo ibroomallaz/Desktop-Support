@@ -71,7 +71,7 @@ namespace DSAMVVM.Core.Renderers
             }
             if (!string.IsNullOrWhiteSpace(team.PhoneNumber)) doc.AddLabelValue("Phone: ", team.PhoneNumber);
 
-            if (team.SupportedDivisions != null && team.SupportedDivisions.Count > 0)
+            if (team.SupportedDivisions is { Count: > 0 })
             {
                 doc.AddRaw("[cyan]Supported Divisions:[/cyan]");
                 foreach (var div in team.SupportedDivisions)
