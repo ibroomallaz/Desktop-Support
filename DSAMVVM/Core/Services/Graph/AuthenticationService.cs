@@ -19,7 +19,6 @@ namespace DSAMVVM.Core.Services.Graph
         private readonly TeamsRoutingService _routingService;
         internal string? _capturedAuthUri;
         private bool _isAuthenticated;
-        private string? _currentAccountUpn;
 
         public event Action<bool>? AuthenticationStateChanged;
 
@@ -46,11 +45,7 @@ namespace DSAMVVM.Core.Services.Graph
             }
         }
 
-        public string? CurrentAccountUpn
-        {
-            get => _currentAccountUpn;
-            private set => _currentAccountUpn = value;
-        }
+        public string? CurrentAccountUpn { get; private set; }
 
         public AuthenticationService(TeamsRoutingService routingService)
         {

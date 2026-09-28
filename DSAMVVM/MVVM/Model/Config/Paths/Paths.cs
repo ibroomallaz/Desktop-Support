@@ -8,8 +8,8 @@
 
         public void NormalizeAll()
         {
-            DepartmentData?.Normalize();
-            LinksData?.Normalize();
+            DepartmentData.Normalize();
+            LinksData.Normalize();
         }
     }
 }

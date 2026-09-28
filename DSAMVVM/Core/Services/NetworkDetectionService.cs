@@ -1,11 +1,7 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
@@ -20,7 +16,7 @@ namespace DSAMVVM.Core.Services
 
         private NetworkStateInfo _currentState = new();
         private readonly Timer _debounceTimer;
-        private readonly object _lock = new();
+        private readonly Lock _lock = new();
 
         public NetworkStateInfo CurrentState
         {

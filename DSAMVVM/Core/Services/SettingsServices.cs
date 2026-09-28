@@ -155,7 +155,7 @@ namespace DSAMVVM.Core.Services
 
             if (preferPerView && !string.IsNullOrWhiteSpace(viewName))
             {
-                var current = GetFontSizeFor(viewName, s, MinFont, MaxFont);
+                var current = GetFontSizeFor(viewName, s);
                 var next = (int)Math.Clamp(current + delta, MinFont, MaxFont);
 
                 if (!s.Ui.ViewFontSizes.TryGetValue(viewName, out var entry))
@@ -196,7 +196,7 @@ namespace DSAMVVM.Core.Services
             }
             else
             {
-                var clamped = (int)Math.Clamp(defaultSize, MinFont, MaxFont);
+                var clamped = Math.Clamp(defaultSize, MinFont, MaxFont);
                 var prev = s.Ui.Font.DefaultSize;
                 s.Ui.Font.DefaultSize = clamped;
                 Log.Info(Tag, $"ResetOutputFontSize: global default {prev} -> {clamped}.");

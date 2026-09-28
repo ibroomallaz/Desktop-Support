@@ -13,7 +13,7 @@ namespace DSAMVVM.Core.Services.Updates
         private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
 
         // Parameterless fallback constructor for backwards-compatibility or design-time instantiation
-        public UpdaterService() : this(App.Services?.GetService<IHttpService>() ?? new HttpService())
+        public UpdaterService() : this(App.Services.GetService<IHttpService>() ?? new HttpService())
         {
         }
 

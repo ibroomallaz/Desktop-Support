@@ -40,11 +40,9 @@ namespace DSAMVVM.Core.Services
             SearchHistory = new ReadOnlyObservableCollection<string>(_searchHistory);
             RecentSearches = new ReadOnlyObservableCollection<SearchHistoryEntry>(_recentSearches);
 
-            if (settings?.Ui?.Search != null)
-            {
-                _historyEnabled = settings.Ui.Search.UseSavedSearchHistory;
-                _historyCap = Math.Max(0, settings.Ui.Search.MaxSearchHistory);
-            }
+            if (settings?.Ui.Search == null) return;
+            _historyEnabled = settings.Ui.Search.UseSavedSearchHistory;
+            _historyCap = Math.Max(0, settings.Ui.Search.MaxSearchHistory);
         }
 
         public void ConfigureHistory(bool enabled, int capacity)

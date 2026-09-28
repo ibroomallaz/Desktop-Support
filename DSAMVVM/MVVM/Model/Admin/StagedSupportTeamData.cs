@@ -10,7 +10,7 @@ namespace DSAMVVM.MVVM.Model.Admin
 
     public sealed class StagedSupportTeamData
     {
-        public SupportTeam Team { get; set; } = new();
-        public StagedSupportTeamAction Action { get; set; } = StagedSupportTeamAction.AddOrUpdate;
+        public SupportTeam Team { get; init; } = new();
+        public StagedSupportTeamAction Action { get; init; } = StagedSupportTeamAction.AddOrUpdate;
     }
 }
