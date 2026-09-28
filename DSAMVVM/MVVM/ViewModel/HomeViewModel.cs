@@ -162,7 +162,11 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 if (Set(ref _currentPet, value))
                 {
-                    _ = LoadPetImageAsync(value, forceRefresh: false);
+                    var validImages = value?.ValidImages ?? [];
+                    CurrentImageIndex = validImages.Count > 1 ? Random.Shared.Next(validImages.Count) : 0;
+                    OnPropertyChanged(nameof(HasMultiplePhotos));
+                    OnPropertyChanged(nameof(PhotoCountDisplay));
+                    _ = LoadPetImageAsync(value, CurrentImageIndex, forceRefresh: false);
                 }
             }
         }
@@ -189,9 +193,37 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
+        private int _currentImageIndex;
+        public int CurrentImageIndex
+        {
+            get => _currentImageIndex;
+            set
+            {
+                if (Set(ref _currentImageIndex, value))
+                {
+                    OnPropertyChanged(nameof(PhotoCountDisplay));
+                    OnPropertyChanged(nameof(HasMultiplePhotos));
+                }
+            }
+        }
+
+        public bool HasMultiplePhotos => (CurrentPet?.ValidImages.Count ?? 0) > 1;
+
+        public string PhotoCountDisplay
+        {
+            get
+            {
+                var count = CurrentPet?.ValidImages.Count ?? 0;
+                if (count <= 1) return string.Empty;
+                return $"{CurrentImageIndex + 1}/{count}";
+            }
+        }
+
         private CancellationTokenSource? _petImageCts;
 
         public ICommand NextPetCommand { get; }
+        public ICommand NextPetPhotoCommand { get; }
+        public ICommand PrevPetPhotoCommand { get; }
         public ICommand RefreshPetImageCommand { get; }
         public ICommand SubmitPetCommand { get; }
 
@@ -415,12 +447,28 @@ namespace DSAMVVM.MVVM.ViewModel
                 Blurb = "Loading mascot of the day..."
             };
 
-            NextPetCommand = new RelayCommand(_ =>
+NextPetCommand = new RelayCommand(_ =>
             {
                 if (_pets.Count == 0) return;
                 _currentPetIndex = (_currentPetIndex + 1) % _pets.Count;
                 CurrentPet = _pets[_currentPetIndex];
             }, _ => _pets.Count > 1);
+
+            NextPetPhotoCommand = new RelayCommand(_ =>
+            {
+                var images = CurrentPet?.ValidImages ?? [];
+                if (images.Count <= 1) return;
+                CurrentImageIndex = (CurrentImageIndex + 1) % images.Count;
+                _ = LoadPetImageAsync(CurrentPet, CurrentImageIndex, forceRefresh: false);
+            }, _ => (CurrentPet?.ValidImages.Count ?? 0) > 1);
+
+            PrevPetPhotoCommand = new RelayCommand(_ =>
+            {
+                var images = CurrentPet?.ValidImages ?? [];
+                if (images.Count <= 1) return;
+                CurrentImageIndex = (CurrentImageIndex - 1 + images.Count) % images.Count;
+                _ = LoadPetImageAsync(CurrentPet, CurrentImageIndex, forceRefresh: false);
+            }, _ => (CurrentPet?.ValidImages.Count ?? 0) > 1);
 
             RefreshPetImageCommand = new RelayCommand(async _ =>
             {
@@ -429,7 +477,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 try
                 {
                     UiNotify.Info($"Refreshing photo for {CurrentPet.Name}...", showStatusBar: true);
-                    await LoadPetImageAsync(CurrentPet, forceRefresh: true);
+                    await LoadPetImageAsync(CurrentPet, CurrentImageIndex, forceRefresh: true);
                 }
                 finally
                 {
@@ -462,15 +510,16 @@ namespace DSAMVVM.MVVM.ViewModel
                 var data = await _serviceMeowService.LoadServiceMeowDataAsync().ConfigureAwait(false);
                 var allPets = data?.AllPets ?? [];
 
+                var initialPet = _serviceMeowService.GetRandomPet();
+
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     _pets.Clear();
                     if (allPets.Count > 0)
                     {
                         _pets.AddRange(allPets);
-                        int initialIndex = DateTime.Today.DayOfYear % _pets.Count;
-                        _currentPetIndex = initialIndex;
-                        CurrentPet = _pets[_currentPetIndex];
+                        _currentPetIndex = (initialPet != null) ? Math.Max(0, _pets.IndexOf(initialPet)) : 0;
+                        CurrentPet = initialPet ?? _pets[_currentPetIndex];
                     }
                     else
                     {
@@ -533,19 +582,22 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        private async Task LoadPetImageAsync(ServiceMeowPet? pet, bool forceRefresh)
+        private async Task LoadPetImageAsync(ServiceMeowPet? pet, int photoIndex, bool forceRefresh)
         {
             _petImageCts?.Cancel();
             _petImageCts?.Dispose();
             var cts = new CancellationTokenSource();
             _petImageCts = cts;
 
-            if (pet == null || string.IsNullOrWhiteSpace(pet.ImageUrl))
+            var images = pet?.ValidImages ?? [];
+            if (pet == null || images.Count == 0)
             {
                 CurrentPetImage = null;
                 return;
             }
 
+            var safeIndex = Math.Clamp(photoIndex, 0, images.Count - 1);
+            var targetUrl = images[safeIndex];
             var targetPetId = pet.Id;
 
             try
@@ -553,11 +605,11 @@ namespace DSAMVVM.MVVM.ViewModel
                 ImageSource? image = null;
                 if (_serviceMeowService != null)
                 {
-                    image = await _serviceMeowService.GetPetImageAsync(pet, forceRefresh: forceRefresh, ct: cts.Token).ConfigureAwait(false);
+                    image = await _serviceMeowService.GetImageAsync(targetUrl, forceRefresh: forceRefresh, ct: cts.Token).ConfigureAwait(false);
                 }
                 else if (_imageCacheService != null)
                 {
-                    image = await _imageCacheService.GetImageAsync(pet.ImageUrl, forceRefresh: forceRefresh, ct: cts.Token).ConfigureAwait(false);
+                    image = await _imageCacheService.GetImageAsync(targetUrl, forceRefresh: forceRefresh, ct: cts.Token).ConfigureAwait(false);
                 }
 
                 if (cts.Token.IsCancellationRequested) return;
@@ -656,4 +708,10 @@ namespace DSAMVVM.MVVM.ViewModel
         }
     }
 }
+
+
+
+
+
+
 

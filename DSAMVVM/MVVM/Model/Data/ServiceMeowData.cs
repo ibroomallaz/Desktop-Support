@@ -1,49 +1,36 @@
 using DSAMVVM.MVVM.Model.Schemas;
 using Newtonsoft.Json;
-using System.Runtime.Serialization;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DSAMVVM.MVVM.Model.Data
 {
-    public sealed class ServiceMeowData
+    public class ServiceMeowData
     {
+        public int SchemaVersion { get; set; } = 1;
         public ServiceMeowMeta Meta { get; set; } = new();
         public List<ServiceMeowOwner> Owners { get; set; } = [];
 
-        [OnDeserialized]
-        private void OnDeserialized(StreamingContext context)
-        {
-            foreach (var owner in Owners)
-            {
-                foreach (var pet in owner.Pets)
-                {
-                    pet.Owner = owner;
-                }
-            }
-        }
-
-        // Flattened list for rotation indexing, random selection, and search
         [JsonIgnore]
-        public IReadOnlyList<ServiceMeowPet> AllPets =>
+        public List<ServiceMeowPet> AllPets =>
             Owners.SelectMany(o => o.Pets).ToList();
     }
 
-    public sealed class ServiceMeowOwner
+    public class ServiceMeowOwner
     {
-        // NetID uniquely identifies staff at the top to avoid name/initial collisions
         public string NetId { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Team { get; set; } = string.Empty;
         public List<ServiceMeowPet> Pets { get; set; } = [];
 
         [JsonIgnore]
-        public string OwnerDisplay => string.IsNullOrWhiteSpace(Team)
-            ? Name
-            : $"{Name} · {Team}";
+        public string OwnerDisplay =>
+            !string.IsNullOrWhiteSpace(Team) ? $"{Name} · {Team}" : Name;
     }
 
-    public sealed class ServiceMeowPet
+    public class ServiceMeowPet
     {
-        public string Id { get; set; } = Guid.NewGuid().ToString("N")[..8];
+        public string Id { get; set; } = Guid.NewGuid().ToString("N");
         public string Name { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
         public string Breed { get; set; } = string.Empty;
@@ -54,24 +41,20 @@ namespace DSAMVVM.MVVM.Model.Data
         [JsonIgnore]
         public ServiceMeowOwner? Owner { get; set; }
 
+        [JsonIgnore]
+        public List<string> ValidImages =>
+            Images.Where(img =>
+            {
+                if (string.IsNullOrWhiteSpace(img)) return false;
+                var trimmed = img.Trim();
+                return !string.Equals(trimmed, "TBD", StringComparison.OrdinalIgnoreCase) &&
+                       !string.Equals(trimmed, "TDB", StringComparison.OrdinalIgnoreCase) &&
+                       !string.Equals(trimmed, "NONE", StringComparison.OrdinalIgnoreCase);
+            }).Select(img => img.Trim()).ToList();
+
         // Primary image compatibility getter for existing view bindings
         [JsonIgnore]
-        public string? ImageUrl
-        {
-            get
-            {
-                if (Images.Count == 0) return null;
-                var first = Images[0]?.Trim();
-                if (string.IsNullOrWhiteSpace(first)) return null;
-                if (string.Equals(first, "TBD", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(first, "TDB", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(first, "NONE", StringComparison.OrdinalIgnoreCase))
-                {
-                    return null;
-                }
-                return first;
-            }
-        }
+        public string? ImageUrl => ValidImages.Count > 0 ? ValidImages[0] : null;
 
         [JsonIgnore]
         public string BreedOrSpecies => !string.IsNullOrWhiteSpace(Breed) ? Breed : Species;

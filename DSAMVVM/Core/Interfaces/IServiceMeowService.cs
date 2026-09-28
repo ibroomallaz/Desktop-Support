@@ -10,5 +10,6 @@ namespace DSAMVVM.Core.Interfaces
         Task ReloadServiceMeowDataAsync(CancellationToken ct = default);
         Task<ImageSource?> GetPetImageAsync(ServiceMeowPet? pet, bool forceRefresh = false, CancellationToken ct = default);
         Task<ImageSource?> GetImageAsync(string? url, bool forceRefresh = false, int decodePixelWidth = 500, CancellationToken ct = default);
+        ServiceMeowPet? GetRandomPet();
     }
 }

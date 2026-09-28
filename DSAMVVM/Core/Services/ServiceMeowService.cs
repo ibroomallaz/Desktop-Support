@@ -50,6 +50,13 @@ namespace DSAMVVM.Core.Services
             return _imageCacheService.GetImageAsync(url, forceRefresh: forceRefresh, decodePixelWidth: decodePixelWidth, ct: ct);
         }
 
+        public ServiceMeowPet? GetRandomPet()
+        {
+            var pets = _cache?.AllPets;
+            if (pets == null || pets.Count == 0) return null;
+            return pets[Random.Shared.Next(pets.Count)];
+        }
+
         private async Task<ServiceMeowData?> LoadInternalAsync(bool isReload, CancellationToken ct)
         {
             if (!isReload && _cache != null) return _cache;
@@ -285,3 +292,4 @@ namespace DSAMVVM.Core.Services
         }
     }
 }
+
