@@ -3,7 +3,7 @@
     public sealed class FontSettings
     {
         public double DefaultSize { get; set; } = 14.0;
-        public bool ViewFontSizeOverride { get; set; } = false;
+        public bool ViewFontSizeOverride { get; set; }
         public void Clamp() => DefaultSize = UiLimits.ClampFontSize(DefaultSize);
     }
 

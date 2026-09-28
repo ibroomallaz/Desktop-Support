@@ -10,15 +10,14 @@ namespace DSAMVVM.MVVM.Model.Config.UI
 
         public void Normalize()
         {
-            if (Items == null || Items.Count == 0)
+            switch (Items.Count)
             {
-                Items = GetDefaultShortcuts();
-                return;
-            }
-
-            if (Items.Count > MaxShortcuts)
-            {
-                Items = Items.Take(MaxShortcuts).ToList();
+                case 0:
+                    Items = GetDefaultShortcuts();
+                    return;
+                case > MaxShortcuts:
+                    Items = Items.Take(MaxShortcuts).ToList();
+                    break;
             }
 
             for (int i = 0; i < Items.Count; i++)

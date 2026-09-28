@@ -13,11 +13,11 @@ namespace DSAMVVM.MVVM.Model.Config
 
         public void ApplyDefaultsAndClamp()
         {
-            Meta?.Normalize();
-            Ui?.NormalizeAll();
-            Paths?.NormalizeAll();
-            Logging?.Clamp();
-            QuickSearch?.Clamp();
+            Meta.Normalize();
+            Ui.NormalizeAll();
+            Paths.NormalizeAll();
+            Logging.Clamp();
+            QuickSearch.Clamp();
         }
     }
 }

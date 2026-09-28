@@ -21,18 +21,18 @@ namespace DSAMVVM.MVVM.Model.Config.UI
             set => Set(ref _title, value);
         }
 
-        private string _description = string.Empty;
+        private readonly string _description = string.Empty;
         public string Description
         {
             get => _description;
-            set => Set(ref _description, value);
+            init => Set(ref _description, value);
         }
 
-        private string _target = string.Empty;
+        private readonly string _target = string.Empty;
         public string Target
         {
             get => _target;
-            set => Set(ref _target, value);
+            init => Set(ref _target, value);
         }
 
         private string _icon = Glyphs.Links;
@@ -64,6 +64,7 @@ namespace DSAMVVM.MVVM.Model.Config.UI
         }
 
         [JsonIgnore]
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public ICommand? OpenCommand { get; set; }
 
         public HomeShortcutItem Clone() => new()

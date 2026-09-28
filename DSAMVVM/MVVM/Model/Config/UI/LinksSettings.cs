@@ -5,7 +5,7 @@ namespace DSAMVVM.MVVM.Model.Config.UI
     public sealed partial class LinksUiSettings
     {
         public bool OpenLastViewedFirst { get; set; } = true;
-        public bool OverrideEnabled { get; set; } = false;
+        public bool OverrideEnabled { get; set; }
         public string? OverrideTeam { get; set; }
         public string? LastTeam { get; set; }
 
