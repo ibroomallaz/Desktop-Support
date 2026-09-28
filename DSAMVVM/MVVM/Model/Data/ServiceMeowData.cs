@@ -1,4 +1,4 @@
-﻿using DSAMVVM.MVVM.Model.Schemas;
+using DSAMVVM.MVVM.Model.Schemas;
 using Newtonsoft.Json;
 using System.Runtime.Serialization;
 
@@ -56,7 +56,25 @@ namespace DSAMVVM.MVVM.Model.Data
 
         // Primary image compatibility getter for existing view bindings
         [JsonIgnore]
-        public string? ImageUrl => Images.Count > 0 ? Images[0] : null;
+        public string? ImageUrl
+        {
+            get
+            {
+                if (Images.Count == 0) return null;
+                var first = Images[0]?.Trim();
+                if (string.IsNullOrWhiteSpace(first)) return null;
+                if (string.Equals(first, "TBD", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(first, "TDB", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(first, "NONE", StringComparison.OrdinalIgnoreCase))
+                {
+                    return null;
+                }
+                return first;
+            }
+        }
+
+        [JsonIgnore]
+        public string BreedOrSpecies => !string.IsNullOrWhiteSpace(Breed) ? Breed : Species;
 
         [JsonIgnore]
         public string OwnerDisplay => Owner?.OwnerDisplay ?? string.Empty;

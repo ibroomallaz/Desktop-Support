@@ -116,8 +116,8 @@
                                           Height="26"
                                           SelectedIndex="{Binding SelectedSupportKnownIndex}"
                                           Style="{DynamicResource Combo.Links.Dropdown}">
-                                    <ComboBoxItem Content="True"/>
-                                    <ComboBoxItem Content="False"/>
+                                    <sys:String>True</sys:String>
+                                    <sys:String>False</sys:String>
                                 </ComboBox>
 
                                 <!-- Support Team -->
@@ -136,7 +136,7 @@
                                 <TextBox Grid.Row="3" Grid.Column="1" 
                                          Margin="0,0,0,6" 
                                          Height="26"
-                                         Visibility="{Binding IsOtherTeamSelected, Converter={StaticResource BoolToVis}}"
+                                         Visibility="{Binding IsOtherTeamSelected, Converter={StaticResource BoolToVis}}" 
                                          Style="{DynamicResource TextBox.Default}"
                                          Text="{Binding CustomTeamName, UpdateSourceTrigger=PropertyChanged}"/>
 
@@ -343,7 +343,7 @@
                                 <TextBox Grid.Row="2" Grid.Column="1" 
                                          Margin="0,0,0,6" 
                                          Height="26"
-                                         Visibility="{Binding IsOtherLinkTeamSelected, Converter={StaticResource BoolToVis}}"
+                                         Visibility="{Binding IsOtherLinkTeamSelected, Converter={StaticResource BoolToVis}}" 
                                          Style="{DynamicResource TextBox.Default}"
                                          Text="{Binding CustomLinkTeamName, UpdateSourceTrigger=PropertyChanged}"/>
 
@@ -531,7 +531,7 @@
 
                                 <Button Content="Delete Team" 
                                         Command="{Binding DeleteSupportTeamCommand}" 
-                                        Visibility="{Binding ShowDeleteSupportTeamButton, Converter={StaticResource BoolToVis}}"
+                                        Visibility="{Binding ShowDeleteSupportTeamButton, Converter={StaticResource BoolToVis}}" 
                                         Width="90" 
                                         Height="28" 
                                         FontSize="11"
@@ -540,7 +540,7 @@
 
                                 <Button Content="Delete Link" 
                                         Command="{Binding DeleteLinkCommand}" 
-                                        Visibility="{Binding ShowDeleteLinkButton, Converter={StaticResource BoolToVis}}"
+                                        Visibility="{Binding ShowDeleteLinkButton, Converter={StaticResource BoolToVis}}" 
                                         Width="90" 
                                         Height="28" 
                                         FontSize="11"
@@ -549,7 +549,7 @@
 
                                 <Button Content="Delete Pet" 
                                         Command="{Binding DeleteServiceMeowCommand}" 
-                                        Visibility="{Binding ShowDeleteServiceMeowButton, Converter={StaticResource BoolToVis}}"
+                                        Visibility="{Binding ShowDeleteServiceMeowButton, Converter={StaticResource BoolToVis}}" 
                                         Width="90" 
                                         Height="28" 
                                         FontSize="11"

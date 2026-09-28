@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="DSAMVVM.MVVM.View.HomeView"
+<UserControl x:Class="DSAMVVM.MVVM.View.HomeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -793,7 +793,7 @@
                                         BorderBrush="#35FFFFFF"
                                         BorderThickness="1"
                                         Padding="8,3">
-                                    <TextBlock Text="{Binding CurrentPet.Breed}"
+                                    <TextBlock Text="{Binding CurrentPet.BreedOrSpecies}"
                                                Foreground="{DynamicResource Brush.Text.Primary}"
                                                FontSize="10"
                                                FontWeight="SemiBold"/>
@@ -866,3 +866,4 @@
         </Grid>
     </Border>
 </UserControl>
+

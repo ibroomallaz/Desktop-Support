@@ -587,6 +587,7 @@ namespace DSAMVVM
             services.AddSingleton<IDepartmentService, DepartmentService>();
             services.AddSingleton<IADService, ADService>();
             services.AddSingleton<ILinksService, LinksService>();
+            services.AddSingleton<IServiceMeowService, ServiceMeowService>();
             services.AddSingleton<IAdminService, AdminService>();
             services.AddSingleton<IFileDialogService, FileDialogService>();
             services.AddSingleton<IJsonExportService, JsonExportService>();
@@ -642,7 +643,8 @@ namespace DSAMVVM
                     linkRouter: sp.GetRequiredService<IDeepLinkRoutingService>(),
                     imageCacheService: sp.GetRequiredService<IImageCacheService>(),
                     settingsService: sp.GetRequiredService<ISettingsService>(),
-                    linksService: sp.GetRequiredService<ILinksService>()
+                    linksService: sp.GetRequiredService<ILinksService>(),
+                    serviceMeowService: sp.GetRequiredService<IServiceMeowService>()
                 )
             );
 
@@ -663,3 +665,4 @@ namespace DSAMVVM
         }
     }
 }
+

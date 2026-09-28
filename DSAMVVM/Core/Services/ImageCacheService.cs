@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model;
 using System.Collections.Concurrent;
@@ -10,9 +10,10 @@ using System.Windows.Media.Imaging;
 
 namespace DSAMVVM.Core.Services
 {
-    // Service for downloading, caching, and serving images from local disk without file locking.
+    // Service for downloading, caching, and serving images from local disk without file locking or race conditions.
     public class ImageCacheService(IHttpService http) : IImageCacheService
     {
+        private const string Tag = "ImageCache";
         private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
         private readonly string _cacheDirectory = Globals.g_ServiceMeowImageCacheDir;
         private readonly ConcurrentDictionary<string, SemaphoreSlim> _fileLocks = new();
@@ -25,10 +26,31 @@ namespace DSAMVVM.Core.Services
         {
             if (string.IsNullOrWhiteSpace(url)) return null;
 
-            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
-                (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            bool isWeb = false;
+            bool isLocalFile = false;
+            string? localSourcePath = null;
+
+            if (File.Exists(url))
             {
-                Log.Warn("ImageCache", $"Invalid image URL: '{url}'");
+                isLocalFile = true;
+                localSourcePath = url;
+            }
+            else if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            {
+                if (uri.IsFile && File.Exists(uri.LocalPath))
+                {
+                    isLocalFile = true;
+                    localSourcePath = uri.LocalPath;
+                }
+                else if (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+                {
+                    isWeb = true;
+                }
+            }
+
+            if (!isWeb && !isLocalFile)
+            {
+                Log.Warn(Tag, $"Invalid or unreachable image URL/path: '{url}'");
                 return null;
             }
 
@@ -40,7 +62,7 @@ namespace DSAMVVM.Core.Services
 
             try
             {
-                // 1. If not forcing a refresh and file exists, load immediately from disk
+                // 1. If not forcing a refresh and cached file exists, load immediately from disk cache
                 if (!forceRefresh && File.Exists(localPath))
                 {
                     var cachedBitmap = LoadBitmapFromDisk(localPath, decodePixelWidth);
@@ -53,33 +75,55 @@ namespace DSAMVVM.Core.Services
                     try { File.Delete(localPath); } catch { /* best-effort */ }
                 }
 
-                // 2. Download remote image
-                try
+                // 2. Fetch and cache image (Local file copy or Web download)
+                if (isLocalFile && !string.IsNullOrEmpty(localSourcePath))
                 {
-                    Log.Info("ImageCache", $"Downloading image from '{url}' to '{localPath}' (forceRefresh={forceRefresh})");
-                    EnsureDirectory(localPath);
-
-                    await _http.DownloadFileAsync(url, localPath, TimeSpan.FromSeconds(15), ct).ConfigureAwait(false);
-
-                    var downloadedBitmap = LoadBitmapFromDisk(localPath, decodePixelWidth);
-                    if (downloadedBitmap != null)
+                    try
                     {
-                        return downloadedBitmap;
+                        Log.Info(Tag, $"Copying local image from '{localSourcePath}' to cache '{localPath}' (forceRefresh={forceRefresh})");
+                        EnsureDirectory(localPath);
+                        File.Copy(localSourcePath, localPath, overwrite: true);
+
+                        var localBitmap = LoadBitmapFromDisk(localPath, decodePixelWidth);
+                        if (localBitmap != null)
+                        {
+                            return localBitmap;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn(Tag, $"Failed to copy local image from '{localSourcePath}': {ex.Message}");
                     }
                 }
-                catch (OperationCanceledException)
+                else if (isWeb)
                 {
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    Log.Warn("ImageCache", $"Failed to download image from '{url}': {ex.Message}");
-
-                    // Fallback: If refresh failed but previous disk cache still exists, return it
-                    if (File.Exists(localPath))
+                    try
                     {
-                        Log.Info("ImageCache", $"Falling back to existing disk cache for '{url}'");
-                        return LoadBitmapFromDisk(localPath, decodePixelWidth);
+                        Log.Info(Tag, $"Downloading image from '{url}' to '{localPath}' (forceRefresh={forceRefresh})");
+                        EnsureDirectory(localPath);
+
+                        await _http.DownloadFileAsync(url, localPath, TimeSpan.FromSeconds(15), ct).ConfigureAwait(false);
+
+                        var downloadedBitmap = LoadBitmapFromDisk(localPath, decodePixelWidth);
+                        if (downloadedBitmap != null)
+                        {
+                            return downloadedBitmap;
+                        }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn(Tag, $"Failed to download image from '{url}': {ex.Message}");
+
+                        // Fallback: If refresh failed but previous disk cache still exists, return it
+                        if (File.Exists(localPath))
+                        {
+                            Log.Info(Tag, $"Falling back to existing disk cache for '{url}'");
+                            return LoadBitmapFromDisk(localPath, decodePixelWidth);
+                        }
                     }
                 }
 
@@ -123,7 +167,7 @@ namespace DSAMVVM.Core.Services
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn("ImageCache", $"Failed to clear image cache directory: {ex.Message}");
+                    Log.Warn(Tag, $"Failed to clear image cache directory: {ex.Message}");
                 }
             }, ct);
         }
@@ -142,7 +186,7 @@ namespace DSAMVVM.Core.Services
                 var bitmap = new BitmapImage();
                 bitmap.BeginInit();
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+                // In-memory stream decode with OnLoad avoids file locks; avoid IgnoreImageCache to prevent WPF .NET 10 null key bug in ImagingCache
 
                 if (decodePixelWidth > 0)
                 {
@@ -158,7 +202,7 @@ namespace DSAMVVM.Core.Services
             }
             catch (Exception ex)
             {
-                Log.Warn("ImageCache", $"Failed to decode image file '{filePath}': {ex.Message}");
+                Log.Warn(Tag, $"Failed to decode image file '{filePath}': {ex.Message}");
                 return null;
             }
         }
@@ -181,7 +225,15 @@ namespace DSAMVVM.Core.Services
                 if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
                 {
                     var ext = Path.GetExtension(uri.AbsolutePath).ToLowerInvariant();
-                    if (ext is ".png" or ".jpg" or ".jpeg" or ".gif" or ".bmp" or ".ico")
+                    if (ext is ".png" or ".jpg" or ".jpeg" or ".gif" or ".bmp" or ".ico" or ".webp")
+                    {
+                        return ext;
+                    }
+                }
+                else
+                {
+                    var ext = Path.GetExtension(url).ToLowerInvariant();
+                    if (ext is ".png" or ".jpg" or ".jpeg" or ".gif" or ".bmp" or ".ico" or ".webp")
                     {
                         return ext;
                     }
@@ -205,3 +257,5 @@ namespace DSAMVVM.Core.Services
         }
     }
 }
+
+

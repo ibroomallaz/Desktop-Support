@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
@@ -42,6 +42,7 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IImageCacheService? _imageCacheService;
         private readonly ISettingsService? _settingsService;
         private readonly ILinksService? _linksService;
+        private readonly IServiceMeowService? _serviceMeowService;
 
         private NetworkStateInfo _networkState = NetworkStateInfo.Disconnected();
         private ADStateInfo _adState = ADStateInfo.Checking();
@@ -149,63 +150,20 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand AddShortcutCommand { get; }
 
         // --- Pet of the Day (ServiceMeow) ---
-        private readonly List<ServiceMeowOwner> _mockOwners =
-        [
-            new()
-            {
-                NetId = "davet",
-                Name = "Dave T.",
-                Team = "Network Operations",
-                Pets =
-                [
-                    new()
-                    {
-                        Name = "Nimbus",
-                        Species = "Cat",
-                        Breed = "British Shorthair",
-                        Title = "Chief Packet Sniffer",
-                        Blurb = "Discovered a loose patch cable by chewing on the boot."
-                    },
-                    new()
-                    {
-                        Name = "Barnaby",
-                        Species = "Dog",
-                        Breed = "Golden Retriever",
-                        Title = "Lead Morale Specialist",
-                        Blurb = "Has a 99.9% success rate resolving escalated user stress tickets."
-                    }
-                ]
-            },
-            new()
-            {
-                NetId = "sarahm",
-                Name = "Sarah M.",
-                Team = "Service Desk",
-                Pets =
-                [
-                    new()
-                    {
-                        Name = "Pixel",
-                        Species = "Cat",
-                        Breed = "Calico",
-                        Title = "Senior Cable Untangler",
-                        Blurb = "Always sleeps directly on top of the warmest switch rack."
-                    }
-                ]
-            }
-        ];
+        private readonly List<ServiceMeowPet> _pets = [];
+        public IReadOnlyList<ServiceMeowPet> Pets => _pets;
 
-        private readonly List<ServiceMeowPet> _mockPets;
         private int _currentPetIndex;
-        private ServiceMeowPet _currentPet;
-        public ServiceMeowPet CurrentPet
+        private ServiceMeowPet? _currentPet;
+        public ServiceMeowPet? CurrentPet
         {
             get => _currentPet;
             set
             {
-                _currentPet = value;
-                OnPropertyChanged();
-                _ = LoadPetImageAsync(forceRefresh: false);
+                if (Set(ref _currentPet, value))
+                {
+                    _ = LoadPetImageAsync(value, forceRefresh: false);
+                }
             }
         }
 
@@ -231,6 +189,8 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
+        private CancellationTokenSource? _petImageCts;
+
         public ICommand NextPetCommand { get; }
         public ICommand RefreshPetImageCommand { get; }
         public ICommand SubmitPetCommand { get; }
@@ -249,7 +209,8 @@ namespace DSAMVVM.MVVM.ViewModel
             IDeepLinkRoutingService? linkRouter = null,
             IImageCacheService? imageCacheService = null,
             ISettingsService? settingsService = null,
-            ILinksService? linksService = null)
+            ILinksService? linksService = null,
+            IServiceMeowService? serviceMeowService = null)
         {
             _openUser = openUser;
             _openComputer = openComputer;
@@ -265,6 +226,7 @@ namespace DSAMVVM.MVVM.ViewModel
             _imageCacheService = imageCacheService;
             _settingsService = settingsService;
             _linksService = linksService;
+            _serviceMeowService = serviceMeowService;
 
             if (_networkService != null)
             {
@@ -415,7 +377,7 @@ namespace DSAMVVM.MVVM.ViewModel
                     App.Settings.Ui.Shortcuts.Normalize();
                     _settingsService?.RequestSave(App.Settings, Globals.g_SettingsPath);
                     OnPropertyChanged(nameof(CanAddShortcut));
-                    UiNotify.Info($"Removed shortcut '{item.Title}'", showStatusBar: true);
+                    UiNotify.Info($"Removed shortcut: {item.Title}", showStatusBar: true);
                 }
             });
 
@@ -444,51 +406,87 @@ namespace DSAMVVM.MVVM.ViewModel
                 };
             }
 
-            // ServiceMeow setup
-            foreach (var owner in _mockOwners)
+            // Initial ServiceMeow mascot placeholder while remote data loads
+            _currentPet = new ServiceMeowPet
             {
-                foreach (var pet in owner.Pets)
-                {
-                    pet.Owner = owner;
-                }
-            }
-            _mockPets = _mockOwners.SelectMany(o => o.Pets).ToList();
-            _currentPet = _mockPets[0];
+                Name = "ServiceMeow",
+                Title = "Support Mascot",
+                Species = "Cat",
+                Blurb = "Loading mascot of the day..."
+            };
 
             NextPetCommand = new RelayCommand(_ =>
             {
-                _currentPetIndex = (_currentPetIndex + 1) % _mockPets.Count;
-                CurrentPet = _mockPets[_currentPetIndex];
-            });
+                if (_pets.Count == 0) return;
+                _currentPetIndex = (_currentPetIndex + 1) % _pets.Count;
+                CurrentPet = _pets[_currentPetIndex];
+            }, _ => _pets.Count > 1);
 
             RefreshPetImageCommand = new RelayCommand(async _ =>
             {
-                if (IsImageRefreshing) return;
+                if (IsImageRefreshing || CurrentPet == null) return;
                 IsImageRefreshing = true;
                 try
                 {
                     UiNotify.Info($"Refreshing photo for {CurrentPet.Name}...", showStatusBar: true);
-                    await LoadPetImageAsync(forceRefresh: true);
+                    await LoadPetImageAsync(CurrentPet, forceRefresh: true);
                 }
                 finally
                 {
                     IsImageRefreshing = false;
                 }
-            }, _ => !IsImageRefreshing);
+            }, _ => !IsImageRefreshing && CurrentPet != null);
 
             SubmitPetCommand = new RelayCommand(_ =>
             {
                 UiNotify.Info("ServiceMeow: Pet submission portal will open in browser.", showStatusBar: true);
             });
 
-            // Load initial mascot image from cache/disk
-            _ = LoadPetImageAsync(forceRefresh: false);
-
             // Wire search service history for real recent searches
             if (_searchService != null)
             {
                 _searchService.HistoryChanged += OnSearchHistoryChanged;
                 SyncRecentActivities();
+            }
+
+            // Asynchronously load real ServiceMeow data from service
+            _ = InitializeServiceMeowAsync();
+        }
+
+        private async Task InitializeServiceMeowAsync()
+        {
+            if (_serviceMeowService == null) return;
+
+            try
+            {
+                var data = await _serviceMeowService.LoadServiceMeowDataAsync().ConfigureAwait(false);
+                var allPets = data?.AllPets ?? [];
+
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    _pets.Clear();
+                    if (allPets.Count > 0)
+                    {
+                        _pets.AddRange(allPets);
+                        int initialIndex = DateTime.Today.DayOfYear % _pets.Count;
+                        _currentPetIndex = initialIndex;
+                        CurrentPet = _pets[_currentPetIndex];
+                    }
+                    else
+                    {
+                        CurrentPet = new ServiceMeowPet
+                        {
+                            Name = "ServiceMeow",
+                            Title = "Support Mascot",
+                            Species = "Cat",
+                            Blurb = "Welcome to Desktop Support! Mascot data is standing by."
+                        };
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("HomeVM", $"Failed to initialize ServiceMeow: {ex.Message}");
             }
         }
 
@@ -535,23 +533,60 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        private async Task LoadPetImageAsync(bool forceRefresh)
+        private async Task LoadPetImageAsync(ServiceMeowPet? pet, bool forceRefresh)
         {
-            if (_imageCacheService == null || string.IsNullOrWhiteSpace(CurrentPet?.ImageUrl))
+            _petImageCts?.Cancel();
+            _petImageCts?.Dispose();
+            var cts = new CancellationTokenSource();
+            _petImageCts = cts;
+
+            if (pet == null || string.IsNullOrWhiteSpace(pet.ImageUrl))
             {
                 CurrentPetImage = null;
                 return;
             }
 
+            var targetPetId = pet.Id;
+
             try
             {
-                var image = await _imageCacheService.GetImageAsync(CurrentPet.ImageUrl, forceRefresh: forceRefresh);
-                CurrentPetImage = image;
+                ImageSource? image = null;
+                if (_serviceMeowService != null)
+                {
+                    image = await _serviceMeowService.GetPetImageAsync(pet, forceRefresh: forceRefresh, ct: cts.Token).ConfigureAwait(false);
+                }
+                else if (_imageCacheService != null)
+                {
+                    image = await _imageCacheService.GetImageAsync(pet.ImageUrl, forceRefresh: forceRefresh, ct: cts.Token).ConfigureAwait(false);
+                }
+
+                if (cts.Token.IsCancellationRequested) return;
+
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    if (!cts.Token.IsCancellationRequested && _currentPet?.Id == targetPetId)
+                    {
+                        CurrentPetImage = image;
+                    }
+                });
+            }
+            catch (OperationCanceledException)
+            {
+                // Canceled due to mascot rotation or forced refresh
             }
             catch (Exception ex)
             {
-                Log.Warn("HomeVM", $"Failed to load image for mascot '{CurrentPet.Name}': {ex.Message}");
-                CurrentPetImage = null;
+                if (!cts.Token.IsCancellationRequested)
+                {
+                    Log.Warn("HomeVM", $"Failed to load image for mascot '{pet.Name}': {ex.Message}");
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        if (_currentPet?.Id == targetPetId)
+                        {
+                            CurrentPetImage = null;
+                        }
+                    });
+                }
             }
         }
 
@@ -586,33 +621,18 @@ namespace DSAMVVM.MVVM.ViewModel
                     _ => Glyphs.Search
                 };
 
-                var tag = entry.Target switch
-                {
-                    SearchTarget.User => "User",
-                    SearchTarget.Computer => "Device",
-                    SearchTarget.Group => "Group",
-                    SearchTarget.Admin => "Admin",
-                    _ => "Search"
-                };
-
                 RecentActivities.Add(new RecentActivityItem
                 {
                     Query = entry.Query,
                     Title = entry.Query,
                     Target = entry.Target,
+                    TypeTag = entry.Target.ToString().ToUpperInvariant(),
                     Icon = glyph,
-                    TypeTag = tag,
                     ActionCommand = new RelayCommand(_ =>
                     {
-                        string viewName = entry.Target switch
-                        {
-                            SearchTarget.User => "user",
-                            SearchTarget.Computer => "computer",
-                            SearchTarget.Group => "group",
-                            SearchTarget.Admin => "admin",
-                            _ => "home"
-                        };
-                        _linkRouter?.RequestNavigation(viewName, entry.Query);
+                        if (entry.Target == SearchTarget.User) _openUser?.Invoke(entry.Query);
+                        else if (entry.Target == SearchTarget.Computer) _openComputer?.Invoke(entry.Query);
+                        else if (entry.Target == SearchTarget.Group) _goGroups?.Invoke();
                     })
                 });
             }
@@ -622,12 +642,18 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             try
             {
-                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
             }
-            catch
+            catch (Exception ex)
             {
-                // ignored
+                Log.Error("HomeVM", $"Failed to launch URL '{url}': {ex.Message}");
+                UiNotify.Warn($"Could not open link: {ex.Message}");
             }
         }
     }
 }
+

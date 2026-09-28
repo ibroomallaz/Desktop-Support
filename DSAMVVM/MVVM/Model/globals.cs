@@ -3,16 +3,16 @@ using System.IO;
 
 namespace DSAMVVM.MVVM.Model
 {
-    public class Globals
+    public abstract class Globals
     {
 
 #pragma warning disable CA2211 // Non-constant fields should not be visible
-        public static string g_AppVersion = VersionDisplayHelper.GetSemVerDisplay();
-        public static string g_FileVersion = VersionDisplayHelper.GetFileVersionDisplay();
+        public static readonly string g_AppVersion = VersionDisplayHelper.GetSemVerDisplay();
+        public static readonly string g_FileVersion = VersionDisplayHelper.GetFileVersionDisplay();
 #pragma warning restore CA2211 // Non-constant fields should not be visible
 
         //Entra ID / Graph constants
-        //Publically discoverable keys are safe for repository
+        //Publicly discoverable keys are safe for repository
         public const string EntraClientId = "36cd585b-c3cd-48e0-9fef-0a5fc69f0fa0";
         public const string EntraTenantId = "5ee35505-eb8e-4929-937d-645df5013288";
         public const string EntraInstanceUrl = "https://login.microsoftonline.com/";
@@ -29,7 +29,7 @@ namespace DSAMVVM.MVVM.Model
         public const string g_LinksJSON = "https://arizona.box.com/shared/static/zg9sd4zpbfse7vk060e4fsegqabhdacs.json";
         public const string g_NewsJSON = "https://arizona.box.com/shared/static/z3nbs9pyehw27len70mhz0p71q4xxidz.json";
         public const string g_DepartmentTestJSONURL = "https://arizona.box.com/shared/static/nuiy4gqgxqwzlnzzz893id5bnmal2f86.json";
-        public const string g_ServiceMeowJSON = "https://arizona.box.com/shared/static/placeholder_servicemeow.json";
+        public const string g_ServiceMeowJSON = "https://arizona.box.com/shared/static/n0w81iie8a9okuq85u3zh55gp1rfr6xx.json";
 
         // Links
         public const string g_SharepointHome = "https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/ProjectHome.aspx";

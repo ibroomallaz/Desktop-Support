@@ -10,12 +10,13 @@ using System.IO;
 
 namespace DSAMVVM.Core.Services
 {
-    public class AdminService(IDepartmentService deptService, ILinksService linksService) : IAdminService
+    public class AdminService(IDepartmentService deptService, ILinksService linksService, IServiceMeowService? meowService = null) : IAdminService
     {
         private const string Tag = "AdminService";
 
         private readonly IDepartmentService _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
         private readonly ILinksService _linksService = linksService ?? throw new ArgumentNullException(nameof(linksService));
+        private readonly IServiceMeowService? _meowService = meowService;
 
         // --- Paths ---
 
@@ -532,11 +533,9 @@ namespace DSAMVVM.Core.Services
                             (string.Equals(p.Name, staged.Pet.Name, StringComparison.OrdinalIgnoreCase) &&
                              string.Equals(owner.NetId, staged.OwnerNetId, StringComparison.OrdinalIgnoreCase)));
 
-                        if (petToRemove != null)
-                        {
-                            owner.Pets.Remove(petToRemove);
-                            break;
-                        }
+                        if (petToRemove == null) continue;
+                        owner.Pets.Remove(petToRemove);
+                        break;
                     }
 
                     meowData.Owners.RemoveAll(o => o.Pets.Count == 0);
@@ -716,3 +715,4 @@ namespace DSAMVVM.Core.Services
         }
     }
 }
+

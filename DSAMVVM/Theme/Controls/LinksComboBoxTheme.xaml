@@ -53,7 +53,8 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
-                    <Grid Background="{TemplateBinding Background}">
+                    <Grid Background="{TemplateBinding Background}"
+                          TextElement.Foreground="{TemplateBinding Foreground}">
                         <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -70,7 +71,8 @@
     <Style x:Key="ComboItem.Links" TargetType="ComboBoxItem">
         <Setter Property="Padding" Value="12,6"/>
         <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{StaticResource Combo.Fg}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBoxItem">
@@ -83,9 +85,10 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Combo.BgHover}"/>
+                            <Setter Property="Foreground" Value="#FFFFFFFF"/>
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Foreground" Value="{StaticResource Combo.Fg}"/>
+                            <Setter Property="Foreground" Value="#FFFFFFFF"/>
                             <Setter TargetName="Root" Property="Background" Value="{StaticResource Combo.BgPressed}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
@@ -97,12 +100,15 @@
         </Setter>
     </Style>
 
-    <!-- dropdown (non-editable) -->
+    <!-- Implicit style for ComboBoxItem so any explicit or implicit items inherit these visuals -->
+    <Style TargetType="{x:Type ComboBoxItem}" BasedOn="{StaticResource ComboItem.Links}"/>
+
+    <!-- dropdown (supports both non-editable and editable) -->
     <Style x:Key="Combo.Links.Dropdown" TargetType="ComboBox">
         <Setter Property="IsEditable" Value="False"/>
         <!-- Removed SelectedIndex forcing so bindings can select saved values -->
         <Setter Property="Padding" Value="{StaticResource Combo.Padding}"/>
-        <Setter Property="Foreground" Value="{StaticResource Combo.Fg}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}"/>
         <Setter Property="Background" Value="{StaticResource Combo.Bg}"/>
         <Setter Property="BorderBrush" Value="{StaticResource Combo.Border}"/>
         <Setter Property="BorderThickness" Value="{StaticResource Combo.BorderThickness}"/>
@@ -127,19 +133,22 @@
                         <!-- closed display + chevron -->
                         <ToggleButton x:Name="DropDownButton"
                                       Style="{StaticResource Combo.DropToggleStyle}"
+                                      Foreground="{TemplateBinding Foreground}"
                                       ClickMode="Press"
                                       IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
-                            <Grid>
+                            <Grid TextElement.Foreground="{TemplateBinding Foreground}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
                                 <!-- Selected content (supports ItemsSource + ItemTemplate via SelectionBoxItem) -->
-                                <ContentPresenter Grid.Column="0"
+                                <ContentPresenter x:Name="ContentSite"
+                                                  Grid.Column="0"
                                                   Margin="{TemplateBinding Padding}"
                                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  TextElement.Foreground="{TemplateBinding Foreground}"
                                                   Content="{TemplateBinding SelectionBoxItem}"
                                                   ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                                   ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"/>
@@ -160,6 +169,27 @@
                                 </Border>
                             </Grid>
                         </ToggleButton>
+
+                        <!-- editable text box (for IsEditable="True") -->
+                        <TextBox x:Name="PART_EditableTextBox"
+                                 Margin="10,0,32,0"
+                                 Padding="0"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                 HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                 Foreground="{TemplateBinding Foreground}"
+                                 CaretBrush="{TemplateBinding Foreground}"
+                                 FontSize="{TemplateBinding FontSize}"
+                                 FontFamily="{TemplateBinding FontFamily}"
+                                 FontWeight="{TemplateBinding FontWeight}"
+                                 IsReadOnly="{TemplateBinding IsReadOnly}"
+                                 Visibility="Collapsed">
+                            <TextBox.Resources>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="{StaticResource Color.Surface.Hover}"/>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#FFFFFFFF"/>
+                            </TextBox.Resources>
+                        </TextBox>
 
                         <!-- dropdown list -->
                         <Popup x:Name="PART_Popup"
@@ -187,6 +217,11 @@
 
                     <!-- states -->
                     <ControlTemplate.Triggers>
+                        <Trigger Property="IsEditable" Value="True">
+                            <Setter Property="IsTabStop" Value="False"/>
+                            <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="ContentSite" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Outer" Property="Background" Value="{StaticResource Combo.BgHover}"/>
                             <Setter Property="BorderBrush" Value="{StaticResource Combo.Border.Active}"/>
