@@ -73,7 +73,7 @@ namespace DSAMVVM.MVVM.Model
             if (!Version.TryParse(requiredVersion, out var required)) return true;
 
             // Standard path for the .NET Desktop Runtime
-            var runtimePath = @"C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App";
+            const string runtimePath = @"C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App";
 
             if (!Directory.Exists(runtimePath)) return false;
 
@@ -117,4 +117,3 @@ namespace DSAMVVM.MVVM.Model
         }
     }
 }
-

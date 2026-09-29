@@ -1,8 +1,6 @@
-﻿using System.Windows.Controls;
-
-namespace DSAMVVM.MVVM.View
+﻿namespace DSAMVVM.MVVM.View
 {
-    public partial class HomeView : UserControl
+    public partial class HomeView
     {
         public HomeView()
         {

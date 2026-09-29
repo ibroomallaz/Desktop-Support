@@ -25,14 +25,12 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand? ActionCommand { get; init; }
     }
 
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class HomeViewModel : ObservableObject
     {
         private readonly Action<string?>? _openUser;
         private readonly Action<string?>? _openComputer;
         private readonly Action? _goGroups;
-        private readonly Action? _goEntra;
-        private readonly Action? _goLinks;
-        private readonly Action? _goAbout;
 
         private readonly INetworkDetectionService? _networkService;
         private readonly IADDetectionService? _adDetectionService;
@@ -41,11 +39,24 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IDeepLinkRoutingService? _linkRouter;
         private readonly IImageCacheService? _imageCacheService;
         private readonly ISettingsService? _settingsService;
-        private readonly ILinksService? _linksService;
         private readonly IServiceMeowService? _serviceMeowService;
 
         private NetworkStateInfo _networkState = NetworkStateInfo.Disconnected();
         private ADStateInfo _adState = ADStateInfo.Checking();
+
+        private string _title = "Home";
+        public string Title
+        {
+            get => _title;
+            set => Set(ref _title, value);
+        }
+
+        private string _subtitle = "Quick access dashboard and environment status";
+        public string Subtitle
+        {
+            get => _subtitle;
+            set => Set(ref _subtitle, value);
+        }
 
         public ICommand GoGroupsCommand { get; }
         public ICommand GoEntraCommand { get; }
@@ -77,16 +88,10 @@ namespace DSAMVVM.MVVM.ViewModel
         // --- Entra / Microsoft 365 Status ---
         public bool IsEntraSignedIn => _authService?.IsAuthenticated ?? false;
 
-        public string EntraAccountName
-        {
-            get
-            {
-                if (!string.IsNullOrWhiteSpace(_authService?.CurrentAccountUpn))
-                    return _authService.CurrentAccountUpn;
-
-                return $"{Environment.UserName.ToLowerInvariant()}@arizona.edu";
-            }
-        }
+        public string EntraAccountName =>
+            !string.IsNullOrWhiteSpace(_authService?.CurrentAccountUpn)
+                ? _authService.CurrentAccountUpn
+                : $"{Environment.UserName.ToLowerInvariant()}@arizona.edu";
 
         public string EntraStatusDotColor => IsEntraSignedIn ? "#3CD070" : "#FFA000";
 
@@ -101,7 +106,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public string DcStatusToolTip => _adState.ToolTipText;
 
-        public string DcStatusDotColor => IsTestingDc ? "#FFA000" : (_adState.IsReachable ? "#3CD070" : "#FF5252");
+        public string DcStatusDotColor => IsTestingDc ? "#FFA000" : _adState.IsReachable ? "#3CD070" : "#FF5252";
 
         private bool _isTestingDc;
         public bool IsTestingDc
@@ -130,14 +135,13 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _isEditMode;
             set
             {
-                if (Set(ref _isEditMode, value))
+                if (!Set(ref _isEditMode, value)) return;
+
+                OnPropertyChanged(nameof(CanAddShortcut));
+                if (!value)
                 {
-                    OnPropertyChanged(nameof(CanAddShortcut));
-                    if (!value)
-                    {
-                        // Exited edit mode: flush any reordered or updated items to disk
-                        _settingsService?.RequestSave(App.Settings, Globals.g_SettingsPath);
-                    }
+                    // Exited edit mode: flush any reordered or updated items to disk
+                    _settingsService?.RequestSave(App.Settings, Globals.g_SettingsPath);
                 }
             }
         }
@@ -160,14 +164,13 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _currentPet;
             set
             {
-                if (Set(ref _currentPet, value))
-                {
-                    var validImages = value?.ValidImages ?? [];
-                    CurrentImageIndex = validImages.Count > 1 ? Random.Shared.Next(validImages.Count) : 0;
-                    OnPropertyChanged(nameof(HasMultiplePhotos));
-                    OnPropertyChanged(nameof(PhotoCountDisplay));
-                    _ = LoadPetImageAsync(value, CurrentImageIndex, forceRefresh: false);
-                }
+                if (!Set(ref _currentPet, value)) return;
+
+                var validImages = value?.ValidImages ?? [];
+                CurrentImageIndex = validImages.Count > 1 ? Random.Shared.Next(validImages.Count) : 0;
+                OnPropertyChanged(nameof(HasMultiplePhotos));
+                OnPropertyChanged(nameof(PhotoCountDisplay));
+                _ = LoadPetImageAsync(value, CurrentImageIndex, forceRefresh: false);
             }
         }
 
@@ -199,11 +202,10 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _currentImageIndex;
             set
             {
-                if (Set(ref _currentImageIndex, value))
-                {
-                    OnPropertyChanged(nameof(PhotoCountDisplay));
-                    OnPropertyChanged(nameof(HasMultiplePhotos));
-                }
+                if (!Set(ref _currentImageIndex, value)) return;
+
+                OnPropertyChanged(nameof(PhotoCountDisplay));
+                OnPropertyChanged(nameof(HasMultiplePhotos));
             }
         }
 
@@ -214,8 +216,7 @@ namespace DSAMVVM.MVVM.ViewModel
             get
             {
                 var count = CurrentPet?.ValidImages.Count ?? 0;
-                if (count <= 1) return string.Empty;
-                return $"{CurrentImageIndex + 1}/{count}";
+                return count <= 1 ? string.Empty : $"{CurrentImageIndex + 1}/{count}";
             }
         }
 
@@ -241,15 +242,11 @@ namespace DSAMVVM.MVVM.ViewModel
             IDeepLinkRoutingService? linkRouter = null,
             IImageCacheService? imageCacheService = null,
             ISettingsService? settingsService = null,
-            ILinksService? linksService = null,
             IServiceMeowService? serviceMeowService = null)
         {
             _openUser = openUser;
             _openComputer = openComputer;
             _goGroups = goGroups;
-            _goEntra = goEntra;
-            _goLinks = goLinks;
-            _goAbout = goAbout;
             _networkService = networkService;
             _adDetectionService = adDetectionService;
             _authService = authService;
@@ -257,7 +254,6 @@ namespace DSAMVVM.MVVM.ViewModel
             _linkRouter = linkRouter;
             _imageCacheService = imageCacheService;
             _settingsService = settingsService;
-            _linksService = linksService;
             _serviceMeowService = serviceMeowService;
 
             if (_networkService != null)
@@ -327,58 +323,24 @@ namespace DSAMVVM.MVVM.ViewModel
             GoEntraCommand = new RelayCommand(_ =>
             {
                 if (_linkRouter != null) _linkRouter.RequestNavigation("entra", string.Empty);
-                else _goEntra?.Invoke();
+                else goEntra?.Invoke();
             });
             GoLinksCommand = new RelayCommand(_ =>
             {
                 if (_linkRouter != null) _linkRouter.RequestNavigation("links", string.Empty);
-                else _goLinks?.Invoke();
+                else goLinks?.Invoke();
             });
             GoAboutCommand = new RelayCommand(_ =>
             {
                 if (_linkRouter != null) _linkRouter.RequestNavigation("about", string.Empty);
-                else _goAbout?.Invoke();
+                else goAbout?.Invoke();
             });
 
-            // Refresh network state
-            RefreshNetworkStatusCommand = new RelayCommand(async _ =>
-            {
-                if (_networkService != null)
-                {
-                    var state = await _networkService.RefreshAsync();
-                    UiNotify.Info($"Network: {state.Label}", showStatusBar: true);
-                }
-            });
+            // Refresh network state safely
+            RefreshNetworkStatusCommand = new RelayCommand(_ => ExecuteRefreshNetworkStatus());
 
-            // Live AD DC test command
-            TestDcCommand = new RelayCommand(async _ =>
-            {
-                if (IsTestingDc) return;
-                IsTestingDc = true;
-                try
-                {
-                    if (_adDetectionService != null)
-                    {
-                        var state = await _adDetectionService.ProbeDomainControllerAsync();
-                        if (state.IsReachable)
-                        {
-                            UiNotify.Info($"AD: Connected to {state.DcHost} ({state.LatencyMs}ms)", showStatusBar: true);
-                        }
-                        else
-                        {
-                            UiNotify.Warn($"AD: {state.StatusText}");
-                        }
-                    }
-                    else
-                    {
-                        await Task.Delay(500);
-                    }
-                }
-                finally
-                {
-                    IsTestingDc = false;
-                }
-            }, _ => !IsTestingDc);
+            // Live AD DC test command safely
+            TestDcCommand = new RelayCommand(_ => ExecuteTestDc(), _ => !IsTestingDc);
 
             // Toggle In-Place Edit Mode
             ToggleEditModeCommand = new RelayCommand(_ =>
@@ -402,15 +364,14 @@ namespace DSAMVVM.MVVM.ViewModel
             // Remove Shortcut In-Place
             RemoveShortcutCommand = new RelayCommand(param =>
             {
-                if (param is HomeShortcutItem item)
-                {
-                    Shortcuts.Remove(item);
-                    App.Settings.Ui.Shortcuts.Items.RemoveAll(x => x.Id == item.Id);
-                    App.Settings.Ui.Shortcuts.Normalize();
-                    _settingsService?.RequestSave(App.Settings, Globals.g_SettingsPath);
-                    OnPropertyChanged(nameof(CanAddShortcut));
-                    UiNotify.Info($"Removed shortcut: {item.Title}", showStatusBar: true);
-                }
+                if (param is not HomeShortcutItem item) return;
+
+                Shortcuts.Remove(item);
+                App.Settings.Ui.Shortcuts.Items.RemoveAll(x => x.Id == item.Id);
+                App.Settings.Ui.Shortcuts.Normalize();
+                _settingsService?.RequestSave(App.Settings, Globals.g_SettingsPath);
+                OnPropertyChanged(nameof(CanAddShortcut));
+                UiNotify.Info($"Removed shortcut: {item.Title}", showStatusBar: true);
             });
 
             // Add Shortcut Slot Action (navigates to Settings)
@@ -447,43 +408,18 @@ namespace DSAMVVM.MVVM.ViewModel
                 Blurb = "Loading mascot of the day..."
             };
 
-NextPetCommand = new RelayCommand(_ =>
+            NextPetCommand = new RelayCommand(_ =>
             {
                 if (_pets.Count == 0) return;
                 _currentPetIndex = (_currentPetIndex + 1) % _pets.Count;
                 CurrentPet = _pets[_currentPetIndex];
             }, _ => _pets.Count > 1);
 
-            NextPetPhotoCommand = new RelayCommand(_ =>
-            {
-                var images = CurrentPet?.ValidImages ?? [];
-                if (images.Count <= 1) return;
-                CurrentImageIndex = (CurrentImageIndex + 1) % images.Count;
-                _ = LoadPetImageAsync(CurrentPet, CurrentImageIndex, forceRefresh: false);
-            }, _ => (CurrentPet?.ValidImages.Count ?? 0) > 1);
+            NextPetPhotoCommand = new RelayCommand(_ => NextPetPhoto(), _ => (CurrentPet?.ValidImages.Count ?? 0) > 1);
 
-            PrevPetPhotoCommand = new RelayCommand(_ =>
-            {
-                var images = CurrentPet?.ValidImages ?? [];
-                if (images.Count <= 1) return;
-                CurrentImageIndex = (CurrentImageIndex - 1 + images.Count) % images.Count;
-                _ = LoadPetImageAsync(CurrentPet, CurrentImageIndex, forceRefresh: false);
-            }, _ => (CurrentPet?.ValidImages.Count ?? 0) > 1);
+            PrevPetPhotoCommand = new RelayCommand(_ => PrevPetPhoto(), _ => (CurrentPet?.ValidImages.Count ?? 0) > 1);
 
-            RefreshPetImageCommand = new RelayCommand(async _ =>
-            {
-                if (IsImageRefreshing || CurrentPet == null) return;
-                IsImageRefreshing = true;
-                try
-                {
-                    UiNotify.Info($"Refreshing photo for {CurrentPet.Name}...", showStatusBar: true);
-                    await LoadPetImageAsync(CurrentPet, CurrentImageIndex, forceRefresh: true);
-                }
-                finally
-                {
-                    IsImageRefreshing = false;
-                }
-            }, _ => !IsImageRefreshing && CurrentPet != null);
+            RefreshPetImageCommand = new RelayCommand(_ => ExecuteRefreshPetImage(), _ => !IsImageRefreshing && CurrentPet != null);
 
             SubmitPetCommand = new RelayCommand(_ =>
             {
@@ -501,6 +437,105 @@ NextPetCommand = new RelayCommand(_ =>
             _ = InitializeServiceMeowAsync();
         }
 
+        private void ExecuteRefreshNetworkStatus()
+        {
+            _ = ExecuteRefreshNetworkStatusAsync();
+        }
+
+        private async Task ExecuteRefreshNetworkStatusAsync()
+        {
+            try
+            {
+                if (_networkService != null)
+                {
+                    var state = await _networkService.RefreshAsync();
+                    UiNotify.Info($"Network: {state.Label}", showStatusBar: true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("HomeVM", $"Failed to refresh network status: {ex.Message}");
+            }
+        }
+
+        private void ExecuteTestDc()
+        {
+            _ = ExecuteTestDcAsync();
+        }
+
+        private async Task ExecuteTestDcAsync()
+        {
+            if (IsTestingDc) return;
+            IsTestingDc = true;
+            try
+            {
+                if (_adDetectionService != null)
+                {
+                    var state = await _adDetectionService.ProbeDomainControllerAsync();
+                    if (state.IsReachable)
+                    {
+                        UiNotify.Info($"AD: Connected to {state.DcHost} ({state.LatencyMs}ms)", showStatusBar: true);
+                    }
+                    else
+                    {
+                        UiNotify.Warn($"AD: {state.StatusText}");
+                    }
+                }
+                else
+                {
+                    await Task.Delay(500);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("HomeVM", $"Domain controller probe failed: {ex.Message}");
+            }
+            finally
+            {
+                IsTestingDc = false;
+            }
+        }
+
+        private void NextPetPhoto()
+        {
+            var images = CurrentPet?.ValidImages ?? [];
+            if (images.Count <= 1) return;
+            CurrentImageIndex = (CurrentImageIndex + 1) % images.Count;
+            _ = LoadPetImageAsync(CurrentPet, CurrentImageIndex, forceRefresh: false);
+        }
+
+        private void PrevPetPhoto()
+        {
+            var images = CurrentPet?.ValidImages ?? [];
+            if (images.Count <= 1) return;
+            CurrentImageIndex = (CurrentImageIndex - 1 + images.Count) % images.Count;
+            _ = LoadPetImageAsync(CurrentPet, CurrentImageIndex, forceRefresh: false);
+        }
+
+        private void ExecuteRefreshPetImage()
+        {
+            _ = ExecuteRefreshPetImageAsync();
+        }
+
+        private async Task ExecuteRefreshPetImageAsync()
+        {
+            if (IsImageRefreshing || CurrentPet == null) return;
+            IsImageRefreshing = true;
+            try
+            {
+                UiNotify.Info($"Refreshing photo for {CurrentPet.Name}...", showStatusBar: true);
+                await LoadPetImageAsync(CurrentPet, CurrentImageIndex, forceRefresh: true);
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("HomeVM", $"Pet image refresh failed: {ex.Message}");
+            }
+            finally
+            {
+                IsImageRefreshing = false;
+            }
+        }
+
         private async Task InitializeServiceMeowAsync()
         {
             if (_serviceMeowService == null) return;
@@ -512,26 +547,29 @@ NextPetCommand = new RelayCommand(_ =>
 
                 var initialPet = _serviceMeowService.GetRandomPet();
 
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+                if (Application.Current?.Dispatcher is { } dispatcher)
                 {
-                    _pets.Clear();
-                    if (allPets.Count > 0)
+                    await dispatcher.InvokeAsync(() =>
                     {
-                        _pets.AddRange(allPets);
-                        _currentPetIndex = (initialPet != null) ? Math.Max(0, _pets.IndexOf(initialPet)) : 0;
-                        CurrentPet = initialPet ?? _pets[_currentPetIndex];
-                    }
-                    else
-                    {
-                        CurrentPet = new ServiceMeowPet
+                        _pets.Clear();
+                        if (allPets.Count > 0)
                         {
-                            Name = "ServiceMeow",
-                            Title = "Support Mascot",
-                            Species = "Cat",
-                            Blurb = "Welcome to Desktop Support! Mascot data is standing by."
-                        };
-                    }
-                });
+                            _pets.AddRange(allPets);
+                            _currentPetIndex = initialPet != null ? Math.Max(0, _pets.IndexOf(initialPet)) : 0;
+                            CurrentPet = initialPet ?? _pets[_currentPetIndex];
+                        }
+                        else
+                        {
+                            CurrentPet = new ServiceMeowPet
+                            {
+                                Name = "ServiceMeow",
+                                Title = "Support Mascot",
+                                Species = "Cat",
+                                Blurb = "Welcome to Desktop Support! Mascot data is standing by."
+                            };
+                        }
+                    });
+                }
             }
             catch (Exception ex)
             {
@@ -560,8 +598,8 @@ NextPetCommand = new RelayCommand(_ =>
 
             try
             {
-                if (item.Target.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-                    item.Target.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                if (item.Target.StartsWith(Uri.UriSchemeHttps + Uri.SchemeDelimiter, StringComparison.OrdinalIgnoreCase) ||
+                    item.Target.StartsWith(Uri.UriSchemeHttp + Uri.SchemeDelimiter, StringComparison.OrdinalIgnoreCase))
                 {
                     OpenUrl(item.Target);
                 }
@@ -573,7 +611,7 @@ NextPetCommand = new RelayCommand(_ =>
                 else
                 {
                     // Fallback to https for standard domain inputs like "service-now.arizona.edu"
-                    OpenUrl("https://" + item.Target);
+                    OpenUrl(Uri.UriSchemeHttps + Uri.SchemeDelimiter + item.Target);
                 }
             }
             catch (Exception ex)
@@ -584,8 +622,11 @@ NextPetCommand = new RelayCommand(_ =>
 
         private async Task LoadPetImageAsync(ServiceMeowPet? pet, int photoIndex, bool forceRefresh)
         {
-            _petImageCts?.Cancel();
-            _petImageCts?.Dispose();
+            if (_petImageCts != null)
+            {
+                await _petImageCts.CancelAsync().ConfigureAwait(false);
+                _petImageCts.Dispose();
+            }
             var cts = new CancellationTokenSource();
             _petImageCts = cts;
 
@@ -614,13 +655,16 @@ NextPetCommand = new RelayCommand(_ =>
 
                 if (cts.Token.IsCancellationRequested) return;
 
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+                if (Application.Current?.Dispatcher is { } dispatcher)
                 {
-                    if (!cts.Token.IsCancellationRequested && _currentPet?.Id == targetPetId)
+                    await dispatcher.InvokeAsync(() =>
                     {
-                        CurrentPetImage = image;
-                    }
-                });
+                        if (!cts.Token.IsCancellationRequested && _currentPet?.Id == targetPetId)
+                        {
+                            CurrentPetImage = image;
+                        }
+                    });
+                }
             }
             catch (OperationCanceledException)
             {
@@ -631,13 +675,16 @@ NextPetCommand = new RelayCommand(_ =>
                 if (!cts.Token.IsCancellationRequested)
                 {
                     Log.Warn("HomeVM", $"Failed to load image for mascot '{pet.Name}': {ex.Message}");
-                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    if (Application.Current?.Dispatcher is { } dispatcher)
                     {
-                        if (_currentPet?.Id == targetPetId)
+                        await dispatcher.InvokeAsync(() =>
                         {
-                            CurrentPetImage = null;
-                        }
-                    });
+                            if (_currentPet?.Id == targetPetId)
+                            {
+                                CurrentPetImage = null;
+                            }
+                        });
+                    }
                 }
             }
         }
@@ -682,9 +729,14 @@ NextPetCommand = new RelayCommand(_ =>
                     Icon = glyph,
                     ActionCommand = new RelayCommand(_ =>
                     {
-                        if (entry.Target == SearchTarget.User) _openUser?.Invoke(entry.Query);
-                        else if (entry.Target == SearchTarget.Computer) _openComputer?.Invoke(entry.Query);
-                        else if (entry.Target == SearchTarget.Group) _goGroups?.Invoke();
+                        Action? navAction = entry.Target switch
+                        {
+                            SearchTarget.User => () => _openUser?.Invoke(entry.Query),
+                            SearchTarget.Computer => () => _openComputer?.Invoke(entry.Query),
+                            SearchTarget.Group => () => _goGroups?.Invoke(),
+                            _ => null
+                        };
+                        navAction?.Invoke();
                     })
                 });
             }
@@ -708,10 +760,3 @@ NextPetCommand = new RelayCommand(_ =>
         }
     }
 }
-
-
-
-
-
-
-

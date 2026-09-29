@@ -643,7 +643,6 @@ namespace DSAMVVM
                     linkRouter: sp.GetRequiredService<IDeepLinkRoutingService>(),
                     imageCacheService: sp.GetRequiredService<IImageCacheService>(),
                     settingsService: sp.GetRequiredService<ISettingsService>(),
-                    linksService: sp.GetRequiredService<ILinksService>(),
                     serviceMeowService: sp.GetRequiredService<IServiceMeowService>()
                 )
             );
@@ -665,4 +664,3 @@ namespace DSAMVVM
         }
     }
 }
-
