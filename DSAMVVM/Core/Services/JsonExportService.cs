@@ -56,6 +56,28 @@ namespace DSAMVVM.Core.Services
             return destinationFilePath;
         }
 
+        public async Task<string> ExportServiceMeowJsonAsync(IEnumerable<StagedChange>? stagedChanges, string destinationFilePath)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(destinationFilePath);
+
+            var meowData = await _adminService.LoadServiceMeowDataAsync();
+
+            if (stagedChanges != null)
+            {
+                meowData = _adminService.ApplyServiceMeowChanges(meowData, stagedChanges);
+            }
+
+            string json = JsonConvert.SerializeObject(meowData, Formatting.Indented);
+
+            var dir = Path.GetDirectoryName(destinationFilePath);
+            if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+
+            await File.WriteAllTextAsync(destinationFilePath, json);
+            Log.Info(Tag, $"Exported servicemeow.json to: {destinationFilePath}");
+
+            return destinationFilePath;
+        }
+
         public async Task<IReadOnlyList<string>> ExportStagedChangesToFolderAsync(IEnumerable<StagedChange> stagedChanges, string destinationDirectory)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(destinationDirectory);
@@ -66,12 +88,14 @@ namespace DSAMVVM.Core.Services
             var changesList = stagedChanges.ToList();
             bool hasDeptChanges = changesList.Any(c => c.Section == AdminSection.Department || c.Section == AdminSection.SupportTeam);
             bool hasLinkChanges = changesList.Any(c => c.Section == AdminSection.Links);
+            bool hasMeowChanges = changesList.Any(c => c.Section == AdminSection.ServiceMeow);
 
-            // If no changes staged at all, export both as baselines
-            if (!hasDeptChanges && !hasLinkChanges)
+            // If no changes staged at all, export all three as baselines
+            if (!hasDeptChanges && !hasLinkChanges && !hasMeowChanges)
             {
                 hasDeptChanges = true;
                 hasLinkChanges = true;
+                hasMeowChanges = true;
             }
 
             var exportedFiles = new List<string>();
@@ -88,6 +112,13 @@ namespace DSAMVVM.Core.Services
                 string linksPath = Path.Combine(destinationDirectory, "links.json");
                 await ExportLinksJsonAsync(changesList, linksPath);
                 exportedFiles.Add(linksPath);
+            }
+
+            if (hasMeowChanges)
+            {
+                string meowPath = Path.Combine(destinationDirectory, "servicemeow.json");
+                await ExportServiceMeowJsonAsync(changesList, meowPath);
+                exportedFiles.Add(meowPath);
             }
 
             return exportedFiles;

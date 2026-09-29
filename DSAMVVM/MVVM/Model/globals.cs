@@ -1,18 +1,18 @@
-﻿using DSAMVVM.Core.Utilities;
+using DSAMVVM.Core.Utilities;
 using System.IO;
 
 namespace DSAMVVM.MVVM.Model
 {
-    public class Globals
+    public abstract class Globals
     {
 
 #pragma warning disable CA2211 // Non-constant fields should not be visible
-        public static string g_AppVersion = VersionDisplayHelper.GetSemVerDisplay();
-        public static string g_FileVersion = VersionDisplayHelper.GetFileVersionDisplay();
+        public static readonly string g_AppVersion = VersionDisplayHelper.GetSemVerDisplay();
+        public static readonly string g_FileVersion = VersionDisplayHelper.GetFileVersionDisplay();
 #pragma warning restore CA2211 // Non-constant fields should not be visible
 
         //Entra ID / Graph constants
-        //Publically discoverable keys are safe for repository
+        //Publicly discoverable keys are safe for repository
         public const string EntraClientId = "36cd585b-c3cd-48e0-9fef-0a5fc69f0fa0";
         public const string EntraTenantId = "5ee35505-eb8e-4929-937d-645df5013288";
         public const string EntraInstanceUrl = "https://login.microsoftonline.com/";
@@ -29,6 +29,7 @@ namespace DSAMVVM.MVVM.Model
         public const string g_LinksJSON = "https://arizona.box.com/shared/static/zg9sd4zpbfse7vk060e4fsegqabhdacs.json";
         public const string g_NewsJSON = "https://arizona.box.com/shared/static/z3nbs9pyehw27len70mhz0p71q4xxidz.json";
         public const string g_DepartmentTestJSONURL = "https://arizona.box.com/shared/static/nuiy4gqgxqwzlnzzz893id5bnmal2f86.json";
+        public const string g_ServiceMeowJSON = "https://arizona.box.com/shared/static/n0w81iie8a9okuq85u3zh55gp1rfr6xx.json";
 
         // Links
         public const string g_SharepointHome = "https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/ProjectHome.aspx";
@@ -45,9 +46,13 @@ namespace DSAMVVM.MVVM.Model
         public const string g_SettingsFileName = "settings.json";
         public static readonly string g_SettingsPath = Path.Combine(g_AppDir, g_SettingsFileName);
 
-        // Backup/cache files (local)
+        // Backup/cache files and directories (local)
         public static readonly string g_DepartmentCachePath = Path.Combine(g_DataDir, "departments.json");
         public static readonly string g_LinksCachePath = Path.Combine(g_DataDir, "links.json");
+        public static readonly string g_ServiceMeowCachePath = Path.Combine(g_DataDir, "servicemeow.json");
+        // Images directory (local)
+        public static readonly string g_ImgDir = Path.Combine(g_AppDir, "img");
+        public static readonly string g_ServiceMeowImageCacheDir = Path.Combine(g_ImgDir, "sm");
 
         // Logs + legacy settings dirs
         public static readonly string g_LogsDir = Path.Combine(g_AppDir, "logs");
@@ -58,6 +63,7 @@ namespace DSAMVVM.MVVM.Model
         public const int g_DepartmentJSONSchema = 3;
         public const int g_LinkJSONSchema = 2;
         public const int g_VersionSchema = 3;
+        public const int g_ServiceMeowJSONSchema = 1;
 
         //.NET runtime requirement check for the update installer
         public static bool IsTargetRuntimePresent(string? requiredVersion)
@@ -67,7 +73,7 @@ namespace DSAMVVM.MVVM.Model
             if (!Version.TryParse(requiredVersion, out var required)) return true;
 
             // Standard path for the .NET Desktop Runtime
-            var runtimePath = @"C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App";
+            const string runtimePath = @"C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App";
 
             if (!Directory.Exists(runtimePath)) return false;
 
@@ -83,6 +89,7 @@ namespace DSAMVVM.MVVM.Model
             EnsureDirSafe(g_LogsDir);
             EnsureDirSafe(g_SettingsLegacyDir);
             EnsureDirSafe(g_DataDir);
+            EnsureDirSafe(g_ServiceMeowImageCacheDir);
         }
 
         // Best-effort creation; returns false and sets error on failure

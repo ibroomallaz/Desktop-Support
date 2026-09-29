@@ -15,6 +15,7 @@ namespace DSAMVVM.MVVM.Model.Admin
             AdminSection.Department => $"Dept {Key}",
             AdminSection.SupportTeam => $"Team: {Key}",
             AdminSection.Links => $"Link: {Key}",
+            AdminSection.ServiceMeow => $"Pet: {Key}",
             _ => Key
         };
     }

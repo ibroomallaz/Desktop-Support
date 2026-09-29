@@ -2,7 +2,7 @@
 {
     public sealed class DataLocation
     {
-        public bool UseCustomSource { get; set; } = false;
+        public bool UseCustomSource { get; set; }
         public string Source { get; set; } = "web";
         public string Uri { get; set; } = string.Empty;
         public string? FallbackFile { get; set; }
@@ -14,7 +14,7 @@
             {
                 Source = "web";
             }
-            Uri ??= string.Empty;
+
             if (string.IsNullOrWhiteSpace(FallbackFile)) FallbackFile = null;
             if (UseCustomSource && string.IsNullOrWhiteSpace(Uri)) UseCustomSource = false;
         }

@@ -1,300 +1,870 @@
-﻿<UserControl x:Class="DSAMVVM.MVVM.View.HomeView"
+<UserControl x:Class="DSAMVVM.MVVM.View.HomeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:res="clr-namespace:DSAMVVM.MVVM.View.Resources"
+             xmlns:enums="clr-namespace:DSAMVVM.Core.Enums"
+             xmlns:vm="clr-namespace:DSAMVVM.MVVM.ViewModel"
              mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:HomeViewModel}"
              d:DesignHeight="450"
              d:DesignWidth="800">
 
     <UserControl.Resources>
-        <!-- hover/press overlay for whole tiles -->
-        <Style x:Key="TileOverlayButton" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="Focusable" Value="False"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Overlay" Background="{TemplateBinding Background}" Opacity="0"/>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Overlay" Property="Background" Value="{DynamicResource CardGradient.Surface.Hover}"/>
-                                <Setter TargetName="Overlay" Property="Opacity" Value="0.25"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Overlay" Property="Background" Value="{DynamicResource CardGradient.Surface.Pressed}"/>
-                                <Setter TargetName="Overlay" Property="Opacity" Value="0.35"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="Overlay" Property="Opacity" Value="0.10"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Theme/Colors/Shortcuts.Palette.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Card hover/press overlay button -->
+            <Style x:Key="CardOverlayButton" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Focusable" Value="False"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Overlay" Background="{TemplateBinding Background}" Opacity="0" CornerRadius="10"/>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Overlay" Property="Background" Value="#25FFFFFF"/>
+                                    <Setter TargetName="Overlay" Property="Opacity" Value="0.40"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Overlay" Property="Background" Value="#40FFFFFF"/>
+                                    <Setter TargetName="Overlay" Property="Opacity" Value="0.50"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Subtle Text Link Button -->
+            <Style x:Key="SubtleLinkButton" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="4,2"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Muted}"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" CornerRadius="4">
+                                <ContentPresenter x:Name="ContentHost"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource Brush.Info.Light}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Dynamic Themed Pill Button for Recent Queries -->
+            <Style x:Key="RecentPillButton" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Root"
+                                    Background="{DynamicResource Brush.Pill.User.Bg}"
+                                    BorderBrush="{DynamicResource Brush.Pill.User.Border}"
+                                    BorderThickness="1"
+                                    CornerRadius="12"
+                                    Padding="9,4">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.User}">
+                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.User.Bg}"/>
+                                    <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.User.Border}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Computer}">
+                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.Device.Bg}"/>
+                                    <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.Device.Border}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Group}">
+                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.Group.Bg}"/>
+                                    <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.Group.Border}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Admin}">
+                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.Admin.Bg}"/>
+                                    <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.Admin.Border}"/>
+                                </DataTrigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Root" Property="BorderBrush" Value="#80FFFFFF"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Root" Property="Background" Value="#30FFFFFF"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
     </UserControl.Resources>
 
-    <Border Padding="{DynamicResource Space.Page}"
+    <Border Padding="14,4,14,10"
             Background="Transparent"
             SnapsToDevicePixels="True"
             UseLayoutRounding="True">
 
-        <Grid VerticalAlignment="Top">
+        <Grid VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <!-- Header -->
+                <RowDefinition Height="*"/>
+                <!-- Main Body (Left Hub + Right ServiceMeow) -->
             </Grid.RowDefinitions>
 
-            <!-- title -->
-            <TextBlock Grid.Row="0"
-                       Text="{Binding Title}"
-                       Foreground="{DynamicResource Brush.Text.Primary}"
-                       FontSize="24"
-                       Margin="0,0,0,6"/>
-
-            <!-- version banner -->
-            <Border Grid.Row="1"
-                    MinHeight="128"
-                    CornerRadius="12"
-                    Background="{DynamicResource CardGradient.Accent}"
-                    Margin="0,0,0,6"
-                    Padding="12">
-                <StackPanel>
-                    <TextBlock Text="{Binding AppVersion}"
-                               Foreground="{DynamicResource Brush.Text.OnAccent}"
-                               FontSize="22" FontWeight="SemiBold"
-                               Margin="0,2,0,4"
-                               TextTrimming="CharacterEllipsis"/>
-                    <TextBlock Text=""
-                               Foreground="{DynamicResource Brush.Text.OnAccent}"
-                               FontSize="13"/>
-                    <TextBlock Text=""
-                               Foreground="{DynamicResource Brush.Text.OnAccent}"
-                               FontSize="13" Margin="0,2,0,0"/>
-                </StackPanel>
-            </Border>
-
-            <!-- quick lookups -->
-            <Grid Grid.Row="2" Margin="0,0,0,6">
+            <!-- ===================== HEADER ===================== -->
+            <Grid Grid.Row="0" Margin="0,0,0,12">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- user lookup -->
-                <Border Grid.Column="0"
-                        MinHeight="104"
-                        CornerRadius="12"
-                        Background="{DynamicResource CardGradient.Surface.L1}"
-                        Padding="10"
-                        Margin="0,0,5,0"
-                        BorderBrush="{DynamicResource Brush.Card.Border}"
-                        BorderThickness="1">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="25*"/>
-                            <ColumnDefinition Width="321*"/>
-                        </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="{Binding Title}"
+                               Foreground="{DynamicResource Brush.Text.Primary}"
+                               FontSize="22"
+                               FontWeight="Bold"/>
+                    <TextBlock Text="{Binding Subtitle}"
+                               Foreground="{DynamicResource Brush.Text.Muted}"
+                               FontSize="12"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <!-- Network Type Status Badge -->
+                <Button Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource SubtleLinkButton}"
+                        Command="{Binding RefreshNetworkStatusCommand}"
+                        ToolTip="{Binding NetworkStatusToolTip}">
+                    <Border CornerRadius="12"
+                            Background="#18FFFFFF"
+                            BorderBrush="#30FFFFFF"
+                            BorderThickness="1"
+                            Padding="11,5">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding NetworkStatusGlyph}"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource Brush.Info.Light}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,7,0"/>
+                            <Ellipse Width="7" Height="7" Fill="{Binding NetworkStatusDotColor}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding NetworkStatusText}"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Button>
+            </Grid>
+
+            <!-- ===================== MAIN 2-COLUMN BODY ===================== -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.18*"/>
+                    <!-- Left Column: Streamlined Status, Recent Activity, Shortcuts -->
+                    <ColumnDefinition Width="14"/>
+                    <!-- Spacer -->
+                    <ColumnDefinition Width="1.0*"/>
+                    <!-- Right Column: ServiceMeow Hero Box -->
+                </Grid.ColumnDefinitions>
+
+                <!-- ================= LEFT COLUMN ================= -->
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <!-- Slim Unified Status Ribbon -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Recent Activity Chips -->
+                        <RowDefinition Height="*"/>
+                        <!-- Quick Shortcuts with Color Variation -->
+                    </Grid.RowDefinitions>
+
+                    <!-- Row 0: Slim Unified Environment Status Ribbon -->
+                    <Border Grid.Row="0"
+                            Margin="0,0,0,12"
+                            Height="44"
+                            CornerRadius="10"
+                            Background="{DynamicResource CardGradient.Surface.L1}"
+                            BorderBrush="{DynamicResource Brush.Card.Border}"
+                            BorderThickness="1"
+                            Padding="10,0">
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="1"/>
+                                <!-- Divider -->
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Left: Entra ID Status -->
+                            <Button Grid.Column="0"
+                                    Style="{StaticResource SubtleLinkButton}"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding GoEntraCommand}"
+                                    ToolTip="{Binding EntraStatusToolTip}">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Static res:Glyphs.Entra}"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="15"
+                                               Foreground="#5BC3FF"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,6,0"/>
+                                    <Ellipse Width="6" Height="6" Fill="{Binding EntraStatusDotColor}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Entra:"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               FontSize="11"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,4,0"/>
+                                    <TextBlock Text="{Binding EntraAccountName}"
+                                               Foreground="{DynamicResource Brush.Text.Primary}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Vertical Divider -->
+                            <Rectangle Grid.Column="1" Fill="#25FFFFFF" Height="22" VerticalAlignment="Center" Margin="6,0"/>
+
+                            <!-- Right: Active Directory DC Status -->
+                            <Grid Grid.Column="2" VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" ToolTip="{Binding DcStatusToolTip}">
+                                    <TextBlock Text="{x:Static res:Glyphs.Server}"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="14"
+                                               Foreground="#5BC3FF"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,6,0"/>
+                                    <Ellipse Width="6" Height="6" Fill="{Binding DcStatusDotColor}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="AD:"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               FontSize="11"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,4,0"/>
+                                    <TextBlock Text="{Binding DcStatusText}"
+                                               Foreground="{DynamicResource Brush.Text.Primary}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+
+                                <Button Grid.Column="1"
+                                        Style="{StaticResource SubtleLinkButton}"
+                                        VerticalAlignment="Center"
+                                        ToolTip="Probe Active Directory Domain Controllers"
+                                        Command="{Binding TestDcCommand}">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Static res:Glyphs.Sync}"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="11"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,4,0"/>
+                                        <TextBlock Text="Test"
+                                                   FontSize="11"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 1: Recent Activity ("Jump Back In") -->
+                    <StackPanel Grid.Row="1" Margin="0,0,0,12">
+                        <Grid Margin="0,0,0,6">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="&#xE81C;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource Brush.Info.Light}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,6,0"/>
+                                <TextBlock Text="Recent Activity"
+                                           Foreground="{DynamicResource Brush.Text.Primary}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"/>
+                                <TextBlock Text="· Quick Jump"
+                                           Foreground="{DynamicResource Brush.Text.Muted}"
+                                           FontSize="11"
+                                           Margin="4,0,0,0"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Empty state placeholder when no searches yet -->
+                        <TextBlock Text="No recent searches in this session"
+                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                   FontSize="11"
+                                   FontStyle="Italic"
+                                   Margin="2,2,0,4">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RecentActivities.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <!-- Recent Activity Themed Chips -->
+                        <ItemsControl ItemsSource="{Binding RecentActivities}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource RecentPillButton}"
+                                            Margin="0,0,8,6"
+                                            Command="{Binding ActionCommand}">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Icon}"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,6,0">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource Brush.Pill.User.Icon}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.User}">
+                                                                <Setter Property="Foreground" Value="{DynamicResource Brush.Pill.User.Icon}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Computer}">
+                                                                <Setter Property="Foreground" Value="{DynamicResource Brush.Pill.Device.Icon}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Group}">
+                                                                <Setter Property="Foreground" Value="{DynamicResource Brush.Pill.Group.Icon}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Admin}">
+                                                                <Setter Property="Foreground" Value="{DynamicResource Brush.Pill.Admin.Icon}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <TextBlock Text="{Binding Title}"
+                                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding TypeTag}"
+                                                       Foreground="{DynamicResource Brush.Text.Muted}"
+                                                       FontSize="10"
+                                                       Margin="5,0,0,0"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <!-- Row 2: Customizable Quick Shortcuts with Color Variations -->
+                    <Grid Grid.Row="2">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0"
-                                   Text="User lookup"
-                                   Foreground="{DynamicResource Brush.Text.Primary}"
-                                   FontSize="18" Margin="0,0,0,6" Grid.ColumnSpan="2"/>
+                        <!-- Section Header -->
+                        <Grid Grid.Row="0" Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Static res:Glyphs.Links}"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource Brush.Info.Light}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,6,0"/>
+                                <TextBlock Text="Quick Shortcuts"
+                                           Foreground="{DynamicResource Brush.Text.Primary}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"/>
+                            </StackPanel>
 
-                        <Border Grid.Row="1"
-                                CornerRadius="12"
-                                Background="#12FFFFFF"
-                                BorderBrush="#30FFFFFF"
-                                BorderThickness="1"
-                                Padding="8,0" Height="32" Grid.ColumnSpan="2">
-                            <TextBox Background="Transparent"
-                                     BorderThickness="0"
-                                     Foreground="{DynamicResource Brush.Text.Primary}"
-                                     CaretBrush="{DynamicResource Brush.Text.Primary}"
-                                     FontSize="14"
-                                     VerticalContentAlignment="Center"
-                                     Text="{Binding UserQuery, UpdateSourceTrigger=PropertyChanged}"
-                                     ToolTip="NetID, or email"/>
-                        </Border>
+                            <!-- Header Actions -->
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <!-- Advanced Settings Button (visible in Edit Mode) -->
+                                <Button VerticalAlignment="Center"
+                                        Margin="0,0,6,0"
+                                        ToolTip="Open shortcut manager in Settings"
+                                        Command="{Binding GoSettingsShortcutsCommand}">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource SubtleLinkButton}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Static res:Glyphs.Settings}"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="11"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,4,0"/>
+                                        <TextBlock Text="Advanced..."
+                                                   FontSize="11"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
 
-                        <Rectangle Grid.Row="2" Height="0" Grid.ColumnSpan="2" Margin="0,0,0,28" Grid.RowSpan="2"/>
+                                <!-- Toggle Edit Mode / Done Button -->
+                                <Button Style="{StaticResource SubtleLinkButton}"
+                                        VerticalAlignment="Center"
+                                        Command="{Binding ToggleEditModeCommand}">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="11"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,4,0">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="{x:Static res:Glyphs.Settings}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Muted}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                                            <Setter Property="Text" Value="{x:Static res:Glyphs.Checkmark}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource Brush.Success}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBlock FontSize="11" VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="Customize"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                                            <Setter Property="Text" Value="Done"/>
+                                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource Brush.Success}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
 
-                        <Button Grid.Row="3"
-                                Content="Open User"
-                                MinWidth="108"
-                                HorizontalAlignment="Right"
-                                Style="{DynamicResource Button.Rounded}"
-                                Margin="0,6,0,0"
-                                Grid.Column="1"
-                                Command="{Binding OpenUserCommand}"/>
+                        <!-- Shortcuts Uniform Grid with Jewel-Tone Theme Variations -->
+                        <ItemsControl Grid.Row="1" ItemsSource="{Binding Shortcuts}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="2"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource ShortcutCardBorder}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="32"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Distinct Colored Icon Plate with High-Contrast Foreground -->
+                                            <Border Grid.Column="0"
+                                                    Width="30"
+                                                    Height="30"
+                                                    CornerRadius="7"
+                                                    Background="#20FFFFFF"
+                                                    VerticalAlignment="Center"
+                                                    HorizontalAlignment="Left">
+                                                <TextBlock Text="{Binding Icon}"
+                                                           FontFamily="Segoe MDL2 Assets"
+                                                           FontSize="15"
+                                                           Style="{StaticResource ShortcutFgText}"
+                                                           VerticalAlignment="Center"
+                                                           HorizontalAlignment="Center"/>
+                                            </Border>
+
+                                            <!-- Title & Subtitle -->
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <TextBlock Text="{Binding Title}"
+                                                           Style="{StaticResource ShortcutFgText}"
+                                                           FontSize="12"
+                                                           FontWeight="Bold"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding Description}"
+                                                           Foreground="{DynamicResource Brush.Text.Muted}"
+                                                           FontSize="10"
+                                                           Margin="0,1,0,0"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+
+                                            <!-- Click Overlay Button (active when not in Edit Mode) -->
+                                            <Button Grid.Column="0" Grid.ColumnSpan="3"
+                                                    Command="{Binding OpenCommand}">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource CardOverlayButton}">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding DataContext.IsEditMode, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+
+                                            <!-- Delete / Remove Badge [✕] (visible only in Edit Mode) -->
+                                            <Button Grid.Column="2"
+                                                    Width="22"
+                                                    Height="22"
+                                                    VerticalAlignment="Center"
+                                                    HorizontalAlignment="Right"
+                                                    ToolTip="Remove shortcut"
+                                                    Command="{Binding DataContext.RemoveShortcutCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource SubtleLinkButton}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding DataContext.IsEditMode, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                                <Border Width="18" Height="18" CornerRadius="9" Background="#40000000" BorderBrush="#50FFFFFF" BorderThickness="1">
+                                                    <TextBlock Text="{x:Static res:Glyphs.Dismiss}"
+                                                               FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="9"
+                                                               Foreground="{DynamicResource Brush.Accent.Red.Light}"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center"/>
+                                                </Border>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Add Shortcut Slot Tile (visible in edit mode when capacity allows) -->
+                        <Button Grid.Row="2"
+                                Margin="3,6,3,0"
+                                Height="40"
+                                Command="{Binding AddShortcutCommand}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource SubtleLinkButton}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding IsEditMode}" Value="True"/>
+                                                <Condition Binding="{Binding CanAddShortcut}" Value="True"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <Border CornerRadius="8"
+                                    BorderBrush="{DynamicResource Brush.Border.Active}"
+                                    BorderThickness="1"
+                                    Background="#10FFFFFF"
+                                    Padding="10,0">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Static res:Glyphs.Add}"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource Brush.Info.Light}"
+                                               Margin="0,0,6,0"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="Add / Manage Shortcuts in Settings..."
+                                               Foreground="{DynamicResource Brush.Text.Primary}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </Button>
                     </Grid>
-                </Border>
+                </Grid>
 
-                <!-- computer lookup -->
-                <Border Grid.Column="1"
-                        MinHeight="104"
+                <!-- ================= RIGHT COLUMN: SERVICEMEOW HERO BOX ================= -->
+                <Border Grid.Column="2"
                         CornerRadius="12"
                         Background="{DynamicResource CardGradient.Surface.L1}"
-                        Padding="10"
-                        Margin="5,0,0,0"
                         BorderBrush="{DynamicResource Brush.Card.Border}"
-                        BorderThickness="1">
+                        BorderThickness="1"
+                        Padding="12">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="49*"/>
-                            <ColumnDefinition Width="297*"/>
-                        </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
+                            <!-- ServiceMeow Header -->
                             <RowDefinition Height="*"/>
+                            <!-- Large Hero Pet Photo Frame (Dynamic Height) -->
                             <RowDefinition Height="Auto"/>
+                            <!-- Pet Bio & Role -->
+                            <RowDefinition Height="Auto"/>
+                            <!-- Blurb Callout -->
+                            <RowDefinition Height="Auto"/>
+                            <!-- Footer & Submit Link -->
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0"
-                                   Text="Computer lookup"
-                                   Foreground="{DynamicResource Brush.Text.Primary}"
-                                   FontSize="18" Margin="0,0,0,6" Grid.ColumnSpan="2"/>
+                        <!-- Header with Arizona Red Support Mascot Tag -->
+                        <Grid Grid.Row="0" Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="🐾 ServiceMeow"
+                                           Foreground="{DynamicResource Brush.Text.Primary}"
+                                           FontSize="15"
+                                           FontWeight="Bold"/>
+                            </StackPanel>
+
+                            <Border Grid.Column="1"
+                                    CornerRadius="6"
+                                    Background="#20B11226"
+                                    BorderBrush="{DynamicResource Brush.Accent.Red.Light}"
+                                    BorderThickness="1"
+                                    Padding="7,2">
+                                <TextBlock Text="Support Mascot"
+                                           Foreground="{DynamicResource Brush.Accent.Red.Light}"
+                                           FontSize="9"
+                                           FontWeight="Bold"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- Large Hero Pet Photo Frame (Expanded to 210+ px tall for maximum visual delight) -->
                         <Border Grid.Row="1"
+                                MinHeight="210"
                                 CornerRadius="12"
-                                Background="#12FFFFFF"
-                                BorderBrush="#30FFFFFF"
+                                Background="#0B111A"
+                                BorderBrush="#253549"
                                 BorderThickness="1"
-                                Padding="8,0" Height="32" Grid.ColumnSpan="2">
-                            <TextBox Background="Transparent"
-                                     BorderThickness="0"
-                                     Foreground="{DynamicResource Brush.Text.Primary}"
-                                     CaretBrush="{DynamicResource Brush.Text.Primary}"
-                                     FontSize="14"
-                                     VerticalContentAlignment="Center"
-                                     Text="{Binding ComputerQuery, UpdateSourceTrigger=PropertyChanged}"
-                                     ToolTip="Hostname"/>
+                                ClipToBounds="True"
+                                Margin="0,0,0,8">
+                            <Grid>
+                                <!-- Clean Ambient Radial Aura -->
+                                <Rectangle>
+                                    <Rectangle.Fill>
+                                        <RadialGradientBrush Center="0.5,0.45" RadiusX="0.65" RadiusY="0.65">
+                                            <GradientStop Color="#1A283E" Offset="0.0"/>
+                                            <GradientStop Color="#101826" Offset="0.55"/>
+                                            <GradientStop Color="#090E17" Offset="1.0"/>
+                                        </RadialGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+
+                                <!-- Remote Pet Image (loaded from local disk cache) -->
+                                <Image Source="{Binding CurrentPetImage}"
+                                       Stretch="UniformToFill"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center">
+                                    <Image.Style>
+                                        <Style TargetType="Image">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="Source" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+
+                                <!-- Large Stylized Mascot Vector Graphic Fallback (when CurrentPetImage is null) -->
+                                <Viewbox Width="145" Height="145" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <Viewbox.Style>
+                                        <Style TargetType="Viewbox">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding CurrentPetImage}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Viewbox.Style>
+                                    <Canvas Width="100" Height="100">
+                                        <!-- Cat Ears -->
+                                        <Path Data="M 28,45 L 18,16 L 43,30 Z" Fill="#5A6D8C"/>
+                                        <Path Data="M 30,42 L 23,22 L 40,31 Z" Fill="#FFAEC0" Opacity="0.6"/>
+                                        <Path Data="M 72,45 L 82,16 L 57,30 Z" Fill="#5A6D8C"/>
+                                        <Path Data="M 70,42 L 77,22 L 60,31 Z" Fill="#FFAEC0" Opacity="0.6"/>
+                                        <!-- Head -->
+                                        <Ellipse Canvas.Left="18" Canvas.Top="28" Width="64" Height="54" Fill="#6E84A7"/>
+                                        <!-- Chubby Cheeks -->
+                                        <Ellipse Canvas.Left="20" Canvas.Top="52" Width="20" Height="16" Fill="#FFAEC0" Opacity="0.25"/>
+                                        <Ellipse Canvas.Left="60" Canvas.Top="52" Width="20" Height="16" Fill="#FFAEC0" Opacity="0.25"/>
+                                        <!-- Eyes -->
+                                        <Ellipse Canvas.Left="34" Canvas.Top="46" Width="8" Height="12" Fill="#0E1624"/>
+                                        <Ellipse Canvas.Left="36" Canvas.Top="48" Width="3" Height="4" Fill="#FFFFFF"/>
+                                        <Ellipse Canvas.Left="58" Canvas.Top="46" Width="8" Height="12" Fill="#0E1624"/>
+                                        <Ellipse Canvas.Left="60" Canvas.Top="48" Width="3" Height="4" Fill="#FFFFFF"/>
+                                        <!-- Nose & Snout -->
+                                        <Path Data="M 47,59 L 53,59 L 50,63 Z" Fill="#FFAEC0"/>
+                                        <Path Data="M 50,63 Q 46,67 41,65" Stroke="#0E1624" StrokeThickness="1.6"/>
+                                        <Path Data="M 50,63 Q 54,67 59,65" Stroke="#0E1624" StrokeThickness="1.6"/>
+                                        <!-- Whiskers -->
+                                        <Line X1="16" Y1="56" X2="36" Y2="59" Stroke="#C2D1E0" StrokeThickness="1.4"/>
+                                        <Line X1="15" Y1="63" X2="36" Y2="62" Stroke="#C2D1E0" StrokeThickness="1.4"/>
+                                        <Line X1="84" Y1="56" X2="64" Y2="59" Stroke="#C2D1E0" StrokeThickness="1.4"/>
+                                        <Line X1="85" Y1="63" X2="64" Y2="62" Stroke="#C2D1E0" StrokeThickness="1.4"/>
+                                        <!-- Red Collar with Gold Bell -->
+                                        <Path Data="M 33,78 Q 50,86 67,78" Stroke="#C5355E" StrokeThickness="4" StrokeEndLineCap="Round" StrokeStartLineCap="Round"/>
+                                        <Ellipse Canvas.Left="46" Canvas.Top="79" Width="8" Height="8" Fill="#FFD15C"/>
+                                    </Canvas>
+                                </Viewbox>
+
+                                <!-- Floating Mascot Actions (Top Right Glass Bar) -->
+                                <Border HorizontalAlignment="Right"
+                                        VerticalAlignment="Top"
+                                        Margin="8"
+                                        CornerRadius="14"
+                                        Background="#660B111A"
+                                        BorderBrush="#40FFFFFF"
+                                        BorderThickness="1"
+                                        Padding="2">
+                                    <StackPanel Orientation="Horizontal">
+                                        <!-- Reload / Force Refresh Image -->
+                                        <Button Width="26"
+                                                Height="26"
+                                                Style="{StaticResource SubtleLinkButton}"
+                                                Content="&#xE72C;"
+                                                FontFamily="Segoe MDL2 Assets"
+                                                FontSize="11"
+                                                ToolTip="Reload Mascot Photo"
+                                                Command="{Binding RefreshPetImageCommand}"/>
+                                        <!-- Next Mascot -->
+                                        <Button Width="26"
+                                                Height="26"
+                                                Style="{StaticResource SubtleLinkButton}"
+                                                Content="&#xE76C;"
+                                                FontFamily="Segoe MDL2 Assets"
+                                                FontSize="11"
+                                                ToolTip="Next Mascot"
+                                                Command="{Binding NextPetCommand}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Breed Tag (Bottom Left Glass Tag) -->
+                                <Border HorizontalAlignment="Left"
+                                        VerticalAlignment="Bottom"
+                                        Margin="8"
+                                        CornerRadius="6"
+                                        Background="#B30B111A"
+                                        BorderBrush="#35FFFFFF"
+                                        BorderThickness="1"
+                                        Padding="8,3">
+                                    <TextBlock Text="{Binding CurrentPet.BreedOrSpecies}"
+                                               Foreground="{DynamicResource Brush.Text.Primary}"
+                                               FontSize="10"
+                                               FontWeight="SemiBold"/>
+                                </Border>
+                            </Grid>
                         </Border>
 
-                        <Rectangle Grid.Row="2" Height="0" Grid.ColumnSpan="2" Margin="0,0,0,28" Grid.RowSpan="2"/>
+                        <!-- Pet Bio & Role -->
+                        <StackPanel Grid.Row="2" Margin="0,0,0,4">
+                            <TextBlock Text="{Binding CurrentPet.Name}"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                       FontSize="17"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="{Binding CurrentPet.Title}"
+                                       Foreground="{DynamicResource Brush.Info.Light}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Margin="0,1,0,0"
+                                       TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
 
-                        <Button Grid.Row="3"
-                                Content="Open Computer"
-                                MinWidth="128"
-                                HorizontalAlignment="Right"
-                                Style="{DynamicResource Button.Rounded}"
-                                Margin="0,6,0,0"
-                                Grid.Column="1"
-                                Command="{Binding OpenComputerCommand}"/>
+                        <!-- Blurb Callout -->
+                        <Border Grid.Row="3"
+                                CornerRadius="7"
+                                Background="#12FFFFFF"
+                                BorderBrush="#1FFFFFFF"
+                                BorderThickness="1"
+                                Padding="8,5"
+                                Margin="0,2,0,6">
+                            <TextBlock Text="{Binding CurrentPet.Blurb}"
+                                       Foreground="{DynamicResource Brush.Text.Muted}"
+                                       FontSize="10"
+                                       FontStyle="Italic"
+                                       TextWrapping="Wrap"/>
+                        </Border>
+
+                        <!-- Footer -->
+                        <Grid Grid.Row="4" VerticalAlignment="Bottom">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding CurrentPet.OwnerDisplay}"
+                                       Foreground="{DynamicResource Brush.Text.Muted}"
+                                       FontSize="10"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"/>
+
+                            <Button Grid.Column="1"
+                                    Style="{StaticResource SubtleLinkButton}"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding SubmitPetCommand}">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE722;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="11"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,4,0"/>
+                                    <TextBlock Text="Submit Pet"
+                                               FontSize="10"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
                     </Grid>
                 </Border>
             </Grid>
-
-            <!-- tiles -->
-            <UniformGrid Grid.Row="3" Columns="4" Margin="0,0,0,8">
-
-                <!-- Groups -->
-                <Border Height="82" CornerRadius="12"
-                        Background="{DynamicResource CardGradient.Surface.L1}"
-                        Margin="0,0,6,0" Padding="0"
-                        BorderBrush="{DynamicResource Brush.Card.Border}" BorderThickness="1">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="8"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-                        <StackPanel Grid.Column="1" Margin="12,8,12,8">
-                            <TextBlock Text="Groups" Foreground="{DynamicResource Brush.Text.Primary}" FontSize="15"/>
-                            <TextBlock Text="Search group memberships"
-                                       Foreground="{DynamicResource Brush.Text.Muted}" FontSize="13"
-                                       TextWrapping="Wrap"/>
-                        </StackPanel>
-                        <Button Grid.Column="1"
-                                Style="{StaticResource TileOverlayButton}"
-                                Command="{Binding GoGroupsCommand}"/>
-                    </Grid>
-                </Border>
-
-                <!-- Entra -->
-                <Border Height="82" CornerRadius="12"
-                        Background="{DynamicResource CardGradient.Surface.L1}"
-                        Margin="6,0,6,0" Padding="0"
-                        BorderBrush="{DynamicResource Brush.Card.Border}" BorderThickness="1">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="8"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-                        <StackPanel Grid.Column="1" Margin="12,8,12,8">
-                            <TextBlock Text="Entra" Foreground="{DynamicResource Brush.Text.Primary}" FontSize="15"/>
-                            <TextBlock Text="Sign in for Feedback"
-                                       Foreground="{DynamicResource Brush.Text.Muted}" FontSize="13"
-                                       TextWrapping="Wrap"/>
-                        </StackPanel>
-                        <Button Grid.Column="1"
-                                Style="{StaticResource TileOverlayButton}"
-                                Command="{Binding GoEntraCommand}"/>
-                    </Grid>
-                </Border>
-
-                <!-- Links -->
-                <Border Height="82" CornerRadius="12"
-                        Background="{DynamicResource CardGradient.Surface.L1}"
-                        Margin="6,0,6,0" Padding="0"
-                        BorderBrush="{DynamicResource Brush.Card.Border}" BorderThickness="1">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="8"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-                        <StackPanel Grid.Column="1" Margin="12,8,12,8">
-                            <TextBlock Text="Links" Foreground="{DynamicResource Brush.Text.Primary}" FontSize="15"/>
-                            <TextBlock Text="Intranet · ServiceNow"
-                                       Foreground="{DynamicResource Brush.Text.Muted}" FontSize="13"
-                                       TextWrapping="Wrap"/>
-                        </StackPanel>
-                        <Button Grid.Column="1"
-                                Style="{StaticResource TileOverlayButton}"
-                                Command="{Binding GoLinksCommand}"/>
-                    </Grid>
-                </Border>
-
-                <!-- About -->
-                <Border Height="82" CornerRadius="12"
-                        Background="{DynamicResource CardGradient.Surface.L1}"
-                        Margin="6,0,0,0" Padding="0"
-                        BorderBrush="{DynamicResource Brush.Card.Border}" BorderThickness="1">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="8"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
-                        <StackPanel Grid.Column="1" Margin="12,8,12,8">
-                            <TextBlock Text="About" Foreground="{DynamicResource Brush.Text.Primary}" FontSize="15"/>
-                            <TextBlock Text="Version, source, credits"
-                                       Foreground="{DynamicResource Brush.Text.Muted}" FontSize="13"
-                                       TextWrapping="Wrap"/>
-                        </StackPanel>
-                        <Button Grid.Column="1"
-                                Style="{StaticResource TileOverlayButton}"
-                                Command="{Binding GoAboutCommand}"/>
-                    </Grid>
-                </Border>
-
-            </UniformGrid>
-
         </Grid>
     </Border>
 </UserControl>

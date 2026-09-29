@@ -3,7 +3,6 @@ using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Data;
-using DSAMVVM.MVVM.Model.Schemas;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
@@ -19,7 +18,6 @@ namespace DSAMVVM.Core.Services
         private readonly string _cachePath = Globals.g_DepartmentCachePath;
 
         private List<IDepartment>? _departments;
-        private DepartmentMeta? _meta;
 
         // Class-level dictionary for fast Team lookups
         private Dictionary<string, SupportTeam> _teamMap = [];
@@ -107,7 +105,7 @@ namespace DSAMVVM.Core.Services
             UiNotify.Progress(key, isReload ? "Refreshing department data…" : "Loading department data…", priority: 0);
 
             // Resolve source, defaulting to global web URL unless a valid custom source is enabled.
-            var settings = App.Settings?.Paths.DepartmentData;
+            var settings = App.Settings.Paths.DepartmentData;
             string source = "Web";
             string targetUri = Globals.g_DepartmentJSONURL;
 
@@ -197,7 +195,6 @@ namespace DSAMVVM.Core.Services
                 try
                 {
                     var wrapper = JsonConvert.DeserializeObject<DepartmentListWrapper>(jsonContent) ?? throw new Exception("Deserialized data was null.");
-                    _meta = wrapper.Meta;
 
                     // Build fast lookup dictionary for Support Teams.
                     _teamMap = wrapper.SupportTeams.Where(t => !string.IsNullOrWhiteSpace(t.SupportTeamName))

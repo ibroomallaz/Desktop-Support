@@ -579,6 +579,7 @@ namespace DSAMVVM
             services.AddSingleton<IQuickSearchService, QuickSearchService>();
 
             services.AddSingleton<IHttpService, HttpService>();
+            services.AddSingleton<IImageCacheService, ImageCacheService>();
             services.AddSingleton<ISettingsService, SettingsService>();
 
             services.AddSingleton<AppSettings>(_ => Settings);
@@ -586,6 +587,7 @@ namespace DSAMVVM
             services.AddSingleton<IDepartmentService, DepartmentService>();
             services.AddSingleton<IADService, ADService>();
             services.AddSingleton<ILinksService, LinksService>();
+            services.AddSingleton<IServiceMeowService, ServiceMeowService>();
             services.AddSingleton<IAdminService, AdminService>();
             services.AddSingleton<IFileDialogService, FileDialogService>();
             services.AddSingleton<IJsonExportService, JsonExportService>();
@@ -594,6 +596,8 @@ namespace DSAMVVM
             services.AddSingleton<IDeepLinkRoutingService, DeepLinkRoutingService>();
             services.AddSingleton<IAuthenticationService, AuthenticationService>();
             services.AddSingleton<IApplicationStateService, ApplicationStateService>();
+            services.AddSingleton<INetworkDetectionService, NetworkDetectionService>();
+            services.AddSingleton<IADDetectionService, ADDetectionService>();
 
             services.AddSingleton<IOutputTextSettingsProvider>(sp =>
                 new OutputTextSettingsProvider(
@@ -631,7 +635,15 @@ namespace DSAMVVM
                     goGroups: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.Group,
                     goEntra: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.Entra,
                     goLinks: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.Links,
-                    goAbout: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.About
+                    goAbout: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.About,
+                    networkService: sp.GetRequiredService<INetworkDetectionService>(),
+                    adDetectionService: sp.GetRequiredService<IADDetectionService>(),
+                    authService: sp.GetRequiredService<IAuthenticationService>(),
+                    searchService: sp.GetRequiredService<ISearchService>(),
+                    linkRouter: sp.GetRequiredService<IDeepLinkRoutingService>(),
+                    imageCacheService: sp.GetRequiredService<IImageCacheService>(),
+                    settingsService: sp.GetRequiredService<ISettingsService>(),
+                    serviceMeowService: sp.GetRequiredService<IServiceMeowService>()
                 )
             );
 

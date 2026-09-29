@@ -11,28 +11,24 @@ namespace DSAMVVM.Core.Services.Graph
         {
             var roleClaim = claims.FirstOrDefault(c => c.Type == "roles" && c.Value.Contains("TeamID:"));
 
-            if (roleClaim != null)
+            if (roleClaim == null) return;
+            string[] routePairs = roleClaim.Value.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (string pair in routePairs)
             {
-                string[] routePairs = roleClaim.Value.Split('|', StringSplitOptions.RemoveEmptyEntries);
+                string[] keyValue = pair.Split([':'], 2, StringSplitOptions.RemoveEmptyEntries);
 
-                foreach (string pair in routePairs)
+                if (keyValue.Length != 2) continue;
+                string key = keyValue[0].Trim();
+                string value = keyValue[1].Trim();
+
+                if (key.Equals("TeamID", StringComparison.OrdinalIgnoreCase))
                 {
-                    string[] keyValue = pair.Split([':'], 2, StringSplitOptions.RemoveEmptyEntries);
-
-                    if (keyValue.Length == 2)
-                    {
-                        string key = keyValue[0].Trim();
-                        string value = keyValue[1].Trim();
-
-                        if (key.Equals("TeamID", StringComparison.OrdinalIgnoreCase))
-                        {
-                            TeamId = value;
-                        }
-                        else
-                        {
-                            _channels[key] = value;
-                        }
-                    }
+                    TeamId = value;
+                }
+                else
+                {
+                    _channels[key] = value;
                 }
             }
         }

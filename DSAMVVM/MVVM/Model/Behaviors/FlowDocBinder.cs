@@ -66,7 +66,7 @@ namespace DSAMVVM.MVVM.Model.Behaviors
             if (d is not FlowDocumentScrollViewer viewer) return;
 
             // If DI isn't ready yet (designer / early parse), delay until Loaded
-            if (Application.Current is not App || App.Services == null)
+            if (Application.Current is not App)
             {
                 viewer.Loaded -= DeferLoaded;
                 viewer.Loaded += DeferLoaded;
@@ -82,11 +82,9 @@ namespace DSAMVVM.MVVM.Model.Behaviors
         {
             if (sender is not FlowDocumentScrollViewer viewer) return;
 
-            if (Application.Current is App && App.Services != null)
-            {
-                viewer.Loaded -= DeferLoaded;
-                EnsureSubscribedAndRender(viewer, forceBottom: false);
-            }
+            if (Application.Current is not App) return;
+            viewer.Loaded -= DeferLoaded;
+            EnsureSubscribedAndRender(viewer, forceBottom: false);
         }
 
         private static void EnsureSubscribedAndRender(FlowDocumentScrollViewer viewer, bool forceBottom)
@@ -108,7 +106,7 @@ namespace DSAMVVM.MVVM.Model.Behaviors
 
                 textSettings.Changed += Handler;
 
-                viewer.Unloaded += (_, __) =>
+                viewer.Unloaded += (_, _) =>
                 {
                     textSettings.Changed -= Handler;
                     viewer.ClearValue(SubscribedProviderProperty);
@@ -123,7 +121,7 @@ namespace DSAMVVM.MVVM.Model.Behaviors
 
         private static void Rebuild(FlowDocumentScrollViewer viewer, IFlowDocService flowSvc, bool forceBottom)
         {
-            var text = GetText(viewer) ?? string.Empty;
+            var text = GetText(viewer);
             var viewName = GetViewName(viewer); // null => default/global font size
 
             // Preserve scroll only if not forcing bottom
@@ -146,7 +144,7 @@ namespace DSAMVVM.MVVM.Model.Behaviors
                     s?.ScrollToBottom();
                 }, DispatcherPriority.Background);
             }
-            else if (oldOffset is double o && sv != null)
+            else if (oldOffset is { } o && sv != null)
             {
                 sv.ScrollToVerticalOffset(o);
             }

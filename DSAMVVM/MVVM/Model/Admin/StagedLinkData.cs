@@ -10,9 +10,9 @@ namespace DSAMVVM.MVVM.Model.Admin
 
     public sealed class StagedLinkData
     {
-        public bool IsCommon { get; set; } = true;
-        public string? Team { get; set; }
-        public Link Link { get; set; } = new();
-        public StagedLinkAction Action { get; set; } = StagedLinkAction.AddOrUpdate;
+        public bool IsCommon { get; init; } = true;
+        public string? Team { get; init; }
+        public Link Link { get; init; } = new();
+        public StagedLinkAction Action { get; init; } = StagedLinkAction.AddOrUpdate;
     }
 }

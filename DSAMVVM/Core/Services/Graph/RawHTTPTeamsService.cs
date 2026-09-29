@@ -20,10 +20,8 @@ namespace DSAMVVM.Core.Services.Graph
             var jsonPayload = $"{{\"body\": {{\"contentType\": \"text\", \"content\": \"{messageText}\"}}}}";
 
             using var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-            using var request = new HttpRequestMessage(HttpMethod.Post, requestUrl)
-            {
-                Content = content
-            };
+            using var request = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+            request.Content = content;
 
             // Inject the dynamic OAuth2 token into the per-request header collection
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
@@ -31,7 +29,7 @@ namespace DSAMVVM.Core.Services.Graph
 
             try
             {
-                var httpService = App.Services?.GetService<IHttpService>();
+                var httpService = App.Services.GetService<IHttpService>();
                 HttpResponseMessage response;
                 if (httpService != null)
                 {

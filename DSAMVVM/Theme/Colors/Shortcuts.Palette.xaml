@@ -1,0 +1,198 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ======================================================== -->
+    <!-- Quick Shortcuts Jewel-Tone Color Palettes               -->
+    <!-- ======================================================== -->
+
+    <!-- Blue (Azure / ServiceNow / Microsoft 365) -->
+    <Color x:Key="Color.Shortcut.Blue.Bg">#12263F</Color>
+    <Color x:Key="Color.Shortcut.Blue.Border">#234975</Color>
+    <Color x:Key="Color.Shortcut.Blue.Fg">#5BC3FF</Color>
+    <SolidColorBrush x:Key="Brush.Shortcut.Blue.Bg"     Color="#12263F"/>
+    <SolidColorBrush x:Key="Brush.Shortcut.Blue.Border" Color="#234975"/>
+    <SolidColorBrush x:Key="Brush.Shortcut.Blue.Fg"     Color="#5BC3FF"/>
+
+    <!-- Amber (Gold / NetID / Security) -->
+    <Color x:Key="Color.Shortcut.Amber.Bg">#2C2013</Color>
+    <Color x:Key="Color.Shortcut.Amber.Border">#5C4123</Color>
+    <Color x:Key="Color.Shortcut.Amber.Fg">#FFB84D</Color>
+    <SolidColorBrush x:Key="Brush.Shortcut.Amber.Bg"     Color="#2C2013"/>
+    <SolidColorBrush x:Key="Brush.Shortcut.Amber.Border" Color="#5C4123"/>
+    <SolidColorBrush x:Key="Brush.Shortcut.Amber.Fg"     Color="#FFB84D"/>
+
+    <!-- Green (Emerald / IT Status / Health) -->
+    <Color x:Key="Color.Shortcut.Green.Bg">#102C1F</Color>
+    <Color x:Key="Color.Shortcut.Green.Border">#1F593D</Color>
+    <Color x:Key="Color.Shortcut.Green.Fg">#48D588</Color>
+    <SolidColorBrush x:Key="Brush.Shortcut.Green.Bg"     Color="#102C1F"/>
+    <SolidColorBrush x:Key="Brush.Shortcut.Green.Border" Color="#1F593D"/>
+    <SolidColorBrush x:Key="Brush.Shortcut.Green.Fg"     Color="#48D588"/>
+
+    <!-- Rose (Berry / Knowledge Base / Docs) -->
+    <Color x:Key="Color.Shortcut.Rose.Bg">#301522</Color>
+    <Color x:Key="Color.Shortcut.Rose.Border">#61243E</Color>
+    <Color x:Key="Color.Shortcut.Rose.Fg">#FFAEC0</Color>
+    <SolidColorBrush x:Key="Brush.Shortcut.Rose.Bg"     Color="#301522"/>
+    <SolidColorBrush x:Key="Brush.Shortcut.Rose.Border" Color="#61243E"/>
+    <SolidColorBrush x:Key="Brush.Shortcut.Rose.Fg"     Color="#FFAEC0"/>
+
+    <!-- Purple (Royal / Administration / Scripts) -->
+    <Color x:Key="Color.Shortcut.Purple.Bg">#25173B</Color>
+    <Color x:Key="Color.Shortcut.Purple.Border">#4D2C7A</Color>
+    <Color x:Key="Color.Shortcut.Purple.Fg">#C68EFF</Color>
+    <SolidColorBrush x:Key="Brush.Shortcut.Purple.Bg"     Color="#25173B"/>
+    <SolidColorBrush x:Key="Brush.Shortcut.Purple.Border" Color="#4D2C7A"/>
+    <SolidColorBrush x:Key="Brush.Shortcut.Purple.Fg"     Color="#C68EFF"/>
+
+    <!-- Teal (Cyan / Repos / Custom Tools) -->
+    <Color x:Key="Color.Shortcut.Teal.Bg">#0F292F</Color>
+    <Color x:Key="Color.Shortcut.Teal.Border">#1C5561</Color>
+    <Color x:Key="Color.Shortcut.Teal.Fg">#4DEEEA</Color>
+    <SolidColorBrush x:Key="Brush.Shortcut.Teal.Bg"     Color="#0F292F"/>
+    <SolidColorBrush x:Key="Brush.Shortcut.Teal.Border" Color="#1C5561"/>
+    <SolidColorBrush x:Key="Brush.Shortcut.Teal.Fg"     Color="#4DEEEA"/>
+
+    <!-- ======================================================== -->
+    <!-- Reusable Styles & Templates for Shortcuts                -->
+    <!-- ======================================================== -->
+
+    <!-- Shortcut Card Root Border Style based on ColorPreset theme tokens -->
+    <Style x:Key="ShortcutCardBorder" TargetType="Border">
+        <Setter Property="Margin" Value="3"/>
+        <Setter Property="MinHeight" Value="56"/>
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Blue.Bg}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Blue.Border}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Blue">
+                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Blue.Bg}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Blue.Border}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Amber">
+                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Amber.Bg}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Amber.Border}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Green">
+                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Green.Bg}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Green.Border}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Rose">
+                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Rose.Bg}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Rose.Border}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Purple">
+                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Purple.Bg}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Purple.Border}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Teal">
+                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Teal.Bg}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Teal.Border}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Shortcut Icon Badge / Plate Border (used in Settings and preview slots) -->
+    <Style x:Key="ShortcutIconPlate" TargetType="Border">
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Blue.Bg}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Blue.Border}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Blue">
+                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Blue.Bg}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Blue.Border}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Amber">
+                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Amber.Bg}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Amber.Border}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Green">
+                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Green.Bg}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Green.Border}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Rose">
+                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Rose.Bg}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Rose.Border}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Purple">
+                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Purple.Bg}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Purple.Border}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Teal">
+                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Teal.Bg}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Teal.Border}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Shortcut Foreground Style based on ColorPreset theme tokens -->
+    <Style x:Key="ShortcutFgText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Shortcut.Blue.Fg}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Blue">
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Shortcut.Blue.Fg}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Amber">
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Shortcut.Amber.Fg}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Green">
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Shortcut.Green.Fg}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Rose">
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Shortcut.Rose.Fg}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Purple">
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Shortcut.Purple.Fg}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ColorPreset}" Value="Teal">
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Shortcut.Teal.Fg}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- ComboBox Item Template with Color Dot Badge -->
+    <DataTemplate x:Key="ColorPresetItemTemplate">
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <Border Width="10" Height="10" CornerRadius="5" Margin="0,0,8,0" VerticalAlignment="Center">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Blue.Fg}"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Blue.Border}"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding}" Value="Blue">
+                                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Blue.Fg}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Blue.Border}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding}" Value="Amber">
+                                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Amber.Fg}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Amber.Border}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding}" Value="Green">
+                                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Green.Fg}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Green.Border}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding}" Value="Rose">
+                                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Rose.Fg}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Rose.Border}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding}" Value="Purple">
+                                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Purple.Fg}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Purple.Border}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding}" Value="Teal">
+                                <Setter Property="Background" Value="{DynamicResource Brush.Shortcut.Teal.Fg}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Shortcut.Teal.Border}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+            </Border>
+            <TextBlock Text="{Binding}" Foreground="{DynamicResource Brush.Text.Primary}" FontSize="12" VerticalAlignment="Center"/>
+        </StackPanel>
+    </DataTemplate>
+
+</ResourceDictionary>

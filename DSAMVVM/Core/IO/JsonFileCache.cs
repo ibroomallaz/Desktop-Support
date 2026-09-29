@@ -56,7 +56,12 @@ namespace DSAMVVM.Core.IO
             catch (Exception ex)
             {
                 Log.Error("Cache", $"cache.write.error path=\"{_path}\"", ex);
-                try { if (File.Exists(tmp)) File.Delete(tmp); } catch { }
+                try { if (File.Exists(tmp)) File.Delete(tmp); }
+                catch
+                {
+                    // ignored
+                }
+
                 throw;
             }
         }

@@ -47,32 +47,18 @@
                        Foreground="{DynamicResource Brush.Text.Primary}" 
                        VerticalAlignment="Center"/>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <RadioButton Content="Department" 
-                             GroupName="AdminSectionMode"
-                             IsChecked="{Binding SelectedSection, Converter={StaticResource EnumEquals}, ConverterParameter={x:Static enums:AdminSection.Department}}"
-                             Style="{DynamicResource Radio.GroupView}"
-                             FontSize="11"
-                             Padding="12,3"
-                             MinHeight="26"
-                             Margin="0,0,6,0"/>
-
-                <RadioButton Content="Support Team" 
-                             GroupName="AdminSectionMode"
-                             IsChecked="{Binding SelectedSection, Converter={StaticResource EnumEquals}, ConverterParameter={x:Static enums:AdminSection.SupportTeam}}"
-                             Style="{DynamicResource Radio.GroupView}"
-                             FontSize="11"
-                             Padding="12,3"
-                             MinHeight="26"
-                             Margin="0,0,6,0"/>
-
-                <RadioButton Content="Links" 
-                             GroupName="AdminSectionMode"
-                             IsChecked="{Binding SelectedSection, Converter={StaticResource EnumEquals}, ConverterParameter={x:Static enums:AdminSection.Links}}"
-                             Style="{DynamicResource Radio.GroupView}"
-                             FontSize="11"
-                             Padding="12,3"
-                             MinHeight="26"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <TextBlock Text="Section:" 
+                           Style="{StaticResource Admin.FieldLabel}" 
+                           Margin="0,0,8,0" 
+                           FontSize="11"/>
+                <ComboBox ItemsSource="{Binding AvailableSections}"
+                          SelectedItem="{Binding SelectedSectionOption, Mode=TwoWay}"
+                          DisplayMemberPath="DisplayName"
+                          Style="{DynamicResource Combo.Links.Dropdown}"
+                          Width="160"
+                          Height="28"
+                          FontSize="11"/>
             </StackPanel>
         </Grid>
 
@@ -97,55 +83,66 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,4,0">
                         <StackPanel Margin="0,0,4,0">
 
-                            <!-- Department Form -->
+                            <!-- Department Section -->
                             <Grid Visibility="{Binding IsDepartmentSelected, Converter={StaticResource BoolToVis}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="105"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="105"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Department ID:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <!-- Department ID -->
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Dept ID:" Style="{StaticResource Admin.FieldLabel}"/>
                                 <TextBox Grid.Row="0" Grid.Column="1" 
                                          Margin="0,0,0,6" 
                                          Height="26"
+                                         MaxLength="4"
                                          Style="{DynamicResource TextBox.Default}"
                                          Text="{Binding DeptId, UpdateSourceTrigger=PropertyChanged}"/>
 
+                                <!-- Support Known -->
                                 <TextBlock Grid.Row="1" Grid.Column="0" Text="Support Known:" Style="{StaticResource Admin.FieldLabel}"/>
                                 <ComboBox Grid.Row="1" Grid.Column="1" 
                                           Margin="0,0,0,6" 
-                                          Height="26" 
-                                          SelectedItem="{Binding SupportKnown, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                          Height="26"
+                                          SelectedIndex="{Binding SelectedSupportKnownIndex}"
                                           Style="{DynamicResource Combo.Links.Dropdown}">
-                                    <sys:Boolean>True</sys:Boolean>
-                                    <sys:Boolean>False</sys:Boolean>
+                                    <sys:String>True</sys:String>
+                                    <sys:String>False</sys:String>
                                 </ComboBox>
 
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Support Team:" VerticalAlignment="Top" Margin="0,4,8,0" Style="{StaticResource Admin.FieldLabel}"/>
-                                <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,6">
-                                    <ComboBox ItemsSource="{Binding AvailableTeams}"
-                                              SelectedItem="{Binding SelectedTeamOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                              Height="26"
-                                              Style="{DynamicResource Combo.Links.Dropdown}"/>
+                                <!-- Support Team -->
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Support Team:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <ComboBox Grid.Row="2" Grid.Column="1" 
+                                          Margin="0,0,0,6" 
+                                          Height="26"
+                                          ItemsSource="{Binding AvailableTeams}"
+                                          SelectedItem="{Binding SelectedTeamOption, Mode=TwoWay}"
+                                          Style="{DynamicResource Combo.Links.Dropdown}"/>
 
-                                    <TextBox Margin="0,6,0,0" 
-                                             Height="26"
-                                             Style="{DynamicResource TextBox.Default}"
-                                             Text="{Binding CustomTeamName, UpdateSourceTrigger=PropertyChanged}"
-                                             Visibility="{Binding IsOtherTeamSelected, Converter={StaticResource BoolToVis}}"/> 
-                                </StackPanel>
-
-                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Notes:" VerticalAlignment="Top" Margin="0,4,8,0" Style="{StaticResource Admin.FieldLabel}"/>
+                                <!-- Custom Support Team (when "Other" is chosen) -->
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="New Team Name:" 
+                                           Visibility="{Binding IsOtherTeamSelected, Converter={StaticResource BoolToVis}}" 
+                                           Style="{StaticResource Admin.FieldLabel}"/>
                                 <TextBox Grid.Row="3" Grid.Column="1" 
+                                         Margin="0,0,0,6" 
+                                         Height="26"
+                                         Visibility="{Binding IsOtherTeamSelected, Converter={StaticResource BoolToVis}}" 
+                                         Style="{DynamicResource TextBox.Default}"
+                                         Text="{Binding CustomTeamName, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <!-- Notes -->
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Notes:" VerticalAlignment="Top" Margin="0,4,8,0" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="4" Grid.Column="1" 
                                          MinHeight="75" 
                                          MaxHeight="120"
                                          TextWrapping="Wrap" 
@@ -157,12 +154,8 @@
                                          Text="{Binding DeptNotes, UpdateSourceTrigger=PropertyChanged}"/>
                             </Grid>
 
-                            <!-- Support Team Form -->
+                            <!-- Support Team Section -->
                             <Grid Visibility="{Binding IsSupportTeamSelected, Converter={StaticResource BoolToVis}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="105"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
@@ -171,14 +164,18 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="105"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                                <!-- Select existing team or [+ New Support Team] -->
+                                <!-- Select Team / Create New -->
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Select Team:" Style="{StaticResource Admin.FieldLabel}"/>
                                 <ComboBox Grid.Row="0" Grid.Column="1" 
-                                          ItemsSource="{Binding AvailableSupportTeamNames}"
-                                          SelectedItem="{Binding SelectedSupportTeamOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                          Margin="0,0,0,6"
+                                          Margin="0,0,0,6" 
                                           Height="26"
+                                          ItemsSource="{Binding AvailableSupportTeamNames}"
+                                          SelectedItem="{Binding SelectedSupportTeamOption, Mode=TwoWay}"
                                           Style="{DynamicResource Combo.Links.Dropdown}"/>
 
                                 <!-- Team Name -->
@@ -190,7 +187,7 @@
                                          Text="{Binding TeamName, UpdateSourceTrigger=PropertyChanged}"/>
 
                                 <!-- Manager Name -->
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Manager:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Manager Name:" Style="{StaticResource Admin.FieldLabel}"/>
                                 <TextBox Grid.Row="2" Grid.Column="1" 
                                          Margin="0,0,0,6" 
                                          Height="26"
@@ -206,123 +203,107 @@
                                          Text="{Binding TeamManagerNetId, UpdateSourceTrigger=PropertyChanged}"/>
 
                                 <!-- Phone Number -->
-                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Phone #:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Phone Number:" Style="{StaticResource Admin.FieldLabel}"/>
                                 <TextBox Grid.Row="4" Grid.Column="1" 
                                          Margin="0,0,0,6" 
                                          Height="26"
                                          Style="{DynamicResource TextBox.Default}"
                                          Text="{Binding TeamPhoneNumber, UpdateSourceTrigger=PropertyChanged}"/>
 
-                                <!-- Supported Divisions -->
+                                <!-- Supported Divisions List & Add/Remove -->
                                 <TextBlock Grid.Row="5" Grid.Column="0" Text="Divisions:" VerticalAlignment="Top" Margin="0,4,8,0" Style="{StaticResource Admin.FieldLabel}"/>
-                                <Border Grid.Row="5" Grid.Column="1" 
-                                        Background="{DynamicResource Brush.Surface.1}" 
-                                        BorderBrush="{DynamicResource Brush.Border}" 
-                                        BorderThickness="1" 
-                                        CornerRadius="6" 
-                                        Padding="6">
-                                    <StackPanel>
-                                        <!-- Add Division Row -->
-                                        <Grid Margin="0,0,0,6">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="65"/>
-                                                <ColumnDefinition Width="4"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="4"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
+                                <Grid Grid.Row="5" Grid.Column="1">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                                            <TextBox Grid.Column="0" 
-                                                     Height="24" 
-                                                     FontSize="11"
-                                                     Style="{DynamicResource TextBox.Default}"
-                                                     ToolTip="Division Abbreviation (e.g. ACDV)"
-                                                     Text="{Binding NewDivAbbrev, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <!-- Add Division Form -->
+                                    <Grid Grid.Row="0" Margin="0,0,0,6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="65"/>
+                                            <ColumnDefinition Width="6"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="6"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
 
-                                            <TextBox Grid.Column="2" 
-                                                     Height="24" 
-                                                     FontSize="11"
-                                                     Style="{DynamicResource TextBox.Default}"
-                                                     ToolTip="Full Division Name"
-                                                     Text="{Binding NewDivFullName, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBox Grid.Column="0" 
+                                                 Height="26" 
+                                                 Style="{DynamicResource TextBox.Default}"
+                                                 ToolTip="Division Abbreviation (e.g., ADO)"
+                                                 Text="{Binding NewDivAbbrev, UpdateSourceTrigger=PropertyChanged}"/>
 
-                                            <Button Grid.Column="4" 
-                                                    Content="Add" 
-                                                    Command="{Binding AddDivisionCommand}"
-                                                    Width="42" 
-                                                    Height="24" 
-                                                    FontSize="11"
-                                                    FontWeight="SemiBold"
-                                                    Style="{DynamicResource Button.Rounded}"/>
-                                        </Grid>
+                                        <TextBox Grid.Column="2" 
+                                                 Height="26" 
+                                                 Style="{DynamicResource TextBox.Default}"
+                                                 ToolTip="Division Full Name (e.g., Athletics Department Operations)"
+                                                 Text="{Binding NewDivFullName, UpdateSourceTrigger=PropertyChanged}"/>
 
-                                        <!-- List of Supported Divisions -->
-                                        <ItemsControl ItemsSource="{Binding SupportedDivisionsList}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border Margin="0,0,0,3" 
-                                                            Background="{DynamicResource Brush.Surface.0}" 
-                                                            BorderBrush="{DynamicResource Brush.Border}" 
-                                                            BorderThickness="1" 
-                                                            CornerRadius="4" 
-                                                            Padding="5,3">
-                                                        <Grid>
+                                        <Button Grid.Column="4" 
+                                                Content="+ Add" 
+                                                Command="{Binding AddDivisionCommand}" 
+                                                Height="26" 
+                                                Padding="10,0" 
+                                                FontSize="11"
+                                                Style="{DynamicResource Button.Rounded}"/>
+                                    </Grid>
+
+                                    <!-- Existing Divisions ItemsControl -->
+                                    <Border Grid.Row="1" 
+                                            Background="{DynamicResource Brush.Surface.1}" 
+                                            BorderBrush="{DynamicResource Brush.Border}" 
+                                            BorderThickness="1" 
+                                            CornerRadius="6" 
+                                            Padding="6" 
+                                            MinHeight="60" 
+                                            MaxHeight="120">
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                            <ItemsControl ItemsSource="{Binding SupportedDivisionsList}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid Margin="0,2">
                                                             <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="55"/>
+                                                                <ColumnDefinition Width="Auto"/>
                                                                 <ColumnDefinition Width="*"/>
                                                                 <ColumnDefinition Width="Auto"/>
                                                             </Grid.ColumnDefinitions>
 
-                                                            <TextBlock Grid.Column="0" 
-                                                                       Text="{Binding DivAbbrev}" 
-                                                                       FontWeight="Bold" 
-                                                                       FontSize="10" 
-                                                                       Foreground="{DynamicResource Brush.Accent.Red.Light}"
-                                                                       VerticalAlignment="Center"/>
-
-                                                            <TextBlock Grid.Column="1" 
-                                                                       Text="{Binding DivFullName}" 
-                                                                       FontSize="10" 
-                                                                       Foreground="{DynamicResource Brush.Text.Primary}"
-                                                                       TextTrimming="CharacterEllipsis"
-                                                                       VerticalAlignment="Center"/>
-
+                                                            <TextBlock Grid.Column="0" Text="{Binding DivAbbrev}" FontWeight="Bold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,8,0"/>
+                                                            <TextBlock Grid.Column="1" Text="{Binding DivFullName}" Foreground="{DynamicResource Brush.Text.Muted}" TextTrimming="CharacterEllipsis"/>
                                                             <Button Grid.Column="2" 
                                                                     Content="✕" 
-                                                                    Command="{Binding DataContext.RemoveDivisionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                    Command="{Binding DataContext.RemoveDivisionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                                                                     CommandParameter="{Binding}"
-                                                                    ToolTip="Remove Division"
-                                                                    Width="18" 
-                                                                    Height="18" 
-                                                                    FontSize="9"
-                                                                    VerticalAlignment="Center"
                                                                     Style="{DynamicResource Button.Rounded.Small}"
-                                                                    Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                    Foreground="{DynamicResource Brush.Text.Muted}"
+                                                                    Width="18" Height="18" Margin="4,0,0,0"/>
                                                         </Grid>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </StackPanel>
-                                </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+                                    </Border>
+                                </Grid>
                             </Grid>
 
-                            <!-- Links Form -->
+                            <!-- Links Section -->
                             <Grid Visibility="{Binding IsLinksSelected, Converter={StaticResource BoolToVis}}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/> <!-- 0: Scope Selector -->
+                                    <RowDefinition Height="Auto"/> <!-- 1: Target Team (Conditional) -->
+                                    <RowDefinition Height="Auto"/> <!-- 2: New Team (Conditional) -->
+                                    <RowDefinition Height="Auto"/> <!-- 3: Existing Links Dropdown -->
+                                    <RowDefinition Height="Auto"/> <!-- 4: Link Name -->
+                                    <RowDefinition Height="Auto"/> <!-- 5: URL -->
+                                    <RowDefinition Height="Auto"/> <!-- 6: Description -->
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="105"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
 
-                                <!-- Scope (Common vs Team) -->
+                                <!-- Scope Selector -->
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Scope:" Style="{StaticResource Admin.FieldLabel}"/>
                                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,6">
                                     <RadioButton Content="Common Link" 
@@ -330,64 +311,70 @@
                                                  IsChecked="{Binding IsLinkCommon, Mode=TwoWay}"
                                                  Style="{DynamicResource Radio.GroupView}"
                                                  FontSize="11"
-                                                 Padding="10,2"
+                                                 Padding="10,3"
                                                  MinHeight="24"
                                                  Margin="0,0,6,0"/>
+
                                     <RadioButton Content="Team Link" 
                                                  GroupName="LinkScopeGroup"
                                                  IsChecked="{Binding IsLinkTeam, Mode=TwoWay}"
                                                  Style="{DynamicResource Radio.GroupView}"
                                                  FontSize="11"
-                                                 Padding="10,2"
+                                                 Padding="10,3"
                                                  MinHeight="24"/>
                                 </StackPanel>
 
-                                <!-- Target Team (visible only when Team Link is selected) -->
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Target Team:" VerticalAlignment="Top" Margin="0,4,8,0" 
-                                           Style="{StaticResource Admin.FieldLabel}"
-                                           Visibility="{Binding IsLinkTeam, Converter={StaticResource BoolToVis}}"/>
-                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,6"
-                                            Visibility="{Binding IsLinkTeam, Converter={StaticResource BoolToVis}}">
-                                    <ComboBox ItemsSource="{Binding AvailableLinkTeams}"
-                                              SelectedItem="{Binding SelectedLinkTeam, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                              Height="26"
-                                              Style="{DynamicResource Combo.Links.Dropdown}"/>
-
-                                    <TextBox Margin="0,6,0,0" 
-                                             Height="26"
-                                             Style="{DynamicResource TextBox.Default}"
-                                             Text="{Binding CustomLinkTeamName, UpdateSourceTrigger=PropertyChanged}"
-                                             Visibility="{Binding IsOtherLinkTeamSelected, Converter={StaticResource BoolToVis}}"/>
-                                </StackPanel>
-
-                                <!-- Select existing link or [+ New Link] -->
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Select Link:" Style="{StaticResource Admin.FieldLabel}"/>
-                                <ComboBox Grid.Row="2" Grid.Column="1" 
-                                          ItemsSource="{Binding ScopeLinksList}"
-                                          SelectedItem="{Binding SelectedScopeLinkOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                          Margin="0,0,0,6"
+                                <!-- Target Team (Only for Team Links) -->
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Target Team:" 
+                                           Visibility="{Binding IsLinkTeam, Converter={StaticResource BoolToVis}}"
+                                           Style="{StaticResource Admin.FieldLabel}"/>
+                                <ComboBox Grid.Row="1" Grid.Column="1" 
+                                          Margin="0,0,0,6" 
                                           Height="26"
+                                          Visibility="{Binding IsLinkTeam, Converter={StaticResource BoolToVis}}"
+                                          ItemsSource="{Binding AvailableLinkTeams}"
+                                          SelectedItem="{Binding SelectedLinkTeam, Mode=TwoWay}"
+                                          Style="{DynamicResource Combo.Links.Dropdown}"/>
+
+                                <!-- New Team Name (If "Other" selected in Target Team) -->
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="New Team:" 
+                                           Visibility="{Binding IsOtherLinkTeamSelected, Converter={StaticResource BoolToVis}}" 
+                                           Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" 
+                                         Margin="0,0,0,6" 
+                                         Height="26"
+                                         Visibility="{Binding IsOtherLinkTeamSelected, Converter={StaticResource BoolToVis}}" 
+                                         Style="{DynamicResource TextBox.Default}"
+                                         Text="{Binding CustomLinkTeamName, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <!-- Select Existing Link / Create New -->
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Select Link:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <ComboBox Grid.Row="3" Grid.Column="1" 
+                                          Margin="0,0,0,6" 
+                                          Height="26"
+                                          ItemsSource="{Binding ScopeLinksList}"
+                                          SelectedItem="{Binding SelectedScopeLinkOption, Mode=TwoWay}"
                                           Style="{DynamicResource Combo.Links.Dropdown}"/>
 
                                 <!-- Link Name -->
-                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Name:" Style="{StaticResource Admin.FieldLabel}"/>
-                                <TextBox Grid.Row="3" Grid.Column="1" 
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Link Name:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="4" Grid.Column="1" 
                                          Margin="0,0,0,6" 
                                          Height="26"
                                          Style="{DynamicResource TextBox.Default}"
                                          Text="{Binding LinkName, UpdateSourceTrigger=PropertyChanged}"/>
 
                                 <!-- URL -->
-                                <TextBlock Grid.Row="4" Grid.Column="0" Text="URL:" Style="{StaticResource Admin.FieldLabel}"/>
-                                <TextBox Grid.Row="4" Grid.Column="1" 
+                                <TextBlock Grid.Row="5" Grid.Column="0" Text="URL:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="5" Grid.Column="1" 
                                          Margin="0,0,0,6" 
                                          Height="26"
                                          Style="{DynamicResource TextBox.Default}"
                                          Text="{Binding LinkUrl, UpdateSourceTrigger=PropertyChanged}"/>
 
                                 <!-- Description -->
-                                <TextBlock Grid.Row="5" Grid.Column="0" Text="Description:" VerticalAlignment="Top" Margin="0,4,8,0" Style="{StaticResource Admin.FieldLabel}"/>
-                                <TextBox Grid.Row="5" Grid.Column="1" 
+                                <TextBlock Grid.Row="6" Grid.Column="0" Text="Description:" VerticalAlignment="Top" Margin="0,4,8,0" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="6" Grid.Column="1" 
                                          MinHeight="75" 
                                          MaxHeight="120"
                                          TextWrapping="Wrap" 
@@ -397,6 +384,134 @@
                                          Padding="6" 
                                          Style="{DynamicResource TextBox.Default}"
                                          Text="{Binding LinkDescription, UpdateSourceTrigger=PropertyChanged}"/>
+                            </Grid>
+
+                            <!-- ServiceMeow Section -->
+                            <Grid Visibility="{Binding IsServiceMeowSelected, Converter={StaticResource BoolToVis}}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/> <!-- 0: Pet Selector -->
+                                    <RowDefinition Height="Auto"/> <!-- 1: Owner Header -->
+                                    <RowDefinition Height="Auto"/> <!-- 2: Owner NetID -->
+                                    <RowDefinition Height="Auto"/> <!-- 3: Owner Name -->
+                                    <RowDefinition Height="Auto"/> <!-- 4: Owner Team -->
+                                    <RowDefinition Height="Auto"/> <!-- 5: Pet Header -->
+                                    <RowDefinition Height="Auto"/> <!-- 6: Pet Name -->
+                                    <RowDefinition Height="Auto"/> <!-- 7: Species & Breed -->
+                                    <RowDefinition Height="Auto"/> <!-- 8: Title / Role -->
+                                    <RowDefinition Height="Auto"/> <!-- 9: Photo URL -->
+                                    <RowDefinition Height="Auto"/> <!-- 10: Blurb / Bio -->
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="105"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Pet Selector -->
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Select Pet:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <ComboBox Grid.Row="0" Grid.Column="1" 
+                                          Margin="0,0,0,10" 
+                                          Height="26"
+                                          ItemsSource="{Binding AvailablePetsList}"
+                                          SelectedItem="{Binding SelectedPetOption, Mode=TwoWay}"
+                                          Style="{DynamicResource Combo.Links.Dropdown}"/>
+
+                                <!-- Owner Header -->
+                                <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                                        Margin="0,2,0,8" Padding="0,0,0,4" 
+                                        BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Brush.Border}">
+                                    <TextBlock Text="Owner Information" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource Brush.Accent.Red.Light}"/>
+                                </Border>
+
+                                <!-- Owner NetID -->
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Owner NetID:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" 
+                                         Margin="0,0,0,6" 
+                                         Height="26"
+                                         Style="{DynamicResource TextBox.Default}"
+                                         Text="{Binding PetOwnerNetId, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <!-- Owner Name -->
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Owner Name:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="3" Grid.Column="1" 
+                                         Margin="0,0,0,6" 
+                                         Height="26"
+                                         Style="{DynamicResource TextBox.Default}"
+                                         Text="{Binding PetOwnerName, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <!-- Owner Team -->
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Owner Team:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <ComboBox Grid.Row="4" Grid.Column="1" 
+                                          Margin="0,0,0,10" 
+                                          Height="26"
+                                          IsEditable="True"
+                                          ItemsSource="{Binding AvailableTeams}"
+                                          Text="{Binding PetOwnerTeam, UpdateSourceTrigger=PropertyChanged}"
+                                          Style="{DynamicResource Combo.Links.Dropdown}"/>
+
+                                <!-- Pet Header -->
+                                <Border Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" 
+                                        Margin="0,2,0,8" Padding="0,0,0,4" 
+                                        BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Brush.Border}">
+                                    <TextBlock Text="Pet Details" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource Brush.Accent.Red.Light}"/>
+                                </Border>
+
+                                <!-- Pet Name -->
+                                <TextBlock Grid.Row="6" Grid.Column="0" Text="Pet Name:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="6" Grid.Column="1" 
+                                         Margin="0,0,0,6" 
+                                         Height="26"
+                                         Style="{DynamicResource TextBox.Default}"
+                                         Text="{Binding PetName, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <!-- Species & Breed (Side by Side in Column 1) -->
+                                <TextBlock Grid.Row="7" Grid.Column="0" Text="Species / Breed:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <Grid Grid.Row="7" Grid.Column="1" Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="110"/>
+                                        <ColumnDefinition Width="6"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox Grid.Column="0" 
+                                              Height="26"
+                                              IsEditable="True"
+                                              ItemsSource="{Binding AvailableSpecies}"
+                                              Text="{Binding PetSpecies, UpdateSourceTrigger=PropertyChanged}"
+                                              Style="{DynamicResource Combo.Links.Dropdown}"/>
+                                    <TextBox Grid.Column="2" 
+                                             Height="26" 
+                                             Style="{DynamicResource TextBox.Default}"
+                                             Text="{Binding PetBreed, UpdateSourceTrigger=PropertyChanged}"/>
+                                </Grid>
+
+                                <!-- Title / Role -->
+                                <TextBlock Grid.Row="8" Grid.Column="0" Text="Title / Role:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="8" Grid.Column="1" 
+                                         Margin="0,0,0,6" 
+                                         Height="26"
+                                         Style="{DynamicResource TextBox.Default}"
+                                         Text="{Binding PetTitle, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <!-- Photo URL -->
+                                <TextBlock Grid.Row="9" Grid.Column="0" Text="Photo URL:" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="9" Grid.Column="1" 
+                                         Margin="0,0,0,6" 
+                                         Height="26"
+                                         ToolTip="Direct Box URL or web image link for the pet photo"
+                                         Style="{DynamicResource TextBox.Default}"
+                                         Text="{Binding PetImageUrl, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <!-- Blurb / Bio -->
+                                <TextBlock Grid.Row="10" Grid.Column="0" Text="Blurb / Bio:" VerticalAlignment="Top" Margin="0,4,8,0" Style="{StaticResource Admin.FieldLabel}"/>
+                                <TextBox Grid.Row="10" Grid.Column="1" 
+                                         MinHeight="65" 
+                                         MaxHeight="120"
+                                         TextWrapping="Wrap" 
+                                         AcceptsReturn="True" 
+                                         VerticalScrollBarVisibility="Auto"
+                                         VerticalContentAlignment="Top" 
+                                         Padding="6" 
+                                         Style="{DynamicResource TextBox.Default}"
+                                         Text="{Binding PetBlurb, UpdateSourceTrigger=PropertyChanged}"/>
                             </Grid>
 
                         </StackPanel>
@@ -416,7 +531,7 @@
 
                                 <Button Content="Delete Team" 
                                         Command="{Binding DeleteSupportTeamCommand}" 
-                                        Visibility="{Binding ShowDeleteSupportTeamButton, Converter={StaticResource BoolToVis}}"
+                                        Visibility="{Binding ShowDeleteSupportTeamButton, Converter={StaticResource BoolToVis}}" 
                                         Width="90" 
                                         Height="28" 
                                         FontSize="11"
@@ -425,10 +540,20 @@
 
                                 <Button Content="Delete Link" 
                                         Command="{Binding DeleteLinkCommand}" 
-                                        Visibility="{Binding ShowDeleteLinkButton, Converter={StaticResource BoolToVis}}"
+                                        Visibility="{Binding ShowDeleteLinkButton, Converter={StaticResource BoolToVis}}" 
                                         Width="90" 
                                         Height="28" 
                                         FontSize="11"
+                                        Margin="0,0,6,0"
+                                        Style="{DynamicResource Button.Rounded}"/>
+
+                                <Button Content="Delete Pet" 
+                                        Command="{Binding DeleteServiceMeowCommand}" 
+                                        Visibility="{Binding ShowDeleteServiceMeowButton, Converter={StaticResource BoolToVis}}" 
+                                        Width="90" 
+                                        Height="28" 
+                                        FontSize="11"
+                                        Margin="0,0,6,0"
                                         Style="{DynamicResource Button.Rounded}"/>
                             </StackPanel>
 
@@ -527,7 +652,7 @@
 
                                                 <Button Grid.Column="1" 
                                                         Content="✕" 
-                                                        Command="{Binding DataContext.RemoveStagedItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        Command="{Binding DataContext.RemoveStagedItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                                                         CommandParameter="{Binding}"
                                                         ToolTip="Remove this change from queue"
                                                         Width="20" 

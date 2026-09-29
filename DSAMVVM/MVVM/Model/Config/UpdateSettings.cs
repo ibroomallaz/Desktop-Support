@@ -2,7 +2,7 @@
 {
     public sealed class UpdateSettings
     {
-        public bool EnablePreReleaseChannel { get; set; } = false;
-        public bool UseInternalTestingSources { get; set; } = false;
+        public bool EnablePreReleaseChannel { get; set; }
+        public bool UseInternalTestingSources { get; set; }
     }
 }
