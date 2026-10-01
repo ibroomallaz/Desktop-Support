@@ -49,7 +49,7 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 Category = SettingsCategory.Appearance,
                 Title = "Appearance & Interface",
-                Description = "Search text sizes, per-tab overrides, system tray options, and history limit.",
+                Description = "Search text sizes, per-tab overrides, system tray options, ServiceMeow mascot, and history limit.",
                 Glyph = Glyphs.Appearance
             },
             new SettingsCategoryItem
@@ -224,6 +224,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public LinksUiSettings LinksSettings => _settings.Ui.Links;
         public SearchSettings SearchSettings => _settings.Ui.Search;
         public TrayUiSettings TraySettings => _settings.Ui.Tray;
+        public ServiceMeowUiSettings ServiceMeowSettings => _settings.Ui.ServiceMeow;
 
         // --- UI State Properties ---
         private double _defaultFontSize;
@@ -310,6 +311,13 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private bool _closeToTray;
         public bool CloseToTray { get => _closeToTray; set { if (Set(ref _closeToTray, value)) SetModified(); } }
+
+        private bool _enableServiceMeow;
+        public bool EnableServiceMeow
+        {
+            get => _enableServiceMeow;
+            set { if (Set(ref _enableServiceMeow, value)) SetModified(); }
+        }
 
         private bool _enablePreReleaseChannel;
         public bool EnablePreReleaseChannel { get => _enablePreReleaseChannel; set { if (Set(ref _enablePreReleaseChannel, value)) SetModified(); } }
@@ -444,6 +452,7 @@ namespace DSAMVVM.MVVM.ViewModel
             EnableTrayIcon = _settings.Ui.Tray.EnableTrayIcon;
             MinimizeToTray = _settings.Ui.Tray.MinimizeToTray;
             CloseToTray = _settings.Ui.Tray.CloseToTray;
+            EnableServiceMeow = _settings.Ui.ServiceMeow.Enabled;
             EnablePreReleaseChannel = _settings.Updates.EnablePreReleaseChannel;
 
             EnableQuickSearch = _settings.QuickSearch.Enabled;
@@ -485,6 +494,7 @@ namespace DSAMVVM.MVVM.ViewModel
             OnPropertyChanged(nameof(LinksSettings));
             OnPropertyChanged(nameof(SearchSettings));
             OnPropertyChanged(nameof(TraySettings));
+            OnPropertyChanged(nameof(ServiceMeowSettings));
 
             // 3. Load values into VM properties
             LoadValuesFromSettings();
@@ -638,6 +648,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 _settings.Ui.Tray.EnableTrayIcon = EnableTrayIcon;
                 _settings.Ui.Tray.MinimizeToTray = MinimizeToTray;
                 _settings.Ui.Tray.CloseToTray = CloseToTray;
+                _settings.Ui.ServiceMeow.Enabled = EnableServiceMeow;
                 _settings.Updates.EnablePreReleaseChannel = EnablePreReleaseChannel;
 
                 _settings.QuickSearch.Enabled = EnableQuickSearch;

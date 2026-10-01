@@ -2,6 +2,8 @@
 {
     public sealed class ServiceMeowUiSettings
     {
+        public bool Enabled { get; set; } = true;
+
         // Customizable rotation interval: e.g. "15m", "30m", "1h", "24h", "Daily"
         public string RotationInterval { get; set; } = "24h";
 

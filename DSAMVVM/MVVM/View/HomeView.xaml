@@ -17,6 +17,8 @@
                 <ResourceDictionary Source="/Theme/Colors/Shortcuts.Palette.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
+            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
             <!-- Card hover/press overlay button -->
             <Style x:Key="CardOverlayButton" TargetType="Button">
                 <Setter Property="Background" Value="Transparent"/>
@@ -183,10 +185,31 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1.18*"/>
                     <!-- Left Column: Streamlined Status, Recent Activity, Shortcuts -->
-                    <ColumnDefinition Width="14"/>
-                    <!-- Spacer -->
-                    <ColumnDefinition Width="1.0*"/>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Style>
+                            <Style TargetType="ColumnDefinition">
+                                <Setter Property="Width" Value="14"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsServiceMeowEnabled}" Value="False">
+                                        <Setter Property="Width" Value="0"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ColumnDefinition.Style>
+                    </ColumnDefinition>
                     <!-- Right Column: ServiceMeow Hero Box -->
+                    <ColumnDefinition>
+                        <ColumnDefinition.Style>
+                            <Style TargetType="ColumnDefinition">
+                                <Setter Property="Width" Value="1.0*"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsServiceMeowEnabled}" Value="False">
+                                        <Setter Property="Width" Value="0"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ColumnDefinition.Style>
+                    </ColumnDefinition>
                 </Grid.ColumnDefinitions>
 
                 <!-- ================= LEFT COLUMN ================= -->
@@ -492,7 +515,7 @@
                         <ItemsControl Grid.Row="1" ItemsSource="{Binding Shortcuts}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <UniformGrid Columns="2"/>
+                                    <UniformGrid Columns="{Binding DataContext.ShortcutColumns, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
@@ -632,7 +655,8 @@
                         Background="{DynamicResource CardGradient.Surface.L1}"
                         BorderBrush="{DynamicResource Brush.Card.Border}"
                         BorderThickness="1"
-                        Padding="12">
+                        Padding="12"
+                        Visibility="{Binding IsServiceMeowEnabled, Converter={StaticResource BoolToVis}}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>

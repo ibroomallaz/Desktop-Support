@@ -220,6 +220,22 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
+        // --- ServiceMeow Availability & Layout State ---
+        private bool _isServiceMeowEnabled = true;
+        public bool IsServiceMeowEnabled
+        {
+            get => _isServiceMeowEnabled;
+            set
+            {
+                if (Set(ref _isServiceMeowEnabled, value))
+                {
+                    OnPropertyChanged(nameof(ShortcutColumns));
+                }
+            }
+        }
+
+        public int ShortcutColumns => IsServiceMeowEnabled ? 2 : 3;
+
         private CancellationTokenSource? _petImageCts;
 
         public ICommand NextPetCommand { get; }
@@ -255,6 +271,8 @@ namespace DSAMVVM.MVVM.ViewModel
             _imageCacheService = imageCacheService;
             _settingsService = settingsService;
             _serviceMeowService = serviceMeowService;
+
+            _isServiceMeowEnabled = App.Settings.Ui.ServiceMeow.Enabled;
 
             if (_networkService != null)
             {
@@ -395,7 +413,11 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 _settingsService.SettingsChanged += (_, _) =>
                 {
-                    UiNotify.RunOnUiAsync(LoadShortcutsFromSettings);
+                    UiNotify.RunOnUiAsync(() =>
+                    {
+                        LoadShortcutsFromSettings();
+                        UpdateServiceMeowState();
+                    });
                 };
             }
 
@@ -433,8 +455,21 @@ namespace DSAMVVM.MVVM.ViewModel
                 SyncRecentActivities();
             }
 
-            // Asynchronously load real ServiceMeow data from service
-            _ = InitializeServiceMeowAsync();
+            // Asynchronously load real ServiceMeow data from service if enabled
+            if (IsServiceMeowEnabled)
+            {
+                _ = InitializeServiceMeowAsync();
+            }
+        }
+
+        private void UpdateServiceMeowState()
+        {
+            bool wasEnabled = IsServiceMeowEnabled;
+            IsServiceMeowEnabled = App.Settings.Ui.ServiceMeow.Enabled;
+            if (!wasEnabled && IsServiceMeowEnabled && _pets.Count == 0)
+            {
+                _ = InitializeServiceMeowAsync();
+            }
         }
 
         private void ExecuteRefreshNetworkStatus()
@@ -498,16 +533,16 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private void NextPetPhoto()
         {
-            var images = CurrentPet?.ValidImages ?? [];
-            if (images.Count <= 1) return;
+            var images = CurrentPet?.ValidImages;
+            if (images == null || images.Count <= 1) return;
             CurrentImageIndex = (CurrentImageIndex + 1) % images.Count;
             _ = LoadPetImageAsync(CurrentPet, CurrentImageIndex, forceRefresh: false);
         }
 
         private void PrevPetPhoto()
         {
-            var images = CurrentPet?.ValidImages ?? [];
-            if (images.Count <= 1) return;
+            var images = CurrentPet?.ValidImages;
+            if (images == null || images.Count <= 1) return;
             CurrentImageIndex = (CurrentImageIndex - 1 + images.Count) % images.Count;
             _ = LoadPetImageAsync(CurrentPet, CurrentImageIndex, forceRefresh: false);
         }
@@ -538,7 +573,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private async Task InitializeServiceMeowAsync()
         {
-            if (_serviceMeowService == null) return;
+            if (_serviceMeowService == null || !IsServiceMeowEnabled) return;
 
             try
             {
@@ -622,6 +657,12 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private async Task LoadPetImageAsync(ServiceMeowPet? pet, int photoIndex, bool forceRefresh)
         {
+            if (!IsServiceMeowEnabled)
+            {
+                CurrentPetImage = null;
+                return;
+            }
+
             if (_petImageCts != null)
             {
                 await _petImageCts.CancelAsync().ConfigureAwait(false);

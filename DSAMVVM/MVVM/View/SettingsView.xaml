@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="DSAMVVM.MVVM.View.SettingsView"
+<UserControl x:Class="DSAMVVM.MVVM.View.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -350,6 +350,25 @@
                                     <CheckBox Foreground="{DynamicResource Brush.Text.Primary}" Content="Minimize window to Tray" Margin="24,0,0,8" IsChecked="{Binding MinimizeToTray, Mode=TwoWay}"/>
                                     <CheckBox Foreground="{DynamicResource Brush.Text.Primary}" Content="Close button (X) minimizes to Tray" Margin="24,0,0,0" IsChecked="{Binding CloseToTray, Mode=TwoWay}"/>
                                 </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Support Mascot (ServiceMeow) -->
+                    <Border x:Name="CardServiceMeow" Style="{StaticResource Card.Container}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
+                            <StackPanel Grid.Column="1" Margin="16">
+                                <TextBlock Text="Support Mascot (ServiceMeow)" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                                <CheckBox x:Name="EnableServiceMeowCheck" Foreground="{DynamicResource Brush.Text.Primary}"
+                                          Content="Show ServiceMeow Mascot on Home Dashboard" Margin="0,0,0,8"
+                                          IsChecked="{Binding EnableServiceMeow, Mode=TwoWay}"/>
+                                <TextBlock Text="Displays the Arizona Desktop Support pet mascot on the Home dashboard. When disabled, background pet synchronization and image downloads are stopped, and the Home dashboard expands to a clean full-width layout."
+                                           Foreground="{DynamicResource Brush.Text.Muted}" FontSize="11" Margin="24,0,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
                         </Grid>
                     </Border>
