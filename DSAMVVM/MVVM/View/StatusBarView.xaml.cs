@@ -1,10 +1,9 @@
 ﻿using DSAMVVM.MVVM.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
-using System.Windows.Controls;
 
 namespace DSAMVVM.MVVM.View
 {
-    public partial class StatusBarView : UserControl
+    public partial class StatusBarView
     {
         public StatusBarView()
         {

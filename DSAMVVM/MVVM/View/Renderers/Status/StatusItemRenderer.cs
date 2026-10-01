@@ -26,7 +26,7 @@ namespace DSAMVVM.MVVM.View.Renderers.Status
             tb.Inlines.Clear();
 
             var item = e.NewValue as StatusItem;
-            if (item == null || item.Spans == null || item.Spans.Count == 0) return;
+            if (item == null || item.Spans.Count == 0) return;
 
             IReadOnlyList<StatusSpan> spans = item.Spans;
 
@@ -45,13 +45,18 @@ namespace DSAMVVM.MVVM.View.Renderers.Status
                         hl.NavigateUri = s.ExternalLink;
                         hl.RequestNavigate += (_, args) =>
                         {
-                            try { Process.Start(new ProcessStartInfo(args.Uri.AbsoluteUri) { UseShellExecute = true }); } catch { }
+                            try { Process.Start(new ProcessStartInfo(args.Uri.AbsoluteUri) { UseShellExecute = true }); }
+                            catch
+                            {
+                                // ignored
+                            }
+
                             args.Handled = true;
                         };
                     }
 
                     if (!string.IsNullOrEmpty(s.Command))
-                        hl.Click += (_, __) => UiNotify.TryExecute(s.Command!);
+                        hl.Click += (_, _) => UiNotify.TryExecute(s.Command!);
 
                     inline = hl;
                 }

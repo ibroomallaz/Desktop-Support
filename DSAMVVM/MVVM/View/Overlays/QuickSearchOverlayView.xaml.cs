@@ -8,10 +8,10 @@ using System.Windows.Navigation;
 
 namespace DSAMVVM.MVVM.View.Overlays
 {
-    public partial class QuickSearchOverlayView : Window
+    public partial class QuickSearchOverlayView
     {
         private readonly QuickSearchOverlayViewModel _viewModel;
-        private bool _isClosing = false;
+        private bool _isClosing;
 
         public QuickSearchOverlayView(string capturedText, QuickSearchOverlayViewModel viewModel)
         {

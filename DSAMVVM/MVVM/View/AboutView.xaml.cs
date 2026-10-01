@@ -2,11 +2,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace DSAMVVM.MVVM.View
 {
-    public partial class AboutView : UserControl
+    public partial class AboutView
     {
         private readonly AboutViewModel _vm;
 

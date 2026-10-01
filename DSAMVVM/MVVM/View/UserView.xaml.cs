@@ -7,7 +7,7 @@ using System.Windows.Media;
 
 namespace DSAMVVM.MVVM.View
 {
-    public partial class UserView : UserControl
+    public partial class UserView
     {
         private UserViewModel? _vm;
         private FlowDocumentScrollViewer? _viewer;

@@ -1,8 +1,6 @@
-﻿using System.Windows;
-
-namespace DSAMVVM.MVVM.View
+﻿namespace DSAMVVM.MVVM.View
 {
-    public partial class SplashWindow : Window
+    public partial class SplashWindow
     {
         public SplashWindow()
         {

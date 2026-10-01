@@ -1,10 +1,7 @@
-﻿using System.Windows.Controls;
-
-
-namespace DSAMVVM.MVVM.View
+﻿namespace DSAMVVM.MVVM.View
 {
 
-    public partial class EntraView : UserControl
+    public partial class EntraView
     {
         public EntraView()
         {

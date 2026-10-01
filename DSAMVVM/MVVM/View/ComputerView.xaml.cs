@@ -6,7 +6,7 @@ using System.Windows.Media;
 
 namespace DSAMVVM.MVVM.View
 {
-    public partial class ComputerView : UserControl
+    public partial class ComputerView
     {
         private ComputerViewModel? _vm;
 

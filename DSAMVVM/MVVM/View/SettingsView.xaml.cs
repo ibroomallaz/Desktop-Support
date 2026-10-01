@@ -1,13 +1,11 @@
 ﻿using DSAMVVM.MVVM.ViewModel;
-using System;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
 namespace DSAMVVM.MVVM.View
 {
-    public partial class SettingsView : UserControl
+    public partial class SettingsView
     {
         private SettingsViewModel? _subscribedVm;
 
