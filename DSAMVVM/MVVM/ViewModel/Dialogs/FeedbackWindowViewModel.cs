@@ -1,10 +1,13 @@
-﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Services.Graph;
 using DSAMVVM.Core.Utilities;
+using DSAMVVM.MVVM.Model;
 using Microsoft.Graph;
 using Microsoft.Kiota.Abstractions.Authentication;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
@@ -25,6 +28,13 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
         private string _editableDepartment = string.Empty;
         private string _editableTeam = string.Empty;
         private string _noteText = string.Empty;
+
+        // Backing fields for ServiceMeow nomination
+        private string _petName = string.Empty;
+        private string _petSpecies = "Cat";
+        private string _petRole = "Chief Morale Officer";
+        private string _petOwner = string.Empty;
+        private string _petBlurb = string.Empty;
 
         public event EventHandler<bool>? RequestClose;
         public ICommand SubmitCommand { get; }
@@ -58,6 +68,7 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
                 OnPropertyChanged(nameof(IsBugOrRequestUI));
                 OnPropertyChanged(nameof(IsUpdateUI));
                 OnPropertyChanged(nameof(IsNoteUI));
+                OnPropertyChanged(nameof(IsServiceMeowUI));
                 OnPropertyChanged(nameof(CanSubmit));
             }
         }
@@ -66,6 +77,7 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
         public bool IsBugOrRequestUI => SelectedFeedbackIndex == 0 || SelectedFeedbackIndex == 1;
         public bool IsUpdateUI => SelectedFeedbackIndex == 2;
         public bool IsNoteUI => SelectedFeedbackIndex == 3;
+        public bool IsServiceMeowUI => SelectedFeedbackIndex == 4;
 
         // Editable context properties initialized from application state
         public string EditableDepartment
@@ -85,6 +97,7 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
         {
             0 => "Provide bug details below:",
             1 => "Describe your feature request:",
+            4 => "Nominate a team pet for ServiceMeow:",
             _ => "Provide details below:"
         };
 
@@ -106,6 +119,37 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
             set { _noteText = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanSubmit)); }
         }
 
+        // ServiceMeow properties
+        public string PetName
+        {
+            get => _petName;
+            set { _petName = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanSubmit)); }
+        }
+
+        public string PetSpecies
+        {
+            get => _petSpecies;
+            set { _petSpecies = value; OnPropertyChanged(); }
+        }
+
+        public string PetRole
+        {
+            get => _petRole;
+            set { _petRole = value; OnPropertyChanged(); }
+        }
+
+        public string PetOwner
+        {
+            get => _petOwner;
+            set { _petOwner = value; OnPropertyChanged(); }
+        }
+
+        public string PetBlurb
+        {
+            get => _petBlurb;
+            set { _petBlurb = value; OnPropertyChanged(); }
+        }
+
         // Validates required fields based on the currently active UI index
         public bool CanSubmit
         {
@@ -118,6 +162,7 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
                     0 or 1 => !string.IsNullOrWhiteSpace(BugRequestText),
                     2 => !string.IsNullOrWhiteSpace(ExpectedTeamText) && !string.IsNullOrWhiteSpace(EditableDepartment),
                     3 => !string.IsNullOrWhiteSpace(NoteText) && !string.IsNullOrWhiteSpace(EditableDepartment),
+                    4 => !string.IsNullOrWhiteSpace(PetName),
                     _ => false
                 };
             }
@@ -139,6 +184,7 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
             _isAuthenticated = _authService.IsAuthenticated;
             _authService.AuthenticationStateChanged += OnAuthenticationStateChanged;
 
+
             SubmitCommand = new RelayCommand(async _ => await ExecuteSubmitAsync());
         }
 
@@ -147,28 +193,64 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
             IsAuthenticated = isAuthenticated;
         }
 
+
+        // Resolves the currently authenticated user's NetID
+        private string GetPosterNetId()
+        {
+            string upn = _authService.CurrentAccountUpn ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(upn) && upn.Contains('@'))
+            {
+                return upn.Split('@')[0];
+            }
+
+            return Environment.UserName;
+        }
+
+        private static void OpenTeamsThreadDeepLink(string teamId, string channelId, string messageId)
+        {
+            try
+            {
+                // Format official Microsoft Teams message deep link
+                string encodedChannel = WebUtility.UrlEncode(channelId);
+                string deepLink = $"https://teams.microsoft.com/l/message/{encodedChannel}/{messageId}?groupId={teamId}&tenantId={Globals.EntraTenantId}";
+
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = deepLink,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[FEEDBACK-DEBUG] Failed to launch Teams deep link: {ex.Message}");
+            }
+        }
+
         private async Task ExecuteSubmitAsync()
         {
-            System.Diagnostics.Debug.WriteLine("[FEEDBACK-DEBUG] ExecuteSubmitAsync command triggered.");
+            Debug.WriteLine("[FEEDBACK-DEBUG] ExecuteSubmitAsync command triggered.");
 
             if (!IsAuthenticated)
             {
                 try
                 {
-                    System.Diagnostics.Debug.WriteLine("[FEEDBACK-DEBUG] User is not authenticated. Triggering MSAL interactive prompt.");
-                    string[] authScopes = ["User.Read"];
+                    Debug.WriteLine("[FEEDBACK-DEBUG] User is not authenticated. Triggering MSAL interactive prompt.");
+                    string[] authScopes = ["User.Read", "ChannelMessage.Send"];
                     await _authService.AcquireTokenInteractiveAsync(authScopes);
+
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[FEEDBACK-DEBUG] Auth Exception: {ex}");
+                    Debug.WriteLine($"[FEEDBACK-DEBUG] Auth Exception: {ex}");
                 }
                 return;
             }
 
+
+
             if (!CanSubmit)
             {
-                System.Diagnostics.Debug.WriteLine("[FEEDBACK-DEBUG] Execution aborted. CanSubmit returned false.");
+                Debug.WriteLine("[FEEDBACK-DEBUG] Execution aborted. CanSubmit returned false.");
                 return;
             }
 
@@ -178,11 +260,17 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
                 1 => "Request",
                 2 => "Update",
                 3 => "Note",
+                4 => "ServiceMeow",
                 _ => "Bug"
             };
 
-            // Intercepts the Note submission to fetch the Update channel ID from the routing dictionary
-            string routingKey = feedbackType == "Note" ? "Update" : feedbackType;
+            // Intercepts Note to fetch Update channel ID, or ServiceMeow for pet nomination channel
+            string routingKey = feedbackType switch
+            {
+                "Note" => "Update",
+                "ServiceMeow" => "ServiceMeow",
+                _ => feedbackType
+            };
 
             // Compiles individual UI fields into a single details string for the payload
             string details = SelectedFeedbackIndex switch
@@ -190,10 +278,11 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
                 0 or 1 => BugRequestText.Trim(),
                 2 => ExpectedTeamText.Trim(),
                 3 => NoteText.Trim(),
+                4 => PetBlurb.Trim(),
                 _ => string.Empty
             };
 
-            System.Diagnostics.Debug.WriteLine($"[FEEDBACK-DEBUG] Preparing to send: {feedbackType}. Details length: {details.Length}");
+            Debug.WriteLine($"[FEEDBACK-DEBUG] Preparing to send: {feedbackType}. Details length: {details.Length}");
 
             try
             {
@@ -202,49 +291,63 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
                 // Ensure we use the routingKey here instead of feedbackType
                 string channelId = _routingService.GetChannelId(routingKey);
 
-                System.Diagnostics.Debug.WriteLine($"[FEEDBACK-DEBUG] Extracted Routing -> TeamID: {teamId} | ChannelID: {channelId}");
+                Debug.WriteLine($"[FEEDBACK-DEBUG] Extracted Routing -> TeamID: {teamId} | ChannelID: {channelId}");
 
                 if (!string.IsNullOrEmpty(teamId) && !string.IsNullOrEmpty(channelId))
                 {
                     string[] scopes = ["ChannelMessage.Send"];
 
-                    System.Diagnostics.Debug.WriteLine("[FEEDBACK-DEBUG] Building Graph client and Token Provider...");
+                    Debug.WriteLine("[FEEDBACK-DEBUG] Building Graph client and Token Provider...");
                     var tokenProvider = new InlineTokenProvider((AuthenticationService)_authService, scopes);
                     var authProvider = new BaseBearerTokenAuthenticationProvider(tokenProvider);
                     var graphClient = new GraphServiceClient(authProvider);
 
-                    System.Diagnostics.Debug.WriteLine("[FEEDBACK-DEBUG] Awaiting GraphTeamsService.PostMessageAsync...");
+                    Debug.WriteLine("[FEEDBACK-DEBUG] Awaiting GraphTeamsService.PostMessageAsync...");
+
+                    string posterNetId = GetPosterNetId();
 
                     var payload = new FeedbackPayload(
-                        teamId,
-                        channelId,
-                        feedbackType, // The payload retains the original type to format HTML properly
-                        details,
-                        _appStateService.CurrentView,
-                        _appStateService.RecentError,
-                        EditableTeam.Trim(),
-                        _appStateService.RecentQuery,
-                        EditableDepartment.Trim()
+                        TeamId: teamId,
+                        ChannelId: channelId,
+                        FeedbackType: feedbackType, // The payload retains the original type to format HTML properly
+                        Details: details,
+                        CurrentView: _appStateService.CurrentView,
+                        RecentError: _appStateService.RecentError,
+                        CurrentSupportTeam: EditableTeam.Trim(),
+                        RecentQuery: _appStateService.RecentQuery,
+                        RecentDepartment: EditableDepartment.Trim(),
+                        PetName: PetName,
+                        PetSpecies: PetSpecies,
+                        PetRole: PetRole,
+                        PetOwner: PetOwner,
+                        PetBlurb: PetBlurb,
+                        SubmitterNetId: posterNetId
                     );
 
-                    bool success = await GraphTeamsService.PostMessageAsync(graphClient, payload);
+                    var createdMessage = await GraphTeamsService.PostMessageAsync(graphClient, payload);
 
-                    System.Diagnostics.Debug.WriteLine($"[FEEDBACK-DEBUG] Graph post finished. Success: {success}");
+                    Debug.WriteLine($"[FEEDBACK-DEBUG] Graph post finished. CreatedMessage: {createdMessage?.Id}");
 
-                    if (success)
+                    if (createdMessage != null)
                     {
-                        System.Diagnostics.Debug.WriteLine("[FEEDBACK-DEBUG] Sending RequestClose event to window.");
+                        // For ServiceMeow nominations, open Teams directly to the new message thread so user can reply with photo
+                        if (feedbackType == "ServiceMeow" && !string.IsNullOrWhiteSpace(createdMessage.Id))
+                        {
+                            OpenTeamsThreadDeepLink(teamId, channelId, createdMessage.Id);
+                        }
+
+                        Debug.WriteLine("[FEEDBACK-DEBUG] Sending RequestClose event to window.");
                         RequestClose?.Invoke(this, true);
                     }
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("[FEEDBACK-DEBUG] ABORT: Missing TeamID or ChannelID. Ensure routing claims exist in Entra token.");
+                    Debug.WriteLine("[FEEDBACK-DEBUG] ABORT: Missing TeamID or ChannelID. Ensure routing claims exist in Entra token.");
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[FEEDBACK-DEBUG] FATAL Submission Exception: {ex}");
+                Debug.WriteLine($"[FEEDBACK-DEBUG] FATAL Submission Exception: {ex}");
             }
         }
 

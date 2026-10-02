@@ -1,3 +1,4 @@
+using DSAMVVM.MVVM.View.Dialogs;
 using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
@@ -445,7 +446,11 @@ namespace DSAMVVM.MVVM.ViewModel
 
             SubmitPetCommand = new RelayCommand(_ =>
             {
-                UiNotify.Info("ServiceMeow: Pet submission portal will open in browser.", showStatusBar: true);
+                var window = new FeedbackWindow(defaultIndex: 4)
+                {
+                    Owner = Application.Current?.MainWindow
+                };
+                window.ShowDialog();
             });
 
             // Wire search service history for real recent searches

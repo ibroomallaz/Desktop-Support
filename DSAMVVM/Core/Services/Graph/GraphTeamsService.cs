@@ -47,8 +47,8 @@ namespace DSAMVVM.Core.Services.Graph
             }
         }
 
-        // Transmits a formatted message payload to a specified Teams channel.
-        public static async Task<bool> PostMessageAsync(GraphServiceClient graphClient, ITeamsMessagePayload payload)
+        // Transmits a formatted message payload to a specified Teams channel, returning the created ChatMessage if successful.
+        public static async Task<Microsoft.Graph.Models.ChatMessage?> PostMessageAsync(GraphServiceClient graphClient, ITeamsMessagePayload payload)
         {
             try
             {
@@ -62,13 +62,13 @@ namespace DSAMVVM.Core.Services.Graph
                     }
                 };
 
-                await graphClient.Teams[payload.TeamId].Channels[payload.ChannelId].Messages.PostAsync(chatMessage);
-                return true;
+                var createdMessage = await graphClient.Teams[payload.TeamId].Channels[payload.ChannelId].Messages.PostAsync(chatMessage);
+                return createdMessage;
             }
             catch (Exception ex)
             {
                 Log.Error("GraphTeamsService", $"TEAMS POST ERROR: Failed to post message to channel {payload.ChannelId}.", ex);
-                return false;
+                return null;
             }
         }
     }

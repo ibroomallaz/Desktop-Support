@@ -1,8 +1,8 @@
 ﻿<Window x:Class="DSAMVVM.MVVM.View.Dialogs.FeedbackWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Submit Feedback"
-        Height="420" Width="440"
+        Title="Submit Feedback / Nomination"
+        Height="490" Width="460"
         WindowStyle="None"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
@@ -44,14 +44,14 @@
                     BorderThickness="0,0,0,1"
                     MouseLeftButtonDown="OnTitleBarDrag">
                 <Grid>
-                    <TextBlock Text="Submit Feedback"
+                    <TextBlock Text="Submit to Teams"
                                VerticalAlignment="Center"
                                FontSize="16"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource Brush.Text.Primary}"/>
 
                     <Button HorizontalAlignment="Right"
-                            Content="X"
+                            Content="✕"
                             Width="28" Height="28"
                             Click="Cancel_Click"
                             Style="{DynamicResource Button.Rounded.Small}"/>
@@ -65,8 +65,8 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <StackPanel Grid.Row="0" Margin="0,0,0,16">
-                    <TextBlock Text="Feedback Type"
+                <StackPanel Grid.Row="0" Margin="0,0,0,14">
+                    <TextBlock Text="Submission Category"
                                Foreground="{DynamicResource Brush.Text.Secondary}"
                                Margin="0,0,0,4"/>
                     <ComboBox x:Name="FeedbackTypeComboBox"
@@ -77,17 +77,18 @@
                         <ComboBoxItem Content="💡 Request a Feature"/>
                         <ComboBoxItem Content="🔄 Update Support Team"/>
                         <ComboBoxItem Content="📝 Add/Update Note"/>
+                        <ComboBoxItem Content="🐾 Nominate Pet (ServiceMeow)"/>
                     </ComboBox>
                 </StackPanel>
 
-                <Grid Grid.Row="1" Margin="0,0,0,16">
+                <Grid Grid.Row="1" Margin="0,0,0,14">
 
                     <!-- BUG & REQUEST UI -->
                     <StackPanel Visibility="{Binding IsBugOrRequestUI, Converter={StaticResource BoolToVis}}">
                         <TextBlock Text="{Binding InputPromptText}"
                                    Foreground="{DynamicResource Brush.Text.Secondary}"
                                    Margin="0,0,0,4"/>
-                        <TextBox Height="180"
+                        <TextBox Height="230"
                                  AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
                                  Text="{Binding BugRequestText, UpdateSourceTrigger=PropertyChanged}"
                                  Background="{DynamicResource Brush.Surface.1}"
@@ -126,10 +127,69 @@
                                  BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1" Padding="4"/>
 
                         <TextBlock Text="Note Details:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,0,0,4"/>
-                        <TextBox Height="110" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                        <TextBox Height="160" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
                                  Text="{Binding NoteText, UpdateSourceTrigger=PropertyChanged}"
                                  Background="{DynamicResource Brush.Surface.1}" Foreground="{DynamicResource Brush.Text.Primary}"
                                  BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1" Padding="4"/>
+                    </StackPanel>
+
+                    <!-- SERVICEMEOW NOMINATION UI -->
+                    <StackPanel Visibility="{Binding IsServiceMeowUI, Converter={StaticResource BoolToVis}}">
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Pet Name: *" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,0,0,4"/>
+                                <TextBox Height="28"
+                                         Text="{Binding PetName, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="{DynamicResource Brush.Surface.1}" Foreground="{DynamicResource Brush.Text.Primary}"
+                                         BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1" Padding="4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Species / Type:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,0,0,4"/>
+                                <TextBox Height="28"
+                                         Text="{Binding PetSpecies, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="{DynamicResource Brush.Surface.1}" Foreground="{DynamicResource Brush.Text.Primary}"
+                                         BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1" Padding="4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Official Role:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,0,0,4"/>
+                                <TextBox Height="28"
+                                         Text="{Binding PetRole, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="{DynamicResource Brush.Surface.1}" Foreground="{DynamicResource Brush.Text.Primary}"
+                                         BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1" Padding="4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Owner / Handler:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,0,0,4"/>
+                                <TextBox Height="28"
+                                         Text="{Binding PetOwner, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="{DynamicResource Brush.Surface.1}" Foreground="{DynamicResource Brush.Text.Primary}"
+                                         BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1" Padding="4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="Bio / Fun Fact:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,0,0,4"/>
+                        <TextBox Height="75" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                                 Text="{Binding PetBlurb, UpdateSourceTrigger=PropertyChanged}"
+                                 Background="{DynamicResource Brush.Surface.1}" Foreground="{DynamicResource Brush.Text.Primary}"
+                                 BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1" Padding="4"/>
+
+                        <Border Margin="0,10,0,0" Padding="10,8" Background="{DynamicResource Brush.Surface.2}" CornerRadius="6">
+                            <TextBlock Text="🐾 Photo Submission: Once submitted, the nomination card will post to the ServiceMeow Teams channel. Simply reply to that thread with your favorite pet photo(s)!"
+                                       Foreground="{DynamicResource Brush.Text.Muted}"
+                                       FontSize="11.5" TextWrapping="Wrap"/>
+                        </Border>
                     </StackPanel>
                 </Grid>
 
@@ -143,7 +203,7 @@
                             Style="{DynamicResource Button.Rounded}"/>
 
                     <Button Content="{Binding SubmitButtonText}"
-                            Width="90" Height="30"
+                            Width="120" Height="30"
                             IsDefault="True"
                             Command="{Binding SubmitCommand}"
                             IsEnabled="{Binding CanSubmit}"
