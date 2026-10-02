@@ -1,0 +1,113 @@
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+  <Package Name="Desktop Support App"
+           Manufacturer="University of Arizona"
+           Version="!(bind.fileVersion.DesktopSupportAppExe)"
+           UpgradeCode="8C75EC73-37A1-4BEF-8ADF-CCF71E46450F"
+           Scope="perUser">
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of Desktop Support App is already installed." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AppIcon" SourceFile="..\DSAMVVM\img\MainIcon.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/ibroomallaz/Desktop-Support" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/ibroomallaz/Desktop-Support" />
+    <Property Id="ARPCOMMENTS" Value="Desktop Support App" />
+
+    <SetProperty Id="ARPINSTALLLOCATION" Value="[INSTALLFOLDER]" After="CostFinalize" />
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch Desktop Support App" />
+    <Property Id="WixShellExecTarget" Value="[!DesktopSupportAppExe]" />
+    <CustomAction Id="LaunchApplication" BinaryRef="Wix4UtilCA_X64" DllEntry="WixShellExec" Impersonate="yes" />
+
+    <util:CloseApplication Id="CloseDesktopSupportApp"
+                           Target="Desktop Support App.exe"
+                           CloseMessage="yes"
+                           Description="Desktop Support App is currently running and must be closed to continue."
+                           PromptToContinue="yes"
+                           RebootPrompt="no" />
+
+    <UI>
+      <ui:WixUI Id="WixUI_InstallDir" />
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2" Condition="NOT Installed" />
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2" />
+      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchApplication" Condition="WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed" />
+    </UI>
+
+    <WixVariable Id="WixUIBannerBmp" Value="Resources\banner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="Resources\dialog.bmp" />
+
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="CompanyFolder" Name="University of Arizona">
+        <Directory Id="ProductFolder" Name="Desktop Support App">
+          <Directory Id="INSTALLFOLDER" Name="App" />
+        </Directory>
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="Desktop Support App" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
+
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="CmpDesktopSupportAppExe" Guid="9CDAC9B2-45FA-4920-A5FA-A05BADA36AD2">
+        <File Id="DesktopSupportAppExe"
+              Source="!(bindpath.DSAMVVM)\Desktop Support App.exe"
+              KeyPath="yes" />
+      </Component>
+
+      <Files Include="!(bindpath.DSAMVVM)\**">
+        <Exclude Files="!(bindpath.DSAMVVM)\Desktop Support App.exe" />
+        <Exclude Files="!(bindpath.DSAMVVM)\*.pdb" />
+      </Files>
+    </ComponentGroup>
+
+    <ComponentGroup Id="ProductShortcuts">
+      <Component Directory="ApplicationProgramsFolder" Id="AppShortcutsComponent" Guid="37894D07-AE03-4FAD-A772-4C69A755CECF">
+        <Shortcut Id="ApplicationStartMenuShortcut"
+                  Name="Desktop Support App"
+                  Description="Desktop Support App"
+                  Target="[!DesktopSupportAppExe]"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="AppIcon" />
+
+        <Shortcut Id="ApplicationDesktopShortcut"
+                  Directory="DesktopFolder"
+                  Name="Desktop Support App"
+                  Description="Desktop Support App"
+                  Target="[!DesktopSupportAppExe]"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="AppIcon" />
+
+        <!-- Clean up per-user directories on uninstall -->
+        <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
+        <RemoveFolder Id="RemoveINSTALLFOLDER" Directory="INSTALLFOLDER" On="uninstall" />
+        <RemoveFolder Id="RemoveProductFolder" Directory="ProductFolder" On="uninstall" />
+        <RemoveFolder Id="RemoveCompanyFolder" Directory="CompanyFolder" On="uninstall" />
+
+        <!-- Registry tracking for per-user component KeyPath and cleanup on uninstall -->
+        <RegistryKey Root="HKCU"
+                     Key="Software\University of Arizona\Desktop Support App"
+                     ForceCreateOnInstall="yes"
+                     ForceDeleteOnUninstall="yes">
+          <RegistryValue Name="Installed"
+                         Type="integer"
+                         Value="1"
+                         KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+    </ComponentGroup>
+
+    <Feature Id="MainFeature" Title="Desktop Support App" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentGroupRef Id="ProductShortcuts" />
+    </Feature>
+  </Package>
+</Wix>

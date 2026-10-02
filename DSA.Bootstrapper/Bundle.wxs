@@ -1,0 +1,21 @@
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal">
+  <Bundle Name="Desktop Support App"
+          Manufacturer="University of Arizona"
+          Version="!(bind.packageVersion.DSAInstallerMsi)"
+          UpgradeCode="F28A3C60-6201-43B3-902E-E6B146C843E6"
+          IconSourceFile="..\DSAMVVM\img\MainIcon.ico">
+
+    <BootstrapperApplication>
+      <bal:WixStandardBootstrapperApplication
+          Theme="hyperlinkSidebarLicense"
+          LogoSideFile="Resources\sidebar.png"
+          LogoFile="Resources\logo.png"
+          LicenseUrl="" />
+    </BootstrapperApplication>
+
+    <Chain>
+      <MsiPackage Id="DSAInstallerMsi" SourceFile="$(var.DSA.Installer.TargetPath)" />
+    </Chain>
+  </Bundle>
+</Wix>
