@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Logging;
+﻿using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Data;
@@ -70,7 +69,7 @@ namespace DSAMVVM.Core.Services.Integrations
                 var progressKey = UiNotify.ProgressOf(key);
                 UiNotify.Progress(key, isReload ? "Refreshing ServiceMeow..." : "Loading ServiceMeow...", priority: 0);
 
-                var settings = (System.Windows.Application.Current != null) ? App.Settings?.Paths?.ServiceMeowData : null;
+                var settings = (System.Windows.Application.Current != null) ? App.Settings.Paths.ServiceMeowData : null;
                 string source = "Web";
                 string targetUri = Globals.g_ServiceMeowJSON;
 
@@ -205,7 +204,7 @@ namespace DSAMVVM.Core.Services.Integrations
                                     pet.Owner = owner;
                                 }
                             }
-                            model.Meta?.Normalize();
+                            model.Meta.Normalize();
                             _cache = model;
 
                             // When JSON changes, reconcile image cache (re-download updated images, purge removed images)

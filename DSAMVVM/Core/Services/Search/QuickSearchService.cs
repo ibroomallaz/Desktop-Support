@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
-using DSAMVVM.MVVM.Model.Config;
+﻿using DSAMVVM.MVVM.Model.Config;
 using SharpHook;
 using SharpHook.Data;
 using SharpHook.Simulation;

@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Logging;
+﻿using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Data;

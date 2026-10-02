@@ -73,10 +73,12 @@ namespace DSAMVVM.MVVM.Services.Updates
             await ShowRequiredBlockingAsync(GetPreferredOwner(), minReq, msg, updatePayload);
         }
 
-        public async Task CheckAsync() => await CheckAsync(false);
+        public async Task CheckAsync() => await CheckWithResultAsync(false);
 
-        // Executes a standard version check and triggers the appropriate UI elements based on the result
-        public async Task CheckAsync(bool showUpToDatePopup)
+        public async Task CheckAsync(bool showUpToDatePopup) => await CheckWithResultAsync(showUpToDatePopup);
+
+        // Executes a standard version check and returns whether a newer update prompt was displayed
+        public async Task<bool> CheckWithResultAsync(bool showUpToDatePopup = false)
         {
             var url = ActiveVersionUrl;
             Log.Info(Cat, $"check.start installed=\"{_installedVersion}\" url=\"{url}\"");
@@ -86,7 +88,7 @@ namespace DSAMVVM.MVVM.Services.Updates
             {
                 UiNotify.Error("Version check error", res?.Error ?? "Unknown error", alsoStatusBar: true, key: StatusKey);
                 Log.Info(Cat, "check.error");
-                return;
+                return false;
             }
 
             var stablePayload = res.Info?.Current ?? new CurrentVersion
@@ -117,7 +119,7 @@ namespace DSAMVVM.MVVM.Services.Updates
             {
                 var msg = res.RequiredMessage ?? "A newer version is required to continue.";
                 await ShowRequiredBlockingAsync(GetPreferredOwner(), res.RequiredMinVersion!, msg, stablePayload);
-                return;
+                return true;
             }
 
             Log.Info(Cat, $"check.info stable=\"{Val(stablePayload.Version)}\" pre=\"{Val(prePayload.Version)}\" pre.exists={(preExists ? "true" : "false")}");
@@ -129,22 +131,11 @@ namespace DSAMVVM.MVVM.Services.Updates
 
             if (!showed && showUpToDatePopup)
             {
-                UiNotify.Info("You’re up to date.", showStatusBar: true, key: StatusKey);
-
-                var owner = GetPreferredOwner();
-                var msgBoxText = $"No updates found.  Version: ({_installedVersion}).";
-
-                if (owner != null)
-                {
-                    MessageBox.Show(owner, msgBoxText, "Up to Date", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else
-                {
-                    MessageBox.Show(msgBoxText, "Up to Date", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-
-                Log.Info(Cat, "check.up-to-date.shown");
+                UiNotify.Success($"You’re up to date. Version: ({_installedVersion}).", showStatusBar: true, key: StatusKey);
+                Log.Info(Cat, "check.up-to-date.notified");
             }
+
+            return showed;
         }
 
         // Reduces redundant network requests during automated polling cycles

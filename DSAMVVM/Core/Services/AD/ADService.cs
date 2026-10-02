@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Models;
+﻿using DSAMVVM.Core.Models;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
 

@@ -15,112 +15,520 @@
                 <ResourceDictionary Source="/Theme/Controls/Button.Rounded.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
+            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+            <!-- Card surface container -->
             <Style x:Key="Card.Surface" TargetType="Border">
                 <Setter Property="CornerRadius" Value="12"/>
                 <Setter Property="Padding" Value="0"/>
                 <Setter Property="Background" Value="{DynamicResource CardGradient.Surface.L1}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource Brush.Card.Border}"/>
                 <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
                         <Setter Property="Background" Value="{DynamicResource CardGradient.Surface.Hover}"/>
                     </Trigger>
-                    <Trigger Property="IsEnabled" Value="False">
-                        <Setter Property="Opacity" Value="0.7"/>
-                    </Trigger>
                 </Style.Triggers>
             </Style>
 
+            <!-- Compact rounded button -->
             <Style x:Key="Button.Rounded.Compact" TargetType="Button" BasedOn="{StaticResource Button.Rounded}">
-                <Setter Property="Padding"   Value="8,2"/>
-                <Setter Property="MinHeight" Value="26"/>
+                <Setter Property="Padding"   Value="10,4"/>
+                <Setter Property="MinHeight" Value="28"/>
+                <Setter Property="Height"    Value="28"/>
                 <Setter Property="FontSize"  Value="12"/>
-                <Setter Property="MinWidth"  Value="120"/>
-                <Setter Property="Margin"    Value="0,0,8,8"/>
+                <Setter Property="MinWidth"  Value="0"/>
+            </Style>
+
+            <!-- Subtle borderless link button -->
+            <Style x:Key="SubtleLinkButton" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Resource Tile Button -->
+            <Style x:Key="ResourceTileButton" TargetType="Button">
+                <Setter Property="Background" Value="{DynamicResource CardGradient.Surface.L1}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="12,10"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Chrome"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource CardGradient.Surface.Hover}"/>
+                                    <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Brush.Border.Active}"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource CardGradient.Surface.Pressed}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
             </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Margin="16" Orientation="Vertical">
+        <StackPanel Margin="16,10,16,16" Orientation="Vertical">
 
-            <TextBlock Text="About"
-                       FontSize="20"
-                       FontWeight="SemiBold"
-                       Foreground="{DynamicResource Brush.Text.Primary}"
-                       Margin="0,0,0,12"/>
-
-            <Border Style="{StaticResource Card.Surface}" Margin="0,0,0,16">
+            <!-- ===================== HERO HEADER BANNER ===================== -->
+            <Border Background="{DynamicResource CardGradient.Surface.L1}"
+                    BorderBrush="{DynamicResource Brush.Card.Border}"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    Padding="16,14"
+                    Margin="0,0,0,14"
+                    SnapsToDevicePixels="True">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
+                    <!-- Application Icon -->
                     <Border Grid.Column="0"
-                            Background="{DynamicResource CardGradient.Accent}"
-                            CornerRadius="12,0,0,12"/>
+                            Width="54" Height="54"
+                            CornerRadius="12"
+                            Background="#18FFFFFF"
+                            BorderBrush="#30FFFFFF"
+                            BorderThickness="1"
+                            VerticalAlignment="Center"
+                            Margin="0,0,16,0">
+                        <Image Source="/img/MainIcon.ico"
+                               Width="38" Height="38"
+                               RenderOptions.BitmapScalingMode="HighQuality"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"/>
+                    </Border>
 
-                    <StackPanel Grid.Column="1" Margin="16">
-                        <TextBlock Text="Application"
-                                   FontSize="16" FontWeight="Bold"
-                                   Foreground="{DynamicResource Brush.Text.Primary}"
-                                   Margin="0,0,0,12"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                            <TextBlock Text="Version:" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,0,6,0"/>
-                            <TextBlock Text="{Binding AppVersion}" 
-                                       Foreground="{DynamicResource Brush.Text.Primary}" 
-                                       FontWeight="Medium"
-                                       Cursor="Hand"
-                                       ToolTip="Click to toggle detailed file version">
-                                <TextBlock.InputBindings>
-                                    <MouseBinding MouseAction="LeftClick" Command="{Binding ToggleVersionCommand}"/>
-                                </TextBlock.InputBindings>
-                            </TextBlock>
+                    <!-- App Title, Subtitle & Version -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="Desktop Support App"
+                                       FontSize="19"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                       VerticalAlignment="Center"/>
+                            <Border Margin="10,0,0,0"
+                                    Background="#22B11226"
+                                    BorderBrush="#44B11226"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Padding="8,2"
+                                    VerticalAlignment="Center">
+                                <TextBlock Text="UArizona"
+                                           FontSize="10"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush.Accent.Red.Light}"/>
+                            </Border>
                         </StackPanel>
-                        <WrapPanel>
-                            <Button Style="{StaticResource Button.Rounded.Compact}"
-                                    Content="Check for Update"
-                                    Command="{Binding CheckVersionCommand}"/>
-                        </WrapPanel>
-                    </StackPanel>
-                </Grid>
-            </Border>
 
-            <Border Style="{StaticResource Card.Surface}" Margin="0,0,0,16">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                        <TextBlock Text="University of Arizona • Desktop Support &amp; IT Services"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                   Margin="0,2,0,8"/>
 
-                    <Border Grid.Column="0"
-                            Background="{DynamicResource CardGradient.Accent}"
-                            CornerRadius="12,0,0,12"/>
-
-                    <StackPanel Grid.Column="1" Margin="16">
-                        <TextBlock Text="Developer Team"
-                                   FontSize="16" FontWeight="Bold"
-                                   Foreground="{DynamicResource Brush.Text.Primary}"
-                                   Margin="0,0,0,12"/>
-                        <ItemsControl ItemsSource="{Binding Developers}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
-                                        <TextBlock Text="•" Margin="0,0,6,0" Foreground="{DynamicResource Brush.Text.Muted}"/>
-                                        <TextBlock Text="{Binding}" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                        <!-- Version Interactive Pill + Copy Button -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Style="{StaticResource SubtleLinkButton}"
+                                    Command="{Binding ToggleVersionCommand}"
+                                    ToolTip="Click to toggle detailed build / file version">
+                                <Border CornerRadius="11"
+                                        Background="#18FFFFFF"
+                                        BorderBrush="#30FFFFFF"
+                                        BorderThickness="1"
+                                        Padding="8,3">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#xE946;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource Brush.Info.Light}"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,6,0"/>
+                                        <TextBlock Text="{Binding AppVersion}"
+                                                   Foreground="{DynamicResource Brush.Text.Primary}"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   VerticalAlignment="Center"/>
                                     </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                                </Border>
+                            </Button>
+
+                            <!-- Copy Button -->
+                            <Button Style="{StaticResource SubtleLinkButton}"
+                                    Command="{Binding CopyVersionCommand}"
+                                    ToolTip="Copy version string to clipboard"
+                                    Margin="6,0,0,0">
+                                <Border CornerRadius="8"
+                                        Background="#10FFFFFF"
+                                        BorderBrush="#20FFFFFF"
+                                        BorderThickness="1"
+                                        Padding="6,3">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#xE8C8;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="10"
+                                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,4,0"/>
+                                        <TextBlock Text="Copy"
+                                                   FontSize="10"
+                                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Update Action & Non-intrusive Inline Status -->
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="12,0,0,0">
+                        <Button Style="{StaticResource Button.Rounded.Compact}"
+                                Height="30"
+                                Padding="14,0"
+                                HorizontalAlignment="Right"
+                                Command="{Binding CheckVersionCommand}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="&#xE72C;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="12"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,6,0"/>
+                                <TextBlock Text="{Binding CheckButtonText}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Up To Date Indicator Badge -->
+                        <Border Margin="0,6,0,0"
+                                Padding="8,3"
+                                CornerRadius="10"
+                                Background="#1C1E7A3A"
+                                BorderBrush="#4D3CD070"
+                                BorderThickness="1"
+                                HorizontalAlignment="Right"
+                                Visibility="{Binding IsUpToDate, Converter={StaticResource BoolToVis}}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="&#xE73E;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="11"
+                                           Foreground="#3CD070"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,5,0"/>
+                                <TextBlock Text="Up to date"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="#3CD070"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Check Failed Badge -->
+                        <Border Margin="0,6,0,0"
+                                Padding="8,3"
+                                CornerRadius="10"
+                                Background="#20B11226"
+                                BorderBrush="#50E57373"
+                                BorderThickness="1"
+                                HorizontalAlignment="Right"
+                                Visibility="{Binding HasCheckFailed, Converter={StaticResource BoolToVis}}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="&#xE7BA;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource Brush.Accent.Red.Light}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,5,0"/>
+                                <TextBlock Text="Check failed"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush.Accent.Red.Light}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Last Checked Timestamp -->
+                        <TextBlock Text="{Binding LastCheckedText}"
+                                   FontSize="10"
+                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                   HorizontalAlignment="Right"
+                                   Margin="0,3,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding LastCheckedText}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding LastCheckedText}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <Border Style="{StaticResource Card.Surface}">
+            <!-- ===================== 2-COLUMN BODY (System & Developers) ===================== -->
+            <Grid Margin="0,0,0,14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="14"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- LEFT COLUMN: System & Diagnostics -->
+                <Border Grid.Column="0" Style="{StaticResource Card.Surface}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="6"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0"
+                                Background="{DynamicResource CardGradient.Accent}"
+                                CornerRadius="12,0,0,12"/>
+
+                        <StackPanel Grid.Column="1" Margin="14,14,14,14">
+                            <!-- Card Title -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <TextBlock Text="&#xE90F;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="14"
+                                           Foreground="{DynamicResource Brush.Info.Light}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0"/>
+                                <TextBlock Text="System &amp; Diagnostics"
+                                           FontSize="14"
+                                           FontWeight="Bold"
+                                           Foreground="{DynamicResource Brush.Text.Primary}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Specs Key-Value Grid -->
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="76"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Row 0: Device Name -->
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Device:" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,3"/>
+                                <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding DeviceName}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,3" TextTrimming="CharacterEllipsis"/>
+
+                                <!-- Row 1: OS Edition & Build -->
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="OS Edition:" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,3"/>
+                                <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding OsVersion}" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,3" TextTrimming="CharacterEllipsis"/>
+
+                                <!-- Row 2: Architecture -->
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Architecture:" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,3"/>
+                                <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Architecture}" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,3"/>
+
+                                <!-- Row 3: Runtime -->
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Runtime:" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,3"/>
+                                <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding DotNetVersion}" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,3" TextTrimming="CharacterEllipsis"/>
+
+                                <!-- Row 4: Directory / Join Status -->
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Directory:" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,3"/>
+                                <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding DirectoryStatus}" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,3" TextTrimming="CharacterEllipsis"/>
+                            </Grid>
+
+                            <!-- Folder Actions -->
+                            <WrapPanel Margin="0,4,0,0">
+                                <Button Style="{StaticResource Button.Rounded.Compact}"
+                                        Command="{Binding OpenLogsFolderCommand}"
+                                        ToolTip="{Binding LogsPath, StringFormat='Open {0} in File Explorer'}"
+                                        Margin="0,0,6,6">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#xED25;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="11"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,5,0"/>
+                                        <TextBlock Text="Open Logs" FontSize="11" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <Button Style="{StaticResource Button.Rounded.Compact}"
+                                        Command="{Binding OpenAppDataFolderCommand}"
+                                        ToolTip="{Binding AppDataPath, StringFormat='Open {0} in File Explorer'}"
+                                        Margin="0,0,0,6">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#xE8B7;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="11"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,5,0"/>
+                                        <TextBlock Text="Open App Data" FontSize="11" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- RIGHT COLUMN: Developers (Engineering Team kept as Developers) -->
+                <Border Grid.Column="2" Style="{StaticResource Card.Surface}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="6"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0"
+                                Background="{DynamicResource CardGradient.Accent}"
+                                CornerRadius="12,0,0,12"/>
+
+                        <StackPanel Grid.Column="1" Margin="14,14,14,14">
+                            <!-- Card Title -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <TextBlock Text="&#xE77B;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="14"
+                                           Foreground="{DynamicResource Brush.Info.Light}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0"/>
+                                <TextBlock Text="Developers"
+                                           FontSize="14"
+                                           FontWeight="Bold"
+                                           Foreground="{DynamicResource Brush.Text.Primary}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Developers Roster -->
+                            <ItemsControl ItemsSource="{Binding DeveloperList}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,0,0,8"
+                                                Padding="10,8"
+                                                Background="#12FFFFFF"
+                                                BorderBrush="{DynamicResource Brush.Border}"
+                                                BorderThickness="1"
+                                                CornerRadius="8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Initials Avatar Badge -->
+                                                <Border Grid.Column="0"
+                                                        Width="32" Height="32"
+                                                        CornerRadius="16"
+                                                        Background="{DynamicResource Brush.Accent}"
+                                                        BorderBrush="{DynamicResource Brush.Border.Active}"
+                                                        BorderThickness="1"
+                                                        VerticalAlignment="Center"
+                                                        Margin="0,0,10,0">
+                                                    <TextBlock Text="{Binding Initials}"
+                                                               FontSize="11"
+                                                               FontWeight="Bold"
+                                                               Foreground="{DynamicResource Brush.Text.OnAccent}"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"/>
+                                                </Border>
+
+                                                <!-- Name, NetID, and Role -->
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Name}"
+                                                                   FontSize="12"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                        <TextBlock Text="{Binding NetId, StringFormat=' ({0})'}"
+                                                                   FontSize="10"
+                                                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                                                   VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding Role}"
+                                                               FontSize="10"
+                                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               Margin="0,1,0,0"/>
+                                                </StackPanel>
+
+                                                <!-- Contact Button -->
+                                                <Button Grid.Column="2"
+                                                        Style="{StaticResource SubtleLinkButton}"
+                                                        ToolTip="{Binding Email, StringFormat='Send email to {0}'}"
+                                                        Command="{Binding DataContext.EmailDeveloperCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding Email}"
+                                                        VerticalAlignment="Center">
+                                                    <Border CornerRadius="6"
+                                                            Background="#15FFFFFF"
+                                                            BorderBrush="#25FFFFFF"
+                                                            BorderThickness="1"
+                                                            Padding="7,4">
+                                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                            <TextBlock Text="&#xE715;"
+                                                                       FontFamily="Segoe MDL2 Assets"
+                                                                       FontSize="11"
+                                                                       Foreground="{DynamicResource Brush.Info.Light}"
+                                                                       VerticalAlignment="Center"
+                                                                       Margin="0,0,4,0"/>
+                                                            <TextBlock Text="Email"
+                                                                       FontSize="10"
+                                                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                                                       VerticalAlignment="Center"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- ===================== DOCUMENTATION & RESOURCES ===================== -->
+            <Border Style="{StaticResource Card.Surface}" Margin="0,0,0,14">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="6"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
@@ -128,22 +536,151 @@
                             Background="{DynamicResource CardGradient.Accent}"
                             CornerRadius="12,0,0,12"/>
 
-                    <StackPanel Grid.Column="1" Margin="16">
-                        <TextBlock Text="Resources"
-                                   FontSize="16" FontWeight="Bold"
-                                   Foreground="{DynamicResource Brush.Text.Primary}"
-                                   Margin="0,0,0,12"/>
-                        <WrapPanel>
-                            <Button Style="{StaticResource Button.Rounded.Compact}"
-                                    Content="View Source on GitHub"
-                                    Command="{Binding OpenGitHubCommand}"/>
-                            <Button Style="{StaticResource Button.Rounded.Compact}"
-                                    Content="Open SharePoint"
-                                    Command="{Binding OpenSharePointCommand}"/>
-                        </WrapPanel>
+                    <StackPanel Grid.Column="1" Margin="14,14,14,14">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <TextBlock Text="&#xE774;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource Brush.Info.Light}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <TextBlock Text="Documentation &amp; Resources"
+                                       FontSize="14"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Uniform Grid for 3 Resource Tiles -->
+                        <UniformGrid Columns="3" Rows="1">
+                            <!-- SharePoint Portal -->
+                            <Button Style="{StaticResource ResourceTileButton}"
+                                    Command="{Binding OpenSharePointCommand}"
+                                    Margin="0,0,8,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0"
+                                            Width="34" Height="34"
+                                            CornerRadius="8"
+                                            Background="#203AA0FF"
+                                            BorderBrush="#403AA0FF"
+                                            BorderThickness="1"
+                                            VerticalAlignment="Center"
+                                            Margin="0,0,10,0">
+                                        <TextBlock Text="&#xE774;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="15"
+                                                   Foreground="{DynamicResource Brush.Info.Light}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Project SharePoint"
+                                                   FontSize="12"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                        <TextBlock Text="Guides &amp; documentation"
+                                                   FontSize="10"
+                                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                                   Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Button>
+
+                            <!-- Change Log -->
+                            <Button Style="{StaticResource ResourceTileButton}"
+                                    Command="{Binding OpenChangeLogCommand}"
+                                    Margin="0,0,8,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0"
+                                            Width="34" Height="34"
+                                            CornerRadius="8"
+                                            Background="#20FFB84D"
+                                            BorderBrush="#40FFB84D"
+                                            BorderThickness="1"
+                                            VerticalAlignment="Center"
+                                            Margin="0,0,10,0">
+                                        <TextBlock Text="&#xE8F1;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="15"
+                                                   Foreground="{DynamicResource Brush.Warning}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Release Notes"
+                                                   FontSize="12"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                        <TextBlock Text="Change log &amp; history"
+                                                   FontSize="10"
+                                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                                   Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Button>
+
+                            <!-- GitHub Source -->
+                            <Button Style="{StaticResource ResourceTileButton}"
+                                    Command="{Binding OpenGitHubCommand}"
+                                    Margin="0,0,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0"
+                                            Width="34" Height="34"
+                                            CornerRadius="8"
+                                            Background="#20B11226"
+                                            BorderBrush="#40B11226"
+                                            BorderThickness="1"
+                                            VerticalAlignment="Center"
+                                            Margin="0,0,10,0">
+                                        <TextBlock Text="&#xE756;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="15"
+                                                   Foreground="{DynamicResource Brush.Accent.Red.Light}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="GitHub Repository"
+                                                   FontSize="12"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                        <TextBlock Text="Source code &amp; issues"
+                                                   FontSize="10"
+                                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                                   Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Button>
+                        </UniformGrid>
                     </StackPanel>
                 </Grid>
             </Border>
+
+            <!-- ===================== FOOTER ===================== -->
+            <StackPanel HorizontalAlignment="Center" Margin="0,4,0,8">
+                <TextBlock Text="University of Arizona • Desktop Support Application"
+                           FontSize="10"
+                           Foreground="{DynamicResource Brush.Text.Muted}"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
 
         </StackPanel>
     </ScrollViewer>

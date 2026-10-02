@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;

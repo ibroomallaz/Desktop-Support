@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
 using DSAMVVM.Core.Enums;
-using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Models;
 using DSAMVVM.MVVM.Model.Config;
 
