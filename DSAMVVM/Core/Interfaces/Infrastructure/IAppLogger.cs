@@ -1,6 +1,6 @@
 ﻿using DSAMVVM.Core.Enums;
 
-namespace DSAMVVM.Core.Interfaces
+namespace DSAMVVM.Core.Interfaces.Infrastructure
 {
     // Minimal logging contract; implementations handle the actual sink.
     public interface IAppLogger

@@ -1,7 +1,7 @@
 ﻿using DSAMVVM.Core.Models;
 using DSAMVVM.MVVM.Model.AD;
 
-namespace DSAMVVM.Core.Interfaces
+namespace DSAMVVM.Core.Interfaces.AD
 {
     public interface IADService
     {

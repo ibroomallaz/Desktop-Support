@@ -1,5 +1,4 @@
 using DSAMVVM.Core.Enums;
-using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Services;
 using DSAMVVM.Core.Services.AD;

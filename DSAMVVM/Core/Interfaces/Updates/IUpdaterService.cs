@@ -1,6 +1,6 @@
 ﻿using DSAMVVM.MVVM.Model.Schemas;
 
-namespace DSAMVVM.Core.Interfaces
+namespace DSAMVVM.Core.Interfaces.Updates
 {
     public interface IUpdaterService
     {

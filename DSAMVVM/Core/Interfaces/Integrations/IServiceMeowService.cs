@@ -1,7 +1,7 @@
-using DSAMVVM.MVVM.Model.Data;
+﻿using DSAMVVM.MVVM.Model.Data;
 using System.Windows.Media;
 
-namespace DSAMVVM.Core.Interfaces
+namespace DSAMVVM.Core.Interfaces.Integrations
 {
     public interface IServiceMeowService
     {

@@ -1,6 +1,6 @@
 ﻿using DSAMVVM.MVVM.Model.Data;
 
-namespace DSAMVVM.Core.Interfaces
+namespace DSAMVVM.Core.Interfaces.Integrations
 {
     public interface IDepartment
     {

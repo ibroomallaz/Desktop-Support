@@ -1,6 +1,6 @@
 ﻿using DSAMVVM.MVVM.Model.Config;
 
-namespace DSAMVVM.Core.Interfaces
+namespace DSAMVVM.Core.Interfaces.Infrastructure
 {
     public interface ISettingsService
     {

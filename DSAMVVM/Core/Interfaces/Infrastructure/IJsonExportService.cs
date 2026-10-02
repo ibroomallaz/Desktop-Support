@@ -1,6 +1,6 @@
 ﻿using DSAMVVM.MVVM.Model.Admin;
 
-namespace DSAMVVM.Core.Interfaces
+namespace DSAMVVM.Core.Interfaces.Infrastructure
 {
     public interface IJsonExportService
     {

@@ -1,4 +1,4 @@
-﻿namespace DSAMVVM.Core.Interfaces
+﻿namespace DSAMVVM.Core.Interfaces.UI
 {
     public interface IFileDialogService
     {

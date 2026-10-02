@@ -1,6 +1,6 @@
 ﻿using DSAMVVM.Core.Models;
 
-namespace DSAMVVM.Core.Interfaces
+namespace DSAMVVM.Core.Interfaces.Infrastructure
 {
     public interface INetworkDetectionService : IDisposable
     {

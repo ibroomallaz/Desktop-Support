@@ -1,6 +1,6 @@
 ﻿using System.Windows.Media;
 
-namespace DSAMVVM.Core.Interfaces
+namespace DSAMVVM.Core.Interfaces.UI
 {
     public interface IImageCacheService
     {

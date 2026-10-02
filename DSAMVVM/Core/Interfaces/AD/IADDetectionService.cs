@@ -1,6 +1,6 @@
 ﻿using DSAMVVM.Core.Models;
 
-namespace DSAMVVM.Core.Interfaces;
+namespace DSAMVVM.Core.Interfaces.AD;
 
 public interface IADDetectionService
 {
