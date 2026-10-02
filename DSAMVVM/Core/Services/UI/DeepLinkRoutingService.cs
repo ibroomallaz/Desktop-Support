@@ -3,7 +3,7 @@ using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Renderers;
 using System.Text;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.UI
 {
     public class DeepLinkRoutingService(IADService adService, IDepartmentService deptService) : IDeepLinkRoutingService
     {

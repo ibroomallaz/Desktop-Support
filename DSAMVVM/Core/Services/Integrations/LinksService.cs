@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using static DSAMVVM.Core.Utilities.UiNotify;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.Integrations
 {
     // Service for loading Links data using a Remote-First strategy with local offline fallback.
     public class LinksService(IHttpService http) : ILinksService

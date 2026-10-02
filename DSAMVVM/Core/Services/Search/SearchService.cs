@@ -5,7 +5,7 @@ using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Models;
 using DSAMVVM.MVVM.Model.Config;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.Search
 {
     public class SearchService : ISearchService
     {

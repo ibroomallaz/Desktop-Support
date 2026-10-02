@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using System.IO;
 using System.Text;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.Infrastructure
 {
     public class SettingsService : ISettingsService
     {

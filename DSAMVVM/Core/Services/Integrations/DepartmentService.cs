@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.Integrations
 {
     // Loads Department data using a Remote-First strategy with local offline fallback.
     public class DepartmentService(IHttpService http, IApplicationStateService appStateService) : IDepartmentService

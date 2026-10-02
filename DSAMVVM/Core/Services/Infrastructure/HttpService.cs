@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.Infrastructure
 {
     // Shared HTTP utility. HttpClient is reused app-wide with connection pooling.
     public sealed class HttpService : IHttpService

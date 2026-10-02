@@ -5,7 +5,7 @@ using SharpHook.Data;
 using SharpHook.Simulation;
 using System.Windows;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.Search
 {
     public class QuickSearchService : IQuickSearchService
     {

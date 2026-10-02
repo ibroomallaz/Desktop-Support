@@ -7,7 +7,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.UI
 {
     public sealed partial class FlowDocService(IOutputTextSettingsProvider textSettings) : IFlowDocService
     {

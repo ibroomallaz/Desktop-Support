@@ -7,7 +7,7 @@ using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.Infrastructure
 {
     public sealed class NetworkDetectionService : INetworkDetectionService
     {

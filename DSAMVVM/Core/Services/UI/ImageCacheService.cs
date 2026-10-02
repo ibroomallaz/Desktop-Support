@@ -1,4 +1,4 @@
-using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model;
 using System.Collections.Concurrent;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.UI
 {
     // Service for downloading, caching, and serving images from local disk without file locking or race conditions.
     public class ImageCacheService(IHttpService http) : IImageCacheService

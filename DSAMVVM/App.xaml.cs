@@ -1,8 +1,5 @@
 using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Logging;
-using DSAMVVM.Core.Services;
-using DSAMVVM.Core.Services.AD;
-using DSAMVVM.Core.Services.Graph;
 using DSAMVVM.Core.Services.Updates;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
@@ -570,94 +567,8 @@ namespace DSAMVVM
         {
             var services = new ServiceCollection();
 
-            services.AddSingleton<TeamsRoutingService>();
-
-            services.AddSingleton<IAppLogger>(_ => new FileLogger(Globals.g_LogsDir));
-            services.AddSingleton<StatusBus>();
-            services.AddSingleton<StatusBarViewModel>();
-            services.AddSingleton<IQuickSearchService, QuickSearchService>();
-
-            services.AddSingleton<IHttpService, HttpService>();
-            services.AddSingleton<IImageCacheService, ImageCacheService>();
-            services.AddSingleton<ISettingsService, SettingsService>();
-
-            services.AddSingleton<AppSettings>(_ => Settings);
-
-            services.AddSingleton<IDepartmentService, DepartmentService>();
-            services.AddSingleton<IADService, ADService>();
-            services.AddSingleton<ILinksService, LinksService>();
-            services.AddSingleton<IServiceMeowService, ServiceMeowService>();
-            services.AddSingleton<IAdminService, AdminService>();
-            services.AddSingleton<IFileDialogService, FileDialogService>();
-            services.AddSingleton<IJsonExportService, JsonExportService>();
-            services.AddSingleton<ISearchService, SearchService>();
-            services.AddSingleton<IUpdaterService, UpdaterService>();
-            services.AddSingleton<IDeepLinkRoutingService, DeepLinkRoutingService>();
-            services.AddSingleton<IAuthenticationService, AuthenticationService>();
-            services.AddSingleton<IApplicationStateService, ApplicationStateService>();
-            services.AddSingleton<INetworkDetectionService, NetworkDetectionService>();
-            services.AddSingleton<IADDetectionService, ADDetectionService>();
-
-            services.AddSingleton<IOutputTextSettingsProvider>(sp =>
-                new OutputTextSettingsProvider(
-                    sp.GetRequiredService<ISettingsService>(),
-                    () => Settings));
-
-            services.AddSingleton<IFlowDocService, FlowDocService>();
-
-            services.AddSingleton<MainViewModel>();
-            services.AddTransient<UserViewModel>();
-            services.AddTransient<GroupViewModel>();
-            services.AddTransient<ComputerViewModel>();
-            services.AddTransient<LinksViewModel>();
-            services.AddSingleton<AboutViewModel>();
-            services.AddSingleton<AdminViewModel>();
-
-            services.AddSingleton<HomeViewModel>(sp =>
-                new HomeViewModel(
-                    openUser: q =>
-                    {
-                        var main = sp.GetRequiredService<MainViewModel>();
-                        main.SelectedView = AppView.User;
-                        if (string.IsNullOrWhiteSpace(q)) return;
-                        main.SearchQuery = q;
-                        main.ExecuteSearchCommand.Execute(null);
-                    },
-                    openComputer: q =>
-                    {
-                        var main = sp.GetRequiredService<MainViewModel>();
-                        main.SelectedView = AppView.Computer;
-                        if (string.IsNullOrWhiteSpace(q)) return;
-                        main.SearchQuery = q;
-                        main.ExecuteSearchCommand.Execute(null);
-                    },
-                    goGroups: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.Group,
-                    goEntra: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.Entra,
-                    goLinks: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.Links,
-                    goAbout: () => sp.GetRequiredService<MainViewModel>().SelectedView = AppView.About,
-                    networkService: sp.GetRequiredService<INetworkDetectionService>(),
-                    adDetectionService: sp.GetRequiredService<IADDetectionService>(),
-                    authService: sp.GetRequiredService<IAuthenticationService>(),
-                    searchService: sp.GetRequiredService<ISearchService>(),
-                    linkRouter: sp.GetRequiredService<IDeepLinkRoutingService>(),
-                    imageCacheService: sp.GetRequiredService<IImageCacheService>(),
-                    settingsService: sp.GetRequiredService<ISettingsService>(),
-                    serviceMeowService: sp.GetRequiredService<IServiceMeowService>()
-                )
-            );
-
-            services.AddTransient<QuickSearchOverlayViewModel>();
-            services.AddTransient<EntraViewModel>();
-
-            services.AddTransient<Func<UserViewModel>>(sp => sp.GetRequiredService<UserViewModel>);
-            services.AddTransient<Func<GroupViewModel>>(sp => sp.GetRequiredService<GroupViewModel>);
-            services.AddTransient<Func<ComputerViewModel>>(sp => sp.GetRequiredService<ComputerViewModel>);
-            services.AddTransient<Func<LinksViewModel>>(sp => sp.GetRequiredService<LinksViewModel>);
-            services.AddTransient<Func<AdminViewModel>>(sp => sp.GetRequiredService<AdminViewModel>);
-
-            services.AddSingleton<VersionCheckerUI>();
-            services.AddSingleton<IVersionCheckHandler>(sp => sp.GetRequiredService<VersionCheckerUI>());
-            services.AddSingleton<VersionUpdateScheduler>();
+            services.AddCoreServices();
+            services.AddViewModels();
 
             _serviceProvider = services.BuildServiceProvider();
         }

@@ -1,4 +1,4 @@
-using DSAMVVM.Core.Enums;
+﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model;
@@ -8,7 +8,7 @@ using DSAMVVM.MVVM.Model.Schemas;
 using Newtonsoft.Json;
 using System.IO;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.Integrations
 {
     public class AdminService(IDepartmentService deptService, ILinksService linksService, IServiceMeowService? meowService = null) : IAdminService
     {

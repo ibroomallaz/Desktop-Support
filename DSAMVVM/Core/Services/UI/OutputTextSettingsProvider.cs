@@ -2,7 +2,7 @@
 using DSAMVVM.MVVM.Model.Config;
 using System.Collections.Concurrent;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.UI
 {
     public sealed class OutputTextSettingsProvider(ISettingsService settingsSvc, Func<AppSettings> settingsAccessor) : IOutputTextSettingsProvider
     {

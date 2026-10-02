@@ -1,6 +1,6 @@
 ﻿using DSAMVVM.Core.Interfaces;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.Infrastructure
 {
     public class ApplicationStateService : IApplicationStateService
     {

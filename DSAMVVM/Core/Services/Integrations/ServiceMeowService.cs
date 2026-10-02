@@ -1,4 +1,4 @@
-using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Media;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.Integrations
 {
     // Loads ServiceMeow data using a Remote-First strategy with local offline fallback and image caching.
     public class ServiceMeowService(IHttpService http, IImageCacheService imageCacheService) : IServiceMeowService

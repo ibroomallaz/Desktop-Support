@@ -1,7 +1,7 @@
 ﻿using DSAMVVM.Core.Interfaces;
 using Microsoft.Win32;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.UI
 {
     public class FileDialogService : IFileDialogService
     {

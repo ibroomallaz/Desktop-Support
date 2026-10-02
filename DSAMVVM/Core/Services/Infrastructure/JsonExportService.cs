@@ -5,7 +5,7 @@ using DSAMVVM.MVVM.Model.Admin;
 using Newtonsoft.Json;
 using System.IO;
 
-namespace DSAMVVM.Core.Services
+namespace DSAMVVM.Core.Services.Infrastructure
 {
     public class JsonExportService(IAdminService adminService) : IJsonExportService
     {
