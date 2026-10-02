@@ -1,17 +1,14 @@
-﻿using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Utilities;
+﻿using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.Services.Updates;
 using Microsoft.Extensions.DependencyInjection;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
     // Exposes application metadata and version management commands to the About view
-    public sealed class AboutViewModel : INotifyPropertyChanged
+    public sealed class AboutViewModel : ObservableObject
     {
         private bool _showExtendedVersion;
 
@@ -32,7 +29,6 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand ToggleVersionCommand { get; }
 
         public event EventHandler<string>? OpenUrlRequested;
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         private readonly IHttpService _http;
         private readonly IUpdaterService _updater;
@@ -45,7 +41,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
             OpenGitHubCommand = new RelayCommand(_ => OpenUrlRequested?.Invoke(this, "https://github.com/ibroomallaz/Desktop-Support"));
             OpenSharePointCommand = new RelayCommand(_ => OpenUrlRequested?.Invoke(this, Globals.g_SharepointHome));
-            CheckVersionCommand = new AsyncCommand(CheckVersionAsync, () => !_busy);
+            CheckVersionCommand = new RelayCommand(_ => ExecuteCheckVersion(), _ => !_busy);
 
             // Flips the boolean and notifies the UI to refresh the AppVersion string
             ToggleVersionCommand = new RelayCommand(_ =>
@@ -55,17 +51,18 @@ namespace DSAMVVM.MVVM.ViewModel
             });
         }
 
-        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        private void ExecuteCheckVersion()
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            _ = CheckVersionAsync();
         }
 
         // Executes a manual version check pipeline and manages UI state tracking
         private async Task CheckVersionAsync()
         {
+            if (_busy) return;
             const string key = "VersionCheck";
             _busy = true;
-            (CheckVersionCommand as AsyncCommand)?.RaiseCanExecuteChanged();
+            CommandManager.InvalidateRequerySuggested();
 
             try
             {
@@ -75,36 +72,16 @@ namespace DSAMVVM.MVVM.ViewModel
                 var checker = new VersionCheckerUI(_http, _updater, appSettings);
                 await checker.CheckAsync(showUpToDatePopup: true);
             }
+            catch (Exception ex)
+            {
+                UiNotify.Error("Version Check", $"Check for updates failed: {ex.Message}", ex);
+            }
             finally
             {
                 UiNotify.RemoveKey(UiNotify.ProgressOf(key));
                 _busy = false;
-                (CheckVersionCommand as AsyncCommand)?.RaiseCanExecuteChanged();
+                CommandManager.InvalidateRequerySuggested();
             }
-        }
-
-        // Internal implementation of ICommand for binding synchronous actions
-        private sealed class RelayCommand(Action<object?> exec, Func<bool>? can = null) : ICommand
-        {
-            private readonly Action<object?> _exec = exec;
-            private readonly Func<bool>? _can = can;
-
-            public bool CanExecute(object? p) => _can?.Invoke() ?? true;
-            public void Execute(object? p) => _exec(p);
-            public event EventHandler? CanExecuteChanged;
-            public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        // Internal implementation of ICommand for binding asynchronous tasks
-        private sealed class AsyncCommand(Func<Task> exec, Func<bool>? can = null) : ICommand
-        {
-            private readonly Func<Task> _exec = exec;
-            private readonly Func<bool>? _can = can;
-
-            public bool CanExecute(object? p) => _can?.Invoke() ?? true;
-            public async void Execute(object? p) => await _exec();
-            public event EventHandler? CanExecuteChanged;
-            public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }

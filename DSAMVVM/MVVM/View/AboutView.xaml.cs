@@ -32,10 +32,5 @@ namespace DSAMVVM.MVVM.View
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

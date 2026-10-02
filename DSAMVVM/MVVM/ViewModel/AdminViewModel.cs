@@ -1,6 +1,5 @@
 using System.IO;
 using DSAMVVM.Core.Enums;
-using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
@@ -59,7 +58,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 if (value == null || _selectedSectionOption == value) return;
                 _selectedSectionOption = value;
                 SelectedSection = value.Section;
-                OnPropertyChanged(nameof(SelectedSectionOption));
+                OnPropertyChanged();
             }
         }
 
@@ -73,7 +72,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 if (_selectedSection == value) return;
                 _selectedSection = value;
                 _selectedSectionOption = AvailableSections.FirstOrDefault(s => s.Section == value);
-                OnPropertyChanged(nameof(SelectedSection));
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(SelectedSectionOption));
                 OnPropertyChanged(nameof(IsDepartmentSelected));
                 OnPropertyChanged(nameof(IsSupportTeamSelected));
@@ -95,24 +94,21 @@ namespace DSAMVVM.MVVM.ViewModel
         public int PendingChangesCount => StagedChanges.Count;
         public bool HasPendingChanges => StagedChanges.Count > 0;
 
-        #region Department Section Properties
-
+        // Department Section Properties
         private string _deptId = string.Empty;
         public string DeptId
         {
             get => _deptId;
-            set { _deptId = value; OnPropertyChanged(nameof(DeptId)); }
+            set => Set(ref _deptId, value);
         }
 
-        private bool _supportKnown = false;
+        private bool _supportKnown;
         public bool SupportKnown
         {
             get => _supportKnown;
             set
             {
-                if (_supportKnown == value) return;
-                _supportKnown = value;
-                OnPropertyChanged(nameof(SupportKnown));
+                if (!Set(ref _supportKnown, value)) return;
                 OnPropertyChanged(nameof(SelectedSupportKnownIndex));
             }
         }
@@ -120,7 +116,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public int SelectedSupportKnownIndex
         {
             get => SupportKnown ? 0 : 1;
-            set => SupportKnown = (value == 0);
+            set => SupportKnown = value == 0;
         }
 
         public ObservableCollection<string> AvailableTeams { get; } = [];
@@ -131,9 +127,7 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _selectedTeamOption;
             set
             {
-                if (_selectedTeamOption == value) return;
-                _selectedTeamOption = value;
-                OnPropertyChanged(nameof(SelectedTeamOption));
+                if (!Set(ref _selectedTeamOption, value)) return;
                 OnPropertyChanged(nameof(IsOtherTeamSelected));
                 UpdateEffectiveDeptTeam();
             }
@@ -147,9 +141,7 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _customTeamName;
             set
             {
-                if (_customTeamName == value) return;
-                _customTeamName = value;
-                OnPropertyChanged(nameof(CustomTeamName));
+                if (!Set(ref _customTeamName, value)) return;
                 if (IsOtherTeamSelected)
                 {
                     DeptTeam = value;
@@ -161,20 +153,17 @@ namespace DSAMVVM.MVVM.ViewModel
         public string DeptTeam
         {
             get => _deptTeam;
-            set { _deptTeam = value; OnPropertyChanged(nameof(DeptTeam)); }
+            set => Set(ref _deptTeam, value);
         }
 
         private string _deptNotes = string.Empty;
         public string DeptNotes
         {
             get => _deptNotes;
-            set { _deptNotes = value; OnPropertyChanged(nameof(DeptNotes)); }
+            set => Set(ref _deptNotes, value);
         }
 
-        #endregion
-
-        #region Support Team Section Properties
-
+        // Support Team Section Properties
         public ObservableCollection<string> AvailableSupportTeamNames { get; } = [];
 
         private string? _selectedSupportTeamOption;
@@ -183,9 +172,7 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _selectedSupportTeamOption;
             set
             {
-                if (_selectedSupportTeamOption == value) return;
-                _selectedSupportTeamOption = value;
-                OnPropertyChanged(nameof(SelectedSupportTeamOption));
+                if (!Set(ref _selectedSupportTeamOption, value)) return;
                 _ = OnSupportTeamSelectionChangedAsync(value);
             }
         }
@@ -196,9 +183,7 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _teamName;
             set
             {
-                if (_teamName == value) return;
-                _teamName = value;
-                OnPropertyChanged(nameof(TeamName));
+                if (!Set(ref _teamName, value)) return;
                 OnPropertyChanged(nameof(CanDeleteTeam));
                 OnPropertyChanged(nameof(ShowDeleteSupportTeamButton));
             }
@@ -208,36 +193,21 @@ namespace DSAMVVM.MVVM.ViewModel
         public string TeamManagerName
         {
             get => _teamManagerName;
-            set
-            {
-                if (_teamManagerName == value) return;
-                _teamManagerName = value;
-                OnPropertyChanged(nameof(TeamManagerName));
-            }
+            set => Set(ref _teamManagerName, value);
         }
 
         private string _teamManagerNetId = string.Empty;
         public string TeamManagerNetId
         {
             get => _teamManagerNetId;
-            set
-            {
-                if (_teamManagerNetId == value) return;
-                _teamManagerNetId = value;
-                OnPropertyChanged(nameof(TeamManagerNetId));
-            }
+            set => Set(ref _teamManagerNetId, value);
         }
 
         private string _teamPhoneNumber = string.Empty;
         public string TeamPhoneNumber
         {
             get => _teamPhoneNumber;
-            set
-            {
-                if (_teamPhoneNumber == value) return;
-                _teamPhoneNumber = value;
-                OnPropertyChanged(nameof(TeamPhoneNumber));
-            }
+            set => Set(ref _teamPhoneNumber, value);
         }
 
         public ObservableCollection<SupportedDivs> SupportedDivisionsList { get; } = [];
@@ -246,32 +216,27 @@ namespace DSAMVVM.MVVM.ViewModel
         public string NewDivAbbrev
         {
             get => _newDivAbbrev;
-            set { _newDivAbbrev = value; OnPropertyChanged(nameof(NewDivAbbrev)); }
+            set => Set(ref _newDivAbbrev, value);
         }
 
         private string _newDivFullName = string.Empty;
         public string NewDivFullName
         {
             get => _newDivFullName;
-            set { _newDivFullName = value; OnPropertyChanged(nameof(NewDivFullName)); }
+            set => Set(ref _newDivFullName, value);
         }
 
         public bool CanDeleteTeam => !_isNewTeam && !string.IsNullOrWhiteSpace(TeamName);
         public bool ShowDeleteSupportTeamButton => IsSupportTeamSelected && CanDeleteTeam;
 
-        #endregion
-
-        #region Links Section Properties
-
+        // Links Section Properties
         private bool _isLinkCommon = true;
         public bool IsLinkCommon
         {
             get => _isLinkCommon;
             set
             {
-                if (_isLinkCommon == value) return;
-                _isLinkCommon = value;
-                OnPropertyChanged(nameof(IsLinkCommon));
+                if (!Set(ref _isLinkCommon, value)) return;
                 OnPropertyChanged(nameof(IsLinkTeam));
                 OnPropertyChanged(nameof(ShowDeleteLinkButton));
                 _ = RefreshScopeLinksListAsync();
@@ -292,9 +257,7 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _selectedLinkTeam;
             set
             {
-                if (_selectedLinkTeam == value) return;
-                _selectedLinkTeam = value;
-                OnPropertyChanged(nameof(SelectedLinkTeam));
+                if (!Set(ref _selectedLinkTeam, value)) return;
                 OnPropertyChanged(nameof(IsOtherLinkTeamSelected));
                 _ = RefreshScopeLinksListAsync();
             }
@@ -308,9 +271,7 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _customLinkTeamName;
             set
             {
-                if (_customLinkTeamName == value) return;
-                _customLinkTeamName = value;
-                OnPropertyChanged(nameof(CustomLinkTeamName));
+                if (!Set(ref _customLinkTeamName, value)) return;
                 _ = RefreshScopeLinksListAsync();
             }
         }
@@ -323,9 +284,7 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _selectedScopeLinkOption;
             set
             {
-                if (_selectedScopeLinkOption == value) return;
-                _selectedScopeLinkOption = value;
-                OnPropertyChanged(nameof(SelectedScopeLinkOption));
+                if (!Set(ref _selectedScopeLinkOption, value)) return;
                 _ = OnScopeLinkSelectionChangedAsync(value);
             }
         }
@@ -336,9 +295,7 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _linkName;
             set
             {
-                if (_linkName == value) return;
-                _linkName = value;
-                OnPropertyChanged(nameof(LinkName));
+                if (!Set(ref _linkName, value)) return;
                 OnPropertyChanged(nameof(CanDeleteLink));
                 OnPropertyChanged(nameof(ShowDeleteLinkButton));
             }
@@ -348,33 +305,20 @@ namespace DSAMVVM.MVVM.ViewModel
         public string LinkUrl
         {
             get => _linkUrl;
-            set
-            {
-                if (_linkUrl == value) return;
-                _linkUrl = value;
-                OnPropertyChanged(nameof(LinkUrl));
-            }
+            set => Set(ref _linkUrl, value);
         }
 
         private string _linkDescription = string.Empty;
         public string LinkDescription
         {
             get => _linkDescription;
-            set
-            {
-                if (_linkDescription == value) return;
-                _linkDescription = value;
-                OnPropertyChanged(nameof(LinkDescription));
-            }
+            set => Set(ref _linkDescription, value);
         }
 
         public bool CanDeleteLink => !_isNewLink && !string.IsNullOrWhiteSpace(LinkName);
         public bool ShowDeleteLinkButton => IsLinksSelected && CanDeleteLink;
 
-        #endregion
-
-        #region ServiceMeow Section Properties
-
+        // ServiceMeow Section Properties
         public ObservableCollection<string> AvailablePetsList { get; } = [];
 
         private string? _selectedPetOption;
@@ -383,9 +327,7 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _selectedPetOption;
             set
             {
-                if (_selectedPetOption == value) return;
-                _selectedPetOption = value;
-                OnPropertyChanged(nameof(SelectedPetOption));
+                if (!Set(ref _selectedPetOption, value)) return;
                 _ = OnPetSelectionChangedAsync(value);
             }
         }
@@ -395,21 +337,21 @@ namespace DSAMVVM.MVVM.ViewModel
         public string PetOwnerNetId
         {
             get => _petOwnerNetId;
-            set { _petOwnerNetId = value; OnPropertyChanged(nameof(PetOwnerNetId)); }
+            set => Set(ref _petOwnerNetId, value);
         }
 
         private string _petOwnerName = string.Empty;
         public string PetOwnerName
         {
             get => _petOwnerName;
-            set { _petOwnerName = value; OnPropertyChanged(nameof(PetOwnerName)); }
+            set => Set(ref _petOwnerName, value);
         }
 
         private string _petOwnerTeam = string.Empty;
         public string PetOwnerTeam
         {
             get => _petOwnerTeam;
-            set { _petOwnerTeam = value; OnPropertyChanged(nameof(PetOwnerTeam)); }
+            set => Set(ref _petOwnerTeam, value);
         }
 
         // Pet fields
@@ -419,9 +361,7 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _petName;
             set
             {
-                if (_petName == value) return;
-                _petName = value;
-                OnPropertyChanged(nameof(PetName));
+                if (!Set(ref _petName, value)) return;
                 OnPropertyChanged(nameof(CanDeletePet));
                 OnPropertyChanged(nameof(ShowDeleteServiceMeowButton));
             }
@@ -431,7 +371,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public string PetSpecies
         {
             get => _petSpecies;
-            set { _petSpecies = value; OnPropertyChanged(nameof(PetSpecies)); }
+            set => Set(ref _petSpecies, value);
         }
 
         public ObservableCollection<string> AvailableSpecies { get; } = ["Cat", "Dog", "Bird", "Reptile", "Fish", "Other"];
@@ -440,34 +380,32 @@ namespace DSAMVVM.MVVM.ViewModel
         public string PetBreed
         {
             get => _petBreed;
-            set { _petBreed = value; OnPropertyChanged(nameof(PetBreed)); }
+            set => Set(ref _petBreed, value);
         }
 
         private string _petTitle = string.Empty;
         public string PetTitle
         {
             get => _petTitle;
-            set { _petTitle = value; OnPropertyChanged(nameof(PetTitle)); }
+            set => Set(ref _petTitle, value);
         }
 
         private string _petBlurb = string.Empty;
         public string PetBlurb
         {
             get => _petBlurb;
-            set { _petBlurb = value; OnPropertyChanged(nameof(PetBlurb)); }
+            set => Set(ref _petBlurb, value);
         }
 
         private string _petImageUrl = string.Empty;
         public string PetImageUrl
         {
             get => _petImageUrl;
-            set { _petImageUrl = value; OnPropertyChanged(nameof(PetImageUrl)); }
+            set => Set(ref _petImageUrl, value);
         }
 
         public bool CanDeletePet => !_isNewPet && !string.IsNullOrWhiteSpace(PetName);
         public bool ShowDeleteServiceMeowButton => IsServiceMeowSelected && CanDeletePet;
-
-        #endregion
 
         // Commands
         public ICommand ApplyCommand { get; }
@@ -489,19 +427,22 @@ namespace DSAMVVM.MVVM.ViewModel
             _fileDialogService = fileDialogService ?? throw new ArgumentNullException(nameof(fileDialogService));
 
             ApplyCommand = new RelayCommand(_ => ExecuteApply());
-            RemoveStagedItemCommand = new RelayCommand(param => ExecuteRemoveStagedItem(param));
+            RemoveStagedItemCommand = new RelayCommand(ExecuteRemoveStagedItem);
             DiscardAllCommand = new RelayCommand(_ => ExecuteDiscardAll());
             ClearFormCommand = new RelayCommand(_ => ExecuteClearForm());
-            SaveCommand = new RelayCommand(async _ => await ExecuteSaveAsync());
-            ExportJsonCommand = new RelayCommand(async _ => await ExecuteExportJsonAsync());
+            SaveCommand = new RelayCommand(_ => ExecuteSave(), _ => HasPendingChanges);
+            ExportJsonCommand = new RelayCommand(_ => ExecuteExportJson());
             DeleteLinkCommand = new RelayCommand(_ => StageLinkChange(isDelete: true));
             DeleteSupportTeamCommand = new RelayCommand(_ => StageSupportTeamChange(isDelete: true));
             DeleteServiceMeowCommand = new RelayCommand(_ => StageServiceMeowChange(isDelete: true));
             AddDivisionCommand = new RelayCommand(_ => ExecuteAddDivision());
-            RemoveDivisionCommand = new RelayCommand(param => ExecuteRemoveDivision(param));
+            RemoveDivisionCommand = new RelayCommand(ExecuteRemoveDivision);
 
             _ = InitializeDataAsync();
         }
+
+        private void ExecuteSave() => _ = ExecuteSaveAsync();
+        private void ExecuteExportJson() => _ = ExecuteExportJsonAsync();
 
         private async Task InitializeDataAsync()
         {
@@ -512,8 +453,7 @@ namespace DSAMVVM.MVVM.ViewModel
             await RefreshPetsListAsync();
         }
 
-        #region Department Methods
-
+        // Department Methods
         private async Task LoadAvailableTeamsAsync()
         {
             AvailableTeams.Clear();
@@ -527,7 +467,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private void UpdateEffectiveDeptTeam()
         {
-            DeptTeam = IsOtherTeamSelected ? CustomTeamName.Trim() : (SelectedTeamOption ?? string.Empty);
+            DeptTeam = IsOtherTeamSelected ? CustomTeamName.Trim() : SelectedTeamOption ?? string.Empty;
         }
 
         private void SetTeamSelection(string? team)
@@ -616,10 +556,7 @@ namespace DSAMVVM.MVVM.ViewModel
             UiNotify.Success($"Staged changes for Department {DeptId}. ({PendingChangesCount} pending)");
         }
 
-        #endregion
-
-        #region Support Team Methods
-
+        // Support Team Methods
         private async Task LoadAvailableSupportTeamsAsync()
         {
             AvailableSupportTeamNames.Clear();
@@ -666,21 +603,18 @@ namespace DSAMVVM.MVVM.ViewModel
                 ManagerName = team.ManagerName,
                 ManagerNetID = team.ManagerNetID,
                 PhoneNumber = team.PhoneNumber,
-                SupportedDivisions = team.SupportedDivisions?.Select(d => new SupportedDivs { DivAbbrev = d.DivAbbrev, DivFullName = d.DivFullName }).ToList() ?? []
+                SupportedDivisions = [.. team.SupportedDivisions.Select(d => new SupportedDivs { DivAbbrev = d.DivAbbrev, DivFullName = d.DivFullName })]
             };
 
             TeamName = team.SupportTeamName;
-            TeamManagerName = team.ManagerName ?? string.Empty;
-            TeamManagerNetId = team.ManagerNetID ?? string.Empty;
+            TeamManagerName = team.ManagerName;
+            TeamManagerNetId = team.ManagerNetID;
             TeamPhoneNumber = team.PhoneNumber ?? string.Empty;
 
             SupportedDivisionsList.Clear();
-            if (team.SupportedDivisions != null)
+            foreach (var div in team.SupportedDivisions)
             {
-                foreach (var div in team.SupportedDivisions)
-                {
-                    SupportedDivisionsList.Add(new SupportedDivs { DivAbbrev = div.DivAbbrev, DivFullName = div.DivFullName });
-                }
+                SupportedDivisionsList.Add(new SupportedDivs { DivAbbrev = div.DivAbbrev, DivFullName = div.DivFullName });
             }
 
             NewDivAbbrev = string.Empty;
@@ -689,11 +623,9 @@ namespace DSAMVVM.MVVM.ViewModel
             OnPropertyChanged(nameof(CanDeleteTeam));
             OnPropertyChanged(nameof(ShowDeleteSupportTeamButton));
 
-            if (syncSelector)
-            {
-                _selectedSupportTeamOption = isNew ? "[+ New Support Team]" : team.SupportTeamName;
-                OnPropertyChanged(nameof(SelectedSupportTeamOption));
-            }
+            if (!syncSelector) return;
+            _selectedSupportTeamOption = isNew ? "[+ New Support Team]" : team.SupportTeamName;
+            OnPropertyChanged(nameof(SelectedSupportTeamOption));
         }
 
         private void ResetSupportTeamForm()
@@ -714,8 +646,8 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private void ExecuteAddDivision()
         {
-            string abbrev = (NewDivAbbrev ?? string.Empty).Trim();
-            string fullName = (NewDivFullName ?? string.Empty).Trim();
+            string abbrev = NewDivAbbrev.Trim();
+            string fullName = NewDivFullName.Trim();
 
             if (string.IsNullOrWhiteSpace(abbrev))
             {
@@ -744,7 +676,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private void StageSupportTeamChange(bool isDelete = false)
         {
-            string name = (TeamName ?? string.Empty).Trim();
+            string name = TeamName.Trim();
             if (string.IsNullOrWhiteSpace(name))
             {
                 UiNotify.Warn("Please enter a valid Support Team Name.");
@@ -771,8 +703,8 @@ namespace DSAMVVM.MVVM.ViewModel
                     diff.Append($"NetID: \"{_originalTeam.ManagerNetID}\" -> \"{TeamManagerNetId.Trim()}\"; ");
                 if ((_originalTeam.PhoneNumber ?? string.Empty) != TeamPhoneNumber.Trim())
                     diff.Append("Phone updated; ");
-                if ((_originalTeam.SupportedDivisions?.Count ?? 0) != SupportedDivisionsList.Count)
-                    diff.Append($"Divisions: {_originalTeam.SupportedDivisions?.Count ?? 0} -> {SupportedDivisionsList.Count}; ");
+                if (_originalTeam.SupportedDivisions.Count != SupportedDivisionsList.Count)
+                    diff.Append($"Divisions: {_originalTeam.SupportedDivisions.Count} -> {SupportedDivisionsList.Count}; ");
 
                 if (diff.Length == 0)
                 {
@@ -792,7 +724,7 @@ namespace DSAMVVM.MVVM.ViewModel
                     ManagerName = TeamManagerName.Trim(),
                     ManagerNetID = TeamManagerNetId.Trim(),
                     PhoneNumber = string.IsNullOrWhiteSpace(TeamPhoneNumber) ? null : TeamPhoneNumber.Trim(),
-                    SupportedDivisions = SupportedDivisionsList.Select(d => new SupportedDivs { DivAbbrev = d.DivAbbrev.Trim(), DivFullName = d.DivFullName.Trim() }).ToList()
+                    SupportedDivisions = [.. SupportedDivisionsList.Select(d => new SupportedDivs { DivAbbrev = d.DivAbbrev.Trim(), DivFullName = d.DivFullName.Trim() })]
                 },
                 Action = isDelete ? StagedSupportTeamAction.Delete : StagedSupportTeamAction.AddOrUpdate
             };
@@ -814,15 +746,11 @@ namespace DSAMVVM.MVVM.ViewModel
             OnPropertyChanged(nameof(SelectedSupportTeamOption));
         }
 
-        #endregion
-
-        #region Links Methods
-
-        private string GetEffectiveLinkTeam()
-        {
-            if (IsOtherLinkTeamSelected) return CustomLinkTeamName.Trim();
-            return (SelectedLinkTeam ?? string.Empty).Trim();
-        }
+        // Links Methods
+        private string GetEffectiveLinkTeam() =>
+            IsOtherLinkTeamSelected
+                ? CustomLinkTeamName.Trim()
+                : (SelectedLinkTeam ?? string.Empty).Trim();
 
         private async Task LoadAvailableLinkTeamsAsync()
         {
@@ -956,23 +884,21 @@ namespace DSAMVVM.MVVM.ViewModel
 
             LinkName = link.Name;
             LinkUrl = link.URL;
-            LinkDescription = link.Description ?? string.Empty;
+            LinkDescription = link.Description;
 
             OnPropertyChanged(nameof(CanDeleteLink));
             OnPropertyChanged(nameof(ShowDeleteLinkButton));
 
             _ = RefreshScopeLinksListAsync();
 
-            if (syncSelector)
-            {
-                _selectedScopeLinkOption = isNew ? "[+ New Link]" : link.Name;
-                OnPropertyChanged(nameof(SelectedScopeLinkOption));
-            }
+            if (!syncSelector) return;
+            _selectedScopeLinkOption = isNew ? "[+ New Link]" : link.Name;
+            OnPropertyChanged(nameof(SelectedScopeLinkOption));
         }
 
         private void StageLinkChange(bool isDelete = false)
         {
-            string name = (LinkName ?? string.Empty).Trim();
+            string name = LinkName.Trim();
             if (string.IsNullOrWhiteSpace(name))
             {
                 UiNotify.Warn("Please enter a valid Link Name.");
@@ -986,14 +912,14 @@ namespace DSAMVVM.MVVM.ViewModel
                 return;
             }
 
-            string url = (LinkUrl ?? string.Empty).Trim();
+            string url = LinkUrl.Trim();
             if (!isDelete && string.IsNullOrWhiteSpace(url))
             {
                 UiNotify.Warn("Please enter a valid URL for the link.");
                 return;
             }
 
-            string description = (LinkDescription ?? string.Empty).Trim();
+            string description = LinkDescription.Trim();
             string stagedKey = IsLinkCommon ? name : $"[{effectiveTeam}] {name}";
             var diff = new StringBuilder();
 
@@ -1011,7 +937,7 @@ namespace DSAMVVM.MVVM.ViewModel
                     diff.Append($"Name: \"{_originalLink.Name}\" -> \"{name}\"; ");
                 if (_originalLink.URL != url)
                     diff.Append($"URL: \"{_originalLink.URL}\" -> \"{url}\"; ");
-                if ((_originalLink.Description ?? string.Empty) != description)
+                if (_originalLink.Description != description)
                     diff.Append("Description updated; ");
                 if (_originalLinkIsCommon != IsLinkCommon || (!IsLinkCommon && _originalLinkTeam != effectiveTeam))
                     diff.Append("Scope/Team reassigned; ");
@@ -1063,10 +989,7 @@ namespace DSAMVVM.MVVM.ViewModel
             OnPropertyChanged(nameof(ShowDeleteLinkButton));
         }
 
-        #endregion
-
-        #region ServiceMeow Methods
-
+        // ServiceMeow Methods
         private async Task RefreshPetsListAsync()
         {
             AvailablePetsList.Clear();
@@ -1075,13 +998,11 @@ namespace DSAMVVM.MVVM.ViewModel
             var data = await _adminService.LoadServiceMeowDataAsync();
             foreach (var pet in data.AllPets.OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase))
             {
-                if (!string.IsNullOrWhiteSpace(pet.Name))
-                {
-                    string label = string.IsNullOrWhiteSpace(pet.Owner?.NetId)
-                        ? pet.Name
-                        : $"{pet.Name} ({pet.Owner.NetId})";
-                    AvailablePetsList.Add(label);
-                }
+                if (string.IsNullOrWhiteSpace(pet.Name)) continue;
+                string label = string.IsNullOrWhiteSpace(pet.Owner?.NetId)
+                    ? pet.Name
+                    : $"{pet.Name} ({pet.Owner.NetId})";
+                AvailablePetsList.Add(label);
             }
 
             if (string.IsNullOrWhiteSpace(SelectedPetOption) || !AvailablePetsList.Contains(SelectedPetOption))
@@ -1136,22 +1057,20 @@ namespace DSAMVVM.MVVM.ViewModel
 
             PetName = pet.Name;
             PetSpecies = string.IsNullOrWhiteSpace(pet.Species) ? "Cat" : pet.Species;
-            PetBreed = pet.Breed ?? string.Empty;
-            PetTitle = pet.Title ?? string.Empty;
-            PetBlurb = pet.Blurb ?? string.Empty;
+            PetBreed = pet.Breed;
+            PetTitle = pet.Title;
+            PetBlurb = pet.Blurb;
             PetImageUrl = pet.Images.Count > 0 ? string.Join(", ", pet.Images) : string.Empty;
 
             OnPropertyChanged(nameof(CanDeletePet));
             OnPropertyChanged(nameof(ShowDeleteServiceMeowButton));
 
-            if (syncSelector)
-            {
-                string label = string.IsNullOrWhiteSpace(pet.Owner?.NetId)
-                    ? pet.Name
-                    : $"{pet.Name} ({pet.Owner.NetId})";
-                _selectedPetOption = isNew ? "[+ New Pet]" : label;
-                OnPropertyChanged(nameof(SelectedPetOption));
-            }
+            if (!syncSelector) return;
+            string label = string.IsNullOrWhiteSpace(pet.Owner?.NetId)
+                ? pet.Name
+                : $"{pet.Name} ({pet.Owner.NetId})";
+            _selectedPetOption = isNew ? "[+ New Pet]" : label;
+            OnPropertyChanged(nameof(SelectedPetOption));
         }
 
         private void ResetPetForm()
@@ -1177,26 +1096,26 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private void StageServiceMeowChange(bool isDelete = false)
         {
-            string petName = (PetName ?? string.Empty).Trim();
+            string petName = PetName.Trim();
             if (string.IsNullOrWhiteSpace(petName))
             {
                 UiNotify.Warn("Please enter a valid Pet Name.");
                 return;
             }
 
-            string ownerNetId = (PetOwnerNetId ?? string.Empty).Trim();
+            string ownerNetId = PetOwnerNetId.Trim();
             if (!isDelete && string.IsNullOrWhiteSpace(ownerNetId))
             {
                 UiNotify.Warn("Please enter an Owner NetID for this pet.");
                 return;
             }
 
-            string ownerName = (PetOwnerName ?? string.Empty).Trim();
-            string ownerTeam = (PetOwnerTeam ?? string.Empty).Trim();
+            string ownerName = PetOwnerName.Trim();
+            string ownerTeam = PetOwnerTeam.Trim();
             string species = string.IsNullOrWhiteSpace(PetSpecies) ? "Cat" : PetSpecies.Trim();
-            string breed = (PetBreed ?? string.Empty).Trim();
-            string title = (PetTitle ?? string.Empty).Trim();
-            string blurb = (PetBlurb ?? string.Empty).Trim();
+            string breed = PetBreed.Trim();
+            string title = PetTitle.Trim();
+            string blurb = PetBlurb.Trim();
             string stagedKey = string.IsNullOrWhiteSpace(ownerNetId) ? petName : $"{petName} ({ownerNetId})";
 
             var diff = new StringBuilder();
@@ -1215,15 +1134,15 @@ namespace DSAMVVM.MVVM.ViewModel
                     diff.Append($"Name: \"{_originalPet.Name}\" -> \"{petName}\"; ");
                 if (_originalPet.Species != species)
                     diff.Append($"Species: \"{_originalPet.Species}\" -> \"{species}\"; ");
-                if ((_originalPet.Breed ?? string.Empty) != breed)
+                if (_originalPet.Breed != breed)
                     diff.Append($"Breed: \"{_originalPet.Breed}\" -> \"{breed}\"; ");
-                if ((_originalPet.Title ?? string.Empty) != title)
+                if (_originalPet.Title != title)
                     diff.Append($"Title: \"{_originalPet.Title}\" -> \"{title}\"; ");
-                if ((_originalPet.Blurb ?? string.Empty) != blurb)
+                if (_originalPet.Blurb != blurb)
                     diff.Append("Blurb updated; ");
 
                 string origImages = string.Join(", ", _originalPet.Images);
-                if (origImages != (PetImageUrl ?? string.Empty).Trim())
+                if (origImages != PetImageUrl.Trim())
                     diff.Append("Photo URL updated; ");
 
                 if ((_originalPetOwnerNetId ?? string.Empty) != ownerNetId)
@@ -1236,7 +1155,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 }
             }
 
-            var imageList = (PetImageUrl ?? string.Empty)
+            var imageList = PetImageUrl
                 .Split([',', ';', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .ToList();
 
@@ -1287,48 +1206,48 @@ namespace DSAMVVM.MVVM.ViewModel
             OnPropertyChanged(nameof(SelectedPetOption));
         }
 
-        #endregion
-
         private void ExecuteClearForm()
         {
-            if (SelectedSection == AdminSection.Department)
+            switch (SelectedSection)
             {
-                DeptId = string.Empty;
-                SupportKnown = false;
-                SetTeamSelection(null);
-                DeptNotes = string.Empty;
-                _originalDept = null;
-                _isNewEntry = false;
-            }
-            else if (SelectedSection == AdminSection.SupportTeam)
-            {
-                ResetSupportTeamForm();
-                _selectedSupportTeamOption = "[+ New Support Team]";
-                OnPropertyChanged(nameof(SelectedSupportTeamOption));
-            }
-            else if (SelectedSection == AdminSection.Links)
-            {
-                LinkName = string.Empty;
-                LinkUrl = string.Empty;
-                LinkDescription = string.Empty;
-                _originalLink = null;
-                _isNewLink = true;
-                _selectedScopeLinkOption = "[+ New Link]";
-                OnPropertyChanged(nameof(SelectedScopeLinkOption));
-                OnPropertyChanged(nameof(CanDeleteLink));
-                OnPropertyChanged(nameof(ShowDeleteLinkButton));
-            }
-            else if (SelectedSection == AdminSection.ServiceMeow)
-            {
-                ResetPetForm();
-                _selectedPetOption = "[+ New Pet]";
-                OnPropertyChanged(nameof(SelectedPetOption));
+                case AdminSection.Department:
+                    DeptId = string.Empty;
+                    SupportKnown = false;
+                    SetTeamSelection(null);
+                    DeptNotes = string.Empty;
+                    _originalDept = null;
+                    _isNewEntry = false;
+                    break;
+
+                case AdminSection.SupportTeam:
+                    ResetSupportTeamForm();
+                    _selectedSupportTeamOption = "[+ New Support Team]";
+                    OnPropertyChanged(nameof(SelectedSupportTeamOption));
+                    break;
+
+                case AdminSection.Links:
+                    LinkName = string.Empty;
+                    LinkUrl = string.Empty;
+                    LinkDescription = string.Empty;
+                    _originalLink = null;
+                    _isNewLink = true;
+                    _selectedScopeLinkOption = "[+ New Link]";
+                    OnPropertyChanged(nameof(SelectedScopeLinkOption));
+                    OnPropertyChanged(nameof(CanDeleteLink));
+                    OnPropertyChanged(nameof(ShowDeleteLinkButton));
+                    break;
+
+                case AdminSection.ServiceMeow:
+                    ResetPetForm();
+                    _selectedPetOption = "[+ New Pet]";
+                    OnPropertyChanged(nameof(SelectedPetOption));
+                    break;
             }
         }
 
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
-            var query = (context.Query ?? string.Empty).Trim();
+            var query = context.Query.Trim();
 
             switch (SelectedSection)
             {
@@ -1422,7 +1341,7 @@ namespace DSAMVVM.MVVM.ViewModel
                         return;
                     }
 
-                    var (foundLink, isCommon, teamName) = await _adminService.FindLinkAsync(query);
+                    (Link? foundLink, bool isCommon, string? teamName) = await _adminService.FindLinkAsync(query);
                     if (foundLink != null)
                     {
                         LoadLinkIntoForm(foundLink, isCommon, teamName, isNew: false);
@@ -1519,12 +1438,11 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private void ExecuteRemoveStagedItem(object? param)
         {
-            if (param is StagedChange change && StagedChanges.Contains(change))
-            {
-                StagedChanges.Remove(change);
-                NotifyStagingChanged();
-                UiNotify.Info($"Removed {change.Key} from queue.", showStatusBar: true);
-            }
+            if (param is not StagedChange change || !StagedChanges.Contains(change)) return;
+
+            StagedChanges.Remove(change);
+            NotifyStagingChanged();
+            UiNotify.Info($"Removed {change.Key} from queue.", showStatusBar: true);
         }
 
         private void ExecuteDiscardAll()
@@ -1540,7 +1458,7 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             try
             {
-                bool hasDept = StagedChanges.Any(c => c.Section == AdminSection.Department || c.Section == AdminSection.SupportTeam);
+                bool hasDept = StagedChanges.Any(c => c.Section is AdminSection.Department or AdminSection.SupportTeam);
                 bool hasLinks = StagedChanges.Any(c => c.Section == AdminSection.Links);
                 bool hasMeow = StagedChanges.Any(c => c.Section == AdminSection.ServiceMeow);
 
@@ -1600,17 +1518,19 @@ namespace DSAMVVM.MVVM.ViewModel
                 var baselinePath = _fileDialogService.SaveFile(defaultName, "JSON Data (*.json)|*.json", $"Export {defaultName} for Box");
                 if (string.IsNullOrWhiteSpace(baselinePath)) return;
 
-                if (SelectedSection == AdminSection.Links)
+                switch (SelectedSection)
                 {
-                    await _jsonExportService.ExportLinksJsonAsync(null, baselinePath);
-                }
-                else if (SelectedSection == AdminSection.ServiceMeow)
-                {
-                    await _jsonExportService.ExportServiceMeowJsonAsync(null, baselinePath);
-                }
-                else
-                {
-                    await _jsonExportService.ExportDepartmentsJsonAsync(null, baselinePath);
+                    case AdminSection.Links:
+                        await _jsonExportService.ExportLinksJsonAsync(null, baselinePath);
+                        break;
+                    case AdminSection.ServiceMeow:
+                        await _jsonExportService.ExportServiceMeowJsonAsync(null, baselinePath);
+                        break;
+                    case AdminSection.Department:
+                    case AdminSection.SupportTeam:
+                    default:
+                        await _jsonExportService.ExportDepartmentsJsonAsync(null, baselinePath);
+                        break;
                 }
 
                 UiNotify.Success($"Exported {defaultName} to {Path.GetFileName(baselinePath)} for Box upload!");

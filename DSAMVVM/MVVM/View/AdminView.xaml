@@ -3,15 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:enums="clr-namespace:DSAMVVM.Core.Enums"
-             xmlns:util="clr-namespace:DSAMVVM.Core.Utilities"
+             xmlns:vm="clr-namespace:DSAMVVM.MVVM.ViewModel"
+             xmlns:model="clr-namespace:DSAMVVM.MVVM.Model.Admin"
+             xmlns:data="clr-namespace:DSAMVVM.MVVM.Model.Data"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=vm:AdminViewModel, IsDesignTimeCreatable=False}"
              d:DesignHeight="520" d:DesignWidth="840">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-        <util:EnumEqualsConverter x:Key="EnumEquals" />
 
         <Style x:Key="Admin.FieldLabel" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
@@ -50,7 +51,6 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                 <TextBlock Text="Section:" 
                            Style="{StaticResource Admin.FieldLabel}" 
-                           Margin="0,0,8,0" 
                            FontSize="11"/>
                 <ComboBox ItemsSource="{Binding AvailableSections}"
                           SelectedItem="{Binding SelectedSectionOption, Mode=TwoWay}"
@@ -261,7 +261,7 @@
                                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                                             <ItemsControl ItemsSource="{Binding SupportedDivisionsList}">
                                                 <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
+                                                    <DataTemplate DataType="{x:Type data:SupportedDivs}">
                                                         <Grid Margin="0,2">
                                                             <Grid.ColumnDefinitions>
                                                                 <ColumnDefinition Width="Auto"/>
@@ -620,7 +620,7 @@
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                             <ItemsControl ItemsSource="{Binding StagedChanges}">
                                 <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
+                                    <DataTemplate DataType="{x:Type model:StagedChange}">
                                         <Border Margin="0,0,0,5" 
                                                 Background="{DynamicResource Brush.Surface.0}" 
                                                 BorderBrush="{DynamicResource Brush.Border}" 

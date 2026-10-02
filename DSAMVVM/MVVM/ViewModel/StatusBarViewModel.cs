@@ -22,7 +22,7 @@ namespace DSAMVVM.MVVM.ViewModel
             DismissCommand = new RelayCommand(_ => DismissCurrent(), _ => CurrentStatusItem != null);
 
             // Existing listener to refresh the UI when the bus updates
-            StatusBus.CurrentChanged += (_, __) => OnPropertyChanged(nameof(CurrentStatusItem));
+            StatusBus.CurrentChanged += (_, _) => OnPropertyChanged(nameof(CurrentStatusItem));
         }
 
         private void DismissCurrent()

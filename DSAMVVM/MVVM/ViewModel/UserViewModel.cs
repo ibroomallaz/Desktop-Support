@@ -120,7 +120,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
                 SearchLog += IdentityRenderer.RenderADUser(user);
 
-                if (user != null && user.Exists)
+                if (user is { Exists: true })
                 {
                     Log.Info(ViewKey, $"User '{user.Name}' found successfully.");
 

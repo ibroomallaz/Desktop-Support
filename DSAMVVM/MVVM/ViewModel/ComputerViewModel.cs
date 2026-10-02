@@ -1,5 +1,4 @@
 ﻿using DSAMVVM.Core.Enums;
-using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Renderers;
@@ -25,21 +24,21 @@ namespace DSAMVVM.MVVM.ViewModel
 
         // Errors / state
         private string? _error;
-        public string? Error { get => _error; private set { _error = value; OnPropertyChanged(nameof(Error)); } }
+        public string? Error { get => _error; private set { _error = value; OnPropertyChanged(); } }
 
         private bool _isLoading;
-        public bool IsLoading { get => _isLoading; private set { _isLoading = value; OnPropertyChanged(nameof(IsLoading)); } }
+        public bool IsLoading { get => _isLoading; private set { _isLoading = value; OnPropertyChanged(); } }
 
         // FlowDoc text (bound to viewer)
         private string _searchLog = string.Empty;
-        public string SearchLog { get => _searchLog; private set { _searchLog = value; OnPropertyChanged(nameof(SearchLog)); } }
+        public string SearchLog { get => _searchLog; private set { _searchLog = value; OnPropertyChanged(); } }
 
         // Effective output font size for this view
         private double _effectiveOutputFontSize;
         public double EffectiveOutputFontSize
         {
             get => _effectiveOutputFontSize;
-            private set { _effectiveOutputFontSize = value; OnPropertyChanged(nameof(EffectiveOutputFontSize)); }
+            private set { _effectiveOutputFontSize = value; OnPropertyChanged(); }
         }
 
         // Commands
@@ -150,7 +149,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 // Push formatting to the renderer
                 SearchLog += IdentityRenderer.RenderADComputer(comp);
 
-                if (comp != null && comp.Exists)
+                if (comp is { Exists: true })
                 {
                     Log.Info(ViewKey, $"Computer '{comp.Name}' found successfully.");
                 }
@@ -191,7 +190,7 @@ namespace DSAMVVM.MVVM.ViewModel
             if (disposing)
             {
                 _notifier.Changed -= OnOutputFontSettingsChanged;
-                _flowDoc?.LinkClicked -= OnLinkClicked;
+                _flowDoc.LinkClicked -= OnLinkClicked;
             }
             _disposed = true;
         }
