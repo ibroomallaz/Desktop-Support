@@ -49,12 +49,12 @@
                               Fill="{TemplateBinding Foreground}"
                               Visibility="Collapsed"/>
 
-                            <Popup x:Name="SubMenuPopup" 
-                               AllowsTransparency="True" 
-                               IsOpen="{TemplateBinding IsSubmenuOpen}" 
-                               Placement="Right" 
-                               Focusable="False" 
-                               PopupAnimation="Fade">
+                            <Popup Grid.Column="0" x:Name="SubMenuPopup" 
+                                   AllowsTransparency="True" 
+                                   IsOpen="{TemplateBinding IsSubmenuOpen}" 
+                                   Placement="Right" 
+                                   Focusable="False" 
+                                   PopupAnimation="Fade">
 
                                 <Border Background="{DynamicResource Brush.Surface.1}"
                                     BorderBrush="{DynamicResource Brush.Border}"

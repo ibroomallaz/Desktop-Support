@@ -2,7 +2,7 @@
 {
     public class ADComputerInfo
     {
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; init; } = string.Empty;
 
         public string? OUs { get; set; }
         public string? Description { get; set; }

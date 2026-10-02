@@ -53,6 +53,5 @@
 
   <ItemGroup>
     <Folder Include="img\icons\" />
-    <Folder Include="MVVM\Model\Schemas\News\" />
   </ItemGroup>
 </Project>

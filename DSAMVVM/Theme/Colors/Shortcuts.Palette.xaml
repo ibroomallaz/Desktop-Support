@@ -1,9 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- ======================================================== -->
     <!-- Quick Shortcuts Jewel-Tone Color Palettes               -->
-    <!-- ======================================================== -->
 
     <!-- Blue (Azure / ServiceNow / Microsoft 365) -->
     <Color x:Key="Color.Shortcut.Blue.Bg">#12263F</Color>
@@ -53,9 +51,7 @@
     <SolidColorBrush x:Key="Brush.Shortcut.Teal.Border" Color="#1C5561"/>
     <SolidColorBrush x:Key="Brush.Shortcut.Teal.Fg"     Color="#4DEEEA"/>
 
-    <!-- ======================================================== -->
     <!-- Reusable Styles & Templates for Shortcuts                -->
-    <!-- ======================================================== -->
 
     <!-- Shortcut Card Root Border Style based on ColorPreset theme tokens -->
     <Style x:Key="ShortcutCardBorder" TargetType="Border">

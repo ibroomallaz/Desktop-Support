@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System.Net.Http;
 
 namespace DSAMVVM.Core.IO
@@ -35,7 +34,7 @@ namespace DSAMVVM.Core.IO
 
             if (!string.IsNullOrWhiteSpace(json))
             {
-                T? webModel = default;
+                T? webModel;
                 try
                 {
                     webModel = JsonConvert.DeserializeObject<T>(json, jsonSettings ?? DefaultJson);
@@ -52,8 +51,7 @@ namespace DSAMVVM.Core.IO
 
                     var localModel = await fileCache.ReadAsync();
                     var localMissing = localModel == null;
-                    if (localMissing) log?.Invoke("cache.local.miss");
-                    else log?.Invoke("cache.local.hit");
+                    log?.Invoke(localMissing ? "cache.local.miss" : "cache.local.hit");
 
                     if (!localMissing)
                     {
@@ -61,7 +59,7 @@ namespace DSAMVVM.Core.IO
                     }
 
                     var webStamp = SafeUtc(stampSelector, webModel);
-                    var localStamp = localMissing ? (DateTime?)null : SafeUtc(stampSelector, localModel!);
+                    var localStamp = localMissing ? null : SafeUtc(stampSelector, localModel!);
 
                     var shouldWrite =
                         localMissing ||

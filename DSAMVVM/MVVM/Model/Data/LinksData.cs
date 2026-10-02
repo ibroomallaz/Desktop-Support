@@ -22,8 +22,8 @@ namespace DSAMVVM.MVVM.Model.Data
 
     public sealed class TeamLinkGroup
     {
-        public string Team { get; set; } = string.Empty;
-        public List<Link> Links { get; set; } = [];
+        public string Team { get; init; } = string.Empty;
+        public List<Link> Links { get; init; } = [];
     }
 
     public sealed class Link

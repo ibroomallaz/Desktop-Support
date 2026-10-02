@@ -8,10 +8,7 @@
         <!-- Effects etc-->
         <ResourceDictionary Source="/Theme/Decor/Effects.xaml"/>
         <ResourceDictionary Source="/Theme/Decor/Shapes.xaml"/>
-        <!-- 
-        <ResourceDictionary Source="/Theme/Typography.xaml"/>
-        <ResourceDictionary Source="/Theme/Icons.xaml"/>
--->
+
         <!-- Controls -->
         <ResourceDictionary Source="/Theme/Controls/Radio.Menu.xaml"/>
         <ResourceDictionary Source="/Theme/Controls/Button.Rounded.xaml"/>

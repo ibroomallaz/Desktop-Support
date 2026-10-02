@@ -2,7 +2,7 @@
 {
     public class ADUserInfo
     {
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; init; } = string.Empty;
         public string? DepartmentName { get; set; }
         public string? DepartmentNumber { get; set; }
         public string? DisplayName { get; set; }

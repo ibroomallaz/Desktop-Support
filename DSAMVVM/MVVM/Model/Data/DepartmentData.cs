@@ -23,7 +23,7 @@ namespace DSAMVVM.MVVM.Model.Data
 
     public sealed class Department
     {
-        public string Number { get; set; } = string.Empty;
+        public string Number { get; init; } = string.Empty;
         public bool SupportKnown { get; set; }
         public string? Team { get; set; }
         public string? Notes { get; set; }
@@ -48,7 +48,7 @@ namespace DSAMVVM.MVVM.Model.Data
 
     public sealed class SupportedDivs
     {
-        public string DivAbbrev { get; set; } = string.Empty;
-        public string DivFullName { get; set; } = string.Empty;
+        public string DivAbbrev { get; init; } = string.Empty;
+        public string DivFullName { get; init; } = string.Empty;
     }
 }

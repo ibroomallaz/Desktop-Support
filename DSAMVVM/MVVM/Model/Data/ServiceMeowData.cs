@@ -1,15 +1,13 @@
 using DSAMVVM.MVVM.Model.Schemas;
 using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace DSAMVVM.MVVM.Model.Data
 {
     public class ServiceMeowData
     {
         public int SchemaVersion { get; set; } = 1;
-        public ServiceMeowMeta Meta { get; set; } = new();
-        public List<ServiceMeowOwner> Owners { get; set; } = [];
+        public ServiceMeowMeta Meta { get; init; } = new();
+        public List<ServiceMeowOwner> Owners { get; init; } = [];
 
         [JsonIgnore]
         public List<ServiceMeowPet> AllPets =>
@@ -18,10 +16,10 @@ namespace DSAMVVM.MVVM.Model.Data
 
     public class ServiceMeowOwner
     {
-        public string NetId { get; set; } = string.Empty;
+        public string NetId { get; init; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Team { get; set; } = string.Empty;
-        public List<ServiceMeowPet> Pets { get; set; } = [];
+        public List<ServiceMeowPet> Pets { get; init; } = [];
 
         [JsonIgnore]
         public string OwnerDisplay =>
@@ -30,7 +28,7 @@ namespace DSAMVVM.MVVM.Model.Data
 
     public class ServiceMeowPet
     {
-        public string Id { get; set; } = Guid.NewGuid().ToString("N");
+        public string Id { get; init; } = Guid.NewGuid().ToString("N");
         public string Name { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
         public string Breed { get; set; } = string.Empty;

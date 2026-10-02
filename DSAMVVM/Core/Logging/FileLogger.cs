@@ -1,5 +1,4 @@
 ﻿using DSAMVVM.Core.Enums;
-using DSAMVVM.Core.Interfaces;
 using System.IO;
 using System.Text;
 
@@ -10,21 +9,20 @@ namespace DSAMVVM.Core.Logging
     {
         private readonly Lock _sync = new();
         private int _retentionDays;
-        private string _dir;
         private DateTime _dayUtc;
         private StreamWriter? _writer;
 
         // Cleanup is disabled until settings specify retention.
-        private bool _cleanupEnabled = false;
+        private bool _cleanupEnabled;
 
         // Expose where logs are written.
-        public string DirectoryPath => _dir;
+        public string DirectoryPath { get; private set; }
 
         public FileLogger(string preferredDir, int retentionDays = 14)
         {
             // Use provided retention but DO NOT clean yet; enable only via SetRetentionDays.
             _retentionDays = Math.Max(1, retentionDays);
-            _dir = EnsureDirOrFallback(preferredDir);
+            DirectoryPath = EnsureDirOrFallback(preferredDir);
             _dayUtc = DateTime.UtcNow.Date;
             OpenWriter_NoThrow();
             // Intentionally not calling TryCleanupOldFiles() here to avoid premature culling.
@@ -60,7 +58,7 @@ namespace DSAMVVM.Core.Logging
                 catch
                 {
                     // Repair directory and retry once.
-                    _dir = EnsureDirOrFallback(_dir);
+                    DirectoryPath = EnsureDirOrFallback(DirectoryPath);
                     ReopenForNewDay_NoThrow();
                     TryWriteFallback(sb.ToString());
                 }
@@ -92,7 +90,10 @@ namespace DSAMVVM.Core.Logging
                         fs.Seek(0, SeekOrigin.Begin);
                     }
                 }
-                catch { }
+                catch
+                {
+                    // ignored
+                }
             }
         }
 
@@ -101,16 +102,21 @@ namespace DSAMVVM.Core.Logging
         {
             try
             {
-                foreach (var f in System.IO.Directory.EnumerateFiles(_dir, "app-*.log"))
+                foreach (var f in Directory.EnumerateFiles(DirectoryPath, "app-*.log"))
                 {
                     var d = ParseDate(Path.GetFileNameWithoutExtension(f)); // app-YYYYMMDD
-                    if (d.HasValue && d.Value < cutoffUtc.Date)
+                    if (!d.HasValue || d.Value >= cutoffUtc.Date) continue;
+                    try { File.Delete(f); }
+                    catch
                     {
-                        try { File.Delete(f); } catch { }
+                        // ignored
                     }
                 }
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
         }
 
         // Deletes all logs; optionally also clears today's file.
@@ -118,22 +124,34 @@ namespace DSAMVVM.Core.Logging
         {
             try
             {
-                var today = Path.Combine(_dir, $"app-{_dayUtc:yyyyMMdd}.log");
-                foreach (var f in System.IO.Directory.EnumerateFiles(_dir, "app-*.log"))
+                var today = Path.Combine(DirectoryPath, $"app-{_dayUtc:yyyyMMdd}.log");
+                foreach (var f in Directory.EnumerateFiles(DirectoryPath, "app-*.log"))
                 {
                     if (!includeToday && string.Equals(f, today, StringComparison.OrdinalIgnoreCase)) continue;
-                    try { File.Delete(f); } catch { }
+                    try { File.Delete(f); }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
                 if (includeToday) TruncateToday();
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
         }
 
         public void Dispose()
         {
             lock (_sync)
             {
-                try { _writer?.Dispose(); } catch { }
+                try { _writer?.Dispose(); }
+                catch
+                {
+                    // ignored
+                }
+
                 _writer = null;
             }
         }
@@ -142,13 +160,13 @@ namespace DSAMVVM.Core.Logging
         {
             try
             {
-                System.IO.Directory.CreateDirectory(preferred);
+                Directory.CreateDirectory(preferred);
                 return preferred;
             }
             catch
             {
                 var temp = Path.Combine(Path.GetTempPath(), "UArizona", "DesktopSupportApp", "logs");
-                System.IO.Directory.CreateDirectory(temp);
+                Directory.CreateDirectory(temp);
                 return temp;
             }
         }
@@ -160,48 +178,60 @@ namespace DSAMVVM.Core.Logging
 
         private void ReopenForNewDay_NoThrow()
         {
-            try { _writer?.Dispose(); } catch { }
+            try { _writer?.Dispose(); }
+            catch
+            {
+                // ignored
+            }
+
             try
             {
-                var path = Path.Combine(_dir, $"app-{_dayUtc:yyyyMMdd}.log");
+                var path = Path.Combine(DirectoryPath, $"app-{_dayUtc:yyyyMMdd}.log");
                 _writer = new StreamWriter(new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.Read), Encoding.UTF8)
                 {
                     AutoFlush = true
                 };
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
         }
 
         private void TryCleanupOldFiles()
         {
-            try { TryCleanupOldFiles_NoThrow(); } catch { }
+            try { TryCleanupOldFiles_NoThrow(); }
+            catch
+            {
+                // ignored
+            }
         }
 
         private void TryCleanupOldFiles_NoThrow()
         {
             var cutoff = DateTime.UtcNow.Date.AddDays(-_retentionDays);
-            foreach (var f in System.IO.Directory.EnumerateFiles(_dir, "app-*.log"))
+            foreach (var f in Directory.EnumerateFiles(DirectoryPath, "app-*.log"))
             {
                 var d = ParseDate(Path.GetFileNameWithoutExtension(f));
-                if (d.HasValue && d.Value < cutoff)
+                if (!d.HasValue || d.Value >= cutoff) continue;
+                try { File.Delete(f); }
+                catch
                 {
-                    try { File.Delete(f); } catch { }
+                    // ignored
                 }
             }
         }
 
         private static DateTime? ParseDate(string name) // "app-YYYYMMDD"
         {
-            if (!string.IsNullOrEmpty(name) && name.Length >= 12)
+            if (string.IsNullOrEmpty(name) || name.Length < 12) return null;
+            var datePart = name[4..];
+            if (DateTime.TryParseExact(
+                    datePart, "yyyyMMdd", null,
+                    System.Globalization.DateTimeStyles.AssumeUniversal,
+                    out var d))
             {
-                var datePart = name[4..];
-                if (DateTime.TryParseExact(
-                        datePart, "yyyyMMdd", null,
-                        System.Globalization.DateTimeStyles.AssumeUniversal,
-                        out var d))
-                {
-                    return d.Date;
-                }
+                return d.Date;
             }
             return null;
         }
@@ -210,10 +240,13 @@ namespace DSAMVVM.Core.Logging
         {
             try
             {
-                var path = Path.Combine(_dir, $"app-{_dayUtc:yyyyMMdd}.log");
+                var path = Path.Combine(DirectoryPath, $"app-{_dayUtc:yyyyMMdd}.log");
                 File.AppendAllText(path, line, Encoding.UTF8);
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
         }
     }
 }
