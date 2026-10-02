@@ -1,5 +1,4 @@
-using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Models;
+﻿using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Services.Graph;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
@@ -25,8 +24,8 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
         // Backing fields for dynamic UI input binding
         private string _bugRequestText = string.Empty;
         private string _expectedTeamText = string.Empty;
-        private string _editableDepartment = string.Empty;
-        private string _editableTeam = string.Empty;
+        private string _editableDepartment;
+        private string _editableTeam;
         private string _noteText = string.Empty;
 
         // Backing fields for ServiceMeow nomination
@@ -60,7 +59,7 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
         public int SelectedFeedbackIndex
         {
             get => _selectedFeedbackIndex;
-            set
+            init
             {
                 _selectedFeedbackIndex = value;
                 OnPropertyChanged();

@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Services.Graph;
+﻿using DSAMVVM.Core.Services.Graph;
 using DSAMVVM.MVVM.ViewModel.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
@@ -7,7 +6,7 @@ using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.View.Dialogs
 {
-    public partial class FeedbackWindow : Window
+    public partial class FeedbackWindow
     {
         private readonly FeedbackWindowViewModel _viewModel;
 
@@ -34,9 +33,11 @@ namespace DSAMVVM.MVVM.View.Dialogs
 
         private void OnTitleBarDrag(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
+            if (e.ChangedButton != MouseButton.Left) return;
+            try { DragMove(); }
+            catch
             {
-                try { DragMove(); } catch { }
+                // ignored
             }
         }
 

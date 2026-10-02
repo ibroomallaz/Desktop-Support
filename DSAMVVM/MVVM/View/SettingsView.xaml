@@ -630,17 +630,20 @@
 
                                                     <!-- Action buttons (Up, Down, Delete) -->
                                                     <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
-                                                        <Button Style="{StaticResource Button.Rounded.Compact}" Width="30" Height="28" Margin="0,0,4,0" ToolTip="Move Up"
+                                                        <Button Style="{StaticResource Button.Rounded.Compact}" Width="30"
+                                                                Margin="0,0,4,0" ToolTip="Move Up"
                                                                 Command="{Binding DataContext.MoveShortcutUpCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                 CommandParameter="{Binding}">
                                                             <TextBlock Text="&#xE74A;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource Brush.Text.Primary}"/>
                                                         </Button>
-                                                        <Button Style="{StaticResource Button.Rounded.Compact}" Width="30" Height="28" Margin="0,0,4,0" ToolTip="Move Down"
+                                                        <Button Style="{StaticResource Button.Rounded.Compact}" Width="30"
+                                                                Margin="0,0,4,0" ToolTip="Move Down"
                                                                 Command="{Binding DataContext.MoveShortcutDownCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                 CommandParameter="{Binding}">
                                                             <TextBlock Text="&#xE74B;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource Brush.Text.Primary}"/>
                                                         </Button>
-                                                        <Button Style="{StaticResource Button.Rounded.Compact}" Width="30" Height="28" ToolTip="Remove Shortcut"
+                                                        <Button Style="{StaticResource Button.Rounded.Compact}" Width="30"
+                                                                ToolTip="Remove Shortcut"
                                                                 Command="{Binding DataContext.RemoveShortcutCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                 CommandParameter="{Binding}">
                                                             <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource Brush.Accent.Red.Light}"/>

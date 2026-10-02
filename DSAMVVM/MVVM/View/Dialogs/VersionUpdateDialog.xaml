@@ -136,14 +136,12 @@
                             Margin="0,12,0,0">
                     <Button Content="Install Update"
                             MinWidth="110"
-                            Margin="0,0,8,0"
                             IsDefault="True"
                             Command="{Binding InstallUpdateCommand}"
                             IsEnabled="{Binding IsNotDownloading}"
                             Style="{DynamicResource Button.Rounded}"/>
                     <Button Content="Release notes"
                             MinWidth="120"
-                            Margin="0,0,8,0"
                             Command="{Binding OpenReleaseNotesCommand}"
                             IsEnabled="{Binding IsNotDownloading}"
                             Style="{DynamicResource Button.Rounded}"/>

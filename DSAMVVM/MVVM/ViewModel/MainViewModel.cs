@@ -300,7 +300,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 if (targetAppView == AppView.Settings)
                 {
                     var (category, anchor) = ResolveSettingsTarget(normQuery);
-                    SettingsVM?.SelectCategoryAndAnchor(category, anchor);
+                    SettingsVM.SelectCategoryAndAnchor(category, anchor);
                 }
                 else
                 {
@@ -335,8 +335,8 @@ namespace DSAMVVM.MVVM.ViewModel
                         string? section = GetArgValue(args, "--section") ?? GetArgValue(args, "--tab") ?? GetArgValue(args, "--card");
                         if (!string.IsNullOrEmpty(section))
                         {
-                            var (category, anchor) = ResolveSettingsTarget(section);
-                            SettingsVM?.SelectCategoryAndAnchor(category, anchor);
+                            (SettingsCategory category, string? anchor) = ResolveSettingsTarget(section);
+                            SettingsVM.SelectCategoryAndAnchor(category, anchor);
                         }
                         break;
                     case "links": SelectedView = AppView.Links; break;

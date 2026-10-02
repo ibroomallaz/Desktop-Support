@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Models;
+﻿using DSAMVVM.Core.Models;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -29,7 +28,7 @@ namespace DSAMVVM.MVVM.Services.Status
         {
             _appStateService = appStateService ?? throw new ArgumentNullException(nameof(appStateService));
             _timer = new DispatcherTimer { IsEnabled = false };
-            _timer.Tick += (_, __) => Advance();
+            _timer.Tick += (_, _) => Advance();
         }
 
         public void Report(StatusItem item)
@@ -42,15 +41,15 @@ namespace DSAMVVM.MVVM.Services.Status
                     _appStateService.RecentError = string.Join("", item.Spans.Select(s => s.Text));
                 }
                 if (!string.IsNullOrEmpty(item.Key))
-                    _byKey[item.Key!] = item;
+                    _byKey[item.Key] = item;
 
                 // Resolution: non-sticky with same key as a pinned sticky replaces it now
-                if (Current != null && Current.Sticky && !item.Sticky &&
+                if (Current is { Sticky: true } && !item.Sticky &&
                     !string.IsNullOrEmpty(Current.Key) &&
                     string.Equals(Current.Key, item.Key, StringComparison.OrdinalIgnoreCase))
                 {
                     StopTimer();
-                    if (!string.IsNullOrEmpty(Current.Key)) _byKey.Remove(Current.Key!); // drop old sticky key
+                    if (!string.IsNullOrEmpty(Current.Key)) _byKey.Remove(Current.Key); // drop old sticky key
                     SetCurrent(item);          // show success/info now
                     StartTimerIfNeeded();      // then continue single-pass queue after dwell
                     return;
@@ -59,7 +58,7 @@ namespace DSAMVVM.MVVM.Services.Status
                 // Sticky pins and (optionally) preserves interrupted non-sticky by re-queuing to front
                 if (item.Sticky && StickyPinsRotation)
                 {
-                    if (RequeueInterruptedNonSticky && Current != null && !Current.Sticky)
+                    if (RequeueInterruptedNonSticky && Current is { Sticky: false })
                         RequeueAtFront(Current);
 
                     StopTimer();
@@ -71,8 +70,7 @@ namespace DSAMVVM.MVVM.Services.Status
                 if (!string.IsNullOrEmpty(item.Key))
                 {
                     // Update currently showing non-sticky with same key
-                    if (Current != null &&
-                        !Current.Sticky &&
+                    if (Current is { Sticky: false } &&
                         string.Equals(Current.Key, item.Key, StringComparison.OrdinalIgnoreCase))
                     {
                         SetCurrent(item);
@@ -159,7 +157,7 @@ namespace DSAMVVM.MVVM.Services.Status
         private void Advance()
         {
             // stickies are not timed
-            if (Current != null && Current.Sticky && StickyPinsRotation)
+            if (Current is { Sticky: true } && StickyPinsRotation)
             {
                 StopTimer();
                 return;

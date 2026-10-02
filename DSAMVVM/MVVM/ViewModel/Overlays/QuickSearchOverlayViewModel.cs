@@ -1,5 +1,4 @@
 ﻿using DSAMVVM.Core.Enums;
-using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Renderers;
@@ -162,7 +161,7 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
                     var user = rawData as ADUserInfo;
                     markupResult = IdentityRenderer.RenderQuickADUser(user);
 
-                    if (user != null && user.Exists && !string.IsNullOrEmpty(user.DepartmentNumber))
+                    if (user is { Exists: true } && !string.IsNullOrEmpty(user.DepartmentNumber))
                     {
                         var deptDoc = new FlowDocMarkupBuilder();
                         var dept = await _deptService.GetDepartmentAsync(user.DepartmentNumber);

@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Logging;
+﻿using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
@@ -182,7 +181,7 @@ public class LinksViewModel : ObservableObject
     private void RebuildTeamNames()
     {
         TeamNames = [.. TeamLinks
-            .Select(t => (t?.Team ?? string.Empty).Trim())
+            .Select(t => (t.Team).Trim())
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)];
@@ -218,7 +217,7 @@ public class LinksViewModel : ObservableObject
         if (string.IsNullOrWhiteSpace(SelectedTeam)) { SelectedTeamLinks = []; return; }
 
         var group = TeamLinks.FirstOrDefault(g =>
-            string.Equals(g?.Team, SelectedTeam, StringComparison.OrdinalIgnoreCase));
+            string.Equals(g.Team, SelectedTeam, StringComparison.OrdinalIgnoreCase));
 
         SelectedTeamLinks = group?.Links ?? [];
     }

@@ -39,7 +39,6 @@
                 <!-- Clear -->
                 <Button
                     Content="Clear"
-                    Padding="10,4"
                     Margin="0,0,12,0"
                     Click="ClearLog_Click"
                     Style="{DynamicResource Button.FlowDoc}"
@@ -70,19 +69,14 @@
             <!-- Right cluster: font controls -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="A-"
-                        Width="44"
-                        Margin="0,0,6,0"
                         Click="DecreaseFont_Click"
                         Style="{DynamicResource Button.FlowDoc.Small}"
                         ToolTip="Decrease log text size" />
                 <Button Content="A"
-                        Width="44"
                         Click="ResetFont_Click"
                         Style="{DynamicResource Button.FlowDoc.Small}"
                         ToolTip="Reset log text size" />
                 <Button Content="A+"
-                        Width="44"
-                        Margin="0,0,6,0"
                         Click="IncreaseFont_Click"
                         Style="{DynamicResource Button.FlowDoc.Small}"
                         ToolTip="Increase log text size" />

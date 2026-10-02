@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Logging;
+﻿using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
@@ -42,7 +41,7 @@ namespace DSAMVVM.MVVM.Services.Updates
             Log.Info(RequiredCat, $"enforce.start installed=\"{_installedVersion}\" url=\"{url}\"");
             var res = await FetchAsync();
 
-            if (res == null || (!res.Success && res.Info == null && !res.HasAnyStable && !res.HasAnyPre))
+            if (res is null or { Success: false, Info: null } and { HasAnyStable: false, HasAnyPre: false })
             {
                 Log.Info(RequiredCat, "enforce.skip no-data");
                 return;
@@ -55,7 +54,7 @@ namespace DSAMVVM.MVVM.Services.Updates
                 return;
             }
 
-            var mustUpdate = VersionChecker.IsNewerVersion(_installedVersion, minReq!);
+            var mustUpdate = VersionChecker.IsNewerVersion(_installedVersion, minReq);
             Log.Info(RequiredCat, $"enforce.eval installed=\"{_installedVersion}\" required.min=\"{minReq}\" mustUpdate={(mustUpdate ? "true" : "false")}");
 
             if (!mustUpdate) return;
@@ -71,7 +70,7 @@ namespace DSAMVVM.MVVM.Services.Updates
                 RequiredDotNetVersion = res.StableRequiredDotNetVersion
             };
 
-            await ShowRequiredBlockingAsync(GetPreferredOwner(), minReq!, msg, updatePayload);
+            await ShowRequiredBlockingAsync(GetPreferredOwner(), minReq, msg, updatePayload);
         }
 
         public async Task CheckAsync() => await CheckAsync(false);
@@ -83,7 +82,7 @@ namespace DSAMVVM.MVVM.Services.Updates
             Log.Info(Cat, $"check.start installed=\"{_installedVersion}\" url=\"{url}\"");
 
             var res = await FetchAsync();
-            if (res == null || (!res.Success && res.Info == null && !res.HasAnyStable && !res.HasAnyPre))
+            if (res is null or { Success: false, Info: null } and { HasAnyStable: false, HasAnyPre: false })
             {
                 UiNotify.Error("Version check error", res?.Error ?? "Unknown error", alsoStatusBar: true, key: StatusKey);
                 Log.Info(Cat, "check.error");
@@ -228,21 +227,21 @@ namespace DSAMVVM.MVVM.Services.Updates
                     Owner = owner ?? GetPreferredOwner()
                 };
 
-                viewModel.RequestClose += () => dialog.Close();
+                viewModel.RequestClose += dialog.Close;
 
                 dialog.ShowDialog();
             });
         }
 
         // Enforces application exit if an update is mandatory, utilizing the automated pipeline if approved
-        private async Task ShowRequiredBlockingAsync(Window? owner, string minVersion, string message, CurrentVersion updateInfo)
+        private async Task ShowRequiredBlockingAsync(Window? owner, string minVersion, string message, CurrentVersion? updateInfo)
         {
             var text =
                 "This version of the app is no longer supported.\n\n" +
                 $"Minimum required version: {minVersion}\n\n" +
                 message;
 
-            var result = MessageBox.Show(owner ?? GetPreferredOwner(),
+            var result = MessageBox.Show((owner ?? GetPreferredOwner())!,
                                          text,
                                          "Update Required",
                                          MessageBoxButton.OKCancel,
@@ -265,6 +264,6 @@ namespace DSAMVVM.MVVM.Services.Updates
             return active ?? Application.Current?.MainWindow;
         }
 
-        private static string Val(string? s) => string.IsNullOrWhiteSpace(s) ? "(none)" : s!;
+        private static string Val(string? s) => string.IsNullOrWhiteSpace(s) ? "(none)" : s;
     }
 }
