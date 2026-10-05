@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
@@ -123,6 +123,8 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _searchQuery;
             set { if (_searchQuery != value) { _searchQuery = value; OnPropertyChanged(); } }
         }
+
+        public ReadOnlyObservableCollection<string> SearchHistory => _searchService.SearchHistory;
 
         private bool _showAdminView;
         public bool ShowAdminView

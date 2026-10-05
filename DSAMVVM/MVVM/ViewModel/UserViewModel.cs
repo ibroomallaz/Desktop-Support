@@ -72,6 +72,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand RefreshDeptCommand { get; }
         public ICommand CollapseAllCommand { get; }
         public ICommand ExpandAllCommand { get; }
+        public ICommand RemoveHistoryItemCommand { get; }
         public ICommand IncreaseFontCommand { get; }
         public ICommand DecreaseFontCommand { get; }
         public ICommand ResetFontCommand { get; }
@@ -95,6 +96,13 @@ namespace DSAMVVM.MVVM.ViewModel
             RefreshDeptCommand = new RelayCommand(async _ => await RefreshDepartmentDataAsync());
             CollapseAllCommand = new RelayCommand(_ => CollapseAll());
             ExpandAllCommand = new RelayCommand(_ => ExpandAll());
+            RemoveHistoryItemCommand = new RelayCommand(param =>
+            {
+                if (param is UserHistoryItemViewModel item)
+                {
+                    History.Remove(item);
+                }
+            });
             IncreaseFontCommand = new RelayCommand(_ => AdjustFont(+1));
             DecreaseFontCommand = new RelayCommand(_ => AdjustFont(-1));
             ResetFontCommand = new RelayCommand(_ => ResetFont());
@@ -184,7 +192,7 @@ namespace DSAMVVM.MVVM.ViewModel
                     Log.Warn(ViewKey, $"Search completed, but user '{context.Query}' was not found. Error: {Error}");
                 }
 
-                History.Add(entry);
+                AddHistoryEntry(entry);
             }
             catch (Exception ex)
             {
@@ -204,12 +212,18 @@ namespace DSAMVVM.MVVM.ViewModel
                 {
                     IsExpanded = true
                 };
-                History.Add(failEntry);
+                AddHistoryEntry(failEntry);
             }
             finally
             {
                 IsLoading = false;
             }
+        }
+
+        private void AddHistoryEntry(UserHistoryItemViewModel entry)
+        {
+            entry.RemoveRequested += item => History.Remove(item);
+            History.Add(entry);
         }
 
         public async Task RefreshDepartmentDataAsync()

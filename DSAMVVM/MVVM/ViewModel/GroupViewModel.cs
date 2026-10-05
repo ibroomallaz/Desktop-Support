@@ -1,12 +1,20 @@
-﻿using DSAMVVM.Core.Enums;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Interfaces.AD;
+using DSAMVVM.Core.Interfaces.Integrations;
+using DSAMVVM.Core.Interfaces.UI;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Renderers;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
-using System.IO;
-using System.Windows.Input;
+using DSAMVVM.MVVM.Model.AD;
+using DSAMVVM.MVVM.Model.Data;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -22,6 +30,10 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private const string ViewKey = "GroupView";
         private string? _currentSearchQuery;
+
+        // Modern Card Feed History
+        public ObservableCollection<GroupHistoryItemViewModel> History { get; } = new();
+        public bool HasHistory => History.Count > 0;
 
         // --- Mode State (Restored for Radio Buttons) ---
         public enum GroupSearchMode
@@ -101,7 +113,11 @@ namespace DSAMVVM.MVVM.ViewModel
         }
 
         // --- Commands ---
+        public ICommand ClearCommand { get; }
         public ICommand ClearLogCommand { get; }
+        public ICommand CollapseAllCommand { get; }
+        public ICommand ExpandAllCommand { get; }
+        public ICommand RemoveHistoryItemCommand { get; }
         public ICommand IncreaseFontCommand { get; }
         public ICommand DecreaseFontCommand { get; }
         public ICommand ResetFontCommand { get; }
@@ -121,14 +137,26 @@ namespace DSAMVVM.MVVM.ViewModel
             _flowDoc = flowDoc ?? throw new ArgumentNullException(nameof(flowDoc));
             _linkRouter = linkRouter ?? throw new ArgumentNullException(nameof(linkRouter));
 
-            RefreshEffectiveFont();
-            _notifier.Changed += OnOutputFontSettingsChanged;
-            _flowDoc.LinkClicked += OnLinkClicked;
-
+            ClearCommand = new RelayCommand(_ => ClearLog());
             ClearLogCommand = new RelayCommand(_ => ClearLog());
+            CollapseAllCommand = new RelayCommand(_ => CollapseAll());
+            ExpandAllCommand = new RelayCommand(_ => ExpandAll());
+            RemoveHistoryItemCommand = new RelayCommand(param =>
+            {
+                if (param is GroupHistoryItemViewModel item)
+                {
+                    History.Remove(item);
+                }
+            });
             IncreaseFontCommand = new RelayCommand(_ => AdjustFont(+1));
             DecreaseFontCommand = new RelayCommand(_ => AdjustFont(-1));
             ResetFontCommand = new RelayCommand(_ => ResetFont());
+
+            History.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasHistory));
+
+            RefreshEffectiveFont();
+            _notifier.Changed += OnOutputFontSettingsChanged;
+            _flowDoc.LinkClicked += OnLinkClicked;
         }
 
         // --- Deep Link Handler ---
@@ -183,6 +211,13 @@ namespace DSAMVVM.MVVM.ViewModel
                 return;
             }
 
+            // Auto-switch mode if user pasted/clicked a UA- group while in UserMim mode
+            if (_searchMode == GroupSearchMode.UserMim &&
+                (context.Query.StartsWith("UA-", StringComparison.OrdinalIgnoreCase) || context.Query.StartsWith("UA_", StringComparison.OrdinalIgnoreCase)))
+            {
+                UpdateMode(GroupSearchMode.GroupMembers);
+            }
+
             headerDoc.AddLabelValue("Query: ", context.Query);
             SearchLog += headerDoc.ToString();
 
@@ -193,21 +228,40 @@ namespace DSAMVVM.MVVM.ViewModel
                 IsLoading = true;
                 Log.Info(ViewKey, $"Starting Group search for '{context.Query}'. Mode: {_searchMode}");
 
+                // Collapse previous cards so newest expands
+                foreach (var item in History)
+                {
+                    item.IsExpanded = false;
+                }
+
                 // Route the search directly based on the Radio Button selected
                 switch (_searchMode)
                 {
                     case GroupSearchMode.UserMim:
+                    {
                         var mimResult = await _ad.GetUserMimGroupsAsync(context.Query);
                         SearchLog += IdentityRenderer.RenderMimGroups(mimResult, context.Query);
+
+                        var entry = GroupHistoryItemViewModel.CreateUserMim(context.Query, mimResult, _ad, _deptService, _linkRouter);
+                        entry.IsExpanded = true;
+                        AddHistoryEntry(entry);
                         break;
+                    }
 
                     case GroupSearchMode.GroupMembers:
+                    {
                         var groupName = NormalizeGroupName(context.Query);
                         var adGroup = await _ad.GetGroupAsync(groupName);
                         SearchLog += IdentityRenderer.RenderGroupMembers(adGroup, groupName);
+
+                        var entry = GroupHistoryItemViewModel.CreateGroupMembers(context.Query, groupName, adGroup, _ad, _deptService, _linkRouter);
+                        entry.IsExpanded = true;
+                        AddHistoryEntry(entry);
                         break;
+                    }
 
                     case GroupSearchMode.Department:
+                    {
                         var deptLog = await OrganizationalRenderer.RenderDepartmentContextAsync(context.Query, _deptService);
                         if (string.IsNullOrWhiteSpace(deptLog))
                         {
@@ -222,11 +276,34 @@ namespace DSAMVVM.MVVM.ViewModel
                             titleDoc.AddTitle($"Department: {context.Query}");
                             SearchLog += titleDoc.ToString() + deptLog;
                         }
+
+                        var dept = await _deptService.GetDepartmentAsync(context.Query);
+                        SupportTeam? team = null;
+                        if (dept != null)
+                        {
+                            var teamName = await _deptService.GetTeamAsync(dept.Number);
+                            if (!string.IsNullOrWhiteSpace(teamName))
+                            {
+                                team = await _deptService.GetSupportTeamAsync(teamName.Trim());
+                            }
+                        }
+
+                        var entry = GroupHistoryItemViewModel.CreateDepartment(context.Query, dept, team, _ad, _deptService, _linkRouter);
+                        entry.IsExpanded = true;
+                        AddHistoryEntry(entry);
                         break;
+                    }
 
                     case GroupSearchMode.Division:
+                    {
                         SearchLog += await OrganizationalRenderer.RenderDivisionSupportAsync(context.Query, _deptService);
+
+                        var teams = await _deptService.GetTeamsByDivisionAsync(context.Query);
+                        var entry = GroupHistoryItemViewModel.CreateDivision(context.Query, teams, _ad, _deptService, _linkRouter);
+                        entry.IsExpanded = true;
+                        AddHistoryEntry(entry);
                         break;
+                    }
                 }
             }
             catch (Exception ex)
@@ -237,6 +314,22 @@ namespace DSAMVVM.MVVM.ViewModel
                 var failDoc = new FlowDocMarkupBuilder();
                 failDoc.AddError($"Search failed: {ex.Message}");
                 SearchLog += failDoc.ToString();
+
+                foreach (var item in History)
+                {
+                    item.IsExpanded = false;
+                }
+
+                var failEntry = _searchMode switch
+                {
+                    GroupSearchMode.UserMim => GroupHistoryItemViewModel.CreateUserMim(context.Query, new MimLookupResult { Exists = false, Error = ex.Message }, _ad, _deptService, _linkRouter),
+                    GroupSearchMode.GroupMembers => GroupHistoryItemViewModel.CreateGroupMembers(context.Query, NormalizeGroupName(context.Query), new ADGroupInfo { Exists = false, ErrorMessage = ex.Message }, _ad, _deptService, _linkRouter),
+                    GroupSearchMode.Department => GroupHistoryItemViewModel.CreateDepartment(context.Query, null, null, _ad, _deptService, _linkRouter),
+                    GroupSearchMode.Division => GroupHistoryItemViewModel.CreateDivision(context.Query, null, _ad, _deptService, _linkRouter),
+                    _ => GroupHistoryItemViewModel.CreateUserMim(context.Query, new MimLookupResult { Exists = false, Error = ex.Message }, _ad, _deptService, _linkRouter)
+                };
+                failEntry.IsExpanded = true;
+                AddHistoryEntry(failEntry);
             }
             finally
             {
@@ -244,7 +337,33 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        public void ClearLog() => SearchLog = string.Empty;
+        private void AddHistoryEntry(GroupHistoryItemViewModel entry)
+        {
+            entry.RemoveRequested += item => History.Remove(item);
+            History.Add(entry);
+        }
+
+        public void CollapseAll()
+        {
+            foreach (var item in History)
+            {
+                item.IsExpanded = false;
+            }
+        }
+
+        public void ExpandAll()
+        {
+            foreach (var item in History)
+            {
+                item.IsExpanded = true;
+            }
+        }
+
+        public void ClearLog()
+        {
+            SearchLog = string.Empty;
+            History.Clear();
+        }
 
         private static string NormalizeGroupName(string input)
         {

@@ -11,6 +11,8 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IADService _adService;
         private readonly IDeepLinkRoutingService _linkRouter;
 
+        public event Action<ComputerHistoryItemViewModel>? RemoveRequested;
+
         public string Query { get; }
         public DateTime Timestamp { get; private set; }
         public string TimeFormatted => Timestamp.ToString("h:mm tt");
@@ -113,6 +115,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand ToggleExpandCommand { get; }
         public ICommand CopyNameCommand { get; }
         public ICommand RefreshCommand { get; }
+        public ICommand RemoveCommand { get; }
 
         public ComputerHistoryItemViewModel(
             string query,
@@ -130,6 +133,7 @@ namespace DSAMVVM.MVVM.ViewModel
             ToggleExpandCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
             CopyNameCommand = new RelayCommand(_ => CopyComputerName());
             RefreshCommand = new RelayCommand(async _ => await RefreshAsync());
+            RemoveCommand = new RelayCommand(_ => RemoveRequested?.Invoke(this));
         }
 
         private void CopyComputerName()

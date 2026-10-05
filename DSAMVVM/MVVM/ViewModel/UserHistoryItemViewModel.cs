@@ -259,6 +259,8 @@ namespace DSAMVVM.MVVM.ViewModel
         }
 
         // Commands
+        public event Action<UserHistoryItemViewModel>? RemoveRequested;
+        public ICommand RemoveCommand { get; }
         public ICommand ToggleExpandCommand { get; }
         public ICommand CopyNetIdCommand { get; }
         public ICommand CheckAdobeCommand { get; }
@@ -285,6 +287,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
             User = user;
 
+            RemoveCommand = new RelayCommand(_ => RemoveRequested?.Invoke(this));
             ToggleExpandCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
             CopyNetIdCommand = new RelayCommand(_ => CopyNetId());
             CheckAdobeCommand = new RelayCommand(async _ => await CheckAdobeAsync());

@@ -50,6 +50,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand ClearLogCommand { get; }
         public ICommand CollapseAllCommand { get; }
         public ICommand ExpandAllCommand { get; }
+        public ICommand RemoveHistoryItemCommand { get; }
         public ICommand IncreaseFontCommand { get; }
         public ICommand DecreaseFontCommand { get; }
         public ICommand ResetFontCommand { get; }
@@ -71,6 +72,13 @@ namespace DSAMVVM.MVVM.ViewModel
             ClearLogCommand = new RelayCommand(_ => ClearLog());
             CollapseAllCommand = new RelayCommand(_ => CollapseAll());
             ExpandAllCommand = new RelayCommand(_ => ExpandAll());
+            RemoveHistoryItemCommand = new RelayCommand(param =>
+            {
+                if (param is ComputerHistoryItemViewModel item)
+                {
+                    History.Remove(item);
+                }
+            });
             IncreaseFontCommand = new RelayCommand(_ => AdjustFont(+1));
             DecreaseFontCommand = new RelayCommand(_ => AdjustFont(-1));
             ResetFontCommand = new RelayCommand(_ => ResetFont());
@@ -184,7 +192,7 @@ namespace DSAMVVM.MVVM.ViewModel
                     Log.Warn(ViewKey, $"Search completed, but computer '{context.Query}' was not found. Error: {Error}");
                 }
 
-                History.Add(entry);
+                AddHistoryEntry(entry);
             }
             catch (Exception ex)
             {
@@ -203,12 +211,18 @@ namespace DSAMVVM.MVVM.ViewModel
                 {
                     IsExpanded = true
                 };
-                History.Add(failEntry);
+                AddHistoryEntry(failEntry);
             }
             finally
             {
                 IsLoading = false;
             }
+        }
+
+        private void AddHistoryEntry(ComputerHistoryItemViewModel entry)
+        {
+            entry.RemoveRequested += item => History.Remove(item);
+            History.Add(entry);
         }
 
         public void CollapseAll()

@@ -240,6 +240,7 @@
                                         <ColumnDefinition Width="Auto"/> <!-- Other Status Pills -->
                                         <ColumnDefinition Width="*"/>    <!-- Dept display -->
                                         <ColumnDefinition Width="Auto"/> <!-- Timestamp / Stale -->
+                                        <ColumnDefinition Width="Auto"/> <!-- Dismiss / Clear Individual Record -->
                                         <ColumnDefinition Width="Auto"/> <!-- Chevron -->
                                     </Grid.ColumnDefinitions>
 
@@ -360,8 +361,22 @@
                                                VerticalAlignment="Center"
                                                Margin="0,0,10,0"/>
 
+                                    <!-- Dismiss / Clear Record Button in Collapsed Row -->
+                                    <Button Grid.Column="6"
+                                            Style="{StaticResource InlineLinkButton}"
+                                            Command="{Binding RemoveCommand}"
+                                            ToolTip="Clear this record from history"
+                                            Margin="0,0,8,0"
+                                            Padding="4,2"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="&#xE711;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="10"
+                                                   Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                    </Button>
+
                                     <!-- Chevron down icon -->
-                                    <TextBlock Grid.Column="6"
+                                    <TextBlock Grid.Column="7"
                                                Text="&#xE70D;"
                                                FontFamily="Segoe MDL2 Assets"
                                                FontSize="10"
@@ -606,10 +621,22 @@
                                                 <Button Style="{StaticResource GhostActionButton}"
                                                         Command="{Binding ToggleExpandCommand}"
                                                         ToolTip="Collapse card"
-                                                        Padding="5,3">
+                                                        Padding="5,3"
+                                                        Margin="0,0,4,0">
                                                     <TextBlock Text="&#xE70E;"
                                                                FontFamily="Segoe MDL2 Assets"
                                                                FontSize="11"
+                                                               Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                </Button>
+
+                                                <!-- Remove / Clear Record Button -->
+                                                <Button Style="{StaticResource GhostActionButton}"
+                                                        Command="{Binding RemoveCommand}"
+                                                        ToolTip="Remove this record from history"
+                                                        Padding="5,3">
+                                                    <TextBlock Text="&#xE711;"
+                                                               FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="10"
                                                                Foreground="{DynamicResource Brush.Text.Muted}"/>
                                                 </Button>
                                             </StackPanel>

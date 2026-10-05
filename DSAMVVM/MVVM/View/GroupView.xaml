@@ -1,77 +1,1555 @@
 ﻿<UserControl x:Class="DSAMVVM.MVVM.View.GroupView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:beh="clr-namespace:DSAMVVM.MVVM.Model.Behaviors">
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:DSAMVVM.MVVM.ViewModel"
+             xmlns:res="clr-namespace:DSAMVVM.MVVM.View.Resources"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:GroupViewModel}"
+             d:DesignHeight="600" d:DesignWidth="850">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Theme/Colors/Colors.UA.xaml"/>
+                <ResourceDictionary Source="/Theme/Decor/Gradient.UA.xaml"/>
+                <ResourceDictionary Source="/Theme/Controls/Button.Rounded.xaml"/>
+                <ResourceDictionary Source="/Theme/Controls/Button.FlowDoc.xaml"/>
+                <ResourceDictionary Source="/Theme/Controls/Card.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+            <!-- Compact Ghost Button -->
+            <Style x:Key="GhostActionButton" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}"/>
+                <Setter Property="Padding" Value="8,2"/>
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Chrome"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="6"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Brush.Surface.Hover}"/>
+                                    <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Brush.Border.Active}"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Brush.Surface.Pressed}"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.5"/>
+                                    <Setter Property="Cursor" Value="Arrow"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Inline Link Button -->
+            <Style x:Key="InlineLinkButton" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Info.Light}"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Foreground" Value="{DynamicResource Brush.Info.Active}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- Pill Button for Copy -->
+            <Style x:Key="ChipButton" TargetType="Button">
+                <Setter Property="Background" Value="{DynamicResource Brush.Surface.1}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}"/>
+                <Setter Property="Padding" Value="8,2"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Border"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Border" Property="Background" Value="{DynamicResource Brush.Surface.Hover}"/>
+                                    <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource Brush.Border.Active}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Collapsed Row Header Button -->
+            <Style x:Key="CollapsedRowButton" TargetType="Button">
+                <Setter Property="Background" Value="{DynamicResource Brush.Surface.1}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="10,6"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="RowBorder"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="6"
+                                    Padding="{TemplateBinding Padding}"
+                                    SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="RowBorder" Property="Background" Value="{DynamicResource CardGradient.Surface.Hover}"/>
+                                    <Setter TargetName="RowBorder" Property="BorderBrush" Value="{DynamicResource Brush.Border.Active}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
     <Grid Margin="10">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/> <!-- Search Mode Selector -->
+            <RowDefinition Height="*"/>    <!-- History Cards Feed / Empty State -->
+            <RowDefinition Height="Auto"/> <!-- Bottom Action Bar -->
         </Grid.RowDefinitions>
 
+        <!-- Mode Selector Radio Buttons -->
         <StackPanel Grid.Row="0"
-            Orientation="Horizontal"
-            HorizontalAlignment="Center"
-            Margin="0,0,0,10">
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Margin="0,0,0,10">
             <RadioButton Content="User's MIM Groups"
-                 GroupName="Mode"
-                 IsChecked="{Binding IsUserMim}"
-                 Margin="0,0,16,0"
-                 Style="{StaticResource Radio.GroupView}"/>
+                         GroupName="Mode"
+                         IsChecked="{Binding IsUserMim}"
+                         Margin="0,0,16,0"
+                         Style="{StaticResource Radio.GroupView}"/>
             <RadioButton Content="Group Members"
-                 GroupName="Mode"
-                 IsChecked="{Binding IsGroupMembers}"
-                 Margin="0,0,16,0"
-                 Style="{StaticResource Radio.GroupView}"/>
+                         GroupName="Mode"
+                         IsChecked="{Binding IsGroupMembers}"
+                         Margin="0,0,16,0"
+                         Style="{StaticResource Radio.GroupView}"/>
             <RadioButton Content="Dept Support Search"
-                 GroupName="Mode"
-                 IsChecked="{Binding IsDeptSearch}"
-                 Margin="0,0,16,0" 
-                 Style="{StaticResource Radio.GroupView}"/>
+                         GroupName="Mode"
+                         IsChecked="{Binding IsDeptSearch}"
+                         Margin="0,0,16,0" 
+                         Style="{StaticResource Radio.GroupView}"/>
             <RadioButton Content="Division Support"
-                 GroupName="Mode"
-                 IsChecked="{Binding IsDivSearch}"
-                 Style="{StaticResource Radio.GroupView}"/>
+                         GroupName="Mode"
+                         IsChecked="{Binding IsDivSearch}"
+                         Style="{StaticResource Radio.GroupView}"/>
         </StackPanel>
 
-        <FlowDocumentScrollViewer
-                Grid.Row="1"
-                IsToolBarVisible="False"
-                VerticalScrollBarVisibility="Auto"
-                beh:FlowDocBinder.Text="{Binding SearchLog}"
-                beh:FlowDocBinder.ViewName="{Binding CurrentViewContext}"
-                beh:FlowDocBinder.PreserveScrollPosition="True" />
+        <!-- Empty State Container -->
+        <Border Grid.Row="1"
+                CornerRadius="10"
+                Background="{DynamicResource Brush.Surface.1}"
+                BorderBrush="{DynamicResource Brush.Border}"
+                BorderThickness="1"
+                Padding="30">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasHistory}" Value="False">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
 
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="{x:Static res:Glyphs.Group}"
+                           FontFamily="Segoe MDL2 Assets"
+                           FontSize="32"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource Brush.Text.Muted}"
+                           Opacity="0.5"
+                           Margin="0,0,0,12"/>
+
+                <TextBlock Text="No Group Lookups Yet"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource Brush.Text.Primary}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,6"/>
+
+                <TextBlock Text="Select a search mode above, enter a query in the search bar, and press Enter."
+                           FontSize="12"
+                           Foreground="{DynamicResource Brush.Text.Muted}"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- History Feed ScrollViewer -->
+        <ScrollViewer x:Name="HistoryScrollViewer"
+                      Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer.Style>
+                <Style TargetType="ScrollViewer">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasHistory}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ScrollViewer.Style>
+
+            <ItemsControl ItemsSource="{Binding History}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:GroupHistoryItemViewModel}">
+                        <Grid x:Name="RootCard" Margin="0,0,0,6">
+
+                            <!-- ============================================== -->
+                            <!-- STATE A: COLLAPSED SUMMARY ROW                 -->
+                            <!-- ============================================== -->
+                            <Button Command="{Binding ToggleExpandCommand}">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource CollapsedRowButton}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/> <!-- Icon -->
+                                        <ColumnDefinition Width="Auto"/> <!-- Title -->
+                                        <ColumnDefinition Width="Auto"/> <!-- Mode Badge -->
+                                        <ColumnDefinition Width="Auto"/> <!-- Status Badges Cluster -->
+                                        <ColumnDefinition Width="*"/>    <!-- Extra spacer -->
+                                        <ColumnDefinition Width="Auto"/> <!-- Timestamp / Stale -->
+                                        <ColumnDefinition Width="Auto"/> <!-- Dismiss / Clear Individual Record -->
+                                        <ColumnDefinition Width="Auto"/> <!-- Chevron -->
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Mode Icon -->
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding ModeGlyph}"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="13"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,8,0"/>
+
+                                    <!-- Primary Title -->
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding PrimaryHeaderTitle}"
+                                               FontWeight="SemiBold"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource Brush.Text.Primary}"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,10,0"/>
+
+                                    <!-- Mode Badge -->
+                                    <Border Grid.Column="2" CornerRadius="4" BorderThickness="1" Padding="5,1" Margin="0,0,8,0" VerticalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#122438"/>
+                                                <Setter Property="BorderBrush" Value="#1D3D5E"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsUserMimMode}" Value="True">
+                                                        <Setter Property="Background" Value="#281738"/>
+                                                        <Setter Property="BorderBrush" Value="#6C3BAA"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsDeptMode}" Value="True">
+                                                        <Setter Property="Background" Value="#0E282A"/>
+                                                        <Setter Property="BorderBrush" Value="#1B4D52"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsDivMode}" Value="True">
+                                                        <Setter Property="Background" Value="#2B1D0E"/>
+                                                        <Setter Property="BorderBrush" Value="#593B1C"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding ModeBadgeText}" FontSize="10" FontWeight="SemiBold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#6EC3FF"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsUserMimMode}" Value="True">
+                                                            <Setter Property="Foreground" Value="#E9D5FF"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsDeptMode}" Value="True">
+                                                            <Setter Property="Foreground" Value="#5EEAD4"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsDivMode}" Value="True">
+                                                            <Setter Property="Foreground" Value="#FDBA74"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+
+                                    <!-- Status Badges Cluster -->
+                                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                                        <!-- Not Found Badge -->
+                                        <Border CornerRadius="4" Background="#3A1418" BorderBrush="#63232A" BorderThickness="1" Padding="5,1" Margin="0,0,4,0">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsFound}" Value="False">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="Not Found" FontSize="10" FontWeight="SemiBold" Foreground="#FF7B88"/>
+                                        </Border>
+
+                                        <!-- Missing MIM Policy Warning (User MIM Mode) -->
+                                        <Border CornerRadius="4" Background="#382810" BorderBrush="#5C421A" BorderThickness="1" Padding="5,1" Margin="0,0,4,0">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding HasMimWarning}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="⚠ Missing MIM Wrkst" FontSize="10" FontWeight="SemiBold" Foreground="#FFC069"/>
+                                        </Border>
+
+                                        <!-- Disabled Pill (User MIM Mode) -->
+                                        <Border CornerRadius="4" Background="#3A1418" BorderBrush="#63232A" BorderThickness="1" Padding="5,1" Margin="0,0,4,0">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsUserDisabled}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="Disabled" FontSize="10" FontWeight="Bold" Foreground="#FF7B88"/>
+                                        </Border>
+
+                                        <!-- Summary count / details pill -->
+                                        <Border CornerRadius="4" Background="{DynamicResource Brush.Surface.2}" BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1" Padding="5,1" Margin="0,0,4,0">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsFound}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding CollapsedSummaryText}" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- Timestamp on right -->
+                                    <TextBlock Grid.Column="5"
+                                               Text="{Binding TimeFormatted}"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,10,0"/>
+
+                                    <!-- Dismiss / Clear Record Button in Collapsed Row -->
+                                    <Button Grid.Column="6"
+                                            Style="{StaticResource InlineLinkButton}"
+                                            Command="{Binding RemoveCommand}"
+                                            ToolTip="Clear this record from history"
+                                            Margin="0,0,8,0"
+                                            Padding="4,2"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="&#xE711;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="10"
+                                                   Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                    </Button>
+
+                                    <!-- Chevron down icon -->
+                                    <TextBlock Grid.Column="7"
+                                               Text="&#xE70D;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="10"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               VerticalAlignment="Center"/>
+                                </Grid>
+                            </Button>
+
+                            <!-- ============================================== -->
+                            <!-- STATE B: EXPANDED CARD                         -->
+                            <!-- ============================================== -->
+                            <Border CornerRadius="10"
+                                    Background="{DynamicResource CardGradient.Surface.L1}"
+                                    BorderBrush="{DynamicResource Brush.Card.Border}"
+                                    BorderThickness="1"
+                                    SnapsToDevicePixels="True">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.2"/>
+                                </Border.Effect>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="4"/>  <!-- Red Accent Stripe -->
+                                        <ColumnDefinition Width="*"/>  <!-- Main Card Body -->
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Left Accent Stripe -->
+                                    <Border Grid.Column="0"
+                                            Background="{DynamicResource Brush.Accent.Red}"
+                                            CornerRadius="10,0,0,10"/>
+
+                                    <!-- Card Content -->
+                                    <Grid Grid.Column="1" Margin="14,10">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/> <!-- Header -->
+                                            <RowDefinition Height="Auto"/> <!-- Warning Banner -->
+                                            <RowDefinition Height="Auto"/> <!-- Divider -->
+                                            <RowDefinition Height="*"/>    <!-- Dynamic Content Body -->
+                                        </Grid.RowDefinitions>
+
+                                        <!-- 1. Header: Glyph, Title, Mode, Badges, Time & Actions -->
+                                        <Grid Grid.Row="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/> <!-- Icon -->
+                                                <ColumnDefinition Width="*"/>    <!-- Title + Badges -->
+                                                <ColumnDefinition Width="Auto"/> <!-- Time + Actions -->
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Glyph Icon Badge -->
+                                            <Border Grid.Column="0"
+                                                    Width="34" Height="34"
+                                                    CornerRadius="17"
+                                                    Background="{DynamicResource Brush.Surface.Hover}"
+                                                    BorderBrush="{DynamicResource Brush.Border}"
+                                                    BorderThickness="1"
+                                                    Margin="0,0,10,0"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding ModeGlyph}"
+                                                           FontFamily="Segoe MDL2 Assets"
+                                                           FontSize="16"
+                                                           Foreground="{DynamicResource Brush.Text.Primary}"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Border>
+
+                                            <!-- Title, Mode Badge, and Badges -->
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <!-- Primary Title -->
+                                                    <TextBlock Text="{Binding PrimaryHeaderTitle}"
+                                                               FontSize="15"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{DynamicResource Brush.Text.Primary}"
+                                                               VerticalAlignment="Center"
+                                                               Margin="0,0,8,0"/>
+
+                                                    <!-- Mode Badge -->
+                                                    <Border CornerRadius="4" BorderThickness="1" Padding="6,1" Margin="0,0,6,0" VerticalAlignment="Center">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Background" Value="#122438"/>
+                                                                <Setter Property="BorderBrush" Value="#1D3D5E"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsUserMimMode}" Value="True">
+                                                                        <Setter Property="Background" Value="#281738"/>
+                                                                        <Setter Property="BorderBrush" Value="#6C3BAA"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding IsDeptMode}" Value="True">
+                                                                        <Setter Property="Background" Value="#0E282A"/>
+                                                                        <Setter Property="BorderBrush" Value="#1B4D52"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding IsDivMode}" Value="True">
+                                                                        <Setter Property="Background" Value="#2B1D0E"/>
+                                                                        <Setter Property="BorderBrush" Value="#593B1C"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <TextBlock Text="{Binding ModeBadgeText}" FontSize="11" FontWeight="Bold">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Foreground" Value="#6EC3FF"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsUserMimMode}" Value="True">
+                                                                            <Setter Property="Foreground" Value="#E9D5FF"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding IsDeptMode}" Value="True">
+                                                                            <Setter Property="Foreground" Value="#5EEAD4"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding IsDivMode}" Value="True">
+                                                                            <Setter Property="Foreground" Value="#FDBA74"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Border>
+
+                                                    <!-- Primary Copy Chip Button -->
+                                                    <Button Style="{StaticResource ChipButton}"
+                                                            Command="{Binding CopyPrimaryCommand}"
+                                                            ToolTip="Click to copy query value to clipboard"
+                                                            VerticalAlignment="Center">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding Query}" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource Brush.Text.Primary}"/>
+
+                                                            <!-- Copy Icon (default) -->
+                                                            <TextBlock Text=" &#xE8C8;"
+                                                                       FontFamily="Segoe MDL2 Assets"
+                                                                       FontSize="10"
+                                                                       Foreground="{DynamicResource Brush.Text.Muted}"
+                                                                       VerticalAlignment="Center">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsCopied}" Value="True">
+                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+
+                                                            <!-- Copied Checkmark Feedback -->
+                                                            <TextBlock Text=" ✓ Copied"
+                                                                       FontSize="10"
+                                                                       FontWeight="Bold"
+                                                                       Foreground="#5CDA89"
+                                                                       VerticalAlignment="Center">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsCopied}" Value="True">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </Button>
+
+                                                    <!-- Disabled Pill (User MIM Mode) -->
+                                                    <Border CornerRadius="4" Background="#3A1418" BorderBrush="#63232A" BorderThickness="1" Padding="6,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsUserDisabled}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <TextBlock Text="Disabled" FontSize="10" FontWeight="Bold" Foreground="#FF7B88"/>
+                                                    </Border>
+                                                </WrapPanel>
+                                            </StackPanel>
+
+                                            <!-- Timestamp & Action Controls -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <!-- Timestamp / Relative Age -->
+                                                <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,10,0">
+                                                    <TextBlock Text="{Binding TimeFormatted}"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                                               HorizontalAlignment="Right"/>
+                                                    <TextBlock Text="{Binding RelativeAgeText}"
+                                                               FontSize="9"
+                                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                                               Opacity="0.7"
+                                                               HorizontalAlignment="Right"/>
+                                                </StackPanel>
+
+                                                <!-- Stale Indicator Dot -->
+                                                <Ellipse Width="6" Height="6" Fill="#FFA940" Margin="0,0,8,0" VerticalAlignment="Center"
+                                                         ToolTip="Data is more than 5 minutes old. Click Refresh to update.">
+                                                    <Ellipse.Style>
+                                                        <Style TargetType="Ellipse">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsStale}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Ellipse.Style>
+                                                </Ellipse>
+
+                                                <!-- Refresh Button -->
+                                                <Button Style="{StaticResource GhostActionButton}"
+                                                        Command="{Binding RefreshCommand}"
+                                                        ToolTip="Re-query Active Directory and update card"
+                                                        Margin="0,0,6,0">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="&#xE72C;"
+                                                                   FontFamily="Segoe MDL2 Assets"
+                                                                   FontSize="10"
+                                                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                                                   Margin="0,0,3,0"/>
+                                                        <TextBlock Text="Refresh" FontSize="10"/>
+                                                    </StackPanel>
+                                                </Button>
+
+                                                <!-- Collapse Chevron Toggle Button -->
+                                                <Button Style="{StaticResource GhostActionButton}"
+                                                        Command="{Binding ToggleExpandCommand}"
+                                                        ToolTip="Collapse this card"
+                                                        Padding="6,2"
+                                                        Margin="0,0,6,0">
+                                                    <TextBlock Text="&#xE70E;"
+                                                               FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="10"
+                                                               Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                </Button>
+
+                                                <!-- Remove / Clear Individual Record Button -->
+                                                <Button Style="{StaticResource GhostActionButton}"
+                                                        Command="{Binding RemoveCommand}"
+                                                        ToolTip="Remove this record from history"
+                                                        Padding="6,2">
+                                                    <TextBlock Text="&#xE711;"
+                                                               FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="10"
+                                                               Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- 2. Warning Banner (Missing UA-MIM-Wrkst-AllDivUsers in User MIM mode) -->
+                                        <Border Grid.Row="1"
+                                                Background="#2D2111"
+                                                BorderBrush="#684D23"
+                                                BorderThickness="1"
+                                                CornerRadius="6"
+                                                Padding="10,8"
+                                                Margin="0,8,0,0">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding HasMimWarning}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{x:Static res:Glyphs.Warning}"
+                                                           FontFamily="Segoe MDL2 Assets"
+                                                           FontSize="16"
+                                                           Foreground="#FFA940"
+                                                           VerticalAlignment="Center"
+                                                           Margin="0,0,10,0"/>
+
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock Text="Missing Required MIM Workstation Policy"
+                                                               FontWeight="Bold"
+                                                               Foreground="#FFC069"
+                                                               FontSize="12"/>
+                                                    <TextBlock Text="This user is missing 'UA-MIM-Wrkst-AllDivUsers'. Device login permissions, standard workstation policies, or domain network shares may fail."
+                                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                                               FontSize="11"
+                                                               TextWrapping="Wrap"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- 3. Thin Accent Line Divider -->
+                                        <Rectangle Grid.Row="2"
+                                                   Height="1"
+                                                   Fill="{DynamicResource Brush.Border}"
+                                                   Opacity="0.4"
+                                                   Margin="0,8,0,8"/>
+
+                                        <!-- Error Message Box (If not found or error occurred) -->
+                                        <Border Grid.Row="3"
+                                                Background="#251214"
+                                                BorderBrush="#4B171A"
+                                                BorderThickness="1"
+                                                CornerRadius="6"
+                                                Padding="10,8"
+                                                Margin="0,4,0,0">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsFound}" Value="False">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <StackPanel>
+                                                <TextBlock Text="Lookup Failed or Item Not Found"
+                                                           FontWeight="Bold"
+                                                           Foreground="#FF7B88"
+                                                           FontSize="12"
+                                                           Margin="0,0,0,2"/>
+                                                <TextBlock Text="{Binding ErrorMessage}"
+                                                           Foreground="{DynamicResource Brush.Text.Muted}"
+                                                           FontSize="11"
+                                                           TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- 4. Mode-Specific Content Body (Visible when IsFound is True) -->
+                                        <Grid Grid.Row="3">
+                                            <Grid.Style>
+                                                <Style TargetType="Grid">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsFound}" Value="False">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Grid.Style>
+
+                                            <!-- ============================================== -->
+                                            <!-- MODE 1: USER MIM GROUPS LIST                   -->
+                                            <!-- ============================================== -->
+                                            <StackPanel>
+                                                <StackPanel.Style>
+                                                    <Style TargetType="StackPanel">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsUserMimMode}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </StackPanel.Style>
+
+                                                <!-- Section Header with Count & Expandable Filter Button -->
+                                                <Grid Margin="0,0,0,8">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/> <!-- Title + Count -->
+                                                        <ColumnDefinition Width="*"/>    <!-- Spacer -->
+                                                        <ColumnDefinition Width="Auto"/> <!-- Toggle Filter Button -->
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <TextBlock Text="MIM GROUPS"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                        <TextBlock Text="{Binding MimGroupCount, StringFormat=' ({0})'}"
+                                                                   FontSize="10"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                    </StackPanel>
+
+                                                    <!-- Expandable Filter Toggle Button -->
+                                                    <Button Grid.Column="2"
+                                                            Style="{StaticResource GhostActionButton}"
+                                                            Command="{Binding ToggleMimFilterCommand}"
+                                                            ToolTip="Toggle search/filter box"
+                                                            Padding="7,2">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="&#xE721;"
+                                                                       FontFamily="Segoe MDL2 Assets"
+                                                                       FontSize="10"
+                                                                       Foreground="{DynamicResource Brush.Text.Muted}"
+                                                                       Margin="0,0,4,0"/>
+                                                            <TextBlock Text="Filter" FontSize="10"/>
+                                                        </StackPanel>
+                                                    </Button>
+                                                </Grid>
+
+                                                <!-- Expandable Filter & Count Inset Bar -->
+                                                <Border Background="{DynamicResource Brush.Surface.1}"
+                                                        BorderBrush="{DynamicResource Brush.Border}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="6"
+                                                        Padding="6,4"
+                                                        Margin="0,0,0,8">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsMimFilterOpen}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Grid.Column="0"
+                                                                   Text="&#xE721;"
+                                                                   FontFamily="Segoe MDL2 Assets"
+                                                                   FontSize="11"
+                                                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                                                   VerticalAlignment="Center"
+                                                                   Margin="4,0,6,0"/>
+
+                                                        <TextBox Grid.Column="1"
+                                                                 Text="{Binding MimFilter, UpdateSourceTrigger=PropertyChanged}"
+                                                                 Background="Transparent"
+                                                                 BorderThickness="0"
+                                                                 Foreground="{DynamicResource Brush.Text.Primary}"
+                                                                 FontSize="11"
+                                                                 VerticalAlignment="Center"/>
+
+                                                        <!-- Clear input button -->
+                                                        <Button Grid.Column="2"
+                                                                Command="{Binding ClearMimFilterCommand}"
+                                                                ToolTip="Clear filter"
+                                                                VerticalAlignment="Center"
+                                                                Margin="4,0,4,0">
+                                                            <Button.Style>
+                                                                <Style TargetType="Button" BasedOn="{StaticResource InlineLinkButton}">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding MimFilter}" Value="">
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Button.Style>
+                                                            <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                        </Button>
+
+                                                        <!-- Count Badge -->
+                                                        <Border Grid.Column="3"
+                                                                Background="{DynamicResource Brush.Surface.2}"
+                                                                BorderBrush="{DynamicResource Brush.Border}"
+                                                                BorderThickness="1"
+                                                                CornerRadius="4"
+                                                                Padding="6,2"
+                                                                VerticalAlignment="Center"
+                                                                Margin="4,0,0,0">
+                                                            <TextBlock FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}">
+                                                                <Run Text="Showing "/>
+                                                                <Run Text="{Binding FilteredMimGroupCount, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                                <Run Text=" of "/>
+                                                                <Run Text="{Binding MimGroupCount, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                            </TextBlock>
+                                                        </Border>
+                                                    </Grid>
+                                                </Border>
+
+                                                <!-- MIM Groups Chips -->
+                                                <ItemsControl ItemsSource="{Binding MimGroups}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <WrapPanel Orientation="Horizontal"/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border CornerRadius="6"
+                                                                    Margin="0,0,6,6"
+                                                                    Padding="8,4">
+                                                                <Border.Style>
+                                                                    <Style TargetType="Border">
+                                                                        <Setter Property="Background" Value="{DynamicResource Brush.Surface.2}"/>
+                                                                        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}"/>
+                                                                        <Setter Property="BorderThickness" Value="1"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding .}" Value="UA-MIM-Wrkst-AllDivUsers">
+                                                                                <Setter Property="Background" Value="#102E1B"/>
+                                                                                <Setter Property="BorderBrush" Value="#257A42"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Border.Style>
+
+                                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                                    <Button Style="{StaticResource InlineLinkButton}"
+                                                                            Command="{Binding ElementName=RootCard, Path=DataContext.LookupGroupCommand}"
+                                                                            CommandParameter="{Binding .}"
+                                                                            ToolTip="Click to view members of this group">
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <TextBlock Text="&#xE902; " FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}" VerticalAlignment="Center"/>
+                                                                            <TextBlock Text="{Binding .}" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource Brush.Text.Primary}" VerticalAlignment="Center"/>
+                                                                        </StackPanel>
+                                                                    </Button>
+
+                                                                    <Button Style="{StaticResource InlineLinkButton}"
+                                                                            Command="{Binding ElementName=RootCard, Path=DataContext.CopyItemCommand}"
+                                                                            CommandParameter="{Binding .}"
+                                                                            ToolTip="Copy group name to clipboard"
+                                                                            Margin="8,0,0,0">
+                                                                        <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                    </Button>
+                                                                </StackPanel>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+
+                                            <!-- ============================================== -->
+                                            <!-- MODE 2: GROUP MEMBERS LIST                     -->
+                                            <!-- ============================================== -->
+                                            <StackPanel>
+                                                <StackPanel.Style>
+                                                    <Style TargetType="StackPanel">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsGroupMembersMode}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </StackPanel.Style>
+
+                                                <!-- Section Header with Count & Expandable Filter Button -->
+                                                <Grid Margin="0,0,0,8">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/> <!-- Title + Count -->
+                                                        <ColumnDefinition Width="*"/>    <!-- Spacer -->
+                                                        <ColumnDefinition Width="Auto"/> <!-- Toggle Filter Button -->
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <TextBlock Text="GROUP MEMBERS"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                        <TextBlock Text="{Binding MemberCount, StringFormat=' ({0})'}"
+                                                                   FontSize="10"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                    </StackPanel>
+
+                                                    <!-- Expandable Filter Toggle Button -->
+                                                    <Button Grid.Column="2"
+                                                            Style="{StaticResource GhostActionButton}"
+                                                            Command="{Binding ToggleMemberFilterCommand}"
+                                                            ToolTip="Toggle member search filter"
+                                                            Padding="7,2">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="&#xE721;"
+                                                                       FontFamily="Segoe MDL2 Assets"
+                                                                       FontSize="10"
+                                                                       Foreground="{DynamicResource Brush.Text.Muted}"
+                                                                       Margin="0,0,4,0"/>
+                                                            <TextBlock Text="Filter" FontSize="10"/>
+                                                        </StackPanel>
+                                                    </Button>
+                                                </Grid>
+
+                                                <!-- Expandable Filter & Count Inset Bar -->
+                                                <Border Background="{DynamicResource Brush.Surface.1}"
+                                                        BorderBrush="{DynamicResource Brush.Border}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="6"
+                                                        Padding="6,4"
+                                                        Margin="0,0,0,8">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsMemberFilterOpen}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Grid.Column="0"
+                                                                   Text="&#xE721;"
+                                                                   FontFamily="Segoe MDL2 Assets"
+                                                                   FontSize="11"
+                                                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                                                   VerticalAlignment="Center"
+                                                                   Margin="4,0,6,0"/>
+
+                                                        <TextBox Grid.Column="1"
+                                                                 Text="{Binding MemberFilter, UpdateSourceTrigger=PropertyChanged}"
+                                                                 Background="Transparent"
+                                                                 BorderThickness="0"
+                                                                 Foreground="{DynamicResource Brush.Text.Primary}"
+                                                                 FontSize="11"
+                                                                 VerticalAlignment="Center"/>
+
+                                                        <!-- Clear input button -->
+                                                        <Button Grid.Column="2"
+                                                                Command="{Binding ClearMemberFilterCommand}"
+                                                                ToolTip="Clear filter"
+                                                                VerticalAlignment="Center"
+                                                                Margin="4,0,4,0">
+                                                            <Button.Style>
+                                                                <Style TargetType="Button" BasedOn="{StaticResource InlineLinkButton}">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding MemberFilter}" Value="">
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Button.Style>
+                                                            <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                        </Button>
+
+                                                        <!-- Count Badge -->
+                                                        <Border Grid.Column="3"
+                                                                Background="{DynamicResource Brush.Surface.2}"
+                                                                BorderBrush="{DynamicResource Brush.Border}"
+                                                                BorderThickness="1"
+                                                                CornerRadius="4"
+                                                                Padding="6,2"
+                                                                VerticalAlignment="Center"
+                                                                Margin="4,0,0,0">
+                                                            <TextBlock FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}">
+                                                                <Run Text="Showing "/>
+                                                                <Run Text="{Binding FilteredMemberCount, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                                <Run Text=" of "/>
+                                                                <Run Text="{Binding MemberCount, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                            </TextBlock>
+                                                        </Border>
+                                                    </Grid>
+                                                </Border>
+
+                                                <!-- Members NetID Chips -->
+                                                <ItemsControl ItemsSource="{Binding FilteredMembers}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <WrapPanel Orientation="Horizontal"/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Background="{DynamicResource Brush.Surface.2}"
+                                                                    BorderBrush="{DynamicResource Brush.Border}"
+                                                                    BorderThickness="1"
+                                                                    CornerRadius="6"
+                                                                    Margin="0,0,6,6"
+                                                                    Padding="6,3">
+                                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                                    <Button Style="{StaticResource InlineLinkButton}"
+                                                                            Command="{Binding ElementName=RootCard, Path=DataContext.LookupUserCommand}"
+                                                                            CommandParameter="{Binding .}"
+                                                                            ToolTip="View user details in User view">
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <TextBlock Text="&#xE77B; " FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}" VerticalAlignment="Center"/>
+                                                                            <TextBlock Text="{Binding .}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" VerticalAlignment="Center"/>
+                                                                        </StackPanel>
+                                                                    </Button>
+
+                                                                    <Button Style="{StaticResource InlineLinkButton}"
+                                                                            Command="{Binding ElementName=RootCard, Path=DataContext.CopyItemCommand}"
+                                                                            CommandParameter="{Binding .}"
+                                                                            ToolTip="Copy NetID to clipboard"
+                                                                            Margin="6,0,0,0">
+                                                                        <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                    </Button>
+                                                                </StackPanel>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+
+                                                <!-- Empty member filter message -->
+                                                <TextBlock Text="No members match the current filter."
+                                                           FontSize="11"
+                                                           Foreground="{DynamicResource Brush.Text.Muted}"
+                                                           Margin="0,4,0,0">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding FilteredMemberCount}" Value="0"/>
+                                                                        <Condition Binding="{Binding HasMembers}" Value="True"/>
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </MultiDataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <!-- ============================================== -->
+                                            <!-- MODE 3: DEPARTMENT DETAILS                     -->
+                                            <!-- ============================================== -->
+                                            <Grid>
+                                                <Grid.Style>
+                                                    <Style TargetType="Grid">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsDeptMode}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Grid.Style>
+
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="14"/> <!-- Spacer -->
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Left Column: Support Team Info -->
+                                                <Border Grid.Column="0"
+                                                        Background="{DynamicResource Brush.Surface.1}"
+                                                        BorderBrush="{DynamicResource Brush.Border}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="6"
+                                                        Padding="10,8">
+                                                    <StackPanel>
+                                                        <TextBlock Text="SUPPORT TEAM"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                                                   Margin="0,0,0,6"/>
+
+                                                        <!-- Team Name -->
+                                                        <DockPanel Margin="0,0,0,5">
+                                                            <TextBlock Text="Team: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="{Binding DeptTeamName}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                                <Button Style="{StaticResource InlineLinkButton}"
+                                                                        Command="{Binding CopyItemCommand}"
+                                                                        CommandParameter="{Binding DeptTeamName}"
+                                                                        ToolTip="Copy team name"
+                                                                        Margin="6,0,0,0">
+                                                                    <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                </Button>
+                                                            </StackPanel>
+                                                        </DockPanel>
+
+                                                        <!-- Manager -->
+                                                        <DockPanel Margin="0,0,0,5">
+                                                            <DockPanel.Style>
+                                                                <Style TargetType="DockPanel">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding HasDeptManager}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </DockPanel.Style>
+                                                            <TextBlock Text="Manager: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="{Binding DeptManagerName}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                                <TextBlock Text=" (" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                <Button Style="{StaticResource InlineLinkButton}"
+                                                                        Command="{Binding LookupManagerCommand}"
+                                                                        ToolTip="Lookup manager in User view">
+                                                                    <TextBlock Text="{Binding DeptManagerNetId}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Info.Light}"/>
+                                                                </Button>
+                                                                <TextBlock Text=")" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                <Button Style="{StaticResource InlineLinkButton}"
+                                                                        Command="{Binding CopyItemCommand}"
+                                                                        CommandParameter="{Binding DeptManagerNetId}"
+                                                                        ToolTip="Copy manager NetID"
+                                                                        Margin="6,0,0,0">
+                                                                    <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                </Button>
+                                                            </StackPanel>
+                                                        </DockPanel>
+
+                                                        <!-- Support Phone -->
+                                                        <DockPanel Margin="0,0,0,3">
+                                                            <DockPanel.Style>
+                                                                <Style TargetType="DockPanel">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding HasDeptPhone}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </DockPanel.Style>
+                                                            <TextBlock Text="Phone: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="{Binding DeptSupportPhone}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                                <Button Style="{StaticResource InlineLinkButton}"
+                                                                        Command="{Binding CopyItemCommand}"
+                                                                        CommandParameter="{Binding DeptSupportPhone}"
+                                                                        ToolTip="Copy phone number"
+                                                                        Margin="6,0,0,0">
+                                                                    <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                </Button>
+                                                            </StackPanel>
+                                                        </DockPanel>
+                                                    </StackPanel>
+                                                </Border>
+
+                                                <!-- Right Column: Department Details & Actions -->
+                                                <Border Grid.Column="2"
+                                                        Background="{DynamicResource Brush.Surface.1}"
+                                                        BorderBrush="{DynamicResource Brush.Border}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="6"
+                                                        Padding="10,8">
+                                                    <StackPanel>
+                                                        <TextBlock Text="DEPARTMENT DETAILS"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                                                   Margin="0,0,0,6"/>
+
+                                                        <!-- Department Number -->
+                                                        <DockPanel Margin="0,0,0,5">
+                                                            <TextBlock Text="Dept Number: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                            <TextBlock Text="{Binding DeptNumber}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                        </DockPanel>
+
+                                                        <!-- Department Notes -->
+                                                        <StackPanel Margin="0,0,0,6">
+                                                            <StackPanel.Style>
+                                                                <Style TargetType="StackPanel">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding HasDeptNotes}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </StackPanel.Style>
+                                                            <TextBlock Text="Notes: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,0,0,2"/>
+                                                            <TextBlock Text="{Binding DeptNotes}" FontSize="11" Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap"/>
+                                                        </StackPanel>
+
+                                                        <!-- File Repository Button -->
+                                                        <WrapPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                            <Button Command="{Binding OpenFileRepoCommand}">
+                                                                <Button.Style>
+                                                                    <Style TargetType="Button" BasedOn="{StaticResource GhostActionButton}">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding HasDeptFileRepo}" Value="True">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Button.Style>
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="&#xE8A7; " FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource Brush.Info.Light}"/>
+                                                                    <TextBlock Text="File Repository" FontSize="10"/>
+                                                                </StackPanel>
+                                                            </Button>
+                                                        </WrapPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </Grid>
+
+                                            <!-- ============================================== -->
+                                            <!-- MODE 4: DIVISION SUPPORT TEAMS                 -->
+                                            <!-- ============================================== -->
+                                            <StackPanel>
+                                                <StackPanel.Style>
+                                                    <Style TargetType="StackPanel">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsDivMode}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </StackPanel.Style>
+
+                                                <ItemsControl ItemsSource="{Binding DivTeams}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate DataType="{x:Type vm:SupportTeamCardItem}">
+                                                            <Border Background="{DynamicResource Brush.Surface.1}"
+                                                                    BorderBrush="{DynamicResource Brush.Border}"
+                                                                    BorderThickness="1"
+                                                                    CornerRadius="6"
+                                                                    Padding="10,8"
+                                                                    Margin="0,0,0,8">
+                                                                <Grid>
+                                                                    <Grid.RowDefinitions>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                    </Grid.RowDefinitions>
+
+                                                                    <!-- Row 0: Team Name & Copy -->
+                                                                    <DockPanel Grid.Row="0" Margin="0,0,0,4">
+                                                                        <TextBlock Text="{Binding TeamName}"
+                                                                                   FontSize="12"
+                                                                                   FontWeight="SemiBold"
+                                                                                   Foreground="{DynamicResource Brush.Text.Primary}"
+                                                                                   VerticalAlignment="Center"/>
+                                                                        <Button Style="{StaticResource InlineLinkButton}"
+                                                                                Command="{Binding CopyTeamCommand}"
+                                                                                ToolTip="Copy team name"
+                                                                                Margin="8,0,0,0"
+                                                                                VerticalAlignment="Center">
+                                                                            <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                        </Button>
+                                                                    </DockPanel>
+
+                                                                    <!-- Row 1: Manager & Phone -->
+                                                                    <WrapPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,4">
+                                                                        <!-- Manager -->
+                                                                        <StackPanel Orientation="Horizontal" Margin="0,0,16,0" VerticalAlignment="Center">
+                                                                            <StackPanel.Style>
+                                                                                <Style TargetType="StackPanel">
+                                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Binding="{Binding HasManager}" Value="False">
+                                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </StackPanel.Style>
+                                                                            <TextBlock Text="Manager: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                            <TextBlock Text="{Binding ManagerName}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                                            <TextBlock Text=" (" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                            <Button Style="{StaticResource InlineLinkButton}"
+                                                                                    Command="{Binding LookupManagerCommand}"
+                                                                                    ToolTip="Lookup manager in User view">
+                                                                                <TextBlock Text="{Binding ManagerNetId}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Info.Light}"/>
+                                                                            </Button>
+                                                                            <TextBlock Text=")" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                            <Button Style="{StaticResource InlineLinkButton}"
+                                                                                    Command="{Binding CopyManagerNetIdCommand}"
+                                                                                    ToolTip="Copy manager NetID"
+                                                                                    Margin="4,0,0,0">
+                                                                                <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="9" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                            </Button>
+                                                                        </StackPanel>
+
+                                                                        <!-- Phone -->
+                                                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                                            <StackPanel.Style>
+                                                                                <Style TargetType="StackPanel">
+                                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Binding="{Binding HasPhone}" Value="False">
+                                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </StackPanel.Style>
+                                                                            <TextBlock Text="Phone: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                            <TextBlock Text="{Binding PhoneNumber}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                                        </StackPanel>
+                                                                    </WrapPanel>
+
+                                                                    <!-- Row 2: Supported Divisions (Dropdown toggle, NOT forced) -->
+                                                                    <StackPanel Grid.Row="2" Margin="0,2,0,0">
+                                                                        <StackPanel.Style>
+                                                                            <Style TargetType="StackPanel">
+                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                <Style.Triggers>
+                                                                                    <DataTrigger Binding="{Binding HasDivisions}" Value="True">
+                                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </StackPanel.Style>
+
+                                                                        <!-- Dropdown Toggle Button -->
+                                                                        <Button Command="{Binding ToggleDivisionsCommand}"
+                                                                                HorizontalAlignment="Left"
+                                                                                ToolTip="Toggle supported divisions list">
+                                                                            <Button.Style>
+                                                                                <Style TargetType="Button" BasedOn="{StaticResource GhostActionButton}">
+                                                                                    <Setter Property="Padding" Value="6,2"/>
+                                                                                    <Setter Property="Margin" Value="0,2,0,0"/>
+                                                                                </Style>
+                                                                            </Button.Style>
+                                                                            <StackPanel Orientation="Horizontal">
+                                                                                <TextBlock Text="{Binding DivisionsToggleLabel}" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                                <TextBlock FontSize="9" Foreground="{DynamicResource Brush.Text.Muted}" Margin="5,0,0,0" VerticalAlignment="Center">
+                                                                                    <TextBlock.Style>
+                                                                                        <Style TargetType="TextBlock">
+                                                                                            <Setter Property="Text" Value="▾"/>
+                                                                                            <Style.Triggers>
+                                                                                                <DataTrigger Binding="{Binding ShowDivisions}" Value="True">
+                                                                                                    <Setter Property="Text" Value="▴"/>
+                                                                                                </DataTrigger>
+                                                                                            </Style.Triggers>
+                                                                                        </Style>
+                                                                                    </TextBlock.Style>
+                                                                                </TextBlock>
+                                                                            </StackPanel>
+                                                                        </Button>
+
+                                                                        <!-- Collapsible Inset Panel with Supported Divisions Badges -->
+                                                                        <Border Margin="0,6,0,0"
+                                                                                Background="#0C1420"
+                                                                                BorderBrush="{DynamicResource Brush.Border}"
+                                                                                BorderThickness="1"
+                                                                                CornerRadius="6"
+                                                                                Padding="8,6">
+                                                                            <Border.Style>
+                                                                                <Style TargetType="Border">
+                                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Binding="{Binding ShowDivisions}" Value="True">
+                                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </Border.Style>
+
+                                                                            <ItemsControl ItemsSource="{Binding SupportedDivisions}">
+                                                                                <ItemsControl.ItemsPanel>
+                                                                                    <ItemsPanelTemplate>
+                                                                                        <WrapPanel Orientation="Horizontal"/>
+                                                                                    </ItemsPanelTemplate>
+                                                                                </ItemsControl.ItemsPanel>
+                                                                                <ItemsControl.ItemTemplate>
+                                                                                    <DataTemplate>
+                                                                                        <Border Background="#281738"
+                                                                                                BorderBrush="#6C3BAA"
+                                                                                                BorderThickness="1"
+                                                                                                CornerRadius="4"
+                                                                                                Padding="6,1"
+                                                                                                Margin="0,0,4,4">
+                                                                                            <TextBlock Text="{Binding .}" FontSize="10" FontWeight="SemiBold" Foreground="#E9D5FF"/>
+                                                                                        </Border>
+                                                                                    </DataTemplate>
+                                                                                </ItemsControl.ItemTemplate>
+                                                                            </ItemsControl>
+                                                                        </Border>
+                                                                    </StackPanel>
+                                                                </Grid>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Bottom Action Bar -->
         <Grid Grid.Row="2" Margin="0,10,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/> <!-- Action Buttons -->
+                <ColumnDefinition Width="*"/>    <!-- Spacer -->
+                <ColumnDefinition Width="Auto"/> <!-- Font / Scaling Controls -->
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="0"
-                    Content="Clear"
-                    Margin="0,0,12,0"
-                    Command="{Binding ClearLogCommand}"
-                    Style="{DynamicResource Button.FlowDoc}"
-                    ToolTip="Clear the log output"/>
+            <!-- Left Buttons: Clear, Collapse All, Expand All -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <Button Content="Clear"
+                        Command="{Binding ClearCommand}"
+                        Style="{DynamicResource Button.FlowDoc}"
+                        Margin="0,0,8,0"
+                        ToolTip="Clear search history"/>
 
-            <StackPanel Grid.Column="2"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Right">
-                <Button Content="A-"
+                <Button Content="Collapse All"
+                        Command="{Binding CollapseAllCommand}"
+                        Style="{DynamicResource Button.FlowDoc}"
+                        Margin="0,0,8,0"
+                        ToolTip="Collapse all history cards to single-line summaries"/>
+
+                <Button Content="Expand All"
+                        Command="{Binding ExpandAllCommand}"
+                        Style="{DynamicResource Button.FlowDoc}"
+                        ToolTip="Expand all history cards"/>
+            </StackPanel>
+
+            <!-- Right Buttons: Font Sizing -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button Content="A−"
                         Command="{Binding DecreaseFontCommand}"
                         Style="{DynamicResource Button.FlowDoc.Small}"
-                        ToolTip="Decrease log text size"/>
+                        ToolTip="Decrease text size"/>
                 <Button Content="A"
                         Command="{Binding ResetFontCommand}"
                         Style="{DynamicResource Button.FlowDoc.Small}"
-                        ToolTip="Reset log text size"/>
+                        ToolTip="Reset text size"/>
                 <Button Content="A+"
-                        Margin="6,0,0,0"
                         Command="{Binding IncreaseFontCommand}"
                         Style="{DynamicResource Button.FlowDoc.Small}"
-                        ToolTip="Increase log text size"/>
+                        Margin="6,0,0,0"
+                        ToolTip="Increase text size"/>
             </StackPanel>
         </Grid>
     </Grid>
