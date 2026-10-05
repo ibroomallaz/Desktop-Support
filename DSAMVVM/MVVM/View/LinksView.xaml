@@ -3,232 +3,448 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:DSAMVVM.MVVM.ViewModel"
              mc:Ignorable="d"
-             d:DesignHeight="450"
-             d:DesignWidth="800">
+             d:DataContext="{d:DesignInstance Type=vm:LinksViewModel, IsDesignTimeCreatable=False}"
+             d:DesignHeight="520"
+             d:DesignWidth="840">
 
-    <!-- resources -->
     <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Theme/Colors/Colors.UA.xaml"/>
+                <ResourceDictionary Source="/Theme/Decor/Gradient.UA.xaml"/>
+                <ResourceDictionary Source="/Theme/Controls/Button.Rounded.xaml"/>
+                <ResourceDictionary Source="/Theme/Controls/LinksComboBoxTheme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
-        <!-- link hover (local safe defaults + alias) -->
-        <SolidColorBrush x:Key="Brush.Links.LinkHover.UARed"  Color="#FF8C1D40"/>
-        <SolidColorBrush x:Key="Brush.Links.LinkHover.Indigo" Color="#FF7FA0FF"/>
-        <StaticResource x:Key="Brush.Links.LinkHover" ResourceKey="Brush.Links.LinkHover.UARed"/>
+            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
-        <TextDecorationCollection x:Key="Underline.Hover">
-            <TextDecoration Location="Underline">
-                <TextDecoration.Pen>
-                    <Pen Brush="{StaticResource Brush.Links.LinkHover}" Thickness="1.25"/>
-                </TextDecoration.Pen>
-                <TextDecoration.PenThicknessUnit>FontRecommended</TextDecoration.PenThicknessUnit>
-            </TextDecoration>
-        </TextDecorationCollection>
+            <!-- Card surface container -->
+            <Style x:Key="Card.Surface" TargetType="Border">
+                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Background" Value="{DynamicResource CardGradient.Surface.L1}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Card.Border}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+            </Style>
 
-        <Style x:Key="InlineLinkStyle" TargetType="Hyperlink">
-            <Setter Property="Foreground" Value="{DynamicResource MenuTextPrimaryBrush}"/>
-            <Setter Property="TextDecorations" Value="{x:Null}"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="{StaticResource Brush.Links.LinkHover}"/>
-                    <Setter Property="TextDecorations" Value="{StaticResource Underline.Hover}"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+            <!-- Compact rounded button -->
+            <Style x:Key="Button.Rounded.Compact" TargetType="Button" BasedOn="{StaticResource Button.Rounded}">
+                <Setter Property="Padding"   Value="10,3"/>
+                <Setter Property="MinHeight" Value="26"/>
+                <Setter Property="Height"    Value="26"/>
+                <Setter Property="FontSize"  Value="11"/>
+                <Setter Property="MinWidth"  Value="0"/>
+            </Style>
 
-        <DataTemplate x:Key="TeamNameTemplate">
-            <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" ToolTip="{Binding}"/>
-        </DataTemplate>
-
-        <!-- links card container using your new gradients -->
-        <CornerRadius x:Key="Links.Card.Radius.Inner">10</CornerRadius>
-        <CornerRadius x:Key="Links.Card.Radius.Outer">12</CornerRadius>
-
-        <Style x:Key="LinksCard" TargetType="ContentControl">
-            <Setter Property="SnapsToDevicePixels" Value="True"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ContentControl">
-                        <Grid>
-                            <!-- outer rim -->
-                            <Border CornerRadius="{StaticResource Links.Card.Radius.Outer}"
-                                    Background="Transparent"
-                                    BorderBrush="{DynamicResource BorderGradient.Links.Rim}"
-                                    BorderThickness="1.25"/>
-
-                            <!-- inner card -->
-                            <Border x:Name="Card"
-                                    CornerRadius="{StaticResource Links.Card.Radius.Inner}"
-                                    Background="{DynamicResource CardGradient.Links.Surface}"
-                                    BorderBrush="{DynamicResource Brush.Links.Card.Border}"
-                                    BorderThickness="1">
-                                <ContentPresenter/>
+            <!-- Subtle icon button for copy / open -->
+            <Style x:Key="SubtleIconButton" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Width" Value="22"/>
+                <Setter Property="Height" Value="22"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="ButtonChrome"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="Transparent"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <!-- hover lift -->
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Card"
-                                        Property="Background"
-                                        Value="{DynamicResource CardGradient.Links.Surface.Hover}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="ButtonChrome" Property="Background" Value="#25FFFFFF"/>
+                                    <Setter TargetName="ButtonChrome" Property="BorderBrush" Value="#35FFFFFF"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="ButtonChrome" Property="Background" Value="#40FFFFFF"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
 
+            <!-- Sleek Single-Line Link Tile Template -->
+            <DataTemplate x:Key="LinkTileTemplate" DataType="{x:Type vm:LinkDisplayItem}">
+                <Border CornerRadius="6"
+                        Background="{DynamicResource Brush.Surface.1}"
+                        BorderBrush="{DynamicResource Brush.Border}"
+                        BorderThickness="1"
+                        Padding="8,5"
+                        Margin="0,0,0,4"
+                        SnapsToDevicePixels="True">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource CardGradient.Surface.Hover}"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border.Active}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
+                    <!-- Mouseover Tooltip with Name, Description, and URL -->
+                    <Border.ToolTip>
+                        <ToolTip>
+                            <StackPanel MaxWidth="320">
+                                <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,2"/>
+                                <TextBlock Text="{Binding Description}" Visibility="{Binding HasDescription, Converter={StaticResource BoolToVis}}" FontSize="10.5" Foreground="{DynamicResource Brush.Text.Muted}" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                <TextBlock Text="{Binding Url}" FontSize="9.5" Foreground="{DynamicResource Brush.Info.Light}" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                        </ToolTip>
+                    </Border.ToolTip>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Icon badge -->
+                        <Border Grid.Column="0"
+                                Width="24" Height="24"
+                                CornerRadius="5"
+                                Background="#153AA0FF"
+                                BorderBrush="#253AA0FF"
+                                BorderThickness="1"
+                                VerticalAlignment="Center"
+                                Margin="0,0,8,0">
+                            <TextBlock Text="&#xE774;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource Brush.Info.Light}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+
+                        <!-- Link Name (Click to open) -->
+                        <Border Grid.Column="1"
+                                Background="Transparent"
+                                Cursor="Hand"
+                                VerticalAlignment="Center">
+                            <Border.InputBindings>
+                                <MouseBinding MouseAction="LeftClick"
+                                              Command="{Binding DataContext.OpenLinkCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                              CommandParameter="{Binding}"/>
+                            </Border.InputBindings>
+                            <TextBlock Text="{Binding Name}"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+
+                        <!-- Actions (Copy, Open) -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
+                            <Button Style="{StaticResource SubtleIconButton}"
+                                    ToolTip="Copy URL to clipboard"
+                                    Command="{Binding DataContext.CopyLinkCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}">
+                                <TextBlock Text="&#xE8C8;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="10.5"
+                                           Foreground="{DynamicResource Brush.Text.Muted}"/>
+                            </Button>
+
+                            <Button Style="{StaticResource SubtleIconButton}"
+                                    ToolTip="Open link in default browser"
+                                    Command="{Binding DataContext.OpenLinkCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}"
+                                    Margin="2,0,0,0">
+                                <TextBlock Text="&#xE8A7;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="10.5"
+                                           Foreground="{DynamicResource Brush.Text.Muted}"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </DataTemplate>
+        </ResourceDictionary>
     </UserControl.Resources>
 
-    <!-- layout -->
-    <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled"
-                      Padding="5,0"
-                      HorizontalAlignment="Center"
-                      VerticalAlignment="Center">
-            <StackPanel Margin="10,5,0,20" Orientation="Horizontal">
+    <Grid Margin="14,10,14,12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-                <!-- common links -->
-                <StackPanel Margin="10" Orientation="Vertical">
-                    <Label Content="Common Links"
-                           FontSize="20"
-                           FontWeight="Bold"
-                           Foreground="{DynamicResource MenuTextPrimaryBrush}"
-                           HorizontalAlignment="Center"/>
+        <!-- ===================== TOP HEADER BANNER ===================== -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource CardGradient.Surface.L1}"
+                BorderBrush="{DynamicResource Brush.Card.Border}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="12,8"
+                Margin="0,0,0,10"
+                SnapsToDevicePixels="True">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                    <ContentControl Style="{StaticResource LinksCard}"
-                                    Width="300" Height="250"
-                                    HorizontalAlignment="Center">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                      HorizontalScrollBarVisibility="Disabled">
-                            <ItemsControl ItemsSource="{Binding CommonLinks}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock FontSize="17"
-                                                   HorizontalAlignment="Left"
-                                                   Padding="22,8,6,8"
-                                                   Foreground="{DynamicResource MenuTextPrimaryBrush}"
-                                                   ToolTipService.InitialShowDelay="300"
-                                                   ToolTipService.ShowDuration="120000">
-                                            <TextBlock.ToolTip>
-                                                <StackPanel MaxWidth="360">
-                                                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap"/>
-                                                </StackPanel>
-                                            </TextBlock.ToolTip>
-                                            <Hyperlink Style="{StaticResource InlineLinkStyle}"
-                                                       RequestNavigate="Hyperlink_RequestNavigate">
-                                                <Hyperlink.NavigateUri>
-                                                    <PriorityBinding>
-                                                        <Binding Path="Url"/>
-                                                        <Binding Path="URL"/>
-                                                        <Binding Path="Uri"/>
-                                                        <Binding Path="Href"/>
-                                                    </PriorityBinding>
-                                                </Hyperlink.NavigateUri>
-                                                <Run>
-                                                    <Run.Text>
-                                                        <PriorityBinding>
-                                                            <Binding Path="Title"/>
-                                                            <Binding Path="Name"/>
-                                                            <Binding Path="DisplayName"/>
-                                                        </PriorityBinding>
-                                                    </Run.Text>
-                                                </Run>
-                                            </Hyperlink>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </ContentControl>
+                <Border Grid.Column="0"
+                        Width="32" Height="32"
+                        CornerRadius="8"
+                        Background="#183AA0FF"
+                        BorderBrush="#353AA0FF"
+                        BorderThickness="1"
+                        VerticalAlignment="Center"
+                        Margin="0,0,10,0">
+                    <TextBlock Text="&#xE774;"
+                               FontFamily="Segoe MDL2 Assets"
+                               FontSize="15"
+                               Foreground="{DynamicResource Brush.Info.Light}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="Links Directory"
+                       FontSize="14"
+                       FontWeight="Bold"
+                       Foreground="{DynamicResource Brush.Text.Primary}"/>
+                    <TextBlock Text="Quick access to common university portals and team resources"
+                       FontSize="10.5"
+                       Foreground="{DynamicResource Brush.Text.Muted}"
+                       Margin="0,1,0,0"/>
                 </StackPanel>
 
-                <!-- team links -->
-                <StackPanel Margin="10" Orientation="Vertical">
-                    <Label Content="Team Links"
-                           FontSize="20"
-                           FontWeight="Bold"
-                           Foreground="{DynamicResource MenuTextPrimaryBrush}"
-                           HorizontalAlignment="Center"/>
+                <!-- Reload Button -->
+                <Button Grid.Column="2"
+                        Command="{Binding ReloadLinksCommand}"
+                        ToolTip="Force refresh links data"
+                        VerticalAlignment="Center">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource Button.Rounded.Compact}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsReloading}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="&#xE72C;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="10.5"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,5,0"/>
+                        <TextBlock Text="Reload Links" FontSize="11" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
 
-                    <ComboBox Style="{StaticResource Combo.Links.Dropdown}"
-                              Width="260" Height="32"
-                              HorizontalAlignment="Center"
-                              VerticalAlignment="Center"
-                              Margin="0,0,0,13"
-                              ItemsSource="{Binding TeamNames}"
-                              SelectedItem="{Binding SelectedTeam, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              IsSynchronizedWithCurrentItem="False"
-                              ItemTemplate="{StaticResource TeamNameTemplate}"/>
+        <!-- ===================== 2-COLUMN MAIN CONTENT ===================== -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                    <ContentControl Style="{StaticResource LinksCard}"
-                                    Width="300" Height="215"
-                                    HorizontalAlignment="Center">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                      HorizontalScrollBarVisibility="Disabled">
-                            <ItemsControl ItemsSource="{Binding SelectedTeamLinks}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock FontSize="17"
-                                                   HorizontalAlignment="Left"
-                                                   Padding="22,8,6,8"
-                                                   Foreground="{DynamicResource MenuTextPrimaryBrush}"
-                                                   ToolTipService.InitialShowDelay="300"
-                                                   ToolTipService.ShowDuration="120000">
-                                            <TextBlock.ToolTip>
-                                                <StackPanel MaxWidth="360">
-                                                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap"/>
-                                                </StackPanel>
-                                            </TextBlock.ToolTip>
-                                            <Hyperlink Style="{StaticResource InlineLinkStyle}"
-                                                       RequestNavigate="Hyperlink_RequestNavigate">
-                                                <Hyperlink.NavigateUri>
-                                                    <PriorityBinding>
-                                                        <Binding Path="Url"/>
-                                                        <Binding Path="URL"/>
-                                                        <Binding Path="Uri"/>
-                                                        <Binding Path="Href"/>
-                                                    </PriorityBinding>
-                                                </Hyperlink.NavigateUri>
-                                                <Run>
-                                                    <Run.Text>
-                                                        <PriorityBinding>
-                                                            <Binding Path="Title"/>
-                                                            <Binding Path="Name"/>
-                                                            <Binding Path="DisplayName"/>
-                                                        </PriorityBinding>
-                                                    </Run.Text>
-                                                </Run>
-                                            </Hyperlink>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+            <!-- LEFT COLUMN: Common Links -->
+            <Border Grid.Column="0" Style="{StaticResource Card.Surface}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Red accent strip -->
+                    <Border Grid.Column="0"
+                            Background="{DynamicResource CardGradient.Accent}"
+                            CornerRadius="10,0,0,10"/>
+
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Header -->
+                        <Grid Grid.Row="0" Margin="12,10,12,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="&#xE774;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource Brush.Accent.Red.Light}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,6,0"/>
+                                <TextBlock Text="Common Links"
+                                           FontSize="12.5"
+                                           FontWeight="Bold"
+                                           Foreground="{DynamicResource Brush.Text.Primary}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <TextBlock Grid.Column="1"
+                                       Text="University-wide"
+                                       FontSize="10"
+                                       Foreground="{DynamicResource Brush.Text.Muted}"
+                                       VerticalAlignment="Center"
+                                       Margin="8,0,0,0"/>
+
+                            <Border Grid.Column="2"
+                                    Background="#18FFFFFF"
+                                    BorderBrush="#25FFFFFF"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Padding="6,1"
+                                    VerticalAlignment="Center">
+                                <TextBlock Text="{Binding CommonLinksCount}"
+                                           FontSize="9.5"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush.Text.Muted}"/>
+                            </Border>
+                        </Grid>
+
+                        <Separator Grid.Row="1" Margin="12,0,12,6" Background="{DynamicResource Brush.Border}" Opacity="0.4"/>
+
+                        <!-- Links List -->
+                        <ScrollViewer Grid.Row="2"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      Padding="12,0,10,10">
+                            <ItemsControl ItemsSource="{Binding CommonLinks}"
+                                          ItemTemplate="{StaticResource LinkTileTemplate}"/>
                         </ScrollViewer>
-                    </ContentControl>
-                </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
 
-            </StackPanel>
-        </ScrollViewer>
+            <!-- RIGHT COLUMN: Team Links -->
+            <Border Grid.Column="2" Style="{StaticResource Card.Surface}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-        <!-- reload -->
-        <Button Content="Reload Links"
-                Command="{Binding ReloadLinksCommand}"
-                ToolTip="Force refresh links data"
-                MinHeight="28"
-                Padding="10,4"
-                Margin="12"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Bottom">
-            <Button.Style>
-                <Style TargetType="Button" BasedOn="{StaticResource Button.Rounded}">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsReloading}" Value="True">
-                            <Setter Property="IsEnabled" Value="False"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Button.Style>
-        </Button>
+                    <!-- Blue accent strip -->
+                    <Border Grid.Column="0"
+                            Background="{DynamicResource CardGradient.Info}"
+                            CornerRadius="10,0,0,10"/>
+
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Header -->
+                        <Grid Grid.Row="0" Margin="12,8,12,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="&#xE7EF;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource Brush.Info.Light}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,6,0"/>
+                                <TextBlock Text="Team"
+                                           FontSize="12.5"
+                                           FontWeight="Bold"
+                                           Foreground="{DynamicResource Brush.Text.Primary}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Team Dropdown -->
+                            <ComboBox Grid.Column="1"
+                                      Style="{DynamicResource Combo.Links.Dropdown}"
+                                      ItemsSource="{Binding TeamNames}"
+                                      SelectedItem="{Binding SelectedTeam, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      IsSynchronizedWithCurrentItem="False"
+                                      Height="24"
+                                      Margin="6,0,6,0"
+                                      VerticalAlignment="Center"
+                                      FontSize="10.5"/>
+
+                            <!-- Count badge -->
+                            <Border Grid.Column="2"
+                                    Background="#18FFFFFF"
+                                    BorderBrush="#25FFFFFF"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Padding="6,1"
+                                    VerticalAlignment="Center">
+                                <TextBlock Text="{Binding SelectedTeamLinksCount}"
+                                           FontSize="9.5"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush.Text.Muted}"/>
+                            </Border>
+                        </Grid>
+
+                        <Separator Grid.Row="1" Margin="12,0,12,6" Background="{DynamicResource Brush.Border}" Opacity="0.4"/>
+
+                        <!-- Links List & Empty state -->
+                        <Grid Grid.Row="2" Margin="12,0,10,10">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled"
+                                          Padding="0,0,2,0">
+                                <ItemsControl ItemsSource="{Binding SelectedTeamLinks}"
+                                              ItemTemplate="{StaticResource LinkTileTemplate}"/>
+                            </ScrollViewer>
+
+                            <!-- Empty State -->
+                            <StackPanel VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Margin="16">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasSelectedTeamLinks}" Value="False">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+
+                                <TextBlock Text="&#xE711;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="18"
+                                           Foreground="{DynamicResource Brush.Text.Muted}"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,4"/>
+                                <TextBlock Text="No links found for this team"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush.Text.Muted}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

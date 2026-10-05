@@ -4,9 +4,26 @@ using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.Model.Data;
 using System.Diagnostics;
+using System.Windows;
 using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel;
+
+public sealed class LinkDisplayItem
+{
+    public string Name { get; }
+    public string Description { get; }
+    public string Url { get; }
+    public bool HasDescription => !string.IsNullOrWhiteSpace(Description);
+
+    public LinkDisplayItem(Link link)
+    {
+        ArgumentNullException.ThrowIfNull(link);
+        Name = link.Name.Trim();
+        Description = link.Description.Trim();
+        Url = link.URL.Trim();
+    }
+}
 
 public class LinksViewModel : ObservableObject
 {
@@ -19,17 +36,22 @@ public class LinksViewModel : ObservableObject
     private static AppSettings Settings => App.Settings;
 
     private int _loadedFlag; // 0 = not loaded, 1 = loaded (or in-flight first load)
+    private List<TeamLinkGroup> _rawTeamLinks = [];
 
     public LinksViewModel(ILinksService linksService, ISettingsService settingsService)
     {
         _linksService = linksService ?? throw new ArgumentNullException(nameof(linksService));
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
 
-        ReloadLinksCommand = new RelayCommand(async _ => await ReloadAsync());
+        ReloadLinksCommand = new RelayCommand(_ => ExecuteReload());
+        OpenLinkCommand = new RelayCommand(OpenLink);
+        CopyLinkCommand = new RelayCommand(CopyLink);
 
-        //no implicit loading here. Call EnsureLoadedAsync() after first paint.
+        // no implicit loading here. Call EnsureLoadedAsync() after first paint.
         // this avoids slower startup times if loading is slow.
     }
+
+    private void ExecuteReload() => _ = ReloadAsync();
 
     public async Task EnsureLoadedAsync()
     {
@@ -41,7 +63,7 @@ public class LinksViewModel : ObservableObject
         try
         {
             var cached = _linksService.GetCachedLinksData();
-            Log.Debug(Tag, $"initial_load: cached_present={(cached != null)}");
+            Log.Debug(Tag, $"initial_load: cached_present={cached != null}");
             if (cached is not null) Apply(cached);
 
             var data = await _linksService.LoadLinksDataAsync().ConfigureAwait(false);
@@ -67,32 +89,25 @@ public class LinksViewModel : ObservableObject
         private set { _isReloading = value; OnPropertyChanged(); }
     }
 
-    private List<Link> _commonLinks = [];
-    public List<Link> CommonLinks
+    private List<LinkDisplayItem> _commonLinks = [];
+    public List<LinkDisplayItem> CommonLinks
     {
         get => _commonLinks;
-        private set { _commonLinks = value ?? []; OnPropertyChanged(); }
-    }
-
-    private List<TeamLinkGroup> _teamLinks = [];
-    public List<TeamLinkGroup> TeamLinks
-    {
-        get => _teamLinks;
         private set
         {
-            _teamLinks = value ?? [];
+            _commonLinks = value;
             OnPropertyChanged();
-            RebuildTeamNames();
-            ChooseInitialTeam();
-            UpdateSelectedTeamLinks();
+            OnPropertyChanged(nameof(CommonLinksCount));
         }
     }
+
+    public int CommonLinksCount => CommonLinks.Count;
 
     private List<string> _teamNames = [];
     public List<string> TeamNames
     {
         get => _teamNames;
-        private set { _teamNames = value ?? []; OnPropertyChanged(); }
+        private set { _teamNames = value; OnPropertyChanged(); }
     }
 
     private string? _selectedTeam;
@@ -109,19 +124,82 @@ public class LinksViewModel : ObservableObject
         }
     }
 
-    private List<Link> _selectedTeamLinks = [];
-    public List<Link> SelectedTeamLinks
+    private List<LinkDisplayItem> _selectedTeamLinks = [];
+    public List<LinkDisplayItem> SelectedTeamLinks
     {
         get => _selectedTeamLinks;
-        private set { _selectedTeamLinks = value ?? []; OnPropertyChanged(); }
+        private set
+        {
+            _selectedTeamLinks = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(SelectedTeamLinksCount));
+            OnPropertyChanged(nameof(HasSelectedTeamLinks));
+        }
     }
 
+    public int SelectedTeamLinksCount => SelectedTeamLinks.Count;
+    public bool HasSelectedTeamLinks => SelectedTeamLinks.Count > 0;
+
     public ICommand ReloadLinksCommand { get; }
+    public ICommand OpenLinkCommand { get; }
+    public ICommand CopyLinkCommand { get; }
 
     public void ReevaluateSelection()
     {
         ChooseInitialTeam();
         UpdateSelectedTeamLinks();
+    }
+
+    private static void OpenLink(object? parameter)
+    {
+        string? url = parameter switch
+        {
+            LinkDisplayItem item => item.Url,
+            Link link => link.URL,
+            string s => s,
+            _ => null
+        };
+
+        if (string.IsNullOrWhiteSpace(url)) return;
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            Log.Error(Tag, $"Failed to open link '{url}'", ex);
+            UiNotify.Error("Open Link", $"Could not open link: {ex.Message}", ex);
+        }
+    }
+
+    private static void CopyLink(object? parameter)
+    {
+        (string? url, string? name) = parameter switch
+        {
+            LinkDisplayItem item => (item.Url, item.Name),
+            Link link => (link.URL, link.Name),
+            string s => (s, s),
+            _ => (null, null)
+        };
+
+        if (string.IsNullOrWhiteSpace(url)) return;
+
+        try
+        {
+            Clipboard.SetText(url);
+            string label = !string.IsNullOrWhiteSpace(name) ? $"'{name}'" : "Link";
+            UiNotify.Success($"Copied {label} URL to clipboard.", showStatusBar: true);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(Tag, $"Failed to copy link to clipboard: {ex.Message}", ex);
+            UiNotify.Warn($"Could not copy link to clipboard: {ex.Message}");
+        }
     }
 
     private async Task ReloadAsync()
@@ -136,7 +214,7 @@ public class LinksViewModel : ObservableObject
 
         try
         {
-            UiNotify.Info("Refreshing links…", showStatusBar: true, key: StatusKey);
+            UiNotify.Info("Refreshing links\u2026", showStatusBar: true, key: StatusKey);
 
             await _linksService.ReloadLinksDataAsync().ConfigureAwait(false);
             var data = _linksService.GetCachedLinksData();
@@ -173,15 +251,24 @@ public class LinksViewModel : ObservableObject
 
     private void Apply(LinksData? data)
     {
-        CommonLinks = data?.CommonLinks ?? [];
-        TeamLinks = data?.TeamLinks ?? [];
-        Log.Debug(Tag, $"apply: common={CommonLinks.Count} teams={TeamLinks.Count}");
+        var rawCommon = data?.CommonLinks ?? [];
+        _rawTeamLinks = data?.TeamLinks ?? [];
+
+        CommonLinks = [.. rawCommon
+            .Where(l => !string.IsNullOrWhiteSpace(l.Name))
+            .OrderBy(l => l.Name, StringComparer.OrdinalIgnoreCase)
+            .Select(l => new LinkDisplayItem(l))];
+
+        RebuildTeamNames();
+        ChooseInitialTeam();
+        UpdateSelectedTeamLinks();
+        Log.Debug(Tag, $"apply: common={CommonLinks.Count} teams={_rawTeamLinks.Count}");
     }
 
     private void RebuildTeamNames()
     {
-        TeamNames = [.. TeamLinks
-            .Select(t => (t.Team).Trim())
+        TeamNames = [.. _rawTeamLinks
+            .Select(t => t.Team.Trim())
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)];
@@ -214,12 +301,19 @@ public class LinksViewModel : ObservableObject
 
     private void UpdateSelectedTeamLinks()
     {
-        if (string.IsNullOrWhiteSpace(SelectedTeam)) { SelectedTeamLinks = []; return; }
+        if (string.IsNullOrWhiteSpace(SelectedTeam))
+        {
+            SelectedTeamLinks = [];
+            return;
+        }
 
-        var group = TeamLinks.FirstOrDefault(g =>
+        var group = _rawTeamLinks.FirstOrDefault(g =>
             string.Equals(g.Team, SelectedTeam, StringComparison.OrdinalIgnoreCase));
 
-        SelectedTeamLinks = group?.Links ?? [];
+        SelectedTeamLinks = [.. (group?.Links ?? [])
+            .Where(l => !string.IsNullOrWhiteSpace(l.Name))
+            .OrderBy(l => l.Name, StringComparer.OrdinalIgnoreCase)
+            .Select(l => new LinkDisplayItem(l))];
     }
 
     private void PersistLastTeam()

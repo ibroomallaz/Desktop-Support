@@ -42,6 +42,7 @@
         public const string Note = "\uE70F";
         public const string Checklist = "\uE8F1";
         public const string OpenInNew = "\uE8A7";
+        public const string Copy = "\uE8C8";
         public const string Add = "\uE710";
         public const string Dismiss = "\uE711";
         public const string Checkmark = "\uE73E";
