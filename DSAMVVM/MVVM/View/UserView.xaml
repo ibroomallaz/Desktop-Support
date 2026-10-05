@@ -1,85 +1,1096 @@
-﻿<UserControl x:Class="DSAMVVM.MVVM.View.UserView"
+<UserControl x:Class="DSAMVVM.MVVM.View.UserView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:beh="clr-namespace:DSAMVVM.MVVM.Model.Behaviors"
-             mc:Ignorable="d">
+             xmlns:vm="clr-namespace:DSAMVVM.MVVM.ViewModel"
+             xmlns:res="clr-namespace:DSAMVVM.MVVM.View.Resources"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:UserViewModel}"
+             d:DesignHeight="600" d:DesignWidth="850">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Theme/Colors/Colors.UA.xaml"/>
+                <ResourceDictionary Source="/Theme/Decor/Gradient.UA.xaml"/>
+                <ResourceDictionary Source="/Theme/Controls/Button.Rounded.xaml"/>
+                <ResourceDictionary Source="/Theme/Controls/Button.FlowDoc.xaml"/>
+                <ResourceDictionary Source="/Theme/Controls/Card.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+            <!-- Compact Ghost Button -->
+            <Style x:Key="GhostActionButton" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}"/>
+                <Setter Property="Padding" Value="8,2"/>
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Chrome"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="6"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Brush.Surface.Hover}"/>
+                                    <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Brush.Border.Active}"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Brush.Surface.Pressed}"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.5"/>
+                                    <Setter Property="Cursor" Value="Arrow"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Subtle Link Button -->
+            <Style x:Key="InlineLinkButton" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Info.Light}"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Foreground" Value="{DynamicResource Brush.Info.Hover}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- Pill Button for NetID Copy -->
+            <Style x:Key="NetIdChipButton" TargetType="Button">
+                <Setter Property="Background" Value="{DynamicResource Brush.Surface.1}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}"/>
+                <Setter Property="Padding" Value="8,2"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Border"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Border" Property="Background" Value="{DynamicResource Brush.Surface.Hover}"/>
+                                    <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource Brush.Border.Active}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Collapsed Row Header Button -->
+            <Style x:Key="CollapsedRowButton" TargetType="Button">
+                <Setter Property="Background" Value="{DynamicResource Brush.Surface.1}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="10,6"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="RowBorder"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="6"
+                                    Padding="{TemplateBinding Padding}"
+                                    SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="RowBorder" Property="Background" Value="{DynamicResource CardGradient.Surface.Hover}"/>
+                                    <Setter TargetName="RowBorder" Property="BorderBrush" Value="{DynamicResource Brush.Border.Active}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <!-- log viewer -->
             <RowDefinition Height="Auto"/>
-            <!-- bottom bar -->
         </Grid.RowDefinitions>
 
-        <!-- FlowDocument viewer driven by the shared service/behavior -->
-        <FlowDocumentScrollViewer
-            Grid.Row="0"
-            IsToolBarVisible="False"
-            VerticalScrollBarVisibility="Auto"
-            beh:FlowDocBinder.Text="{Binding SearchLog}"
-            beh:FlowDocBinder.ViewName="UserView"
-            beh:FlowDocBinder.PreserveScrollPosition="True" />
+        <!-- Empty State Container -->
+        <Border Grid.Row="0"
+                CornerRadius="10"
+                Background="{DynamicResource Brush.Surface.1}"
+                BorderBrush="{DynamicResource Brush.Border}"
+                BorderThickness="1"
+                Padding="30">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasHistory}" Value="False">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
 
-        <!-- Bottom Bar -->
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="{x:Static res:Glyphs.User}"
+                           FontFamily="Segoe MDL2 Assets"
+                           FontSize="32"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource Brush.Text.Muted}"
+                           Opacity="0.5"
+                           Margin="0,0,0,12"/>
+
+                <TextBlock Text="No User Lookups Yet"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource Brush.Text.Primary}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,6"/>
+
+                <TextBlock Text="Enter a NetID in the search bar above and press Enter."
+                           FontSize="12"
+                           Foreground="{DynamicResource Brush.Text.Muted}"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- History Feed ScrollViewer -->
+        <ScrollViewer x:Name="HistoryScrollViewer"
+                      Grid.Row="0"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer.Style>
+                <Style TargetType="ScrollViewer">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasHistory}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ScrollViewer.Style>
+
+            <ItemsControl ItemsSource="{Binding History}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:UserHistoryItemViewModel}">
+                        <Grid Margin="0,0,0,6">
+
+                            <!-- ============================================== -->
+                            <!-- STATE A: COLLAPSED SUMMARY ROW                 -->
+                            <!-- ============================================== -->
+                            <Button Command="{Binding ToggleExpandCommand}">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource CollapsedRowButton}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/> <!-- Icon -->
+                                        <ColumnDefinition Width="Auto"/> <!-- Name + NetID -->
+                                        <ColumnDefinition Width="Auto"/> <!-- Division Pill -->
+                                        <ColumnDefinition Width="Auto"/> <!-- Other Status Pills -->
+                                        <ColumnDefinition Width="*"/>    <!-- Dept display -->
+                                        <ColumnDefinition Width="Auto"/> <!-- Timestamp / Stale -->
+                                        <ColumnDefinition Width="Auto"/> <!-- Chevron -->
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- User Icon -->
+                                    <TextBlock Grid.Column="0"
+                                               Text="{x:Static res:Glyphs.User}"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="13"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,8,0"/>
+
+                                    <!-- Name + NetID -->
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                                        <TextBlock Text="{Binding DisplayName}"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                        <TextBlock Text=" · "
+                                                   Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                        <TextBlock Text="{Binding NetId}"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                    </StackPanel>
+
+                                    <!-- Division Pill (Collapsed) -->
+                                    <Border Grid.Column="2" CornerRadius="4" Background="#281738" BorderBrush="#5B2E84" BorderThickness="1" Padding="5,1" Margin="0,0,8,0" VerticalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasDivision}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding DivisionCode, StringFormat='DIV: {0}'}" FontSize="10" FontWeight="Bold" Foreground="#D8B4FE"/>
+                                    </Border>
+
+                                    <!-- Status Pills Cluster in Collapsed Row -->
+                                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                                        <!-- Error / Not Found Pill -->
+                                        <Border CornerRadius="4" Background="#3A1418" BorderBrush="#63232A" BorderThickness="1" Padding="5,1" Margin="0,0,4,0">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsFound}" Value="False">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="Not Found" FontSize="10" FontWeight="SemiBold" Foreground="#FF7B88"/>
+                                        </Border>
+
+                                        <!-- Locked Pill -->
+                                        <Border CornerRadius="4" Background="#3A1418" BorderBrush="#63232A" BorderThickness="1" Padding="5,1" Margin="0,0,4,0">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="Locked" FontSize="10" FontWeight="SemiBold" Foreground="#FF7B88"/>
+                                        </Border>
+
+                                        <!-- Disabled Pill -->
+                                        <Border CornerRadius="4" Background="#3A1418" BorderBrush="#63232A" BorderThickness="1" Padding="5,1" Margin="0,0,4,0">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsDisabled}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="Disabled" FontSize="10" FontWeight="SemiBold" Foreground="#FF7B88"/>
+                                        </Border>
+
+                                        <!-- Missing MIM Wrkst Group Warning (ONLY if missing!) -->
+                                        <Border CornerRadius="4" Background="#382810" BorderBrush="#5C421A" BorderThickness="1" Padding="5,1" Margin="0,0,4,0">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding HasMimWarning}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="⚠ Missing MIM Wrkst" FontSize="10" FontWeight="SemiBold" Foreground="#FFC069"/>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- Department display -->
+                                    <TextBlock Grid.Column="4"
+                                               Text="{Binding DepartmentDisplay}"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,12,0"/>
+
+                                    <!-- Timestamp on right -->
+                                    <TextBlock Grid.Column="5"
+                                               Text="{Binding TimeFormatted}"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,10,0"/>
+
+                                    <!-- Chevron down icon -->
+                                    <TextBlock Grid.Column="6"
+                                               Text="&#xE70D;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="10"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               VerticalAlignment="Center"/>
+                                </Grid>
+                            </Button>
+
+                            <!-- ============================================== -->
+                            <!-- STATE B: EXPANDED CARD                         -->
+                            <!-- ============================================== -->
+                            <Border CornerRadius="10"
+                                    Background="{DynamicResource CardGradient.Surface.L1}"
+                                    BorderBrush="{DynamicResource Brush.Card.Border}"
+                                    BorderThickness="1"
+                                    SnapsToDevicePixels="True">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="0.2"/>
+                                </Border.Effect>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="4"/>  <!-- Red Accent Stripe -->
+                                        <ColumnDefinition Width="*"/>  <!-- Main Card Body -->
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Left Accent Stripe -->
+                                    <Border Grid.Column="0"
+                                            Background="{DynamicResource Brush.Accent.Red}"
+                                            CornerRadius="10,0,0,10"/>
+
+                                    <!-- Card Content -->
+                                    <Grid Grid.Column="1" Margin="14,10">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/> <!-- Header -->
+                                            <RowDefinition Height="Auto"/> <!-- Warning Banner (only if missing MIM or locked) -->
+                                            <RowDefinition Height="Auto"/> <!-- Divider -->
+                                            <RowDefinition Height="*"/>    <!-- 2-Column Body -->
+                                        </Grid.RowDefinitions>
+
+                                        <!-- 1. Header: Glyph, Name, Division, Affiliation, NetID, Actions -->
+                                        <Grid Grid.Row="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/> <!-- Icon -->
+                                                <ColumnDefinition Width="*"/>    <!-- Name + Badges -->
+                                                <ColumnDefinition Width="Auto"/> <!-- Time + Actions -->
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Clean User Glyph Icon -->
+                                            <Border Grid.Column="0"
+                                                    Width="34" Height="34"
+                                                    CornerRadius="17"
+                                                    Background="{DynamicResource Brush.Surface.Hover}"
+                                                    BorderBrush="{DynamicResource Brush.Border}"
+                                                    BorderThickness="1"
+                                                    Margin="0,0,10,0"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock Text="{x:Static res:Glyphs.User}"
+                                                           FontFamily="Segoe MDL2 Assets"
+                                                           FontSize="16"
+                                                           Foreground="{DynamicResource Brush.Text.Primary}"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Border>
+
+                                            <!-- Name, Division, and Badges -->
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <!-- Display Name -->
+                                                    <TextBlock Text="{Binding DisplayName}"
+                                                               FontSize="15"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{DynamicResource Brush.Text.Primary}"
+                                                               VerticalAlignment="Center"
+                                                               Margin="0,0,8,0"/>
+
+                                                    <!-- Prominent Division Badge -->
+                                                    <Border CornerRadius="4" Background="#281738" BorderBrush="#6C3BAA" BorderThickness="1" Padding="6,1" Margin="0,0,6,0" VerticalAlignment="Center">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding HasDivision}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <TextBlock Text="{Binding DivisionCode, StringFormat='DIV: {0}'}" FontSize="11" FontWeight="Bold" Foreground="#E9D5FF"/>
+                                                    </Border>
+
+                                                    <!-- Affiliation Pill -->
+                                                    <Border CornerRadius="4" Background="#122438" BorderBrush="#1D3D5E" BorderThickness="1" Padding="6,1" Margin="0,0,6,0" VerticalAlignment="Center">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Affiliation}" Value="">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <TextBlock Text="{Binding Affiliation}" FontSize="10" FontWeight="SemiBold" Foreground="#6EC3FF"/>
+                                                    </Border>
+
+                                                    <!-- Locked Pill (Only if locked!) -->
+                                                    <Border CornerRadius="4" Background="#3A1418" BorderBrush="#63232A" BorderThickness="1" Padding="6,1" Margin="0,0,6,0" VerticalAlignment="Center">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <TextBlock Text="Locked Out" FontSize="10" FontWeight="Bold" Foreground="#FF7B88"/>
+                                                    </Border>
+
+                                                    <!-- Disabled Pill (Only if disabled!) -->
+                                                    <Border CornerRadius="4" Background="#3A1418" BorderBrush="#63232A" BorderThickness="1" Padding="6,1" Margin="0,0,6,0" VerticalAlignment="Center">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsDisabled}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <TextBlock Text="Disabled" FontSize="10" FontWeight="Bold" Foreground="#FF7B88"/>
+                                                    </Border>
+
+                                                    <!-- NetID Chip Button with Copy -->
+                                                    <Button Style="{StaticResource NetIdChipButton}"
+                                                            Command="{Binding CopyNetIdCommand}"
+                                                            ToolTip="Click to copy NetID to clipboard"
+                                                            VerticalAlignment="Center">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="NetID: " Foreground="{DynamicResource Brush.Text.Muted}" FontSize="11"/>
+                                                            <TextBlock Text="{Binding NetId}" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource Brush.Text.Primary}"/>
+
+                                                            <!-- Copy Icon (default) -->
+                                                            <TextBlock Text=" &#xE8C8;"
+                                                                       FontFamily="Segoe MDL2 Assets"
+                                                                       FontSize="10"
+                                                                       Foreground="{DynamicResource Brush.Text.Muted}"
+                                                                       VerticalAlignment="Center">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsCopied}" Value="True">
+                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+
+                                                            <!-- Copied Checkmark Feedback -->
+                                                            <TextBlock Text=" ✓ Copied"
+                                                                       FontSize="10"
+                                                                       FontWeight="Bold"
+                                                                       Foreground="#5CDA89"
+                                                                       VerticalAlignment="Center">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsCopied}" Value="True">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </Button>
+                                                </WrapPanel>
+                                            </StackPanel>
+
+                                            <!-- Right side of Header: Stale Indicator, Timestamp, Refresh, Chevron Up -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <!-- Stale Indicator -->
+                                                <Border CornerRadius="4" Background="#382810" BorderBrush="#5C421A" BorderThickness="1" Padding="5,1" Margin="0,0,6,0">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsStale}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Text="{Binding RelativeAgeText, StringFormat='searched {0}'}" FontSize="10" Foreground="#FFC069" VerticalAlignment="Center"/>
+                                                </Border>
+
+                                                <!-- Normal Timestamp (when not stale) -->
+                                                <TextBlock Text="{Binding TimeFormatted}"
+                                                           FontSize="11"
+                                                           Foreground="{DynamicResource Brush.Text.Muted}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="0,0,6,0">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsStale}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+
+                                                <!-- Refresh Entry Button -->
+                                                <Button Style="{StaticResource GhostActionButton}"
+                                                        Command="{Binding RefreshCommand}"
+                                                        ToolTip="Re-query Active Directory for this user"
+                                                        Padding="5,3"
+                                                        Margin="0,0,4,0">
+                                                    <TextBlock Text="&#xE72C;"
+                                                               FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                </Button>
+
+                                                <!-- Collapse Button (Chevron Up) -->
+                                                <Button Style="{StaticResource GhostActionButton}"
+                                                        Command="{Binding ToggleExpandCommand}"
+                                                        ToolTip="Collapse card"
+                                                        Padding="5,3">
+                                                    <TextBlock Text="&#xE70E;"
+                                                               FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- 2. Warning Callout (ONLY VISIBLE IF MIM GROUP IS MISSING!) -->
+                                        <Border Grid.Row="1"
+                                                Background="#2D1518"
+                                                BorderBrush="#5E252C"
+                                                BorderThickness="1"
+                                                CornerRadius="6"
+                                                Padding="10,5"
+                                                Margin="0,8,0,0">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding HasMimWarning}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="⚠  " Foreground="#FF7B88" FontWeight="Bold"/>
+                                                <TextBlock Text="User is missing the 'UA-MIM-Wrkst-AllDivUsers' Group"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="#FF7B88"
+                                                           FontSize="11"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- 3. Divider -->
+                                        <Border Grid.Row="2"
+                                                Height="1"
+                                                Background="{DynamicResource Brush.Border}"
+                                                Margin="0,8,0,8"/>
+
+                                        <!-- If User Not Found Error -->
+                                        <Border Grid.Row="3"
+                                                Background="#251214"
+                                                BorderBrush="#4B171A"
+                                                BorderThickness="1"
+                                                CornerRadius="6"
+                                                Padding="10,8"
+                                                Margin="0,4,0,0">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsFound}" Value="False">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <StackPanel>
+                                                <TextBlock Text="User Not Found or Search Aborted"
+                                                           FontWeight="Bold"
+                                                           Foreground="#FF7B88"
+                                                           FontSize="12"
+                                                           Margin="0,0,0,2"/>
+                                                <TextBlock Text="{Binding ErrorMessage}"
+                                                           Foreground="{DynamicResource Brush.Text.Muted}"
+                                                           FontSize="11"
+                                                           TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- 4. Two-Column Body -->
+                                        <Grid Grid.Row="3">
+                                            <Grid.Style>
+                                                <Style TargetType="Grid">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsFound}" Value="False">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Grid.Style>
+
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="14"/> <!-- Spacer -->
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- =================== LEFT COLUMN: ORGANIZATION & SUPPORT =================== -->
+                                            <Border Grid.Column="0"
+                                                    Background="{DynamicResource Brush.Surface.1}"
+                                                    BorderBrush="{DynamicResource Brush.Border}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="6"
+                                                    Padding="10,8">
+                                                <StackPanel>
+                                                    <TextBlock Text="ORGANIZATION &amp; SUPPORT"
+                                                               FontSize="10"
+                                                               FontWeight="Bold"
+                                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                                               Margin="0,0,0,6"/>
+
+                                                    <!-- Division -->
+                                                    <DockPanel Margin="0,0,0,4">
+                                                        <TextBlock Text="Division: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                        <TextBlock Text="{Binding DivisionDisplay}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                    </DockPanel>
+
+                                                    <!-- Department -->
+                                                    <DockPanel Margin="0,0,0,4">
+                                                        <TextBlock Text="Department: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                        <TextBlock Text="{Binding DepartmentDisplay}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" TextTrimming="CharacterEllipsis"/>
+                                                    </DockPanel>
+
+                                                    <!-- Support Team (Clickable to toggle manager & contact info) -->
+                                                    <DockPanel Margin="0,0,0,4">
+                                                        <TextBlock Text="Support Team: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                        <Button Command="{Binding ToggleTeamDetailsCommand}"
+                                                                ToolTip="Click to toggle team manager and contact info"
+                                                                VerticalAlignment="Center">
+                                                            <Button.Style>
+                                                                <Style TargetType="Button" BasedOn="{StaticResource InlineLinkButton}">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding HasSupportTeam}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Button.Style>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="{Binding SupportTeamName}" FontSize="11" FontWeight="SemiBold"/>
+                                                                <TextBlock Text=" &#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="9" VerticalAlignment="Center" Margin="2,1,0,0">
+                                                                    <TextBlock.Style>
+                                                                        <Style TargetType="TextBlock">
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding ShowTeamDetails}" Value="True">
+                                                                                    <Setter Property="Text" Value=" &#xE70E;"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </TextBlock.Style>
+                                                                </TextBlock>
+                                                            </StackPanel>
+                                                        </Button>
+                                                        <TextBlock Text="None" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding HasSupportTeam}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </DockPanel>
+
+                                                    <!-- Expandable Support Team Details (Manager & Phone) -->
+                                                    <Border Background="#0C1420"
+                                                            BorderBrush="#1D2A3B"
+                                                            BorderThickness="1"
+                                                            CornerRadius="6"
+                                                            Padding="8,6"
+                                                            Margin="0,2,0,6">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ShowTeamDetails}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <StackPanel>
+                                                            <!-- Manager -->
+                                                            <DockPanel Margin="0,0,0,3">
+                                                                <DockPanel.Style>
+                                                                    <Style TargetType="DockPanel">
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding HasManager}" Value="False">
+                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </DockPanel.Style>
+                                                                <TextBlock Text="Manager: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding ManagerName}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                                    <TextBlock Text=" (" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                    <TextBlock Text="{Binding ManagerNetID}" FontSize="10" Foreground="{DynamicResource Brush.Info.Light}"/>
+                                                                    <TextBlock Text=")" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                </StackPanel>
+                                                            </DockPanel>
+
+                                                            <!-- Support Phone -->
+                                                            <DockPanel Margin="0,0,0,3">
+                                                                <DockPanel.Style>
+                                                                    <Style TargetType="DockPanel">
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding HasSupportPhone}" Value="False">
+                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </DockPanel.Style>
+                                                                <TextBlock Text="Phone: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                                <TextBlock Text="{Binding SupportPhone}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                            </DockPanel>
+
+                                                            <!-- Link to View in Groups -->
+                                                            <Button Content="View in Groups &#x2192;"
+                                                                    Command="{Binding NavigateTeamCommand}"
+                                                                    Style="{StaticResource InlineLinkButton}"
+                                                                    FontSize="10"
+                                                                    Foreground="{DynamicResource Brush.Info.Light}"
+                                                                    HorizontalAlignment="Left"
+                                                                    Margin="0,2,0,0"/>
+                                                        </StackPanel>
+                                                    </Border>
+
+                                                    <!-- Department Notes -->
+                                                    <StackPanel Margin="0,0,0,4">
+                                                        <StackPanel.Style>
+                                                            <Style TargetType="StackPanel">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding HasNotes}" Value="False">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </StackPanel.Style>
+                                                        <TextBlock Text="Notes: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                        <TextBlock Text="{Binding DepartmentNotes}" FontSize="10" Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap"/>
+                                                    </StackPanel>
+
+                                                    <!-- Action Buttons: File Repo -->
+                                                    <WrapPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                        <Button Command="{Binding OpenFileRepoCommand}">
+                                                            <Button.Style>
+                                                                <Style TargetType="Button" BasedOn="{StaticResource GhostActionButton}">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding HasFileRepo}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Button.Style>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="&#xE8A7; " FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource Brush.Info.Light}"/>
+                                                                <TextBlock Text="File Repository" FontSize="10"/>
+                                                            </StackPanel>
+                                                        </Button>
+                                                    </WrapPanel>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <!-- =================== RIGHT COLUMN: LICENSING =================== -->
+                                            <Border Grid.Column="2"
+                                                    Background="{DynamicResource Brush.Surface.1}"
+                                                    BorderBrush="{DynamicResource Brush.Border}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="6"
+                                                    Padding="10,8">
+                                                <StackPanel>
+                                                    <TextBlock Text="SOFTWARE LICENSES"
+                                                               FontSize="10"
+                                                               FontWeight="Bold"
+                                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                                               Margin="0,0,0,6"/>
+
+                                                    <!-- Microsoft 365 License -->
+                                                    <DockPanel Margin="0,0,0,6">
+                                                        <TextBlock Text="Microsoft 365: "
+                                                                   FontSize="11"
+                                                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                                                   VerticalAlignment="Center"
+                                                                   DockPanel.Dock="Left"/>
+
+                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                            <Border CornerRadius="4" Background="#122438" BorderBrush="#1D3D5E" BorderThickness="1" Padding="6,1" Margin="0,0,4,0">
+                                                                <TextBlock Text="{Binding LicenseSummary}" FontSize="10" FontWeight="SemiBold" Foreground="#6EC3FF"/>
+                                                            </Border>
+
+                                                            <!-- Toggle Raw License Button -->
+                                                            <Button Style="{StaticResource GhostActionButton}"
+                                                                    Command="{Binding ToggleRawLicenseCommand}"
+                                                                    ToolTip="Toggle raw license attributes"
+                                                                    Padding="5,1">
+                                                                <TextBlock Text="Raw" FontSize="10"/>
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </DockPanel>
+
+                                                    <!-- Expandable Raw License Inset -->
+                                                    <Border Background="#0C1420"
+                                                            BorderBrush="#1D2A3B"
+                                                            BorderThickness="1"
+                                                            CornerRadius="6"
+                                                            Padding="6,4"
+                                                            Margin="0,0,0,6">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ShowRawLicense}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <TextBox Text="{Binding RawLicense, Mode=OneWay}"
+                                                                 IsReadOnly="True"
+                                                                 Background="Transparent"
+                                                                 Foreground="{DynamicResource Brush.Text.Muted}"
+                                                                 BorderThickness="0"
+                                                                 FontFamily="Cascadia Code, Consolas"
+                                                                 FontSize="10"
+                                                                 TextWrapping="Wrap"
+                                                                 MaxHeight="60"
+                                                                 VerticalScrollBarVisibility="Auto"/>
+                                                    </Border>
+
+                                                    <!-- Adobe License Check Section -->
+                                                    <DockPanel Margin="0,0,0,6">
+                                                        <TextBlock Text="Adobe Licenses: "
+                                                                   FontSize="11"
+                                                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                                                   VerticalAlignment="Center"
+                                                                   DockPanel.Dock="Left"/>
+
+                                                        <Button Content="Check"
+                                                                Command="{Binding CheckAdobeCommand}"
+                                                                HorizontalAlignment="Right">
+                                                            <Button.Style>
+                                                                <Style TargetType="Button" BasedOn="{StaticResource GhostActionButton}">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsAdobeChecking}" Value="True">
+                                                                            <Setter Property="Content" Value="Checking…"/>
+                                                                            <Setter Property="IsEnabled" Value="False"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding HasAdobeChecked}" Value="True">
+                                                                            <Setter Property="Content" Value="Re-check"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Button.Style>
+                                                        </Button>
+                                                    </DockPanel>
+
+                                                    <!-- Inset Adobe License Results Panel -->
+                                                    <Border Background="#0C1420"
+                                                            BorderBrush="#1D3D5E"
+                                                            BorderThickness="1"
+                                                            CornerRadius="4"
+                                                            Padding="8,5"
+                                                            Margin="0,0,0,4">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding HasAdobeChecked}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+
+                                                        <StackPanel>
+                                                            <DockPanel Margin="0,0,0,2">
+                                                                <TextBlock Text="Acrobat Pro: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                <TextBlock HorizontalAlignment="Right" FontSize="10" FontWeight="SemiBold">
+                                                                    <TextBlock.Style>
+                                                                        <Style TargetType="TextBlock">
+                                                                            <Setter Property="Text" Value="✗ None"/>
+                                                                            <Setter Property="Foreground" Value="#FF7B88"/>
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding HasAcrobatPro}" Value="True">
+                                                                                    <Setter Property="Text" Value="✓ Assigned"/>
+                                                                                    <Setter Property="Foreground" Value="#5CDA89"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </TextBlock.Style>
+                                                                </TextBlock>
+                                                            </DockPanel>
+
+                                                            <DockPanel>
+                                                                <TextBlock Text="Creative Cloud: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                <TextBlock HorizontalAlignment="Right" FontSize="10" FontWeight="SemiBold">
+                                                                    <TextBlock.Style>
+                                                                        <Style TargetType="TextBlock">
+                                                                            <Setter Property="Text" Value="✗ None"/>
+                                                                            <Setter Property="Foreground" Value="#FF7B88"/>
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding HasCreativeCloud}" Value="True">
+                                                                                    <Setter Property="Text" Value="✓ Assigned"/>
+                                                                                    <Setter Property="Foreground" Value="#5CDA89"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </TextBlock.Style>
+                                                                </TextBlock>
+                                                            </DockPanel>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Border>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Bottom Action Bar -->
         <Grid Grid.Row="1" Margin="0,10,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <!-- Clear + Refresh (left) -->
-                <ColumnDefinition Width="*"/>
-                <!-- spacer -->
-                <ColumnDefinition Width="Auto"/>
-                <!-- Font controls (right) -->
+                <ColumnDefinition Width="Auto"/> <!-- Action Buttons -->
+                <ColumnDefinition Width="*"/>    <!-- Spacer -->
+                <ColumnDefinition Width="Auto"/> <!-- Font / Scaling Controls -->
             </Grid.ColumnDefinitions>
 
-            <!-- Left cluster: Clear + Refresh -->
-            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
-                <!-- Clear -->
-                <Button
-                    Content="Clear"
-                    Margin="0,0,12,0"
-                    Click="ClearLog_Click"
-                    Style="{DynamicResource Button.FlowDoc}"
-                    ToolTip="Clear the log output"/>
+            <!-- Left Buttons: Clear, Refresh Dept, Collapse All, Expand All -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <Button Content="Clear"
+                        Command="{Binding ClearCommand}"
+                        Style="{DynamicResource Button.FlowDoc}"
+                        Margin="0,0,8,0"
+                        ToolTip="Clear search history"/>
 
-                <!-- Refresh Dept Data (single Style via BasedOn) -->
-                <Button
-                    x:Name="RefreshDeptButton"
-                    Content="Refresh Dept Data"
-                    Padding="10,4"
-                    Margin="0,0,12,0"
-                    Click="RefreshDept_Click"
-                    ToolTip="Reload departmental JSON from web/cache">
+                <Button Content="Refresh Dept Data"
+                        Command="{Binding RefreshDeptCommand}"
+                        Margin="0,0,8,0"
+                        ToolTip="Reload departmental JSON data">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource Button.FlowDoc}">
                             <Style.Triggers>
-                                <!-- Disable and show busy label while refreshing -->
                                 <DataTrigger Binding="{Binding IsRefreshing}" Value="True">
                                     <Setter Property="IsEnabled" Value="False"/>
-                                    <Setter Property="Content"   Value="Refreshing…"/>
+                                    <Setter Property="Content" Value="Refreshing…"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </Button.Style>
                 </Button>
+
+                <Button Content="Collapse All"
+                        Command="{Binding CollapseAllCommand}"
+                        Style="{DynamicResource Button.FlowDoc}"
+                        Margin="0,0,8,0"
+                        ToolTip="Collapse all history cards to single-line summaries"/>
+
+                <Button Content="Expand All"
+                        Command="{Binding ExpandAllCommand}"
+                        Style="{DynamicResource Button.FlowDoc}"
+                        ToolTip="Expand all history cards"/>
             </StackPanel>
 
-            <!-- Right cluster: font controls -->
-            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="A-"
-                        Click="DecreaseFont_Click"
+            <!-- Right Buttons: Font Sizing -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button Content="A−"
+                        Command="{Binding DecreaseFontCommand}"
                         Style="{DynamicResource Button.FlowDoc.Small}"
-                        ToolTip="Decrease log text size" />
+                        ToolTip="Decrease text size"/>
                 <Button Content="A"
-                        Click="ResetFont_Click"
+                        Command="{Binding ResetFontCommand}"
                         Style="{DynamicResource Button.FlowDoc.Small}"
-                        ToolTip="Reset log text size" />
+                        ToolTip="Reset text size"/>
                 <Button Content="A+"
-                        Click="IncreaseFont_Click"
+                        Command="{Binding IncreaseFontCommand}"
                         Style="{DynamicResource Button.FlowDoc.Small}"
-                        ToolTip="Increase log text size" />
+                        Margin="6,0,0,0"
+                        ToolTip="Increase text size"/>
             </StackPanel>
         </Grid>
     </Grid>

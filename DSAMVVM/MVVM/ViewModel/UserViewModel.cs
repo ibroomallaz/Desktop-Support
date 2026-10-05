@@ -1,11 +1,19 @@
-﻿using DSAMVVM.Core.Enums;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Interfaces.AD;
+using DSAMVVM.Core.Interfaces.Integrations;
+using DSAMVVM.Core.Interfaces.UI;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Renderers;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
-using System.IO;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -19,6 +27,10 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IDeepLinkRoutingService _linkRouter;
 
         private const string ViewKey = "UserView";
+
+        public ObservableCollection<UserHistoryItemViewModel> History { get; } = new();
+
+        public bool HasHistory => History.Count > 0;
 
         private double _effectiveFontSize = 14;
         public double EffectiveFontSize
@@ -55,6 +67,15 @@ namespace DSAMVVM.MVVM.ViewModel
             private set { _searchLog = value; OnPropertyChanged(nameof(SearchLog)); }
         }
 
+        // Commands for modern UI
+        public ICommand ClearCommand { get; }
+        public ICommand RefreshDeptCommand { get; }
+        public ICommand CollapseAllCommand { get; }
+        public ICommand ExpandAllCommand { get; }
+        public ICommand IncreaseFontCommand { get; }
+        public ICommand DecreaseFontCommand { get; }
+        public ICommand ResetFontCommand { get; }
+
         public UserViewModel(
             IADService adService,
             IDepartmentService deptService,
@@ -69,6 +90,16 @@ namespace DSAMVVM.MVVM.ViewModel
             _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
             _flowDoc = flowDoc ?? throw new ArgumentNullException(nameof(flowDoc));
             _linkRouter = linkRouter ?? throw new ArgumentNullException(nameof(linkRouter));
+
+            ClearCommand = new RelayCommand(_ => ClearLog());
+            RefreshDeptCommand = new RelayCommand(async _ => await RefreshDepartmentDataAsync());
+            CollapseAllCommand = new RelayCommand(_ => CollapseAll());
+            ExpandAllCommand = new RelayCommand(_ => ExpandAll());
+            IncreaseFontCommand = new RelayCommand(_ => AdjustFont(+1));
+            DecreaseFontCommand = new RelayCommand(_ => AdjustFont(-1));
+            ResetFontCommand = new RelayCommand(_ => ResetFont());
+
+            History.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasHistory));
 
             _notifier.Changed += OnFontSettingsChanged;
             _flowDoc.LinkClicked += OnLinkClicked;
@@ -89,6 +120,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 SearchLog += result;
             }
         }
+
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
             Error = null;
@@ -119,9 +151,27 @@ namespace DSAMVVM.MVVM.ViewModel
 
                 SearchLog += IdentityRenderer.RenderADUser(user);
 
+                // Collapse all previous items so newest expands
+                foreach (var item in History)
+                {
+                    item.IsExpanded = false;
+                }
+
+                var entry = new UserHistoryItemViewModel(
+                    context.Query,
+                    user,
+                    _adService,
+                    _deptService,
+                    _linkRouter)
+                {
+                    IsExpanded = true
+                };
+
                 if (user is { Exists: true })
                 {
                     Log.Info(ViewKey, $"User '{user.Name}' found successfully.");
+
+                    await entry.LoadDepartmentDetailsAsync();
 
                     if (!string.IsNullOrEmpty(user.DepartmentNumber))
                     {
@@ -133,6 +183,8 @@ namespace DSAMVVM.MVVM.ViewModel
                     Error = user?.ErrorMessage ?? "User not found.";
                     Log.Warn(ViewKey, $"Search completed, but user '{context.Query}' was not found. Error: {Error}");
                 }
+
+                History.Add(entry);
             }
             catch (Exception ex)
             {
@@ -142,6 +194,17 @@ namespace DSAMVVM.MVVM.ViewModel
                 var failDoc = new FlowDocMarkupBuilder();
                 failDoc.AddError($"Search failed: {ex.Message}");
                 SearchLog += failDoc.ToString();
+
+                var failEntry = new UserHistoryItemViewModel(
+                    context.Query,
+                    new ADUserInfo { Name = context.Query, Exists = false, ErrorMessage = ex.Message },
+                    _adService,
+                    _deptService,
+                    _linkRouter)
+                {
+                    IsExpanded = true
+                };
+                History.Add(failEntry);
             }
             finally
             {
@@ -165,6 +228,15 @@ namespace DSAMVVM.MVVM.ViewModel
                 var endDoc = new FlowDocMarkupBuilder();
                 endDoc.AddSuccess("Department data refresh completed.");
                 SearchLog += endDoc.ToString();
+
+                // Refresh department info for any currently displayed users
+                foreach (var item in History)
+                {
+                    if (item.IsFound)
+                    {
+                        await item.LoadDepartmentDetailsAsync();
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -173,6 +245,22 @@ namespace DSAMVVM.MVVM.ViewModel
                 SearchLog += errDoc.ToString();
             }
             finally { IsRefreshing = false; }
+        }
+
+        public void CollapseAll()
+        {
+            foreach (var item in History)
+            {
+                item.IsExpanded = false;
+            }
+        }
+
+        public void ExpandAll()
+        {
+            foreach (var item in History)
+            {
+                item.IsExpanded = true;
+            }
         }
 
         public void AdjustFont(int delta)
@@ -194,7 +282,12 @@ namespace DSAMVVM.MVVM.ViewModel
         }
 
         public Task<string?> LookupNameByID(string id) => _adService.LookupNameByEmployeeID(id);
-        public void ClearLog() => SearchLog = string.Empty;
+
+        public void ClearLog()
+        {
+            SearchLog = string.Empty;
+            History.Clear();
+        }
 
         private void OnFontSettingsChanged(object? s, EventArgs e) => RefreshEffectiveFontSize();
         private void RefreshEffectiveFontSize() => EffectiveFontSize = _notifier.GetFontSize(ViewKey);

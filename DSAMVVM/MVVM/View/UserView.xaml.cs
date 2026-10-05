@@ -1,16 +1,12 @@
-﻿using DSAMVVM.MVVM.ViewModel;
-using System.ComponentModel;
+﻿using System.Collections.Specialized;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Media;
+using DSAMVVM.MVVM.ViewModel;
 
 namespace DSAMVVM.MVVM.View
 {
     public partial class UserView
     {
         private UserViewModel? _vm;
-        private FlowDocumentScrollViewer? _viewer;
 
         public UserView()
         {
@@ -22,9 +18,7 @@ namespace DSAMVVM.MVVM.View
 
         private void OnLoaded(object? sender, RoutedEventArgs e)
         {
-            _viewer = FindOutputViewer();
             HookVm(DataContext as UserViewModel);
-            ApplyFontSizeFromVm();
         }
 
         private void OnUnloaded(object? sender, RoutedEventArgs e)
@@ -36,67 +30,35 @@ namespace DSAMVVM.MVVM.View
         {
             UnhookVm(_vm);
             HookVm(e.NewValue as UserViewModel);
-            ApplyFontSizeFromVm();
         }
 
         private void HookVm(UserViewModel? vm)
         {
             _vm = vm;
-            _vm?.PropertyChanged += OnVmPropertyChanged;
+            if (_vm != null)
+            {
+                _vm.History.CollectionChanged += OnHistoryCollectionChanged;
+            }
         }
 
         private void UnhookVm(UserViewModel? vm)
         {
-            vm?.PropertyChanged -= OnVmPropertyChanged;
-        }
-
-        private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(UserViewModel.EffectiveFontSize))
-                ApplyFontSizeFromVm();
-        }
-
-        private void ApplyFontSizeFromVm()
-        {
-            if (_vm == null) return;
-
-            var viewer = _viewer ??= FindOutputViewer();
-            if (viewer == null) return;
-
-            viewer.Document ??= new FlowDocument();
-            viewer.Document.FontSize = _vm.EffectiveFontSize;
-        }
-
-        private FlowDocumentScrollViewer? FindOutputViewer()
-        {
-            if (this.FindName("OutputViewer") is FlowDocumentScrollViewer named) return named;
-            return FindDescendant<FlowDocumentScrollViewer>(this);
-        }
-
-        private static T? FindDescendant<T>(DependencyObject root) where T : DependencyObject
-        {
-            if (root is T typed) return typed;
-
-            int count = VisualTreeHelper.GetChildrenCount(root);
-            for (int i = 0; i < count; i++)
+            if (vm != null)
             {
-                var child = VisualTreeHelper.GetChild(root, i);
-                var result = FindDescendant<T>(child);
-                if (result != null) return result;
+                vm.History.CollectionChanged -= OnHistoryCollectionChanged;
             }
-            return null;
         }
 
-        // Bottom bar actions delegate to the ViewModel
-        private void ClearLog_Click(object sender, RoutedEventArgs e) => _vm?.ClearLog();
-        private void IncreaseFont_Click(object sender, RoutedEventArgs e) => _vm?.AdjustFont(+1);
-        private void DecreaseFont_Click(object sender, RoutedEventArgs e) => _vm?.AdjustFont(-1);
-        private void ResetFont_Click(object sender, RoutedEventArgs e) => _vm?.ResetFont();
-
-        private async void RefreshDept_Click(object sender, RoutedEventArgs e)
+        private void OnHistoryCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            if (_vm != null)
-                await _vm.RefreshDepartmentDataAsync();
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                // Auto-scroll to the bottom of the feed so the newest card is in view
+                Dispatcher.InvokeAsync(() =>
+                {
+                    HistoryScrollViewer.ScrollToBottom();
+                }, System.Windows.Threading.DispatcherPriority.Loaded);
+            }
         }
     }
 }
