@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Interfaces.AD;
-using DSAMVVM.Core.Interfaces.Integrations;
-using DSAMVVM.Core.Interfaces.UI;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
-using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
 
 namespace DSAMVVM.MVVM.ViewModel
@@ -25,7 +18,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public string Query { get; }
         public DateTime Timestamp { get; private set; }
-        public string TimeFormatted => Timestamp.ToString("HH:mm");
+        public string TimeFormatted => Timestamp.ToString("h:mm tt");
 
         public string RelativeAgeText
         {
@@ -124,7 +117,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public bool IsActive => User?.Exists == true && User.Enabled != false && User.Locked != true;
         public bool IsLocked => User?.Locked == true;
         public bool IsDisabled => User?.Enabled == false;
-        public bool HasMimWarning => User?.Exists == true && !User.HasMimWrkstGroup;
+        public bool HasMimWarning => User is { Exists: true, HasMimWrkstGroup: false };
 
         public string LicenseSummary => !string.IsNullOrWhiteSpace(User?.License) ? User.License : "None";
         public string? RawLicense => User?.RawLicense;
@@ -357,7 +350,7 @@ namespace DSAMVVM.MVVM.ViewModel
                     MimGroupsStatusMessage = "Loading MIM groups…";
                     var result = await _adService.GetUserMimGroupsAsync(NetId);
                     MimGroups.Clear();
-                    if (result?.Groups is { Count: > 0 })
+                    if (result.Groups is { Count: > 0 })
                     {
                         foreach (var g in result.Groups)
                         {
@@ -389,25 +382,22 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 IsRefreshing = true;
                 var updatedUser = await _adService.GetUserAsync(NetId);
-                if (updatedUser != null)
+                User = updatedUser;
+                Timestamp = DateTime.Now;
+                OnPropertyChanged(nameof(TimeFormatted));
+                OnPropertyChanged(nameof(RelativeAgeText));
+                OnPropertyChanged(nameof(IsStale));
+                await LoadDepartmentDetailsAsync();
+
+                if (HasAdobeChecked)
                 {
-                    User = updatedUser;
-                    Timestamp = DateTime.Now;
-                    OnPropertyChanged(nameof(TimeFormatted));
-                    OnPropertyChanged(nameof(RelativeAgeText));
-                    OnPropertyChanged(nameof(IsStale));
-                    await LoadDepartmentDetailsAsync();
+                    await CheckAdobeAsync();
+                }
 
-                    if (HasAdobeChecked)
-                    {
-                        await CheckAdobeAsync();
-                    }
-
-                    if (ShowMimGroups)
-                    {
-                        MimGroups.Clear();
-                        await ToggleMimGroupsAsync();
-                    }
+                if (ShowMimGroups)
+                {
+                    MimGroups.Clear();
+                    await ToggleMimGroupsAsync();
                 }
             }
             catch (Exception ex)
@@ -428,7 +418,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 IsAdobeChecking = true;
                 var status = await _adService.CheckAdobeLicensesAsync(NetId);
                 AdobeStatus = status;
-                AdobeCheckTime = DateTime.Now.ToString("HH:mm");
+                AdobeCheckTime = DateTime.Now.ToString("h:mm tt");
             }
             catch (Exception ex)
             {
@@ -493,7 +483,7 @@ namespace DSAMVVM.MVVM.ViewModel
             }
 
             // 4. Handle "First Last" format
-            var words = cleaned.Split(new[] { ' ', '-' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            var words = cleaned.Split([' ', '-'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             if (words.Length >= 2)
             {
                 char first = GetFirstLetter(words[0]);
@@ -513,11 +503,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private static char GetFirstLetter(string str)
         {
-            foreach (char c in str)
-            {
-                if (char.IsLetter(c)) return char.ToUpperInvariant(c);
-            }
-            return '\0';
+            return (from c in str where char.IsLetter(c) select char.ToUpperInvariant(c)).FirstOrDefault();
         }
     }
 }

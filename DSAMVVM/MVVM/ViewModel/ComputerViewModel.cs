@@ -1,12 +1,13 @@
-﻿using DSAMVVM.Core.Enums;
+﻿using System.Collections.ObjectModel;
+using System.IO;
+using System.Windows.Input;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Renderers;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
-using System.IO;
-using System.Windows.Input;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -20,7 +21,10 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IDeepLinkRoutingService _linkRouter;
 
         private const string ViewKey = "ComputerView";
-        private string? _currentSearchQuery;
+
+        // Modern Card Feed History
+        public ObservableCollection<ComputerHistoryItemViewModel> History { get; } = new();
+        public bool HasHistory => History.Count > 0;
 
         // Errors / state
         private string? _error;
@@ -29,7 +33,7 @@ namespace DSAMVVM.MVVM.ViewModel
         private bool _isLoading;
         public bool IsLoading { get => _isLoading; private set { _isLoading = value; OnPropertyChanged(); } }
 
-        // FlowDoc text (bound to viewer)
+        // FlowDoc text (retained internally for backward compatibility)
         private string _searchLog = string.Empty;
         public string SearchLog { get => _searchLog; private set { _searchLog = value; OnPropertyChanged(); } }
 
@@ -42,7 +46,10 @@ namespace DSAMVVM.MVVM.ViewModel
         }
 
         // Commands
+        public ICommand ClearCommand { get; }
         public ICommand ClearLogCommand { get; }
+        public ICommand CollapseAllCommand { get; }
+        public ICommand ExpandAllCommand { get; }
         public ICommand IncreaseFontCommand { get; }
         public ICommand DecreaseFontCommand { get; }
         public ICommand ResetFontCommand { get; }
@@ -60,20 +67,24 @@ namespace DSAMVVM.MVVM.ViewModel
             _flowDoc = flowDoc ?? throw new ArgumentNullException(nameof(flowDoc));
             _linkRouter = linkRouter ?? throw new ArgumentNullException(nameof(linkRouter));
 
-            RefreshEffectiveFont();
-            _notifier.Changed += OnOutputFontSettingsChanged;
-            _flowDoc.LinkClicked += OnLinkClicked;
-
+            ClearCommand = new RelayCommand(_ => ClearLog());
             ClearLogCommand = new RelayCommand(_ => ClearLog());
+            CollapseAllCommand = new RelayCommand(_ => CollapseAll());
+            ExpandAllCommand = new RelayCommand(_ => ExpandAll());
             IncreaseFontCommand = new RelayCommand(_ => AdjustFont(+1));
             DecreaseFontCommand = new RelayCommand(_ => AdjustFont(-1));
             ResetFontCommand = new RelayCommand(_ => ResetFont());
+
+            History.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasHistory));
+
+            RefreshEffectiveFont();
+            _notifier.Changed += OnOutputFontSettingsChanged;
+            _flowDoc.LinkClicked += OnLinkClicked;
         }
 
         // --- Deep Link Handler ---
         private async void OnLinkClicked(object? sender, string url)
         {
-
             string? sourceView = sender as string;
             if (sourceView != ViewKey) return;
 
@@ -119,7 +130,6 @@ namespace DSAMVVM.MVVM.ViewModel
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
             Error = null;
-            _currentSearchQuery = context.Query;
 
             var headerDoc = new FlowDocMarkupBuilder();
             if (!string.IsNullOrEmpty(SearchLog)) headerDoc.AddHeader("New Search");
@@ -146,8 +156,23 @@ namespace DSAMVVM.MVVM.ViewModel
                 var result = await searchService.SearchAsync(context, target);
                 var comp = result as ADComputerInfo;
 
-                // Push formatting to the renderer
+                // Push formatting to the legacy renderer
                 SearchLog += IdentityRenderer.RenderADComputer(comp);
+
+                // Collapse previous items so newest expands
+                foreach (var item in History)
+                {
+                    item.IsExpanded = false;
+                }
+
+                var entry = new ComputerHistoryItemViewModel(
+                    context.Query,
+                    comp,
+                    _ad,
+                    _linkRouter)
+                {
+                    IsExpanded = true
+                };
 
                 if (comp is { Exists: true })
                 {
@@ -158,6 +183,8 @@ namespace DSAMVVM.MVVM.ViewModel
                     Error = comp?.ErrorMessage ?? "Computer not found.";
                     Log.Warn(ViewKey, $"Search completed, but computer '{context.Query}' was not found. Error: {Error}");
                 }
+
+                History.Add(entry);
             }
             catch (Exception ex)
             {
@@ -167,6 +194,16 @@ namespace DSAMVVM.MVVM.ViewModel
                 var failDoc = new FlowDocMarkupBuilder();
                 failDoc.AddError($"Search failed: {ex.Message}");
                 SearchLog += failDoc.ToString();
+
+                var failEntry = new ComputerHistoryItemViewModel(
+                    context.Query,
+                    new ADComputerInfo { Name = context.Query, Exists = false, ErrorMessage = ex.Message },
+                    _ad,
+                    _linkRouter)
+                {
+                    IsExpanded = true
+                };
+                History.Add(failEntry);
             }
             finally
             {
@@ -174,7 +211,27 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        public void ClearLog() => SearchLog = string.Empty;
+        public void CollapseAll()
+        {
+            foreach (var item in History)
+            {
+                item.IsExpanded = false;
+            }
+        }
+
+        public void ExpandAll()
+        {
+            foreach (var item in History)
+            {
+                item.IsExpanded = true;
+            }
+        }
+
+        public void ClearLog()
+        {
+            SearchLog = string.Empty;
+            History.Clear();
+        }
 
         // Dispose pattern
         private bool _disposed;
