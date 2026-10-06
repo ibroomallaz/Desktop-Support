@@ -212,7 +212,7 @@ namespace DSAMVVM
             {
                 Mark("First window rendered");
 
-                try { _splash?.Close(); _splash = null; }
+                try { _splash?.FadeOutAndClose(160); _splash = null; }
                 catch
                 {
                     // ignored
@@ -574,3 +574,4 @@ namespace DSAMVVM
         }
     }
 }
+

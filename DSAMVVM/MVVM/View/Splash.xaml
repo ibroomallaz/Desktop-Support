@@ -7,33 +7,185 @@
         Background="Transparent"
         ShowInTaskbar="False"
         Topmost="True"
-        Width="560" Height="320"
+        Width="520" Height="280"
         ShowActivated="False"
-        Focusable="False">
-    <Border CornerRadius="16" Background="#1A1D23" BorderThickness="1" BorderBrush="#2A2F37" Padding="24" SnapsToDevicePixels="True">
+        Focusable="False"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        FontFamily="{DynamicResource UiFontFamily}">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Theme/Colors/Colors.UA.xaml"/>
+                <ResourceDictionary Source="/Theme/Decor/Gradient.UA.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Modern Indeterminate ProgressBar Style -->
+            <Style x:Key="ProgressBar.ModernSplash" TargetType="{x:Type ProgressBar}">
+                <Setter Property="Height" Value="4"/>
+                <Setter Property="Background" Value="#18FFFFFF"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ProgressBar}">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="2" ClipToBounds="True">
+                                <Grid x:Name="TemplateRoot">
+                                    <Border x:Name="Indicator"
+                                            CornerRadius="2"
+                                            HorizontalAlignment="Left"
+                                            Width="130">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                <GradientStop Color="#00B11226" Offset="0.0"/>
+                                                <GradientStop Color="#FFB11226" Offset="0.45"/>
+                                                <GradientStop Color="#FFE57373" Offset="1.0"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                        <Border.RenderTransform>
+                                            <TranslateTransform x:Name="IndicatorTranslate" X="-130"/>
+                                        </Border.RenderTransform>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsIndeterminate" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard RepeatBehavior="Forever">
+                                                <DoubleAnimation Storyboard.TargetName="IndicatorTranslate"
+                                                                 Storyboard.TargetProperty="X"
+                                                                 From="-130" To="440"
+                                                                 Duration="0:0:1.5"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <!-- Outer Card Container with Elevation Shadow -->
+    <Border Margin="18"
+            Background="{DynamicResource AppGradient.Window.Blue}"
+            BorderBrush="{DynamicResource Brush.Border}"
+            BorderThickness="1"
+            CornerRadius="16"
+            Padding="26,22,26,20"
+            SnapsToDevicePixels="True">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="22" ShadowDepth="4" Direction="270" Opacity="0.55" Color="#000000"/>
+        </Border.Effect>
+
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <!-- centered logo/title -->
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,12,0,24">
-                <TextBlock Text="Desktop Support App" Foreground="#E6E6E6" FontSize="24" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-                <TextBlock Text="University of Arizona" Foreground="#A0A6B2" FontSize="14" Margin="0,6,0,0" HorizontalAlignment="Center"/>
+            <!-- Hero Brand Section -->
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Margin="0,4,0,16">
+                <!-- App Icon in Frosted Container -->
+                <Border Width="56" Height="56"
+                        CornerRadius="14"
+                        Background="#15FFFFFF"
+                        BorderBrush="#25FFFFFF"
+                        BorderThickness="1"
+                        VerticalAlignment="Center"
+                        Margin="0,0,16,0">
+                    <Image Source="/img/MainIcon.ico"
+                           Width="38" Height="38"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"/>
+                </Border>
+
+                <!-- Titles & Badges -->
+                <StackPanel VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Desktop Support App"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource Brush.Text.Primary}"
+                                   VerticalAlignment="Center"/>
+                        <Border Margin="10,0,0,0"
+                                Background="#22B11226"
+                                BorderBrush="#44B11226"
+                                BorderThickness="1"
+                                CornerRadius="9"
+                                Padding="7,2"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="UArizona"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource Brush.Accent.Red.Light}"/>
+                        </Border>
+                    </StackPanel>
+
+                    <TextBlock Text="University of Arizona &#x2022; Desktop Support &amp; IT Services"
+                               FontSize="11"
+                               Foreground="{DynamicResource Brush.Text.Muted}"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
             </StackPanel>
 
-            <!-- bottom status row centered as a unit -->
-            <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="8"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+            <!-- Status, Progress & Version Row -->
+            <StackPanel Grid.Row="1" VerticalAlignment="Bottom">
+                <!-- Slim Progress Bar -->
+                <ProgressBar Style="{StaticResource ProgressBar.ModernSplash}"
+                             IsIndeterminate="True"
+                             HorizontalAlignment="Stretch"/>
 
-                <ProgressBar Grid.Column="0" IsIndeterminate="True" Height="6" Width="200"/>
-                <TextBlock Grid.Column="2" x:Name="StatusText" Text="Starting…" Foreground="#A0A6B2" FontSize="12" VerticalAlignment="Center"/>
-            </Grid>
+                <!-- Status Text & Version Meta -->
+                <Grid Margin="2,10,2,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Status with pulsing indicator -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Ellipse Width="6" Height="6"
+                                 Fill="{DynamicResource Brush.Accent.Red.Light}"
+                                 Margin="0,0,8,0">
+                            <Ellipse.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             From="0.3" To="1.0"
+                                                             Duration="0:0:0.8"
+                                                             AutoReverse="True"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Ellipse.Triggers>
+                        </Ellipse>
+
+                        <TextBlock x:Name="StatusText"
+                                   Text="Starting…"
+                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                   FontSize="11"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Version String -->
+                    <TextBlock Grid.Column="1"
+                               x:Name="VersionText"
+                               Text=""
+                               Foreground="{DynamicResource Brush.Text.Muted}"
+                               FontSize="10"
+                               Opacity="0.75"
+                               VerticalAlignment="Center"/>
+                </Grid>
+            </StackPanel>
         </Grid>
     </Border>
 </Window>
