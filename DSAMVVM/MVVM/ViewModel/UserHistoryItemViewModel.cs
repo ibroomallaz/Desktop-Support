@@ -14,7 +14,6 @@ namespace DSAMVVM.MVVM.ViewModel
     {
         private readonly IADService _adService;
         private readonly IDepartmentService _deptService;
-        private readonly IDeepLinkRoutingService _linkRouter;
 
         public string Query { get; }
         public DateTime Timestamp { get; private set; }
@@ -127,9 +126,39 @@ namespace DSAMVVM.MVVM.ViewModel
         public string? SupportTeamName
         {
             get => _supportTeamName;
-            private set { _supportTeamName = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasSupportTeam)); }
+            private set
+            {
+                if (Set(ref _supportTeamName, value))
+                {
+                    OnPropertyChanged(nameof(HasSupportTeam));
+                    OnPropertyChanged(nameof(SupportTeamDisplayName));
+                }
+            }
         }
         public bool HasSupportTeam => !string.IsNullOrWhiteSpace(SupportTeamName);
+        public string SupportTeamDisplayName => FormatMiddleTruncate(SupportTeamName);
+
+        public static string FormatMiddleTruncate(string? text, int maxLength = 24)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+            var trimmed = text.Trim();
+            if (trimmed.Length <= maxLength) return trimmed;
+
+            int suffixLen = 7;
+            int prefixLen = maxLength - suffixLen - 1;
+            if (prefixLen < 4) prefixLen = 4;
+
+            var prefix = trimmed[..prefixLen];
+            int lastSpace = prefix.LastIndexOf(' ');
+            if (lastSpace >= 6)
+            {
+                prefix = prefix[..lastSpace];
+            }
+            prefix = prefix.TrimEnd();
+
+            var suffix = trimmed[^suffixLen..].TrimStart();
+            return $"{prefix}…{suffix}";
+        }
 
         private string? _managerName;
         public string? ManagerName
@@ -283,7 +312,7 @@ namespace DSAMVVM.MVVM.ViewModel
             Timestamp = DateTime.Now;
             _adService = adService ?? throw new ArgumentNullException(nameof(adService));
             _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
-            _linkRouter = linkRouter ?? throw new ArgumentNullException(nameof(linkRouter));
+            IDeepLinkRoutingService linkRouter1 = linkRouter ?? throw new ArgumentNullException(nameof(linkRouter));
 
             User = user;
 
@@ -300,14 +329,14 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 if (!string.IsNullOrWhiteSpace(SupportTeamName))
                 {
-                    _linkRouter.RequestNavigation("GroupView", SupportTeamName);
+                    linkRouter1.RequestNavigation("GroupView", SupportTeamName);
                 }
             });
             NavigateDivisionSupportCommand = new RelayCommand(_ =>
             {
                 if (HasDivision)
                 {
-                    _linkRouter.RequestNavigation("GroupView", DivisionCode);
+                    linkRouter1.RequestNavigation("GroupView", DivisionCode);
                 }
             });
         }
@@ -324,17 +353,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
                 var teamName = await _deptService.GetTeamAsync(User.DepartmentNumber);
                 SupportTeamName = teamName?.Trim();
-
-                if (!string.IsNullOrWhiteSpace(SupportTeamName))
-                {
-                    var teamInfo = await _deptService.GetSupportTeamAsync(SupportTeamName);
-                    if (teamInfo != null)
-                    {
-                        ManagerName = teamInfo.ManagerName;
-                        ManagerNetID = teamInfo.ManagerNetID;
-                        SupportPhone = teamInfo.PhoneNumber;
-                    }
-                }
             }
             catch (Exception ex)
             {

@@ -73,6 +73,11 @@ namespace DSAMVVM.MVVM.View.Overlays
             }
         }
 
+        private void BtnClose_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
         // --- KEYBOARD SHORTCUT ROUTING ---
         protected override async void OnPreviewKeyDown(KeyEventArgs e)
         {

@@ -1,9 +1,11 @@
 ﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Renderers;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
+using DSAMVVM.MVVM.Model.Data;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -22,6 +24,69 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
 
         public Action? CloseAction { get; set; }
 
+        private string _searchText = string.Empty;
+        public string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                if (Set(ref _searchText, value))
+                {
+                    OnPropertyChanged(nameof(HasSearchText));
+                }
+            }
+        }
+        public bool HasSearchText => !string.IsNullOrWhiteSpace(SearchText);
+
+        private bool _isSearching;
+        public bool IsSearching
+        {
+            get => _isSearching;
+            set
+            {
+                if (Set(ref _isSearching, value))
+                {
+                    OnPropertyChanged(nameof(ShowResultContainer));
+                }
+            }
+        }
+
+        private object? _resultCard;
+        public object? ResultCard
+        {
+            get => _resultCard;
+            private set
+            {
+                if (Set(ref _resultCard, value))
+                {
+                    OnPropertyChanged(nameof(HasResult));
+                    OnPropertyChanged(nameof(ShowResultContainer));
+                }
+            }
+        }
+        public bool HasResult => ResultCard != null;
+
+        private string? _errorMessage;
+        public string? ErrorMessage
+        {
+            get => _errorMessage;
+            private set
+            {
+                if (Set(ref _errorMessage, value))
+                {
+                    OnPropertyChanged(nameof(HasError));
+                    OnPropertyChanged(nameof(ShowResultContainer));
+                }
+            }
+        }
+        public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
+
+        public bool ShowResultContainer => IsSearching || HasResult || HasError;
+
+        // Commands
+        public ICommand OpenInMainAppCommand { get; }
+        public ICommand ClearSearchCommand { get; }
+
         public QuickSearchOverlayViewModel(
             ISearchService searchService,
             IADService adService,
@@ -36,27 +101,30 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
             _flowDocService = flowDocService ?? throw new ArgumentNullException(nameof(flowDocService));
 
             _flowDocService.LinkClicked += OnLinkClicked;
-        }
 
-        private string _searchText = string.Empty;
-        public string SearchText
-        {
-            get => _searchText;
-            set { _searchText = value; OnPropertyChanged(); }
-        }
+            ClearSearchCommand = new RelayCommand(_ =>
+            {
+                SearchText = string.Empty;
+                ResultCard = null;
+                ErrorMessage = null;
+            });
 
-        private bool _isSearching;
-        public bool IsSearching
-        {
-            get => _isSearching;
-            set { _isSearching = value; OnPropertyChanged(); }
-        }
-
-        private string? _resultText;
-        public string? ResultText
-        {
-            get => _resultText;
-            set { _resultText = value; OnPropertyChanged(); }
+            OpenInMainAppCommand = new RelayCommand(_ =>
+            {
+                if (ResultCard is UserHistoryItemViewModel userVm)
+                {
+                    _linkRouter.RequestNavigation("user", userVm.NetId);
+                }
+                else if (ResultCard is ComputerHistoryItemViewModel compVm)
+                {
+                    _linkRouter.RequestNavigation("computer", compVm.ComputerName);
+                }
+                else if (ResultCard is GroupHistoryItemViewModel groupVm)
+                {
+                    _linkRouter.RequestNavigation("group", !string.IsNullOrWhiteSpace(groupVm.Query) ? groupVm.Query : groupVm.PrimaryHeaderTitle);
+                }
+                CloseAction?.Invoke();
+            });
         }
 
         public void LoadCapturedText(string? text)
@@ -147,84 +215,89 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
         private async Task RunTargetedSearchAsync(string query, AppView category, string? groupMode)
         {
             IsSearching = true;
-            ResultText = null;
+            ErrorMessage = null;
+            ResultCard = null;
 
             try
             {
                 Log.Info("QuickSearch", $"Targeted inline search started for '{query}' (View: {category}, Mode: {groupMode ?? "N/A"})");
 
-                string markupResult = string.Empty;
-
                 if (category == AppView.User)
                 {
                     var rawData = await _searchService.SearchAsync(new SearchContextDTO(query), SearchTarget.User);
                     var user = rawData as ADUserInfo;
-                    markupResult = IdentityRenderer.RenderQuickADUser(user);
-
-                    if (user is { Exists: true } && !string.IsNullOrEmpty(user.DepartmentNumber))
+                    if (user is { Exists: true })
                     {
-                        var deptDoc = new FlowDocMarkupBuilder();
-                        var dept = await _deptService.GetDepartmentAsync(user.DepartmentNumber);
-                        if (dept != null)
-                        {
-                            var teamName = await _deptService.GetTeamAsync(dept.Number);
-                            if (!string.IsNullOrWhiteSpace(teamName)) deptDoc.AddLabelValue("Support Team: ", teamName);
-                            if (!string.IsNullOrWhiteSpace(dept.Notes)) deptDoc.AddLabelValue("Notes: ", dept.Notes);
-                        }
-                        markupResult += deptDoc.ToString();
-                        markupResult += $"\n[gray]   • [/gray][cyan]Action:[/cyan] [red][View Full Profile](dsa://nav/user/{user.Name})[/red]";
+                        var vm = new UserHistoryItemViewModel(query, user, _adService, _deptService, _linkRouter);
+                        await vm.LoadDepartmentDetailsAsync();
+                        ResultCard = vm;
+                    }
+                    else
+                    {
+                        ErrorMessage = user?.ErrorMessage ?? $"User '{query}' was not found in Active Directory.";
                     }
                 }
                 else if (category == AppView.Computer)
                 {
                     var rawData = await _searchService.SearchAsync(new SearchContextDTO(query), SearchTarget.Computer);
-                    markupResult = IdentityRenderer.RenderQuickADComputer(rawData as ADComputerInfo);
+                    var comp = rawData as ADComputerInfo;
+                    if (comp is { Exists: true })
+                    {
+                        var vm = new ComputerHistoryItemViewModel(query, comp, _adService, _linkRouter);
+                        ResultCard = vm;
+                    }
+                    else
+                    {
+                        ErrorMessage = comp?.ErrorMessage ?? $"Computer '{query}' was not found in Active Directory.";
+                    }
                 }
                 else if (category == AppView.Group)
                 {
+                    _searchService.AddToHistory(query, SearchTarget.Group);
                     switch (groupMode)
                     {
                         case "MIM":
                             var mimRes = await _adService.GetUserMimGroupsAsync(query);
-                            markupResult = IdentityRenderer.RenderMimGroups(mimRes, query);
+                            var mimVm = GroupHistoryItemViewModel.CreateUserMim(query, mimRes, _adService, _deptService, _linkRouter);
+                            if (mimVm.IsFound) ResultCard = mimVm;
+                            else ErrorMessage = mimVm.ErrorMessage ?? $"No MIM groups found for user '{query}'.";
                             break;
+
                         case "AD":
                             var groupName = query.Length == 4 && query.All(char.IsDigit) ? $"UA-MIM-0{query}" : query;
                             var adRes = await _adService.GetGroupAsync(groupName);
-                            markupResult = IdentityRenderer.RenderGroupMembers(adRes, groupName);
+                            var adVm = GroupHistoryItemViewModel.CreateGroupMembers(query, groupName, adRes, _adService, _deptService, _linkRouter);
+                            if (adVm.IsFound) ResultCard = adVm;
+                            else ErrorMessage = adVm.ErrorMessage ?? $"Group '{groupName}' not found in Active Directory.";
                             break;
+
                         case "DEPT":
-                            markupResult = await OrganizationalRenderer.RenderDepartmentContextAsync(query, _deptService);
-                            if (string.IsNullOrWhiteSpace(markupResult))
-                                markupResult = $"[cyan]Department '{query}' not found.[/cyan]";
+                            var dept = await _deptService.GetDepartmentAsync(query);
+                            SupportTeam? team = null;
+                            if (dept != null)
+                            {
+                                var teamName = await _deptService.GetTeamAsync(dept.Number);
+                                if (!string.IsNullOrWhiteSpace(teamName))
+                                    team = await _deptService.GetSupportTeamAsync(teamName.Trim());
+                            }
+                            var deptVm = GroupHistoryItemViewModel.CreateDepartment(query, dept, team, _adService, _deptService, _linkRouter);
+                            if (deptVm.IsFound) ResultCard = deptVm;
+                            else ErrorMessage = deptVm.ErrorMessage ?? $"Department '{query}' not found.";
                             break;
+
                         case "DIV":
-                            markupResult = await OrganizationalRenderer.RenderDivisionSupportAsync(query, _deptService);
-                            if (string.IsNullOrWhiteSpace(markupResult))
-                                markupResult = $"[cyan]Division '{query}' not found.[/cyan]";
+                            var teams = await _deptService.GetTeamsByDivisionAsync(query);
+                            var divVm = GroupHistoryItemViewModel.CreateDivision(query, teams, _adService, _deptService, _linkRouter);
+                            if (divVm.IsFound) ResultCard = divVm;
+                            else ErrorMessage = divVm.ErrorMessage ?? $"No support teams configured for division '{query}'.";
                             break;
                     }
-                }
-
-                if (string.IsNullOrWhiteSpace(markupResult))
-                {
-                    markupResult = "[cyan]No results found or unrecognized data format.[/cyan]";
-                }
-
-                ResultText = markupResult;
-
-                if (category == AppView.Group)
-                {
-                    _searchService.AddToHistory(query);
                 }
             }
             catch (Exception ex)
             {
                 Log.Error("QuickSearch", $"Quick search failed for '{query}'", ex);
-
-                var errDoc = new FlowDocMarkupBuilder();
-                errDoc.AddError($"Search failed: {ex.Message}");
-                ResultText = errDoc.ToString();
+                ErrorMessage = $"Search failed: {ex.Message}";
             }
             finally
             {
@@ -239,22 +312,14 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
 
             if (IsSearching) return;
 
-            string result = await _linkRouter.HandleLinkAsync(url);
-            if (!string.IsNullOrWhiteSpace(result))
-            {
-                ResultText += result;
-            }
+            await _linkRouter.HandleLinkAsync(url);
         }
 
         public async Task RouteLinkClickAsync(string url)
         {
             if (!string.IsNullOrWhiteSpace(url))
             {
-                string result = await _linkRouter.HandleLinkAsync(url);
-                if (!string.IsNullOrWhiteSpace(result))
-                {
-                    ResultText += result;
-                }
+                await _linkRouter.HandleLinkAsync(url);
             }
         }
     }

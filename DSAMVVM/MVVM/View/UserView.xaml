@@ -755,8 +755,8 @@
                                                     <!-- Support Team (Clickable to toggle manager & contact info) -->
                                                     <DockPanel Margin="0,0,0,4">
                                                         <TextBlock Text="Support Team: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
-                                                        <Button Command="{Binding ToggleTeamDetailsCommand}"
-                                                                ToolTip="Click to toggle team manager and contact info"
+                                                        <Button Command="{Binding NavigateTeamCommand}"
+                                                                ToolTip="{Binding SupportTeamName}"
                                                                 VerticalAlignment="Center">
                                                             <Button.Style>
                                                                 <Style TargetType="Button" BasedOn="{StaticResource InlineLinkButton}">
@@ -768,20 +768,7 @@
                                                                     </Style.Triggers>
                                                                 </Style>
                                                             </Button.Style>
-                                                            <StackPanel Orientation="Horizontal">
-                                                                <TextBlock Text="{Binding SupportTeamName}" FontSize="11" FontWeight="SemiBold"/>
-                                                                <TextBlock Text=" &#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="9" VerticalAlignment="Center" Margin="2,1,0,0">
-                                                                    <TextBlock.Style>
-                                                                        <Style TargetType="TextBlock">
-                                                                            <Style.Triggers>
-                                                                                <DataTrigger Binding="{Binding ShowTeamDetails}" Value="True">
-                                                                                    <Setter Property="Text" Value=" &#xE70E;"/>
-                                                                                </DataTrigger>
-                                                                            </Style.Triggers>
-                                                                        </Style>
-                                                                    </TextBlock.Style>
-                                                                </TextBlock>
-                                                            </StackPanel>
+                                                            <TextBlock Text="{Binding SupportTeamDisplayName}" FontSize="11" FontWeight="SemiBold"/>
                                                         </Button>
                                                         <TextBlock Text="None" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}">
                                                             <TextBlock.Style>
@@ -796,70 +783,6 @@
                                                             </TextBlock.Style>
                                                         </TextBlock>
                                                     </DockPanel>
-
-                                                    <!-- Expandable Support Team Details (Manager & Phone) -->
-                                                    <Border Background="#0C1420"
-                                                            BorderBrush="#1D2A3B"
-                                                            BorderThickness="1"
-                                                            CornerRadius="6"
-                                                            Padding="8,6"
-                                                            Margin="0,2,0,6">
-                                                        <Border.Style>
-                                                            <Style TargetType="Border">
-                                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding ShowTeamDetails}" Value="True">
-                                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Border.Style>
-                                                        <StackPanel>
-                                                            <!-- Manager -->
-                                                            <DockPanel Margin="0,0,0,3">
-                                                                <DockPanel.Style>
-                                                                    <Style TargetType="DockPanel">
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding HasManager}" Value="False">
-                                                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </DockPanel.Style>
-                                                                <TextBlock Text="Manager: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
-                                                                <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding ManagerName}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
-                                                                    <TextBlock Text=" (" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
-                                                                    <TextBlock Text="{Binding ManagerNetID}" FontSize="10" Foreground="{DynamicResource Brush.Info.Light}"/>
-                                                                    <TextBlock Text=")" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
-                                                                </StackPanel>
-                                                            </DockPanel>
-
-                                                            <!-- Support Phone -->
-                                                            <DockPanel Margin="0,0,0,3">
-                                                                <DockPanel.Style>
-                                                                    <Style TargetType="DockPanel">
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding HasSupportPhone}" Value="False">
-                                                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </DockPanel.Style>
-                                                                <TextBlock Text="Phone: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
-                                                                <TextBlock Text="{Binding SupportPhone}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
-                                                            </DockPanel>
-
-                                                            <!-- Link to View in Groups -->
-                                                            <Button Content="View in Groups &#x2192;"
-                                                                    Command="{Binding NavigateTeamCommand}"
-                                                                    Style="{StaticResource InlineLinkButton}"
-                                                                    FontSize="10"
-                                                                    Foreground="{DynamicResource Brush.Info.Light}"
-                                                                    HorizontalAlignment="Left"
-                                                                    Margin="0,2,0,0"/>
-                                                        </StackPanel>
-                                                    </Border>
 
                                                     <!-- Department Notes -->
                                                     <StackPanel Margin="0,0,0,4">

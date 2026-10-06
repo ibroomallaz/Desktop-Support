@@ -64,7 +64,10 @@ namespace DSAMVVM.MVVM.ViewModel
                         Clipboard.SetDataObject(TeamName);
                         UiNotify.Info($"Copied '{TeamName}' to clipboard.", showStatusBar: true);
                     }
-                    catch { }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
             });
 
@@ -77,7 +80,10 @@ namespace DSAMVVM.MVVM.ViewModel
                         Clipboard.SetDataObject(ManagerNetId);
                         UiNotify.Info($"Copied '{ManagerNetId}' to clipboard.", showStatusBar: true);
                     }
-                    catch { }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
             });
 
@@ -235,8 +241,19 @@ namespace DSAMVVM.MVVM.ViewModel
         // --- Mode 3: Department Details ---
         public string DeptNumber { get; private init; } = string.Empty;
         private string? _deptTeamName;
-        public string? DeptTeamName { get => _deptTeamName; private set { _deptTeamName = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasDeptTeam)); } }
+        public string? DeptTeamName
+        {
+            get => _deptTeamName;
+            private set
+            {
+                _deptTeamName = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasDeptTeam));
+                OnPropertyChanged(nameof(DeptTeamDisplayName));
+            }
+        }
         public bool HasDeptTeam => !string.IsNullOrWhiteSpace(DeptTeamName);
+        public string DeptTeamDisplayName => UserHistoryItemViewModel.FormatMiddleTruncate(DeptTeamName, 24);
 
         private string? _deptManagerName;
         public string? DeptManagerName { get => _deptManagerName; private set { _deptManagerName = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasDeptManager)); } }

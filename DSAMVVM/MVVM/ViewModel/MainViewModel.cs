@@ -1,5 +1,4 @@
-using DSAMVVM.Core.Enums;
-using DSAMVVM.Core.Interfaces;
+﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
@@ -255,8 +254,8 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 RestoreWindow();
 
-                string normView = (targetView ?? string.Empty).Trim();
-                string normQuery = (targetQuery ?? string.Empty).Trim();
+                string normView = (targetView).Trim();
+                string normQuery = (targetQuery).Trim();
 
                 // If path delimiters or query string was included in targetView
                 int qIdx = normView.IndexOf('?');
@@ -277,14 +276,15 @@ namespace DSAMVVM.MVVM.ViewModel
 
                 AppView targetAppView = normView.ToLowerInvariant() switch
                 {
-                    "user" => AppView.User,
-                    "computer" => AppView.Computer,
-                    "group" => AppView.Group,
-                    "entra" => AppView.Entra,
-                    "links" => AppView.Links,
-                    "about" => AppView.About,
-                    "settings" => AppView.Settings,
-                    "admin" => AppView.Admin,
+                    "user" or "userview" => AppView.User,
+                    "computer" or "computerview" => AppView.Computer,
+                    "group" or "groupview" => AppView.Group,
+                    "entra" or "entraview" => AppView.Entra,
+                    "links" or "linksview" => AppView.Links,
+                    "about" or "aboutview" => AppView.About,
+                    "settings" or "settingsview" => AppView.Settings,
+                    "admin" or "adminview" => AppView.Admin,
+                    "home" or "homeview" => AppView.Home,
                     _ => AppView.Home
                 };
 
@@ -601,7 +601,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 var testError = new StatusItemBuilder()
                     .Key("DEBUG_STICKY_ERROR")
                     .Level(StatusLevel.Error)
-                    .Sticky(true)
+                    .Sticky()
                     .Priority(1)
                     .Text("DEBUG: This is a persistent high-priority error. Test the ")
                     .Bold("✕")
