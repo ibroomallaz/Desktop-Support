@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -8,7 +8,7 @@ using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
 
-namespace DSAMVVM.MVVM.ViewModel
+namespace DSAMVVM.MVVM.ViewModel.Cards
 {
     public class UserHistoryItemViewModel : ObservableObject
     {

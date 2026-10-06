@@ -1,9 +1,10 @@
-﻿<UserControl x:Class="DSAMVVM.MVVM.View.GroupView"
+<UserControl x:Class="DSAMVVM.MVVM.View.GroupView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:DSAMVVM.MVVM.ViewModel"
+             xmlns:cards="clr-namespace:DSAMVVM.MVVM.ViewModel.Cards"
              xmlns:res="clr-namespace:DSAMVVM.MVVM.View.Resources"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:GroupViewModel}"
@@ -241,7 +242,7 @@
 
             <ItemsControl ItemsSource="{Binding History}">
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type vm:GroupHistoryItemViewModel}">
+                    <DataTemplate DataType="{x:Type cards:GroupHistoryItemViewModel}">
                         <Grid x:Name="RootCard" Margin="0,0,0,6">
 
                             <!-- ============================================== -->
@@ -1334,7 +1335,7 @@
 
                                                 <ItemsControl ItemsSource="{Binding DivTeams}">
                                                     <ItemsControl.ItemTemplate>
-                                                        <DataTemplate DataType="{x:Type vm:SupportTeamCardItem}">
+                                                        <DataTemplate DataType="{x:Type cards:SupportTeamCardItem}">
                                                             <Border Background="{DynamicResource Brush.Surface.1}"
                                                                     BorderBrush="{DynamicResource Brush.Border}"
                                                                     BorderThickness="1"

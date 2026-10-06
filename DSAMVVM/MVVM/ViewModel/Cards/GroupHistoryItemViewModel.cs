@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+using DSAMVVM.MVVM.ViewModel;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
@@ -7,7 +8,7 @@ using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
 using DSAMVVM.MVVM.Model.Data;
 
-namespace DSAMVVM.MVVM.ViewModel
+namespace DSAMVVM.MVVM.ViewModel.Cards
 {
     public class SupportTeamCardItem : ObservableObject
     {

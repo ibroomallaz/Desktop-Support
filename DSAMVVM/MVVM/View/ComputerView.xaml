@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:DSAMVVM.MVVM.ViewModel"
+             xmlns:cards="clr-namespace:DSAMVVM.MVVM.ViewModel.Cards"
              xmlns:res="clr-namespace:DSAMVVM.MVVM.View.Resources"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:ComputerViewModel}"
@@ -213,7 +214,7 @@
 
             <ItemsControl ItemsSource="{Binding History}">
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type vm:ComputerHistoryItemViewModel}">
+                    <DataTemplate DataType="{x:Type cards:ComputerHistoryItemViewModel}">
                         <Grid Margin="0,0,0,6">
 
                             <!-- ============================================== -->

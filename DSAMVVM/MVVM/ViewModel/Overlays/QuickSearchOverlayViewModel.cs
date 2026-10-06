@@ -1,4 +1,5 @@
-﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.MVVM.ViewModel.Cards;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;

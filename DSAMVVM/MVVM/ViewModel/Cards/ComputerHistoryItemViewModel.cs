@@ -1,10 +1,10 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Input;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
 
-namespace DSAMVVM.MVVM.ViewModel
+namespace DSAMVVM.MVVM.ViewModel.Cards
 {
     public class ComputerHistoryItemViewModel : ObservableObject
     {
