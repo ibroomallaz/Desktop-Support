@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
+using DSAMVVM.Core.Formatters;
 using DSAMVVM.MVVM.Model.AD;
 using DSAMVVM.MVVM.Model.Data;
 
@@ -170,6 +171,8 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
 
         private bool _isCopied;
         public bool IsCopied { get => _isCopied; private set { _isCopied = value; OnPropertyChanged(); } }
+        private bool _isSummaryCopied;
+        public bool IsSummaryCopied { get => _isSummaryCopied; private set { _isSummaryCopied = value; OnPropertyChanged(); } }
 
         // --- Mode 1: User MIM Groups ---
         public List<string> AllMimGroups { get; } = [];
@@ -323,6 +326,7 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
         // Commands
         public ICommand ToggleExpandCommand { get; }
         public ICommand CopyPrimaryCommand { get; }
+        public ICommand CopySummaryCommand { get; }
         public ICommand RefreshCommand { get; }
         public ICommand ToggleTeamDetailsCommand { get; }
         public ICommand OpenFileRepoCommand { get; }
@@ -352,6 +356,7 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
 
             ToggleExpandCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
             CopyPrimaryCommand = new RelayCommand(_ => CopyPrimaryToClipboard());
+            CopySummaryCommand = new RelayCommand(_ => CopySummary());
             RefreshCommand = new RelayCommand(async _ => await RefreshAsync());
             ToggleTeamDetailsCommand = new RelayCommand(_ => ShowTeamDetails = !ShowTeamDetails);
             OpenFileRepoCommand = new RelayCommand(_ => OpenFileRepo());
@@ -664,6 +669,25 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
             finally
             {
                 IsRefreshing = false;
+            }
+        }
+
+        public void CopySummary()
+        {
+            try
+            {
+                var builder = GroupCardClipboardHelper.BuildSummary(this);
+                if (builder.CopyToClipboard())
+                {
+                    IsSummaryCopied = true;
+                    UiNotify.Success($"Copied summary for '{PrimaryHeaderTitle}' to clipboard.", showStatusBar: true);
+                    _ = Task.Delay(1500).ContinueWith(_ => UiNotify.RunOnUiAsync(() => IsSummaryCopied = false));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("GroupHistoryItem", $"Failed to copy summary for '{PrimaryHeaderTitle}': {ex.Message}");
+                UiNotify.Warn($"Could not copy summary: {ex.Message}");
             }
         }
 

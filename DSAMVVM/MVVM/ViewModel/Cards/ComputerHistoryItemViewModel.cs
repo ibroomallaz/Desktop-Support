@@ -1,5 +1,9 @@
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using DSAMVVM.Core.Formatters;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
@@ -103,6 +107,13 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
             private set { _isCopied = value; OnPropertyChanged(); }
         }
 
+        private bool _isSummaryCopied;
+        public bool IsSummaryCopied
+        {
+            get => _isSummaryCopied;
+            private set { _isSummaryCopied = value; OnPropertyChanged(); }
+        }
+
         // Refresh State
         private bool _isRefreshing;
         public bool IsRefreshing
@@ -114,6 +125,7 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
         // Commands
         public ICommand ToggleExpandCommand { get; }
         public ICommand CopyNameCommand { get; }
+        public ICommand CopySummaryCommand { get; }
         public ICommand RefreshCommand { get; }
         public ICommand RemoveCommand { get; }
 
@@ -132,6 +144,7 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
 
             ToggleExpandCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
             CopyNameCommand = new RelayCommand(_ => CopyComputerName());
+            CopySummaryCommand = new RelayCommand(_ => CopySummary());
             RefreshCommand = new RelayCommand(async _ => await RefreshAsync());
             RemoveCommand = new RelayCommand(_ => RemoveRequested?.Invoke(this));
         }
@@ -146,6 +159,25 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
                 _ = Task.Delay(1500).ContinueWith(_ => UiNotify.RunOnUiAsync(() => IsCopied = false));
             }
             catch { /* Clipboard access can fail if occupied */ }
+        }
+
+        public void CopySummary()
+        {
+            try
+            {
+                var builder = ComputerCardClipboardHelper.BuildSummary(this);
+                if (builder.CopyToClipboard())
+                {
+                    IsSummaryCopied = true;
+                    UiNotify.Success($"Copied summary for '{ComputerName}' to clipboard.", showStatusBar: true);
+                    _ = Task.Delay(1500).ContinueWith(_ => UiNotify.RunOnUiAsync(() => IsSummaryCopied = false));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("ComputerHistoryItem", $"Failed to copy summary for '{ComputerName}': {ex.Message}");
+                UiNotify.Warn($"Could not copy summary: {ex.Message}");
+            }
         }
 
         private async Task RefreshAsync()

@@ -1,4 +1,4 @@
-<UserControl x:Class="DSAMVVM.MVVM.View.ComputerView"
+﻿<UserControl x:Class="DSAMVVM.MVVM.View.ComputerView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -216,6 +216,20 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type cards:ComputerHistoryItemViewModel}">
                         <Grid Margin="0,0,0,6">
+                            <Grid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Copy Card Summary" Command="{Binding CopySummaryCommand}">
+                                        <MenuItem.Icon>
+                                            <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="12"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Copy Name Only" Command="{Binding CopyNameCommand}">
+                                        <MenuItem.Icon>
+                                            <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="12"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </Grid.ContextMenu>
 
                             <!-- ============================================== -->
                             <!-- STATE A: COLLAPSED SUMMARY ROW                 -->
@@ -240,6 +254,7 @@
                                         <ColumnDefinition Width="Auto"/> <!-- Status Badges -->
                                         <ColumnDefinition Width="*"/>    <!-- OU path / Description -->
                                         <ColumnDefinition Width="Auto"/> <!-- Timestamp / Stale -->
+                                        <ColumnDefinition Width="Auto"/> <!-- Copy Summary -->
                                         <ColumnDefinition Width="Auto"/> <!-- Dismiss / Clear Individual Record -->
                                         <ColumnDefinition Width="Auto"/> <!-- Chevron -->
                                     </Grid.ColumnDefinitions>
@@ -299,20 +314,7 @@
                                             <TextBlock Text="Disabled" FontSize="10" FontWeight="SemiBold" Foreground="#FF7B88"/>
                                         </Border>
 
-                                        <!-- In Hybrid Group Badge -->
-                                        <Border CornerRadius="4" Background="#281738" BorderBrush="#5B2E84" BorderThickness="1" Padding="5,1" Margin="0,0,4,0">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsHybridGroupMember}" Value="True">
-                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                            <TextBlock Text="In Hybrid Group" FontSize="10" FontWeight="Bold" Foreground="#D8B4FE"/>
-                                        </Border>
+
                                     </StackPanel>
 
                                     <!-- OU Path / Description in Collapsed Row -->
@@ -349,8 +351,49 @@
                                                VerticalAlignment="Center"
                                                Margin="0,0,10,0"/>
 
-                                    <!-- Dismiss / Clear Record Button in Collapsed Row -->
+                                    <!-- Copy Summary Button in Collapsed Row -->
                                     <Button Grid.Column="6"
+                                            Style="{StaticResource InlineLinkButton}"
+                                            Command="{Binding CopySummaryCommand}"
+                                            ToolTip="Copy computer summary to clipboard (Rich Text &amp; Plain Text)"
+                                            Margin="0,0,8,0"
+                                            Padding="4,2"
+                                            VerticalAlignment="Center">
+                                        <Grid>
+                                            <TextBlock Text="&#xE8C8;"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="10"
+                                                       Foreground="{DynamicResource Brush.Text.Muted}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsSummaryCopied}" Value="True">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <TextBlock Text="&#xE73E;"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="10"
+                                                       Foreground="#5CDA89">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsSummaryCopied}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
+                                    </Button>
+
+                                    <!-- Dismiss / Clear Record Button in Collapsed Row -->
+                                    <Button Grid.Column="7"
                                             Style="{StaticResource InlineLinkButton}"
                                             Command="{Binding RemoveCommand}"
                                             ToolTip="Clear this record from history"
@@ -364,7 +407,7 @@
                                     </Button>
 
                                     <!-- Chevron down icon -->
-                                    <TextBlock Grid.Column="7"
+                                    <TextBlock Grid.Column="8"
                                                Text="&#xE70D;"
                                                FontFamily="Segoe MDL2 Assets"
                                                FontSize="10"
@@ -496,21 +539,7 @@
                                                         <TextBlock Text="{Binding OperatingSystem}" FontSize="10" FontWeight="SemiBold" Foreground="#6EC3FF"/>
                                                     </Border>
 
-                                                    <!-- In Hybrid Devices Group Badge -->
-                                                    <Border CornerRadius="4" Background="#281738" BorderBrush="#6C3BAA" BorderThickness="1" Padding="6,2" Margin="0,0,6,0" VerticalAlignment="Center"
-                                                            ToolTip="Device is a member of 'UA-MEMHybridDevices' group">
-                                                        <Border.Style>
-                                                            <Style TargetType="Border">
-                                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding IsHybridGroupMember}" Value="True">
-                                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Border.Style>
-                                                        <TextBlock Text="In Hybrid Devices Group" FontSize="10" FontWeight="Bold" Foreground="#E9D5FF"/>
-                                                    </Border>
+
 
                                                     <!-- Disabled Badge -->
                                                     <Border CornerRadius="4" Background="#3A1418" BorderBrush="#63232A" BorderThickness="1" Padding="6,2" Margin="0,0,6,0" VerticalAlignment="Center">
@@ -529,7 +558,7 @@
                                                 </WrapPanel>
                                             </StackPanel>
 
-                                            <!-- Right side of Header: Stale Indicator, Timestamp, Refresh, Chevron Up -->
+                                            <!-- Right side of Header: Stale Indicator, Timestamp, Copy Summary, Refresh, Chevron Up -->
                                             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                                                 <!-- Stale Indicator -->
                                                 <Border CornerRadius="4" Background="#382810" BorderBrush="#5C421A" BorderThickness="1" Padding="5,1" Margin="0,0,6,0">
@@ -562,6 +591,45 @@
                                                         </Style>
                                                     </TextBlock.Style>
                                                 </TextBlock>
+
+                                                <!-- Copy Summary Button -->
+                                                <Button Style="{StaticResource GhostActionButton}"
+                                                        Command="{Binding CopySummaryCommand}"
+                                                        ToolTip="Copy computer summary (Rich Text &amp; Plain Text)"
+                                                        Padding="5,3"
+                                                        Margin="0,0,4,0">
+                                                    <Grid>
+                                                        <TextBlock Text="&#xE8C8;"
+                                                                   FontFamily="Segoe MDL2 Assets"
+                                                                   FontSize="11"
+                                                                   Foreground="{DynamicResource Brush.Text.Muted}">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsSummaryCopied}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                        <TextBlock Text="&#xE73E;"
+                                                                   FontFamily="Segoe MDL2 Assets"
+                                                                   FontSize="11"
+                                                                   Foreground="#5CDA89">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsSummaryCopied}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </Button>
 
                                                 <!-- Refresh Entry Button -->
                                                 <Button Style="{StaticResource GhostActionButton}"

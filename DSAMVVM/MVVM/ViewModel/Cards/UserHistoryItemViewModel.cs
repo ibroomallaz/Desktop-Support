@@ -6,6 +6,7 @@ using System.Windows.Input;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
+using DSAMVVM.Core.Formatters;
 using DSAMVVM.MVVM.Model.AD;
 
 namespace DSAMVVM.MVVM.ViewModel.Cards
@@ -271,12 +272,20 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
             set { _showRawLicense = value; OnPropertyChanged(); }
         }
 
-        // Copy Feedback
+        // Field Copy Feedback (NetID)
         private bool _isCopied;
         public bool IsCopied
         {
             get => _isCopied;
             private set { _isCopied = value; OnPropertyChanged(); }
+        }
+
+        // Summary Copy Feedback
+        private bool _isSummaryCopied;
+        public bool IsSummaryCopied
+        {
+            get => _isSummaryCopied;
+            private set { _isSummaryCopied = value; OnPropertyChanged(); }
         }
 
         // Refresh State
@@ -292,6 +301,7 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
         public ICommand RemoveCommand { get; }
         public ICommand ToggleExpandCommand { get; }
         public ICommand CopyNetIdCommand { get; }
+        public ICommand CopySummaryCommand { get; }
         public ICommand CheckAdobeCommand { get; }
         public ICommand OpenFileRepoCommand { get; }
         public ICommand ToggleRawLicenseCommand { get; }
@@ -319,6 +329,7 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
             RemoveCommand = new RelayCommand(_ => RemoveRequested?.Invoke(this));
             ToggleExpandCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
             CopyNetIdCommand = new RelayCommand(_ => CopyNetId());
+            CopySummaryCommand = new RelayCommand(_ => CopySummary());
             CheckAdobeCommand = new RelayCommand(async _ => await CheckAdobeAsync());
             OpenFileRepoCommand = new RelayCommand(_ => OpenFileRepo());
             ToggleRawLicenseCommand = new RelayCommand(_ => ShowRawLicense = !ShowRawLicense);
@@ -461,6 +472,26 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
                 _ = Task.Delay(1500).ContinueWith(_ => UiNotify.RunOnUiAsync(() => IsCopied = false));
             }
             catch { /* Clipboard access can fail if occupied */ }
+        }
+
+        public void CopySummary()
+        {
+            try
+            {
+                var builder = UserCardClipboardHelper.BuildSummary(this);
+                
+                if (builder.CopyToClipboard())
+                {
+                    IsSummaryCopied = true;
+                    UiNotify.Success($"Copied summary for '{DisplayName}' to clipboard.", showStatusBar: true);
+                    _ = Task.Delay(1500).ContinueWith(_ => UiNotify.RunOnUiAsync(() => IsSummaryCopied = false));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("UserHistoryItem", $"Failed to copy summary for '{DisplayName}': {ex.Message}");
+                UiNotify.Warn($"Could not copy summary: {ex.Message}");
+            }
         }
 
         private void OpenFileRepo()
