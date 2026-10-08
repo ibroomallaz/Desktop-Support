@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
@@ -29,6 +29,15 @@ namespace DSAMVVM.MVVM.ViewModel
     {
         public KeyCode Key { get; init; }
         public string DisplayName { get; init; } = string.Empty;
+
+        public override string ToString() => DisplayName;
+    }
+
+    public class TypographyPresetOption
+    {
+        public string DisplayName { get; init; } = string.Empty;
+        public double? TargetSize { get; init; }
+        public bool IsCustom { get; init; }
 
         public override string ToString() => DisplayName;
     }
@@ -145,6 +154,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand BrowseLinksCommand { get; }
         public ICommand DiscardCommand { get; }
         public ICommand ResetDefaultsCommand { get; }
+        public ICommand SetPresetSizeCommand { get; }
 
         // --- Shortcut Commands ---
         public ICommand AddCustomShortcutCommand { get; }
@@ -172,8 +182,14 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public List<int> HistorySizeOptions { get; } = [0, 5, 10, 15, 20, 25];
 
-        public IReadOnlyList<double> InitialFontSizeOptions { get; } =
-            [10d, 12d, 14d, 16d, 18d, 20d, 22d];
+        public IReadOnlyList<TypographyPresetOption> TypographyPresets { get; } =
+        [
+            new TypographyPresetOption { DisplayName = "Compact (10 pt)", TargetSize = 10.0 },
+            new TypographyPresetOption { DisplayName = "Standard (12 pt — Default)", TargetSize = 12.0 },
+            new TypographyPresetOption { DisplayName = "Comfortable (13.5 pt)", TargetSize = 13.5 },
+            new TypographyPresetOption { DisplayName = "Large (15 pt)", TargetSize = 15.0 },
+            new TypographyPresetOption { DisplayName = "Custom...", TargetSize = null, IsCustom = true }
+        ];
 
         public ObservableCollection<string> DataSourceOptions { get; } = ["Web", "File"];
 
@@ -236,10 +252,33 @@ namespace DSAMVVM.MVVM.ViewModel
                 if (Set(ref _defaultFontSize, v))
                 {
                     if (!UsePerViewOverride) SyncPerViewToDefault();
+                    if (_selectedUnifiedPreset == null || !_selectedUnifiedPreset.IsCustom)
+                    {
+                        SyncPresetToSize(v, p => _selectedUnifiedPreset = p, nameof(SelectedUnifiedPreset), nameof(IsUnifiedCustomSelected));
+                    }
                     SetModified();
                 }
             }
         }
+
+        private TypographyPresetOption? _selectedUnifiedPreset;
+        public TypographyPresetOption? SelectedUnifiedPreset
+        {
+            get => _selectedUnifiedPreset;
+            set
+            {
+                if (Set(ref _selectedUnifiedPreset, value) && value != null)
+                {
+                    if (value.TargetSize.HasValue)
+                    {
+                        DefaultFontSize = value.TargetSize.Value;
+                    }
+                    OnPropertyChanged(nameof(IsUnifiedCustomSelected));
+                    SetModified();
+                }
+            }
+        }
+        public bool IsUnifiedCustomSelected => SelectedUnifiedPreset?.IsCustom == true;
 
         private bool _usePerViewOverride;
         public bool UsePerViewOverride
@@ -256,10 +295,130 @@ namespace DSAMVVM.MVVM.ViewModel
         }
 
         private double _userFontSize, _computerFontSize, _groupFontSize, _entraFontSize;
-        public double UserFontSize { get => _userFontSize; set { if (Set(ref _userFontSize, UiLimits.ClampFontSize(value))) SetModified(); } }
-        public double ComputerFontSize { get => _computerFontSize; set { if (Set(ref _computerFontSize, UiLimits.ClampFontSize(value))) SetModified(); } }
-        public double GroupFontSize { get => _groupFontSize; set { if (Set(ref _groupFontSize, UiLimits.ClampFontSize(value))) SetModified(); } }
-        public double EntraFontSize { get => _entraFontSize; set { if (Set(ref _entraFontSize, UiLimits.ClampFontSize(value))) SetModified(); } }
+        public double UserFontSize
+        {
+            get => _userFontSize;
+            set
+            {
+                if (Set(ref _userFontSize, UiLimits.ClampFontSize(value)))
+                {
+                    if (_selectedUserPreset == null || !_selectedUserPreset.IsCustom)
+                    {
+                        SyncPresetToSize(value, p => _selectedUserPreset = p, nameof(SelectedUserPreset), nameof(IsUserCustomSelected));
+                    }
+                    SetModified();
+                }
+            }
+        }
+        public double ComputerFontSize
+        {
+            get => _computerFontSize;
+            set
+            {
+                if (Set(ref _computerFontSize, UiLimits.ClampFontSize(value)))
+                {
+                    if (_selectedComputerPreset == null || !_selectedComputerPreset.IsCustom)
+                    {
+                        SyncPresetToSize(value, p => _selectedComputerPreset = p, nameof(SelectedComputerPreset), nameof(IsComputerCustomSelected));
+                    }
+                    SetModified();
+                }
+            }
+        }
+        public double GroupFontSize
+        {
+            get => _groupFontSize;
+            set
+            {
+                if (Set(ref _groupFontSize, UiLimits.ClampFontSize(value)))
+                {
+                    if (_selectedGroupPreset == null || !_selectedGroupPreset.IsCustom)
+                    {
+                        SyncPresetToSize(value, p => _selectedGroupPreset = p, nameof(SelectedGroupPreset), nameof(IsGroupCustomSelected));
+                    }
+                    SetModified();
+                }
+            }
+        }
+        public double EntraFontSize
+        {
+            get => _entraFontSize;
+            set
+            {
+                if (Set(ref _entraFontSize, UiLimits.ClampFontSize(value)))
+                {
+                    if (_selectedEntraPreset == null || !_selectedEntraPreset.IsCustom)
+                    {
+                        SyncPresetToSize(value, p => _selectedEntraPreset = p, nameof(SelectedEntraPreset), nameof(IsEntraCustomSelected));
+                    }
+                    SetModified();
+                }
+            }
+        }
+
+        private TypographyPresetOption? _selectedUserPreset;
+        public TypographyPresetOption? SelectedUserPreset
+        {
+            get => _selectedUserPreset;
+            set
+            {
+                if (Set(ref _selectedUserPreset, value) && value != null)
+                {
+                    if (value.TargetSize.HasValue) UserFontSize = value.TargetSize.Value;
+                    OnPropertyChanged(nameof(IsUserCustomSelected));
+                    SetModified();
+                }
+            }
+        }
+        public bool IsUserCustomSelected => SelectedUserPreset?.IsCustom == true;
+
+        private TypographyPresetOption? _selectedComputerPreset;
+        public TypographyPresetOption? SelectedComputerPreset
+        {
+            get => _selectedComputerPreset;
+            set
+            {
+                if (Set(ref _selectedComputerPreset, value) && value != null)
+                {
+                    if (value.TargetSize.HasValue) ComputerFontSize = value.TargetSize.Value;
+                    OnPropertyChanged(nameof(IsComputerCustomSelected));
+                    SetModified();
+                }
+            }
+        }
+        public bool IsComputerCustomSelected => SelectedComputerPreset?.IsCustom == true;
+
+        private TypographyPresetOption? _selectedGroupPreset;
+        public TypographyPresetOption? SelectedGroupPreset
+        {
+            get => _selectedGroupPreset;
+            set
+            {
+                if (Set(ref _selectedGroupPreset, value) && value != null)
+                {
+                    if (value.TargetSize.HasValue) GroupFontSize = value.TargetSize.Value;
+                    OnPropertyChanged(nameof(IsGroupCustomSelected));
+                    SetModified();
+                }
+            }
+        }
+        public bool IsGroupCustomSelected => SelectedGroupPreset?.IsCustom == true;
+
+        private TypographyPresetOption? _selectedEntraPreset;
+        public TypographyPresetOption? SelectedEntraPreset
+        {
+            get => _selectedEntraPreset;
+            set
+            {
+                if (Set(ref _selectedEntraPreset, value) && value != null)
+                {
+                    if (value.TargetSize.HasValue) EntraFontSize = value.TargetSize.Value;
+                    OnPropertyChanged(nameof(IsEntraCustomSelected));
+                    SetModified();
+                }
+            }
+        }
+        public bool IsEntraCustomSelected => SelectedEntraPreset?.IsCustom == true;
 
         private AppLogLevel _minimumLogLevel;
         public AppLogLevel MinimumLogLevel { get => _minimumLogLevel; set { if (Set(ref _minimumLogLevel, value)) SetModified(); } }
@@ -418,6 +577,17 @@ namespace DSAMVVM.MVVM.ViewModel
             MoveShortcutUpCommand = new RelayCommand(p => MoveShortcutUp(p as HomeShortcutItem));
             MoveShortcutDownCommand = new RelayCommand(p => MoveShortcutDown(p as HomeShortcutItem));
             ResetShortcutsCommand = new RelayCommand(_ => ResetShortcutsToDefaults());
+            SetPresetSizeCommand = new RelayCommand(param =>
+            {
+                if (param is string s && double.TryParse(s, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var sz))
+                {
+                    DefaultFontSize = sz;
+                }
+                else if (param is double d)
+                {
+                    DefaultFontSize = d;
+                }
+            });
         }
 
         // --- Logic ---
@@ -427,11 +597,20 @@ namespace DSAMVVM.MVVM.ViewModel
             _settings.ApplyDefaultsAndClamp();
 
             DefaultFontSize = _settings.Ui.Font.DefaultSize;
+            SyncPresetToSize(DefaultFontSize, p => _selectedUnifiedPreset = p, nameof(SelectedUnifiedPreset), nameof(IsUnifiedCustomSelected));
+
             UsePerViewOverride = _settings.Ui.Font.ViewFontSizeOverride;
             UserFontSize = GetViewSize("UserView", DefaultFontSize);
+            SyncPresetToSize(UserFontSize, p => _selectedUserPreset = p, nameof(SelectedUserPreset), nameof(IsUserCustomSelected));
+
             ComputerFontSize = GetViewSize("ComputerView", DefaultFontSize);
+            SyncPresetToSize(ComputerFontSize, p => _selectedComputerPreset = p, nameof(SelectedComputerPreset), nameof(IsComputerCustomSelected));
+
             GroupFontSize = GetViewSize("GroupView", DefaultFontSize);
+            SyncPresetToSize(GroupFontSize, p => _selectedGroupPreset = p, nameof(SelectedGroupPreset), nameof(IsGroupCustomSelected));
+
             EntraFontSize = GetViewSize("EntraView", DefaultFontSize);
+            SyncPresetToSize(EntraFontSize, p => _selectedEntraPreset = p, nameof(SelectedEntraPreset), nameof(IsEntraCustomSelected));
 
             MinimumLogLevel = _settings.Logging.MinimumLevel;
             RetentionDays = _settings.Logging.RetentionDays;
@@ -538,7 +717,7 @@ namespace DSAMVVM.MVVM.ViewModel
             NewShortcutDescription = string.Empty;
             NewShortcutTarget = string.Empty;
             NewShortcutGlyph = Glyphs.Links;
-            NewShortcutColor = "Blue";
+            NewShortcutColor = ShortcutColorPresets.Presets[Shortcuts.Count % ShortcutColorPresets.Presets.Count];
 
             SetModified();
             UiNotify.Info($"Added shortcut '{item.Title}'. Click Apply to save.", showStatusBar: true);
@@ -753,6 +932,19 @@ namespace DSAMVVM.MVVM.ViewModel
             ComputerFontSize = DefaultFontSize;
             GroupFontSize = DefaultFontSize;
             EntraFontSize = DefaultFontSize;
+            SyncPresetToSize(UserFontSize, p => _selectedUserPreset = p, nameof(SelectedUserPreset), nameof(IsUserCustomSelected));
+            SyncPresetToSize(ComputerFontSize, p => _selectedComputerPreset = p, nameof(SelectedComputerPreset), nameof(IsComputerCustomSelected));
+            SyncPresetToSize(GroupFontSize, p => _selectedGroupPreset = p, nameof(SelectedGroupPreset), nameof(IsGroupCustomSelected));
+            SyncPresetToSize(EntraFontSize, p => _selectedEntraPreset = p, nameof(SelectedEntraPreset), nameof(IsEntraCustomSelected));
+        }
+
+        private void SyncPresetToSize(double size, Action<TypographyPresetOption> assign, string propName, string customPropName)
+        {
+            var match = TypographyPresets.FirstOrDefault(p => p.TargetSize.HasValue && Math.Abs(p.TargetSize.Value - size) < 0.05);
+            var target = match ?? TypographyPresets.First(p => p.IsCustom);
+            assign(target);
+            OnPropertyChanged(propName);
+            OnPropertyChanged(customPropName);
         }
 
         private double GetViewSize(string key, double fallback)

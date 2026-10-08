@@ -263,7 +263,7 @@
                                     <TextBlock Grid.Column="0"
                                                Text="{x:Static res:Glyphs.Computer}"
                                                FontFamily="Segoe MDL2 Assets"
-                                               FontSize="13"
+                                               FontSize="{Binding DataContext.Typography.IconSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                Foreground="{DynamicResource Brush.Text.Muted}"
                                                VerticalAlignment="Center"
                                                Margin="0,0,8,0"/>
@@ -272,14 +272,14 @@
                                     <TextBlock Grid.Column="1"
                                                Text="{Binding ComputerName}"
                                                FontWeight="SemiBold"
-                                               FontSize="12"
+                                               FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                Foreground="{DynamicResource Brush.Text.Primary}"
                                                VerticalAlignment="Center"
                                                Margin="0,0,10,0"/>
 
                                     <!-- OS Badge -->
                                     <Border Grid.Column="2" CornerRadius="4" Background="#122438" BorderBrush="#1D3D5E" BorderThickness="1" Padding="5,1" Margin="0,0,8,0" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding OperatingSystem}" FontSize="10" FontWeight="SemiBold" Foreground="#6EC3FF"/>
+                                        <TextBlock Text="{Binding OperatingSystem}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#6EC3FF" TextWrapping="NoWrap"/>
                                     </Border>
 
                                     <!-- Status Badges Cluster -->
@@ -296,7 +296,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="Not Found" FontSize="10" FontWeight="SemiBold" Foreground="#FF7B88"/>
+                                            <TextBlock Text="Not Found" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                         </Border>
 
                                         <!-- Disabled Badge -->
@@ -311,7 +311,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="Disabled" FontSize="10" FontWeight="SemiBold" Foreground="#FF7B88"/>
+                                            <TextBlock Text="Disabled" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                         </Border>
 
 
@@ -319,7 +319,7 @@
 
                                     <!-- OU Path / Description in Collapsed Row -->
                                     <TextBlock Grid.Column="4"
-                                               FontSize="11"
+                                               FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                Foreground="{DynamicResource Brush.Text.Muted}"
                                                TextTrimming="CharacterEllipsis"
                                                VerticalAlignment="Center"
@@ -346,7 +346,7 @@
                                     <!-- Timestamp on right -->
                                     <TextBlock Grid.Column="5"
                                                Text="{Binding TimeFormatted}"
-                                               FontSize="11"
+                                               FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                Foreground="{DynamicResource Brush.Text.Muted}"
                                                VerticalAlignment="Center"
                                                Margin="0,0,10,0"/>
@@ -476,7 +476,7 @@
                                                     VerticalAlignment="Center">
                                                 <TextBlock Text="{x:Static res:Glyphs.Computer}"
                                                            FontFamily="Segoe MDL2 Assets"
-                                                           FontSize="16"
+                                                           FontSize="{Binding DataContext.Typography.IconSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                            Foreground="{DynamicResource Brush.Text.Primary}"
                                                            HorizontalAlignment="Center"
                                                            VerticalAlignment="Center"/>
@@ -493,7 +493,7 @@
                                                             Margin="0,0,8,0">
                                                         <StackPanel Orientation="Horizontal">
                                                             <TextBlock Text="{Binding ComputerName}"
-                                                                       FontSize="14"
+                                                                       FontSize="{Binding DataContext.Typography.TitleSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                        FontWeight="SemiBold"
                                                                        Foreground="{DynamicResource Brush.Text.Primary}"/>
 
@@ -536,7 +536,7 @@
 
                                                     <!-- OS Badge -->
                                                     <Border CornerRadius="4" Background="#122438" BorderBrush="#1D3D5E" BorderThickness="1" Padding="6,2" Margin="0,0,6,0" VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding OperatingSystem}" FontSize="10" FontWeight="SemiBold" Foreground="#6EC3FF"/>
+                                                        <TextBlock Text="{Binding OperatingSystem}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#6EC3FF" TextWrapping="NoWrap"/>
                                                     </Border>
 
 
@@ -553,7 +553,7 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </Border.Style>
-                                                        <TextBlock Text="Disabled" FontSize="10" FontWeight="Bold" Foreground="#FF7B88"/>
+                                                        <TextBlock Text="Disabled" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                                     </Border>
                                                 </WrapPanel>
                                             </StackPanel>
@@ -577,7 +577,7 @@
 
                                                 <!-- Normal Timestamp (when not stale) -->
                                                 <TextBlock Text="{Binding TimeFormatted}"
-                                                           FontSize="11"
+                                                           FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                            Foreground="{DynamicResource Brush.Text.Muted}"
                                                            VerticalAlignment="Center"
                                                            Margin="0,0,6,0">
@@ -733,21 +733,21 @@
                                                     Padding="10,8">
                                                 <StackPanel>
                                                     <TextBlock Text="SYSTEM &amp; DOMAIN IDENTITY"
-                                                               FontSize="10"
+                                                               FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                FontWeight="Bold"
                                                                Foreground="{DynamicResource Brush.Text.Muted}"
                                                                Margin="0,0,0,6"/>
 
                                                     <!-- Operating System -->
                                                     <DockPanel Margin="0,0,0,4">
-                                                        <TextBlock Text="Operating System: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
-                                                        <TextBlock Text="{Binding OperatingSystem}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                        <TextBlock Text="Operating System: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                        <TextBlock Text="{Binding OperatingSystem}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
                                                     </DockPanel>
 
                                                     <!-- Hybrid Device Group Membership -->
                                                     <DockPanel Margin="0,0,0,4">
-                                                        <TextBlock Text="Hybrid Group: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
-                                                        <TextBlock FontSize="11" FontWeight="SemiBold">
+                                                        <TextBlock Text="Hybrid Group: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                        <TextBlock FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold">
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
                                                                     <Setter Property="Text" Value="Not in UA-MEMHybridDevices"/>
@@ -774,8 +774,8 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </StackPanel.Style>
-                                                        <TextBlock Text="Organizational Unit (OU): " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
-                                                        <TextBlock Text="{Binding CleanOuPath}" FontSize="10.5" Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                                        <TextBlock Text="Organizational Unit (OU): " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                        <TextBlock Text="{Binding CleanOuPath}" FontSize="{Binding DataContext.Typography.NotesSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap" Margin="0,2,0,0"/>
                                                     </StackPanel>
                                                 </StackPanel>
                                             </Border>
@@ -789,21 +789,21 @@
                                                     Padding="10,8">
                                                 <StackPanel>
                                                     <TextBlock Text="ACTIVITY &amp; STATUS"
-                                                               FontSize="10"
+                                                               FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                FontWeight="Bold"
                                                                Foreground="{DynamicResource Brush.Text.Muted}"
                                                                Margin="0,0,0,6"/>
 
                                                     <!-- Last Logon Activity -->
                                                     <DockPanel Margin="0,0,0,6">
-                                                        <TextBlock Text="Last Logon: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
-                                                        <TextBlock Text="{Binding LastLogonDate}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                        <TextBlock Text="Last Logon: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                        <TextBlock Text="{Binding LastLogonDate}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
                                                     </DockPanel>
 
                                                     <!-- Account Status -->
                                                     <DockPanel Margin="0,0,0,4">
-                                                        <TextBlock Text="Account Status: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
-                                                        <TextBlock FontSize="11" FontWeight="SemiBold">
+                                                        <TextBlock Text="Account Status: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                        <TextBlock FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold">
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
                                                                     <Setter Property="Text" Value="Enabled"/>
@@ -830,8 +830,8 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </StackPanel.Style>
-                                                        <TextBlock Text="Description / Notes: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
-                                                        <TextBlock Text="{Binding Description}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap" Margin="0,1,0,0"/>
+                                                        <TextBlock Text="Description / Notes: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                        <TextBlock Text="{Binding Description}" FontSize="{Binding DataContext.Typography.NotesSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap" Margin="0,1,0,0"/>
                                                     </StackPanel>
                                                 </StackPanel>
                                             </Border>

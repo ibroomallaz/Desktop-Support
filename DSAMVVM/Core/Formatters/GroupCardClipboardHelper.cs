@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using DSAMVVM.MVVM.ViewModel;
+﻿using DSAMVVM.MVVM.ViewModel;
 using DSAMVVM.MVVM.ViewModel.Cards;
 
 namespace DSAMVVM.Core.Formatters
@@ -40,6 +39,8 @@ namespace DSAMVVM.Core.Formatters
                 case GroupViewModel.GroupSearchMode.Division:
                     AppendDivisionSupportDetails(builder, vm);
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             return builder;
@@ -111,11 +112,9 @@ namespace DSAMVVM.Core.Formatters
 
         private static void AppendDivisionSupportDetails(CardClipboardBuilder builder, GroupHistoryItemViewModel vm)
         {
-            if (vm.DivTeams.Count > 0)
-            {
-                var teamNames = vm.DivTeams.Select(t => t.TeamName).Where(n => !string.IsNullOrWhiteSpace(n));
-                builder.AddList("SUPPORT TEAMS", teamNames);
-            }
+            if (vm.DivTeams.Count <= 0) return;
+            var teamNames = vm.DivTeams.Select(t => t.TeamName).Where(n => !string.IsNullOrWhiteSpace(n));
+            builder.AddList("SUPPORT TEAMS", teamNames);
         }
     }
 }

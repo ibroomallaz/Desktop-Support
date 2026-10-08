@@ -12,8 +12,8 @@ namespace DSAMVVM.Core.Services.Infrastructure
     public class SettingsService : ISettingsService
     {
         private const string Tag = "SettingsService";
-        private const int MinFont = 8;
-        private const int MaxFont = 24;
+        private const int MinFont = (int)UiLimits.MinFontSize;
+        private const int MaxFont = (int)UiLimits.MaxFontSize;
 
         //Reactive Event Broker
         public event EventHandler<AppSettings>? SettingsChanged;
@@ -50,14 +50,15 @@ namespace DSAMVVM.Core.Services.Infrastructure
                 try
                 {
                     await SaveAsync(settings, path, ct).ConfigureAwait(false);
-                    Log.Info(Tag, "LoadAsync: default settings written.");
+                    Log.Info(Tag, "LoadAsync: created default settings file successfully.");
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn(Tag, $"LoadAsync: failed to write default settings. Reason: {ex.Message}");
+                    Log.Warn(Tag, $"LoadAsync: failed to write default settings file. Reason: {ex.Message}");
                 }
             }
 
+            settings.ApplyDefaultsAndClamp();
             return settings;
         }
 
@@ -68,55 +69,45 @@ namespace DSAMVVM.Core.Services.Infrastructure
             var path = Expand(settingsPath);
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
 
+            settings.ApplyDefaultsAndClamp();
             TryTouchMeta(settings);
 
-            var tmp = path + ".tmp";
-            var bak = path + ".bak";
+            Log.Debug(Tag, $"SaveAsync: persisting settings to \"{path}\".");
+
             var json = JsonConvert.SerializeObject(settings, Formatting.Indented);
+            var tmp = path + ".tmp";
 
-            Log.Debug(Tag, $"SaveAsync: writing settings to temp \"{tmp}\" ({json.Length} bytes).");
+            await File.WriteAllTextAsync(tmp, json, Encoding.UTF8, ct).ConfigureAwait(false);
+            File.Move(tmp, path, overwrite: true);
 
-            try
-            {
-                await File.WriteAllTextAsync(tmp, json, Encoding.UTF8, ct).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(Tag, $"SaveAsync: failed writing temp file \"{tmp}\".", ex);
-                throw;
-            }
-
-            try
-            {
-                if (File.Exists(path))
-                {
-                    File.Copy(path, bak, overwrite: true);
-                    Log.Debug(Tag, $"SaveAsync: backup created at \"{bak}\".");
-                }
-
-                File.Copy(tmp, path, overwrite: true);
-                File.Delete(tmp);
-                Log.Info(Tag, $"SaveAsync: settings persisted to \"{path}\".");
-
-
-                //Broadcast change to listening ViewModels safely on UI thread
-                UiNotify.RunOnUiAsync(() => SettingsChanged?.Invoke(this, settings));
-            }
-            catch (Exception ex)
-            {
-                Log.Error(Tag, $"SaveAsync: replace/cleanup failed for \"{path}\".", ex);
-                throw;
-            }
+            Log.Info(Tag, "SaveAsync: settings successfully written to disk.");
         }
 
         // Paths
 
-        public string ResolveDataDir(AppSettings s)
+        public string ResolveDeptPath(AppSettings s)
         {
-            Directory.CreateDirectory(Globals.g_AppDir);
-            var dataDir = Path.Combine(Globals.g_AppDir, s.Paths.DataDir);
+            var dept = s.Paths.DepartmentData;
+            string dataDir;
+
+            if (dept.UseCustomSource && dept.Source.Equals("File", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!string.IsNullOrWhiteSpace(dept.Uri))
+                {
+                    var expanded = Expand(dept.Uri);
+                    Log.Debug(Tag, $"ResolveDeptPath: using custom file path \"{expanded}\".");
+                    return expanded;
+                }
+                Log.Warn(Tag, "ResolveDeptPath: custom file path is empty, falling back to local app data.");
+                dataDir = Globals.g_DataDir;
+            }
+            else
+            {
+                dataDir = Globals.g_DataDir;
+            }
+
             Directory.CreateDirectory(dataDir);
-            Log.Debug(Tag, $"ResolveDataDir: ensured \"{dataDir}\".");
+            Log.Debug(Tag, $"ResolveDeptPath: resolved directory \"{dataDir}\".");
             return dataDir;
         }
 
@@ -140,7 +131,7 @@ namespace DSAMVVM.Core.Services.Infrastructure
             }
             else
             {
-                var def = s.Ui.Font.DefaultSize > 0 ? s.Ui.Font.DefaultSize : 14;
+                var def = s.Ui.Font.DefaultSize > 0 ? s.Ui.Font.DefaultSize : UiLimits.DefaultFontSize;
                 result = Math.Clamp(def, min, max);
                 Log.Debug(Tag, $"GetFontSizeFor[{viewName}]: using default={def} -> {result}.");
             }
@@ -169,7 +160,7 @@ namespace DSAMVVM.Core.Services.Infrastructure
             }
             else
             {
-                var current = s.Ui.Font.DefaultSize > 0 ? s.Ui.Font.DefaultSize : 14;
+                var current = s.Ui.Font.DefaultSize > 0 ? s.Ui.Font.DefaultSize : UiLimits.DefaultFontSize;
                 var next = (int)Math.Clamp(current + delta, MinFont, MaxFont);
                 s.Ui.Font.DefaultSize = next;
 
@@ -178,7 +169,7 @@ namespace DSAMVVM.Core.Services.Infrastructure
             }
         }
 
-        public void ResetOutputFontSize(AppSettings s, string? viewName, bool preferPerView, int defaultSize = 14)
+        public void ResetOutputFontSize(AppSettings s, string? viewName, bool preferPerView, int defaultSize = 12)
         {
             ArgumentNullException.ThrowIfNull(s);
 

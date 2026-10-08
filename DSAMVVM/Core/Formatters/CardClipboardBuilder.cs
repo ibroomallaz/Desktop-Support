@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Text;
 using DSAMVVM.Core.Utilities;
 
@@ -11,9 +8,9 @@ namespace DSAMVVM.Core.Formatters
     {
         private readonly StringBuilder _html = new();
         private readonly StringBuilder _plain = new();
-        private readonly List<string> _currentBadgeHtml = new();
-        private readonly List<string> _currentBadgePlain = new();
-        private bool _isInsideFieldsBlock = false;
+        private readonly List<string> _currentBadgeHtml = [];
+        private readonly List<string> _currentBadgePlain = [];
+        private bool _isInsideFieldsBlock;
 
         public CardClipboardBuilder()
         {
@@ -85,7 +82,7 @@ namespace DSAMVVM.Core.Formatters
             return this;
         }
 
-        public CardClipboardBuilder AddList(string title, IEnumerable<string> items)
+        public CardClipboardBuilder AddList(string title, IEnumerable<string>? items)
         {
             var itemList = items?.Where(i => !string.IsNullOrWhiteSpace(i)).ToList();
             if (itemList == null || itemList.Count == 0) return this;
@@ -118,7 +115,7 @@ namespace DSAMVVM.Core.Formatters
 
         public bool CopyToClipboard()
         {
-            var (html, plain) = Build();
+            (string html, string plain) = Build();
             return ClipboardHelper.CopyRichAndPlainText(html, plain);
         }
 
@@ -131,31 +128,25 @@ namespace DSAMVVM.Core.Formatters
         private void EnsureFieldsBlockOpen()
         {
             FlushBadges();
-            if (!_isInsideFieldsBlock)
-            {
-                _html.Append("<p style=\"margin: 0;\">");
-                _isInsideFieldsBlock = true;
-            }
+            if (_isInsideFieldsBlock) return;
+            _html.Append("<p style=\"margin: 0;\">");
+            _isInsideFieldsBlock = true;
         }
 
         private void CloseFieldsBlockIfNeeded()
         {
-            if (_isInsideFieldsBlock)
-            {
-                _html.Append("</p>");
-                _isInsideFieldsBlock = false;
-            }
+            if (!_isInsideFieldsBlock) return;
+            _html.Append("</p>");
+            _isInsideFieldsBlock = false;
         }
 
         private void FlushBadges()
         {
-            if (_currentBadgeHtml.Count > 0)
-            {
-                _html.Append($"<p style=\"margin: 0 0 6px 0;\">{string.Join("&nbsp;&nbsp;", _currentBadgeHtml)}</p>");
-                _plain.AppendLine(string.Join("  ", _currentBadgePlain));
-                _currentBadgeHtml.Clear();
-                _currentBadgePlain.Clear();
-            }
+            if (_currentBadgeHtml.Count <= 0) return;
+            _html.Append($"<p style=\"margin: 0 0 6px 0;\">{string.Join("&nbsp;&nbsp;", _currentBadgeHtml)}</p>");
+            _plain.AppendLine(string.Join("  ", _currentBadgePlain));
+            _currentBadgeHtml.Clear();
+            _currentBadgePlain.Clear();
         }
     }
 }

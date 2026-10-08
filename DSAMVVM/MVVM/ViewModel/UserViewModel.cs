@@ -15,6 +15,7 @@ using DSAMVVM.Core.Renderers;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
+using DSAMVVM.MVVM.Model.Config.UI;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -33,12 +34,22 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public bool HasHistory => History.Count > 0;
 
-        private double _effectiveFontSize = 14;
+        private double _effectiveFontSize = UiLimits.DefaultFontSize;
         public double EffectiveFontSize
         {
             get => _effectiveFontSize;
-            private set { _effectiveFontSize = value; OnPropertyChanged(nameof(EffectiveFontSize)); }
+            private set
+            {
+                if (Math.Abs(_effectiveFontSize - value) > 0.01)
+                {
+                    _effectiveFontSize = value;
+                    OnPropertyChanged(nameof(EffectiveFontSize));
+                    OnPropertyChanged(nameof(Typography));
+                }
+            }
         }
+
+        public CardTypography Typography => CardTypography.FromBase(EffectiveFontSize);
 
         private string? _error;
         public string? Error
@@ -291,7 +302,7 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             var s = App.Settings;
             bool perView = s.Ui.Font.ViewFontSizeOverride;
-            _settingsSvc.ResetOutputFontSize(s, perView ? ViewKey : null, perView, 14);
+            _settingsSvc.ResetOutputFontSize(s, perView ? ViewKey : null, perView, (int)UiLimits.DefaultFontSize);
             _notifier.NotifyChanged();
             _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
         }

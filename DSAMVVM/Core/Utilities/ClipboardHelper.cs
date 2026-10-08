@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using System.Windows;
 using DSAMVVM.Core.Logging;
 
@@ -41,7 +40,7 @@ namespace DSAMVVM.Core.Utilities
                     dataObject.SetData(DataFormats.Html, cfHtml, true);
                 }
 
-                System.Windows.Clipboard.SetDataObject(dataObject, true);
+                Clipboard.SetDataObject(dataObject, true);
                 return true;
             }
             catch (Exception ex)

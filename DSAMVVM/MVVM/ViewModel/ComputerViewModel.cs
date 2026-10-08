@@ -9,6 +9,7 @@ using DSAMVVM.Core.Renderers;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
+using DSAMVVM.MVVM.Model.Config.UI;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
@@ -39,12 +40,22 @@ namespace DSAMVVM.MVVM.ViewModel
         public string SearchLog { get => _searchLog; private set { _searchLog = value; OnPropertyChanged(); } }
 
         // Effective output font size for this view
-        private double _effectiveOutputFontSize;
+        private double _effectiveOutputFontSize = UiLimits.DefaultFontSize;
         public double EffectiveOutputFontSize
         {
             get => _effectiveOutputFontSize;
-            private set { _effectiveOutputFontSize = value; OnPropertyChanged(); }
+            private set
+            {
+                if (Math.Abs(_effectiveOutputFontSize - value) > 0.01)
+                {
+                    _effectiveOutputFontSize = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(Typography));
+                }
+            }
         }
+
+        public CardTypography Typography => CardTypography.FromBase(EffectiveOutputFontSize);
 
         // Commands
         public ICommand ClearCommand { get; }
@@ -129,7 +140,7 @@ namespace DSAMVVM.MVVM.ViewModel
             var s = App.Settings;
             bool preferPerView = s.Ui.Font.ViewFontSizeOverride;
 
-            _settingsSvc.ResetOutputFontSize(s, preferPerView ? ViewKey : null, preferPerView, defaultSize: 14);
+            _settingsSvc.ResetOutputFontSize(s, preferPerView ? ViewKey : null, preferPerView, defaultSize: (int)UiLimits.DefaultFontSize);
             _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
 
             _notifier.NotifyChanged();

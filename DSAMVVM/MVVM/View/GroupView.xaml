@@ -300,7 +300,8 @@
                                     <TextBlock Grid.Column="1"
                                                Text="{Binding PrimaryHeaderTitle}"
                                                FontWeight="SemiBold"
-                                               FontSize="12"
+                                               FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                               TextTrimming="CharacterEllipsis"
                                                Foreground="{DynamicResource Brush.Text.Primary}"
                                                VerticalAlignment="Center"
                                                Margin="0,0,10,0"/>
@@ -327,7 +328,7 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <TextBlock Text="{Binding ModeBadgeText}" FontSize="10" FontWeight="SemiBold">
+                                        <TextBlock Text="{Binding ModeBadgeText}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" TextWrapping="NoWrap">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Foreground" Value="#6EC3FF"/>
@@ -361,7 +362,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="Not Found" FontSize="10" FontWeight="SemiBold" Foreground="#FF7B88"/>
+                                            <TextBlock Text="Not Found" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                         </Border>
 
                                         <!-- Missing MIM Policy Warning (User MIM Mode) -->
@@ -376,7 +377,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="⚠ Missing MIM Wrkst" FontSize="10" FontWeight="SemiBold" Foreground="#FFC069"/>
+                                            <TextBlock Text="⚠ Missing MIM Wrkst" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FFC069" TextWrapping="NoWrap"/>
                                         </Border>
 
                                         <!-- Disabled Pill (User MIM Mode) -->
@@ -391,7 +392,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="Disabled" FontSize="10" FontWeight="Bold" Foreground="#FF7B88"/>
+                                            <TextBlock Text="Disabled" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                         </Border>
 
                                         <!-- Summary count / details pill -->
@@ -406,14 +407,14 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="{Binding CollapsedSummaryText}" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                            <TextBlock Text="{Binding CollapsedSummaryText}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" TextWrapping="NoWrap"/>
                                         </Border>
                                     </StackPanel>
 
                                     <!-- Timestamp on right -->
                                     <TextBlock Grid.Column="5"
                                                Text="{Binding TimeFormatted}"
-                                               FontSize="11"
+                                               FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                Foreground="{DynamicResource Brush.Text.Muted}"
                                                VerticalAlignment="Center"
                                                Margin="0,0,10,0"/>
@@ -544,7 +545,7 @@
                                                     VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding ModeGlyph}"
                                                            FontFamily="Segoe MDL2 Assets"
-                                                           FontSize="16"
+                                                           FontSize="{Binding DataContext.Typography.IconSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                            Foreground="{DynamicResource Brush.Text.Primary}"
                                                            HorizontalAlignment="Center"
                                                            VerticalAlignment="Center"/>
@@ -555,7 +556,7 @@
                                                 <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                     <!-- Primary Title -->
                                                     <TextBlock Text="{Binding PrimaryHeaderTitle}"
-                                                               FontSize="15"
+                                                               FontSize="{Binding DataContext.Typography.TitleSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                FontWeight="SemiBold"
                                                                Foreground="{DynamicResource Brush.Text.Primary}"
                                                                VerticalAlignment="Center"
@@ -583,7 +584,7 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </Border.Style>
-                                                        <TextBlock Text="{Binding ModeBadgeText}" FontSize="11" FontWeight="Bold">
+                                                        <TextBlock Text="{Binding ModeBadgeText}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" TextWrapping="NoWrap">
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
                                                                     <Setter Property="Foreground" Value="#6EC3FF"/>
@@ -609,7 +610,7 @@
                                                             ToolTip="Click to copy query value to clipboard"
                                                             VerticalAlignment="Center">
                                                         <StackPanel Orientation="Horizontal">
-                                                            <TextBlock Text="{Binding Query}" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                            <TextBlock Text="{Binding Query}" FontWeight="SemiBold" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Primary}"/>
 
                                                             <!-- Copy Icon (default) -->
                                                             <TextBlock Text=" &#xE8C8;"
@@ -660,7 +661,7 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </Border.Style>
-                                                        <TextBlock Text="Disabled" FontSize="10" FontWeight="Bold" Foreground="#FF7B88"/>
+                                                        <TextBlock Text="Disabled" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                                     </Border>
                                                 </WrapPanel>
                                             </StackPanel>
@@ -670,11 +671,11 @@
                                                 <!-- Timestamp / Relative Age -->
                                                 <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,10,0">
                                                     <TextBlock Text="{Binding TimeFormatted}"
-                                                               FontSize="11"
+                                                               FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                Foreground="{DynamicResource Brush.Text.Muted}"
                                                                HorizontalAlignment="Right"/>
                                                     <TextBlock Text="{Binding RelativeAgeText}"
-                                                               FontSize="9"
+                                                               FontSize="{Binding DataContext.Typography.NotesSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                Foreground="{DynamicResource Brush.Text.Muted}"
                                                                Opacity="0.7"
                                                                HorizontalAlignment="Right"/>
@@ -811,10 +812,10 @@
                                                     <TextBlock Text="Missing Required MIM Workstation Policy"
                                                                FontWeight="Bold"
                                                                Foreground="#FFC069"
-                                                               FontSize="12"/>
+                                                               FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                                                     <TextBlock Text="This user is missing 'UA-MIM-Wrkst-AllDivUsers'. Device login permissions, standard workstation policies, or domain network shares may fail."
                                                                Foreground="{DynamicResource Brush.Text.Muted}"
-                                                               FontSize="11"
+                                                               FontSize="{Binding DataContext.Typography.NotesSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                TextWrapping="Wrap"/>
                                                 </StackPanel>
                                             </Grid>
@@ -849,11 +850,11 @@
                                                 <TextBlock Text="Lookup Failed or Item Not Found"
                                                            FontWeight="Bold"
                                                            Foreground="#FF7B88"
-                                                           FontSize="12"
+                                                           FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                            Margin="0,0,0,2"/>
                                                 <TextBlock Text="{Binding ErrorMessage}"
                                                            Foreground="{DynamicResource Brush.Text.Muted}"
-                                                           FontSize="11"
+                                                           FontSize="{Binding DataContext.Typography.NotesSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                            TextWrapping="Wrap"/>
                                             </StackPanel>
                                         </Border>
@@ -896,11 +897,11 @@
 
                                                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                                                         <TextBlock Text="MIM GROUPS"
-                                                                   FontSize="10"
+                                                                   FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                    FontWeight="Bold"
                                                                    Foreground="{DynamicResource Brush.Text.Muted}"/>
                                                         <TextBlock Text="{Binding MimGroupCount, StringFormat=' ({0})'}"
-                                                                   FontSize="10"
+                                                                   FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                    FontWeight="SemiBold"
                                                                    Foreground="{DynamicResource Brush.Text.Muted}"/>
                                                     </StackPanel>
@@ -961,7 +962,7 @@
                                                                  Background="Transparent"
                                                                  BorderThickness="0"
                                                                  Foreground="{DynamicResource Brush.Text.Primary}"
-                                                                 FontSize="11"
+                                                                 FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                  VerticalAlignment="Center"/>
 
                                                         <!-- Clear input button -->
@@ -992,7 +993,7 @@
                                                                 Padding="6,2"
                                                                 VerticalAlignment="Center"
                                                                 Margin="4,0,0,0">
-                                                            <TextBlock FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}">
+                                                            <TextBlock FontSize="{Binding DataContext.Typography.NotesSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}">
                                                                 <Run Text="Showing "/>
                                                                 <Run Text="{Binding FilteredMimGroupCount, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
                                                                 <Run Text=" of "/>
@@ -1035,7 +1036,7 @@
                                                                             ToolTip="Click to view members of this group">
                                                                         <StackPanel Orientation="Horizontal">
                                                                             <TextBlock Text="&#xE902; " FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}" VerticalAlignment="Center"/>
-                                                                            <TextBlock Text="{Binding .}" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource Brush.Text.Primary}" VerticalAlignment="Center"/>
+                                                                            <TextBlock Text="{Binding .}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Medium" Foreground="{DynamicResource Brush.Text.Primary}" VerticalAlignment="Center"/>
                                                                         </StackPanel>
                                                                     </Button>
 
@@ -1078,11 +1079,11 @@
 
                                                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                                                         <TextBlock Text="GROUP MEMBERS"
-                                                                   FontSize="10"
+                                                                   FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                    FontWeight="Bold"
                                                                    Foreground="{DynamicResource Brush.Text.Muted}"/>
                                                         <TextBlock Text="{Binding MemberCount, StringFormat=' ({0})'}"
-                                                                   FontSize="10"
+                                                                   FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                    FontWeight="SemiBold"
                                                                    Foreground="{DynamicResource Brush.Text.Muted}"/>
                                                     </StackPanel>
@@ -1143,7 +1144,7 @@
                                                                  Background="Transparent"
                                                                  BorderThickness="0"
                                                                  Foreground="{DynamicResource Brush.Text.Primary}"
-                                                                 FontSize="11"
+                                                                 FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                  VerticalAlignment="Center"/>
 
                                                         <!-- Clear input button -->
@@ -1174,7 +1175,7 @@
                                                                 Padding="6,2"
                                                                 VerticalAlignment="Center"
                                                                 Margin="4,0,0,0">
-                                                            <TextBlock FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}">
+                                                            <TextBlock FontSize="{Binding DataContext.Typography.NotesSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}">
                                                                 <Run Text="Showing "/>
                                                                 <Run Text="{Binding FilteredMemberCount, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
                                                                 <Run Text=" of "/>
@@ -1206,7 +1207,7 @@
                                                                             ToolTip="View user details in User view">
                                                                         <StackPanel Orientation="Horizontal">
                                                                             <TextBlock Text="&#xE77B; " FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}" VerticalAlignment="Center"/>
-                                                                            <TextBlock Text="{Binding .}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" VerticalAlignment="Center"/>
+                                                                            <TextBlock Text="{Binding .}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" VerticalAlignment="Center"/>
                                                                         </StackPanel>
                                                                     </Button>
 
@@ -1225,7 +1226,7 @@
 
                                                 <!-- Empty member filter message -->
                                                 <TextBlock Text="No members match the current filter."
-                                                           FontSize="11"
+                                                           FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                            Foreground="{DynamicResource Brush.Text.Muted}"
                                                            Margin="0,4,0,0">
                                                     <TextBlock.Style>
@@ -1275,16 +1276,16 @@
                                                         Padding="10,8">
                                                     <StackPanel>
                                                         <TextBlock Text="SUPPORT TEAM"
-                                                                   FontSize="10"
+                                                                   FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                    FontWeight="Bold"
                                                                    Foreground="{DynamicResource Brush.Text.Muted}"
                                                                    Margin="0,0,0,6"/>
 
                                                         <!-- Team Name -->
                                                         <DockPanel Margin="0,0,0,5">
-                                                            <TextBlock Text="Team: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                            <TextBlock Text="Team: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
                                                             <StackPanel Orientation="Horizontal">
-                                                                <TextBlock Text="{Binding DeptTeamName}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                                <TextBlock Text="{Binding DeptTeamName}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
                                                                 <Button Style="{StaticResource InlineLinkButton}"
                                                                         Command="{Binding CopyItemCommand}"
                                                                         CommandParameter="{Binding DeptTeamName}"
@@ -1307,16 +1308,16 @@
                                                                     </Style.Triggers>
                                                                 </Style>
                                                             </DockPanel.Style>
-                                                            <TextBlock Text="Manager: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                            <TextBlock Text="Manager: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
                                                             <StackPanel Orientation="Horizontal">
-                                                                <TextBlock Text="{Binding DeptManagerName}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
-                                                                <TextBlock Text=" (" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                <TextBlock Text="{Binding DeptManagerName}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                                <TextBlock Text=" (" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
                                                                 <Button Style="{StaticResource InlineLinkButton}"
                                                                         Command="{Binding LookupManagerCommand}"
                                                                         ToolTip="Lookup manager in User view">
-                                                                    <TextBlock Text="{Binding DeptManagerNetId}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Info.Light}"/>
+                                                                    <TextBlock Text="{Binding DeptManagerNetId}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Info.Light}"/>
                                                                 </Button>
-                                                                <TextBlock Text=")" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                <TextBlock Text=")" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
                                                                 <Button Style="{StaticResource InlineLinkButton}"
                                                                         Command="{Binding CopyItemCommand}"
                                                                         CommandParameter="{Binding DeptManagerNetId}"
@@ -1339,9 +1340,9 @@
                                                                     </Style.Triggers>
                                                                 </Style>
                                                             </DockPanel.Style>
-                                                            <TextBlock Text="Phone: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                            <TextBlock Text="Phone: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
                                                             <StackPanel Orientation="Horizontal">
-                                                                <TextBlock Text="{Binding DeptSupportPhone}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                                <TextBlock Text="{Binding DeptSupportPhone}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
                                                                 <Button Style="{StaticResource InlineLinkButton}"
                                                                         Command="{Binding CopyItemCommand}"
                                                                         CommandParameter="{Binding DeptSupportPhone}"
@@ -1363,15 +1364,15 @@
                                                         Padding="10,8">
                                                     <StackPanel>
                                                         <TextBlock Text="DEPARTMENT DETAILS"
-                                                                   FontSize="10"
+                                                                   FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                    FontWeight="Bold"
                                                                    Foreground="{DynamicResource Brush.Text.Muted}"
                                                                    Margin="0,0,0,6"/>
 
                                                         <!-- Department Number -->
                                                         <DockPanel Margin="0,0,0,5">
-                                                            <TextBlock Text="Dept Number: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
-                                                            <TextBlock Text="{Binding DeptNumber}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                            <TextBlock Text="Dept Number: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                            <TextBlock Text="{Binding DeptNumber}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
                                                         </DockPanel>
 
                                                         <!-- Department Notes -->
@@ -1386,8 +1387,8 @@
                                                                     </Style.Triggers>
                                                                 </Style>
                                                             </StackPanel.Style>
-                                                            <TextBlock Text="Notes: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,0,0,2"/>
-                                                            <TextBlock Text="{Binding DeptNotes}" FontSize="11" Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap"/>
+                                                            <TextBlock Text="Notes: " FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,0,0,2"/>
+                                                            <TextBlock Text="{Binding DeptNotes}" FontSize="{Binding DataContext.Typography.NotesSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap"/>
                                                         </StackPanel>
 
                                                         <!-- File Repository Button -->
@@ -1447,7 +1448,7 @@
                                                                     <!-- Row 0: Team Name & Copy -->
                                                                     <DockPanel Grid.Row="0" Margin="0,0,0,4">
                                                                         <TextBlock Text="{Binding TeamName}"
-                                                                                   FontSize="12"
+                                                                                   FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                                    FontWeight="SemiBold"
                                                                                    Foreground="{DynamicResource Brush.Text.Primary}"
                                                                                    VerticalAlignment="Center"/>
@@ -1474,15 +1475,15 @@
                                                                                     </Style.Triggers>
                                                                                 </Style>
                                                                             </StackPanel.Style>
-                                                                            <TextBlock Text="Manager: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
-                                                                            <TextBlock Text="{Binding ManagerName}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
-                                                                            <TextBlock Text=" (" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                            <TextBlock Text="Manager: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                            <TextBlock Text="{Binding ManagerName}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                                            <TextBlock Text=" (" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
                                                                             <Button Style="{StaticResource InlineLinkButton}"
                                                                                     Command="{Binding LookupManagerCommand}"
                                                                                     ToolTip="Lookup manager in User view">
-                                                                                <TextBlock Text="{Binding ManagerNetId}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Info.Light}"/>
+                                                                                <TextBlock Text="{Binding ManagerNetId}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Info.Light}"/>
                                                                             </Button>
-                                                                            <TextBlock Text=")" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                            <TextBlock Text=")" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
                                                                             <Button Style="{StaticResource InlineLinkButton}"
                                                                                     Command="{Binding CopyManagerNetIdCommand}"
                                                                                     ToolTip="Copy manager NetID"
@@ -1503,8 +1504,8 @@
                                                                                     </Style.Triggers>
                                                                                 </Style>
                                                                             </StackPanel.Style>
-                                                                            <TextBlock Text="Phone: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
-                                                                            <TextBlock Text="{Binding PhoneNumber}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                                            <TextBlock Text="Phone: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                            <TextBlock Text="{Binding PhoneNumber}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
                                                                         </StackPanel>
                                                                     </WrapPanel>
 
@@ -1532,7 +1533,7 @@
                                                                                 </Style>
                                                                             </Button.Style>
                                                                             <StackPanel Orientation="Horizontal">
-                                                                                <TextBlock Text="{Binding DivisionsToggleLabel}" FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                                <TextBlock Text="{Binding DivisionsToggleLabel}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
                                                                                 <TextBlock FontSize="9" Foreground="{DynamicResource Brush.Text.Muted}" Margin="5,0,0,0" VerticalAlignment="Center">
                                                                                     <TextBlock.Style>
                                                                                         <Style TargetType="TextBlock">
@@ -1580,7 +1581,7 @@
                                                                                                 CornerRadius="4"
                                                                                                 Padding="6,1"
                                                                                                 Margin="0,0,4,4">
-                                                                                            <TextBlock Text="{Binding .}" FontSize="10" FontWeight="SemiBold" Foreground="#E9D5FF"/>
+                                                                                            <TextBlock Text="{Binding .}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#E9D5FF" TextWrapping="NoWrap"/>
                                                                                         </Border>
                                                                                     </DataTemplate>
                                                                                 </ItemsControl.ItemTemplate>

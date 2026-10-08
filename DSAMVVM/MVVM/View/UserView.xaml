@@ -273,12 +273,12 @@
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
                                         <TextBlock Text="{Binding DisplayName}"
                                                    FontWeight="SemiBold"
-                                                   FontSize="12"
+                                                   FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                    Foreground="{DynamicResource Brush.Text.Primary}"/>
                                         <TextBlock Text=" · "
                                                    Foreground="{DynamicResource Brush.Text.Muted}"/>
                                         <TextBlock Text="{Binding NetId}"
-                                                   FontSize="12"
+                                                   FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                    Foreground="{DynamicResource Brush.Text.Muted}"/>
                                     </StackPanel>
 
@@ -294,7 +294,7 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <TextBlock Text="{Binding DivisionCode, StringFormat='DIV: {0}'}" FontSize="10" FontWeight="Bold" Foreground="#D8B4FE"/>
+                                        <TextBlock Text="{Binding DivisionCode, StringFormat='DIV: {0}'}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" Foreground="#D8B4FE" TextWrapping="NoWrap"/>
                                     </Border>
 
                                     <!-- Status Pills Cluster in Collapsed Row -->
@@ -311,7 +311,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="Not Found" FontSize="10" FontWeight="SemiBold" Foreground="#FF7B88"/>
+                                            <TextBlock Text="Not Found" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                         </Border>
 
                                         <!-- Locked Pill -->
@@ -326,7 +326,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="Locked" FontSize="10" FontWeight="SemiBold" Foreground="#FF7B88"/>
+                                            <TextBlock Text="Locked" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                         </Border>
 
                                         <!-- Disabled Pill -->
@@ -341,7 +341,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="Disabled" FontSize="10" FontWeight="SemiBold" Foreground="#FF7B88"/>
+                                            <TextBlock Text="Disabled" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                         </Border>
 
                                         <!-- Missing MIM Wrkst Group Warning (ONLY if missing!) -->
@@ -356,14 +356,14 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="⚠ Missing MIM Wrkst" FontSize="10" FontWeight="SemiBold" Foreground="#FFC069"/>
+                                            <TextBlock Text="⚠ Missing MIM Wrkst" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FFC069" TextWrapping="NoWrap"/>
                                         </Border>
                                     </StackPanel>
 
                                     <!-- Department display -->
                                     <TextBlock Grid.Column="4"
                                                Text="{Binding DepartmentDisplay}"
-                                               FontSize="11"
+                                               FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                Foreground="{DynamicResource Brush.Text.Muted}"
                                                TextTrimming="CharacterEllipsis"
                                                VerticalAlignment="Center"
@@ -372,7 +372,7 @@
                                     <!-- Timestamp on right -->
                                     <TextBlock Grid.Column="5"
                                                Text="{Binding TimeFormatted}"
-                                               FontSize="11"
+                                               FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                Foreground="{DynamicResource Brush.Text.Muted}"
                                                VerticalAlignment="Center"
                                                Margin="0,0,10,0"/>
@@ -514,7 +514,7 @@
                                                 <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                     <!-- Display Name -->
                                                     <TextBlock Text="{Binding DisplayName}"
-                                                               FontSize="15"
+                                                               FontSize="{Binding DataContext.Typography.TitleSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                FontWeight="SemiBold"
                                                                Foreground="{DynamicResource Brush.Text.Primary}"
                                                                VerticalAlignment="Center"
@@ -532,7 +532,7 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </Border.Style>
-                                                        <TextBlock Text="{Binding DivisionCode, StringFormat='DIV: {0}'}" FontSize="11" FontWeight="Bold" Foreground="#E9D5FF"/>
+                                                        <TextBlock Text="{Binding DivisionCode, StringFormat='DIV: {0}'}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" Foreground="#E9D5FF" TextWrapping="NoWrap"/>
                                                     </Border>
 
                                                     <!-- Affiliation Pill -->
@@ -547,7 +547,7 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </Border.Style>
-                                                        <TextBlock Text="{Binding Affiliation}" FontSize="10" FontWeight="SemiBold" Foreground="#6EC3FF"/>
+                                                        <TextBlock Text="{Binding Affiliation}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#6EC3FF" TextWrapping="NoWrap"/>
                                                     </Border>
 
                                                     <!-- Locked Pill (Only if locked!) -->
@@ -562,7 +562,7 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </Border.Style>
-                                                        <TextBlock Text="Locked Out" FontSize="10" FontWeight="Bold" Foreground="#FF7B88"/>
+                                                        <TextBlock Text="Locked Out" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                                     </Border>
 
                                                     <!-- Disabled Pill (Only if disabled!) -->
@@ -577,7 +577,7 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </Border.Style>
-                                                        <TextBlock Text="Disabled" FontSize="10" FontWeight="Bold" Foreground="#FF7B88"/>
+                                                        <TextBlock Text="Disabled" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                                     </Border>
 
                                                     <!-- NetID Chip Button with Copy -->
@@ -586,8 +586,8 @@
                                                             ToolTip="Click to copy NetID to clipboard"
                                                             VerticalAlignment="Center">
                                                         <StackPanel Orientation="Horizontal">
-                                                            <TextBlock Text="NetID: " Foreground="{DynamicResource Brush.Text.Muted}" FontSize="11"/>
-                                                            <TextBlock Text="{Binding NetId}" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                            <TextBlock Text="NetID: " Foreground="{DynamicResource Brush.Text.Muted}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                                            <TextBlock Text="{Binding NetId}" FontWeight="SemiBold" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Primary}"/>
 
                                                             <!-- Copy Icon (default) -->
                                                             <TextBlock Text=" &#xE8C8;"
@@ -831,26 +831,26 @@
                                                     Padding="10,8">
                                                 <StackPanel>
                                                     <TextBlock Text="ORGANIZATION &amp; SUPPORT"
-                                                               FontSize="10"
+                                                               FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                FontWeight="Bold"
                                                                Foreground="{DynamicResource Brush.Text.Muted}"
                                                                Margin="0,0,0,6"/>
 
                                                     <!-- Division -->
                                                     <DockPanel Margin="0,0,0,4">
-                                                        <TextBlock Text="Division: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
-                                                        <TextBlock Text="{Binding DivisionDisplay}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                        <TextBlock Text="Division: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                        <TextBlock Text="{Binding DivisionDisplay}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
                                                     </DockPanel>
 
                                                     <!-- Department -->
-                                                    <DockPanel Margin="0,0,0,4">
-                                                        <TextBlock Text="Department: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
-                                                        <TextBlock Text="{Binding DepartmentDisplay}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" TextTrimming="CharacterEllipsis"/>
+                                                    <DockPanel Margin="0,0,0,4" LastChildFill="True">
+                                                        <TextBlock Text="Department: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left" VerticalAlignment="Top"/>
+                                                        <TextBlock Text="{Binding DepartmentDisplay}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap"/>
                                                     </DockPanel>
 
                                                     <!-- Support Team (Clickable to toggle manager & contact info) -->
                                                     <DockPanel Margin="0,0,0,4">
-                                                        <TextBlock Text="Support Team: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                        <TextBlock Text="Support Team: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
                                                         <Button Command="{Binding NavigateTeamCommand}"
                                                                 ToolTip="{Binding SupportTeamName}"
                                                                 VerticalAlignment="Center">
@@ -864,9 +864,9 @@
                                                                     </Style.Triggers>
                                                                 </Style>
                                                             </Button.Style>
-                                                            <TextBlock Text="{Binding SupportTeamDisplayName}" FontSize="11" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{Binding SupportTeamDisplayName}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold"/>
                                                         </Button>
-                                                        <TextBlock Text="None" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}">
+                                                        <TextBlock Text="None" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}">
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
                                                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -891,8 +891,8 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </StackPanel.Style>
-                                                        <TextBlock Text="Notes: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
-                                                        <TextBlock Text="{Binding DepartmentNotes}" FontSize="10" Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap"/>
+                                                        <TextBlock Text="Notes: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                        <TextBlock Text="{Binding DepartmentNotes}" FontSize="{Binding DataContext.Typography.NotesSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap"/>
                                                     </StackPanel>
 
                                                     <!-- Action Buttons: File Repo -->
@@ -926,7 +926,7 @@
                                                     Padding="10,8">
                                                 <StackPanel>
                                                     <TextBlock Text="SOFTWARE LICENSES"
-                                                               FontSize="10"
+                                                               FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                FontWeight="Bold"
                                                                Foreground="{DynamicResource Brush.Text.Muted}"
                                                                Margin="0,0,0,6"/>
@@ -934,14 +934,14 @@
                                                     <!-- Microsoft 365 License -->
                                                     <DockPanel Margin="0,0,0,6">
                                                         <TextBlock Text="Microsoft 365: "
-                                                                   FontSize="11"
+                                                                   FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                    Foreground="{DynamicResource Brush.Text.Muted}"
                                                                    VerticalAlignment="Center"
                                                                    DockPanel.Dock="Left"/>
 
                                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                                             <Border CornerRadius="4" Background="#122438" BorderBrush="#1D3D5E" BorderThickness="1" Padding="6,1" Margin="0,0,4,0">
-                                                                <TextBlock Text="{Binding LicenseSummary}" FontSize="10" FontWeight="SemiBold" Foreground="#6EC3FF"/>
+                                                                <TextBlock Text="{Binding LicenseSummary}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#6EC3FF" TextWrapping="NoWrap"/>
                                                             </Border>
 
                                                             <!-- Toggle Raw License Button -->
@@ -986,7 +986,7 @@
                                                     <!-- Adobe License Check Section -->
                                                     <DockPanel Margin="0,0,0,6">
                                                         <TextBlock Text="Adobe Licenses: "
-                                                                   FontSize="11"
+                                                                   FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                    Foreground="{DynamicResource Brush.Text.Muted}"
                                                                    VerticalAlignment="Center"
                                                                    DockPanel.Dock="Left"/>
@@ -1030,8 +1030,8 @@
 
                                                         <StackPanel>
                                                             <DockPanel Margin="0,0,0,2">
-                                                                <TextBlock Text="Acrobat Pro: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
-                                                                <TextBlock HorizontalAlignment="Right" FontSize="10" FontWeight="SemiBold">
+                                                                <TextBlock Text="Acrobat Pro: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                <TextBlock HorizontalAlignment="Right" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold">
                                                                     <TextBlock.Style>
                                                                         <Style TargetType="TextBlock">
                                                                             <Setter Property="Text" Value="✗ None"/>
@@ -1048,8 +1048,8 @@
                                                             </DockPanel>
 
                                                             <DockPanel>
-                                                                <TextBlock Text="Creative Cloud: " FontSize="10" Foreground="{DynamicResource Brush.Text.Muted}"/>
-                                                                <TextBlock HorizontalAlignment="Right" FontSize="10" FontWeight="SemiBold">
+                                                                <TextBlock Text="Creative Cloud: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                <TextBlock HorizontalAlignment="Right" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold">
                                                                     <TextBlock.Style>
                                                                         <Style TargetType="TextBlock">
                                                                             <Setter Property="Text" Value="✗ None"/>

@@ -20,16 +20,48 @@ namespace DSAMVVM.MVVM.Model.Config.UI
                     break;
             }
 
+            var defaults = GetDefaultShortcuts();
+            var defaultsById = defaults.ToDictionary(d => d.Id, StringComparer.OrdinalIgnoreCase);
+
+            // Detect legacy condition where all items collapsed to the same color preset (e.g. all Blue during migration)
+            bool allUniformColor = Items.Count > 1 &&
+                                   Items.All(x => string.Equals(x.ColorPreset, Items[0].ColorPreset, StringComparison.OrdinalIgnoreCase));
+
             for (int i = 0; i < Items.Count; i++)
             {
-                Items[i].Order = i;
-                if (string.IsNullOrWhiteSpace(Items[i].Id))
-                    Items[i].Id = Guid.NewGuid().ToString("N")[..8];
-                if (string.IsNullOrWhiteSpace(Items[i].Title))
-                    Items[i].Title = "Shortcut";
-                if (string.IsNullOrWhiteSpace(Items[i].Icon))
-                    Items[i].Icon = Glyphs.Links;
-                Items[i].ColorPreset = ShortcutColorPresets.Normalize(Items[i].ColorPreset);
+                var item = Items[i];
+                item.Order = i;
+
+                if (string.IsNullOrWhiteSpace(item.Id))
+                    item.Id = Guid.NewGuid().ToString("N")[..8];
+
+                if (defaultsById.TryGetValue(item.Id, out var def))
+                {
+                    // Restore glyph if it became '?' due to legacy ASCII serialization glitch
+                    if (string.IsNullOrWhiteSpace(item.Icon) || item.Icon == "?")
+                        item.Icon = def.Icon;
+
+                    // Restore rich jewel-tone default color if items collapsed to uniform
+                    if (!item.IsCustom && allUniformColor)
+                    {
+                        item.ColorPreset = def.ColorPreset;
+                    }
+                }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(item.Icon) || item.Icon == "?")
+                        item.Icon = Glyphs.Links;
+
+                    if (allUniformColor && item.IsCustom)
+                    {
+                        item.ColorPreset = ShortcutColorPresets.Presets[i % ShortcutColorPresets.Presets.Count];
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(item.Title))
+                    item.Title = "Shortcut";
+
+                item.ColorPreset = ShortcutColorPresets.Normalize(item.ColorPreset);
             }
         }
 

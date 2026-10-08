@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using DSAMVVM.MVVM.ViewModel.Cards;
+﻿using DSAMVVM.MVVM.ViewModel.Cards;
 
 namespace DSAMVVM.Core.Formatters
 {
@@ -32,8 +30,8 @@ namespace DSAMVVM.Core.Formatters
 
         public static void AppendHeader(CardClipboardBuilder builder, UserHistoryItemViewModel vm)
         {
-            string displayName = vm.DisplayName?.Trim() ?? string.Empty;
-            string netId = vm.NetId?.Trim() ?? string.Empty;
+            string displayName = vm.DisplayName.Trim();
+            string netId = vm.NetId.Trim();
 
             if (!string.IsNullOrWhiteSpace(netId) && displayName.Contains(netId, StringComparison.OrdinalIgnoreCase))
             {
@@ -140,7 +138,7 @@ namespace DSAMVVM.Core.Formatters
 
         public static void AppendMimGroups(CardClipboardBuilder builder, UserHistoryItemViewModel vm)
         {
-            if (vm.ShowMimGroups && vm.MimGroups.Count > 0)
+            if (vm is { ShowMimGroups: true, MimGroups.Count: > 0 })
             {
                 builder.AddList("MIM GROUPS", vm.MimGroups);
             }

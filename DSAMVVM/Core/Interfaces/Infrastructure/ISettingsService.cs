@@ -1,22 +1,24 @@
-﻿using DSAMVVM.MVVM.Model.Config;
+﻿using DSAMVVM.Core.Logging;
+using DSAMVVM.MVVM.Model.Config;
 
-namespace DSAMVVM.Core.Interfaces.Infrastructure
+namespace DSAMVVM.Core.Interfaces
 {
     public interface ISettingsService
     {
-        // Load settings from disk. Creates defaults on first run.
+        // Load settings from path (or return defaults if not found / corrupt).
         Task<AppSettings> LoadAsync(string settingsPath, CancellationToken ct = default);
 
-        // Save settings to disk (atomic). For frequent saves, prefer RequestSave (debounced).
+        // Save settings to path.
         Task SaveAsync(AppSettings settings, string settingsPath, CancellationToken ct = default);
 
-        // Get (and ensure) the app data directory path based on settings.
-        string ResolveDataDir(AppSettings s);
+        // Get (and ensure) the department data file path based on settings.
+        string ResolveDeptPath(AppSettings s);
+
         // Get (and ensure) the app logs directory path based on settings.
         string ResolveLogDir(AppSettings s);
 
         // Effective font size for a given view, honoring per-view overrides and clamping.
-        double GetFontSizeFor(string viewName, AppSettings s, double min = 9, double max = 24);
+        double GetFontSizeFor(string viewName, AppSettings s, double min = 9, double max = 18);
 
         // --- Font-size helpers (settings-first model) ---
 
@@ -26,7 +28,7 @@ namespace DSAMVVM.Core.Interfaces.Infrastructure
 
         // Reset: if preferPerView==true and viewName supplied -> remove per-view override;
         // otherwise reset the global default to provided defaultSize.
-        void ResetOutputFontSize(AppSettings s, string? viewName, bool preferPerView, int defaultSize = 14);
+        void ResetOutputFontSize(AppSettings s, string? viewName, bool preferPerView, int defaultSize = 12);
 
         // --- Debounced persistence ---
 

@@ -1,4 +1,4 @@
-<UserControl x:Class="DSAMVVM.MVVM.View.SettingsView"
+﻿<UserControl x:Class="DSAMVVM.MVVM.View.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -118,6 +118,98 @@
                     </TextBlock.Style>
                 </TextBlock>
             </DataTemplate>
+
+            <!-- Softened Slider Accent Palette (Harmonious UA Burgundy / Muted Rose) -->
+            <SolidColorBrush x:Key="Brush.Slider.Track.Fill" Color="#8C1D40"/>
+            <SolidColorBrush x:Key="Brush.Slider.Thumb.Fill" Color="#8C1D40"/>
+            <SolidColorBrush x:Key="Brush.Slider.Thumb.Stroke" Color="#CBD5E1"/>
+            <SolidColorBrush x:Key="Brush.Slider.Thumb.Hover" Color="#A82B51"/>
+            <SolidColorBrush x:Key="Brush.Slider.Thumb.Pressed" Color="#BA3860"/>
+
+            <!-- Sleek Dark Theme Slider Thumb -->
+            <Style x:Key="Slider.Themed.Thumb" TargetType="{x:Type Thumb}">
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Setter Property="OverridesDefaultStyle" Value="True"/>
+                <Setter Property="Focusable" Value="False"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Thumb}">
+                            <Grid Width="16" Height="16">
+                                <Ellipse x:Name="ThumbEllipse"
+                                         Width="12" Height="12"
+                                         Fill="{DynamicResource Brush.Slider.Thumb.Fill}"
+                                         Stroke="{DynamicResource Brush.Slider.Thumb.Stroke}"
+                                         StrokeThickness="1.5"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center"/>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="ThumbEllipse" Property="Fill" Value="{DynamicResource Brush.Slider.Thumb.Hover}"/>
+                                    <Setter TargetName="ThumbEllipse" Property="Stroke" Value="#FFFFFF"/>
+                                    <Setter TargetName="ThumbEllipse" Property="Width" Value="13"/>
+                                    <Setter TargetName="ThumbEllipse" Property="Height" Value="13"/>
+                                </Trigger>
+                                <Trigger Property="IsDragging" Value="True">
+                                    <Setter TargetName="ThumbEllipse" Property="Fill" Value="{DynamicResource Brush.Slider.Thumb.Pressed}"/>
+                                    <Setter TargetName="ThumbEllipse" Property="Stroke" Value="#FFFFFF"/>
+                                    <Setter TargetName="ThumbEllipse" Property="Width" Value="13"/>
+                                    <Setter TargetName="ThumbEllipse" Property="Height" Value="13"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Sleek Dark Theme Slider -->
+            <Style x:Key="Slider.Themed" TargetType="{x:Type Slider}">
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Setter Property="OverridesDefaultStyle" Value="True"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="MinHeight" Value="24"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Slider}">
+                            <Grid VerticalAlignment="Center">
+                                <Border Height="4"
+                                        Background="{DynamicResource Brush.Surface.1}"
+                                        BorderBrush="{DynamicResource Brush.Border}"
+                                        BorderThickness="1"
+                                        CornerRadius="2"
+                                        VerticalAlignment="Center"/>
+                                <Track x:Name="PART_Track">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Command="{x:Static Slider.DecreaseLarge}">
+                                            <RepeatButton.Template>
+                                                <ControlTemplate TargetType="{x:Type RepeatButton}">
+                                                    <Border Height="4"
+                                                            Background="{DynamicResource Brush.Slider.Track.Fill}"
+                                                            CornerRadius="2,0,0,2"
+                                                            VerticalAlignment="Center"/>
+                                                </ControlTemplate>
+                                            </RepeatButton.Template>
+                                        </RepeatButton>
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb Style="{StaticResource Slider.Themed.Thumb}"/>
+                                    </Track.Thumb>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Command="{x:Static Slider.IncreaseLarge}">
+                                            <RepeatButton.Template>
+                                                <ControlTemplate TargetType="{x:Type RepeatButton}">
+                                                    <Border Background="Transparent"/>
+                                                </ControlTemplate>
+                                            </RepeatButton.Template>
+                                        </RepeatButton>
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -246,14 +338,19 @@
                                         <ColumnDefinition Width="12"/>
                                         <ColumnDefinition Width="240"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Default search size at launch" Style="{StaticResource FieldLabel}"/>
+                                    <TextBlock Text="Default search text size" Style="{StaticResource FieldLabel}"/>
                                     <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}"
-                                              ItemsSource="{Binding InitialFontSizeOptions}"
-                                              SelectedValue="{Binding LinksSettings.InitialFontSize, Mode=TwoWay}"
-                                              SelectedValuePath="." ItemTemplate="{StaticResource PtItemTemplate}"/>
+                                              ItemsSource="{Binding TypographyPresets}"
+                                              SelectedItem="{Binding SelectedUnifiedPreset, Mode=TwoWay}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding DisplayName}" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </Grid>
 
-                                <Grid Margin="0,0,0,12">
+                                <Grid Margin="0,0,0,12" Visibility="{Binding IsUnifiedCustomSelected, Converter={StaticResource BoolToVis}}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="12"/>
@@ -261,8 +358,9 @@
                                         <ColumnDefinition Width="12"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Default search text size" Style="{StaticResource FieldLabel}"/>
-                                    <Slider x:Name="GeneralSizeSlider" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
+                                    <TextBlock Text="Custom text size" Style="{StaticResource FieldLabel}"/>
+                                    <Slider x:Name="GeneralSizeSlider" Grid.Column="2" Style="{StaticResource Slider.Themed}"
+                                            Minimum="8" Maximum="24" TickFrequency="1"
                                             IsSnapToTickEnabled="True" Value="{Binding DefaultFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                     <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
                                         <Run Text="{Binding ElementName=GeneralSizeSlider, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
@@ -277,58 +375,141 @@
                                     <TextBlock Text="Per-tab search text sizes" FontWeight="SemiBold"
                                                Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,8"/>
                                     <UniformGrid Columns="2" Rows="2">
-                                        <Grid Margin="0,0,12,8">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="12"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="12"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="User" Style="{StaticResource FieldLabel}"/>
-                                            <Slider x:Name="UserSize" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
-                                                    IsSnapToTickEnabled="True" Value="{Binding UserFontSize, Mode=TwoWay}"/>
-                                            <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}"><Run Text="{Binding ElementName=UserSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/></TextBlock>
-                                        </Grid>
-                                        <Grid Margin="0,0,12,8">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="12"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="12"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="Computer" Style="{StaticResource FieldLabel}"/>
-                                            <Slider x:Name="ComputerSize" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
-                                                    IsSnapToTickEnabled="True" Value="{Binding ComputerFontSize, Mode=TwoWay}"/>
-                                            <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}"><Run Text="{Binding ElementName=ComputerSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/></TextBlock>
-                                        </Grid>
-                                        <Grid Margin="0,0,12,8">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="12"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="12"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="Group" Style="{StaticResource FieldLabel}"/>
-                                            <Slider x:Name="GroupSize" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
-                                                    IsSnapToTickEnabled="True" Value="{Binding GroupFontSize, Mode=TwoWay}"/>
-                                            <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}"><Run Text="{Binding ElementName=GroupSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/></TextBlock>
-                                        </Grid>
-                                        <Grid Margin="0,0,12,8">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="12"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="12"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="Entra" Style="{StaticResource FieldLabel}"/>
-                                            <Slider x:Name="EntraSize" Grid.Column="2" Minimum="8" Maximum="24" TickFrequency="1"
-                                                    IsSnapToTickEnabled="True" Value="{Binding EntraFontSize, Mode=TwoWay}"/>
-                                            <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}"><Run Text="{Binding ElementName=EntraSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/></TextBlock>
-                                        </Grid>
+                                        <!-- User View -->
+                                        <StackPanel Margin="0,0,12,12">
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="70"/>
+                                                    <ColumnDefinition Width="8"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="User" Style="{StaticResource FieldLabel}"/>
+                                                <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}"
+                                                          ItemsSource="{Binding TypographyPresets}"
+                                                          SelectedItem="{Binding SelectedUserPreset, Mode=TwoWay}">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{Binding DisplayName}" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                            </Grid>
+                                            <Grid Visibility="{Binding IsUserCustomSelected, Converter={StaticResource BoolToVis}}" Margin="78,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="8"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Slider x:Name="UserSize" Style="{StaticResource Slider.Themed}"
+                                                        Minimum="8" Maximum="24" TickFrequency="1" IsSnapToTickEnabled="True"
+                                                        Value="{Binding UserFontSize, Mode=TwoWay}"/>
+                                                <TextBlock Grid.Column="2" Style="{StaticResource FieldLabel}">
+                                                    <Run Text="{Binding ElementName=UserSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
+                                                </TextBlock>
+                                            </Grid>
+                                        </StackPanel>
+
+                                        <!-- Computer View -->
+                                        <StackPanel Margin="0,0,12,12">
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="70"/>
+                                                    <ColumnDefinition Width="8"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Computer" Style="{StaticResource FieldLabel}"/>
+                                                <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}"
+                                                          ItemsSource="{Binding TypographyPresets}"
+                                                          SelectedItem="{Binding SelectedComputerPreset, Mode=TwoWay}">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{Binding DisplayName}" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                            </Grid>
+                                            <Grid Visibility="{Binding IsComputerCustomSelected, Converter={StaticResource BoolToVis}}" Margin="78,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="8"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Slider x:Name="ComputerSize" Style="{StaticResource Slider.Themed}"
+                                                        Minimum="8" Maximum="24" TickFrequency="1" IsSnapToTickEnabled="True"
+                                                        Value="{Binding ComputerFontSize, Mode=TwoWay}"/>
+                                                <TextBlock Grid.Column="2" Style="{StaticResource FieldLabel}">
+                                                    <Run Text="{Binding ElementName=ComputerSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
+                                                </TextBlock>
+                                            </Grid>
+                                        </StackPanel>
+
+                                        <!-- Group View -->
+                                        <StackPanel Margin="0,0,12,12">
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="70"/>
+                                                    <ColumnDefinition Width="8"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Group" Style="{StaticResource FieldLabel}"/>
+                                                <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}"
+                                                          ItemsSource="{Binding TypographyPresets}"
+                                                          SelectedItem="{Binding SelectedGroupPreset, Mode=TwoWay}">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{Binding DisplayName}" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                            </Grid>
+                                            <Grid Visibility="{Binding IsGroupCustomSelected, Converter={StaticResource BoolToVis}}" Margin="78,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="8"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Slider x:Name="GroupSize" Style="{StaticResource Slider.Themed}"
+                                                        Minimum="8" Maximum="24" TickFrequency="1" IsSnapToTickEnabled="True"
+                                                        Value="{Binding GroupFontSize, Mode=TwoWay}"/>
+                                                <TextBlock Grid.Column="2" Style="{StaticResource FieldLabel}">
+                                                    <Run Text="{Binding ElementName=GroupSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
+                                                </TextBlock>
+                                            </Grid>
+                                        </StackPanel>
+
+                                        <!-- Entra View -->
+                                        <StackPanel Margin="0,0,12,12">
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="70"/>
+                                                    <ColumnDefinition Width="8"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Entra" Style="{StaticResource FieldLabel}"/>
+                                                <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}"
+                                                          ItemsSource="{Binding TypographyPresets}"
+                                                          SelectedItem="{Binding SelectedEntraPreset, Mode=TwoWay}">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{Binding DisplayName}" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                            </Grid>
+                                            <Grid Visibility="{Binding IsEntraCustomSelected, Converter={StaticResource BoolToVis}}" Margin="78,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="8"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Slider x:Name="EntraSize" Style="{StaticResource Slider.Themed}"
+                                                        Minimum="8" Maximum="24" TickFrequency="1" IsSnapToTickEnabled="True"
+                                                        Value="{Binding EntraFontSize, Mode=TwoWay}"/>
+                                                <TextBlock Grid.Column="2" Style="{StaticResource FieldLabel}">
+                                                    <Run Text="{Binding ElementName=EntraSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
+                                                </TextBlock>
+                                            </Grid>
+                                        </StackPanel>
                                     </UniformGrid>
                                 </StackPanel>
                             </StackPanel>
@@ -423,7 +604,8 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Double-Tap Speed" Style="{StaticResource FieldLabel}"/>
-                                        <Slider x:Name="DoubleTapSlider" Grid.Column="2" Minimum="100" Maximum="1000" TickFrequency="50" 
+                                        <Slider x:Name="DoubleTapSlider" Grid.Column="2" Style="{StaticResource Slider.Themed}"
+                                                Minimum="100" Maximum="1000" TickFrequency="50" 
                                                 IsSnapToTickEnabled="True" Value="{Binding QuickSearchDoubleTapMs, Mode=TwoWay}"/>
                                         <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
                                             <Run Text="{Binding ElementName=DoubleTapSlider, Path=Value, StringFormat=F0}"/><Run Text=" ms"/>
