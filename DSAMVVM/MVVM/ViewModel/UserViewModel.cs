@@ -1,17 +1,10 @@
 using DSAMVVM.MVVM.ViewModel.Cards;
-using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using DSAMVVM.Core.Enums;
-using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Interfaces.AD;
-using DSAMVVM.Core.Interfaces.Integrations;
-using DSAMVVM.Core.Interfaces.UI;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
-using DSAMVVM.Core.Renderers;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
@@ -25,7 +18,6 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IDepartmentService _deptService;
         private readonly ISettingsService _settingsSvc;
         private readonly IOutputTextSettingsProvider _notifier;
-        private readonly IFlowDocService _flowDoc;
         private readonly IDeepLinkRoutingService _linkRouter;
 
         private const string ViewKey = "UserView";
@@ -72,13 +64,6 @@ namespace DSAMVVM.MVVM.ViewModel
             private set { _isRefreshing = value; OnPropertyChanged(nameof(IsRefreshing)); }
         }
 
-        private string _searchLog = string.Empty;
-        public string SearchLog
-        {
-            get => _searchLog;
-            private set { _searchLog = value; OnPropertyChanged(nameof(SearchLog)); }
-        }
-
         // Commands for modern UI
         public ICommand ClearCommand { get; }
         public ICommand RefreshDeptCommand { get; }
@@ -94,14 +79,12 @@ namespace DSAMVVM.MVVM.ViewModel
             IDepartmentService deptService,
             ISettingsService settingsSvc,
             IOutputTextSettingsProvider notifier,
-            IFlowDocService flowDoc,
             IDeepLinkRoutingService linkRouter)
         {
             _adService = adService ?? throw new ArgumentNullException(nameof(adService));
             _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
             _settingsSvc = settingsSvc ?? throw new ArgumentNullException(nameof(settingsSvc));
             _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
-            _flowDoc = flowDoc ?? throw new ArgumentNullException(nameof(flowDoc));
             _linkRouter = linkRouter ?? throw new ArgumentNullException(nameof(linkRouter));
 
             ClearCommand = new RelayCommand(_ => ClearLog());
@@ -122,43 +105,18 @@ namespace DSAMVVM.MVVM.ViewModel
             History.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasHistory));
 
             _notifier.Changed += OnFontSettingsChanged;
-            _flowDoc.LinkClicked += OnLinkClicked;
 
             RefreshEffectiveFontSize();
-        }
-
-        private async void OnLinkClicked(object? sender, string url)
-        {
-            string? sourceView = sender as string;
-            if (sourceView != ViewKey) return;
-
-            if (IsLoading) return;
-
-            string result = await _linkRouter.HandleLinkAsync(url);
-            if (!string.IsNullOrWhiteSpace(result))
-            {
-                SearchLog += result;
-            }
         }
 
         public async Task OnSearchUpdated(SearchContextDTO context, ISearchService searchService, SearchTarget target)
         {
             Error = null;
 
-            var headerDoc = new FlowDocMarkupBuilder();
-            if (!string.IsNullOrEmpty(SearchLog)) headerDoc.AddHeader("New Search");
-            if (!string.IsNullOrWhiteSpace(context.Query)) headerDoc.AddLabelValue("Query: ", context.Query);
-
-            SearchLog += headerDoc.ToString();
-
             if (target != SearchTarget.User || string.IsNullOrWhiteSpace(context.Query))
             {
                 Error = "Invalid target or empty query.";
                 Log.Warn(ViewKey, $"Search aborted: Invalid target ({target}) or empty query.");
-
-                var errDoc = new FlowDocMarkupBuilder();
-                errDoc.AddError("Aborted: Invalid search parameters.");
-                SearchLog += errDoc.ToString();
                 return;
             }
 
@@ -168,8 +126,6 @@ namespace DSAMVVM.MVVM.ViewModel
                 Log.Info(ViewKey, $"Starting User search for '{context.Query}'");
 
                 var user = await searchService.SearchAsync(context, target) as ADUserInfo;
-
-                SearchLog += IdentityRenderer.RenderADUser(user);
 
                 // Collapse all previous items so newest expands
                 foreach (var item in History)
@@ -192,11 +148,6 @@ namespace DSAMVVM.MVVM.ViewModel
                     Log.Info(ViewKey, $"User '{user.Name}' found successfully.");
 
                     await entry.LoadDepartmentDetailsAsync();
-
-                    if (!string.IsNullOrEmpty(user.DepartmentNumber))
-                    {
-                        SearchLog += await OrganizationalRenderer.RenderDepartmentContextAsync(user.DepartmentNumber, _deptService);
-                    }
                 }
                 else
                 {
@@ -210,10 +161,6 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 Error = ex.Message;
                 Log.Error(ViewKey, $"Exception during user search for '{context.Query}'", ex);
-
-                var failDoc = new FlowDocMarkupBuilder();
-                failDoc.AddError($"Search failed: {ex.Message}");
-                SearchLog += failDoc.ToString();
 
                 var failEntry = new UserHistoryItemViewModel(
                     context.Query,
@@ -244,16 +191,8 @@ namespace DSAMVVM.MVVM.ViewModel
             IsRefreshing = true;
             try
             {
-                var startDoc = new FlowDocMarkupBuilder();
-                startDoc.AddSuccess("Refreshing department data…");
-                SearchLog += startDoc.ToString();
-
                 UiNotify.Info("Refreshing department data…", showStatusBar: true, key: "DeptRefresh");
                 await _deptService.ReloadDataAsync();
-
-                var endDoc = new FlowDocMarkupBuilder();
-                endDoc.AddSuccess("Department data refresh completed.");
-                SearchLog += endDoc.ToString();
 
                 // Refresh department info for any currently displayed users
                 foreach (var item in History)
@@ -266,9 +205,7 @@ namespace DSAMVVM.MVVM.ViewModel
             }
             catch (Exception ex)
             {
-                var errDoc = new FlowDocMarkupBuilder();
-                errDoc.AddError($"Refresh failed: {ex.Message}");
-                SearchLog += errDoc.ToString();
+                Log.Error(ViewKey, $"Refresh failed: {ex.Message}", ex);
             }
             finally { IsRefreshing = false; }
         }
@@ -311,7 +248,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public void ClearLog()
         {
-            SearchLog = string.Empty;
             History.Clear();
         }
 
@@ -325,7 +261,6 @@ namespace DSAMVVM.MVVM.ViewModel
             if (_disposed) return;
 
             _notifier.Changed -= OnFontSettingsChanged;
-            _flowDoc.LinkClicked -= OnLinkClicked;
 
             _disposed = true;
 

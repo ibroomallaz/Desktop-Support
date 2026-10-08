@@ -1,9 +1,9 @@
 using DSAMVVM.MVVM.ViewModel.Cards;
 using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Interfaces.UI;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
-using DSAMVVM.Core.Renderers;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
 using DSAMVVM.MVVM.Model.Data;
@@ -19,7 +19,6 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
         private readonly IADService _adService;
         private readonly IDepartmentService _deptService;
         private readonly IDeepLinkRoutingService _linkRouter;
-        private readonly IFlowDocService _flowDocService;
 
         public string ViewKey { get; } = "QuickSearchView";
 
@@ -92,16 +91,12 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
             ISearchService searchService,
             IADService adService,
             IDepartmentService deptService,
-            IDeepLinkRoutingService linkRouter,
-            IFlowDocService flowDocService)
+            IDeepLinkRoutingService linkRouter)
         {
             _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
             _adService = adService ?? throw new ArgumentNullException(nameof(adService));
             _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
             _linkRouter = linkRouter ?? throw new ArgumentNullException(nameof(linkRouter));
-            _flowDocService = flowDocService ?? throw new ArgumentNullException(nameof(flowDocService));
-
-            _flowDocService.LinkClicked += OnLinkClicked;
 
             ClearSearchCommand = new RelayCommand(_ =>
             {
@@ -304,16 +299,6 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
             {
                 IsSearching = false;
             }
-        }
-
-        private async void OnLinkClicked(object? sender, string url)
-        {
-            string? sourceView = sender as string;
-            if (sourceView != ViewKey) return;
-
-            if (IsSearching) return;
-
-            await _linkRouter.HandleLinkAsync(url);
         }
 
         public async Task RouteLinkClickAsync(string url)

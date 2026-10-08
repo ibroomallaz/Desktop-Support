@@ -5,7 +5,6 @@ using System.Windows.Input;
 using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
-using DSAMVVM.Core.Renderers;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
@@ -19,7 +18,6 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IADService _ad;
         private readonly ISettingsService _settingsSvc;
         private readonly IOutputTextSettingsProvider _notifier;
-        private readonly IFlowDocService _flowDoc;
         private readonly IDeepLinkRoutingService _linkRouter;
 
         private const string ViewKey = "ComputerView";
@@ -34,10 +32,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private bool _isLoading;
         public bool IsLoading { get => _isLoading; private set { _isLoading = value; OnPropertyChanged(); } }
-
-        // FlowDoc text (retained internally for backward compatibility)
-        private string _searchLog = string.Empty;
-        public string SearchLog { get => _searchLog; private set { _searchLog = value; OnPropertyChanged(); } }
 
         // Effective output font size for this view
         private double _effectiveOutputFontSize = UiLimits.DefaultFontSize;
@@ -71,13 +65,11 @@ namespace DSAMVVM.MVVM.ViewModel
             IADService adService,
             ISettingsService settingsSvc,
             IOutputTextSettingsProvider notifier,
-            IFlowDocService flowDoc,
             IDeepLinkRoutingService linkRouter)
         {
             _ad = adService ?? throw new ArgumentNullException(nameof(adService));
             _settingsSvc = settingsSvc ?? throw new ArgumentNullException(nameof(settingsSvc));
             _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
-            _flowDoc = flowDoc ?? throw new ArgumentNullException(nameof(flowDoc));
             _linkRouter = linkRouter ?? throw new ArgumentNullException(nameof(linkRouter));
 
             ClearCommand = new RelayCommand(_ => ClearLog());
@@ -99,22 +91,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
             RefreshEffectiveFont();
             _notifier.Changed += OnOutputFontSettingsChanged;
-            _flowDoc.LinkClicked += OnLinkClicked;
-        }
-
-        // --- Deep Link Handler ---
-        private async void OnLinkClicked(object? sender, string url)
-        {
-            string? sourceView = sender as string;
-            if (sourceView != ViewKey) return;
-
-            if (IsLoading) return;
-
-            string result = await _linkRouter.HandleLinkAsync(url);
-            if (!string.IsNullOrWhiteSpace(result))
-            {
-                SearchLog += result;
-            }
         }
 
         private void OnOutputFontSettingsChanged(object? sender, EventArgs e) => RefreshEffectiveFont();
@@ -151,20 +127,10 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             Error = null;
 
-            var headerDoc = new FlowDocMarkupBuilder();
-            if (!string.IsNullOrEmpty(SearchLog)) headerDoc.AddHeader("New Search");
-            if (!string.IsNullOrWhiteSpace(context.Query)) headerDoc.AddLabelValue("Query: ", context.Query);
-
-            SearchLog += headerDoc.ToString();
-
             if (target != SearchTarget.Computer || string.IsNullOrWhiteSpace(context.Query))
             {
                 Error = "Invalid target or empty query.";
                 Log.Warn(ViewKey, $"Search aborted: Invalid target ({target}) or empty query.");
-
-                var errDoc = new FlowDocMarkupBuilder();
-                errDoc.AddError("Aborted: Invalid search parameters.");
-                SearchLog += errDoc.ToString();
                 return;
             }
 
@@ -175,9 +141,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
                 var result = await searchService.SearchAsync(context, target);
                 var comp = result as ADComputerInfo;
-
-                // Push formatting to the legacy renderer
-                SearchLog += IdentityRenderer.RenderADComputer(comp);
 
                 // Collapse previous items so newest expands
                 foreach (var item in History)
@@ -210,10 +173,6 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 Error = ex.Message;
                 Log.Error(ViewKey, $"Exception during computer search for '{context.Query}'", ex);
-
-                var failDoc = new FlowDocMarkupBuilder();
-                failDoc.AddError($"Search failed: {ex.Message}");
-                SearchLog += failDoc.ToString();
 
                 var failEntry = new ComputerHistoryItemViewModel(
                     context.Query,
@@ -255,7 +214,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public void ClearLog()
         {
-            SearchLog = string.Empty;
             History.Clear();
         }
 
@@ -273,7 +231,6 @@ namespace DSAMVVM.MVVM.ViewModel
             if (disposing)
             {
                 _notifier.Changed -= OnOutputFontSettingsChanged;
-                _flowDoc.LinkClicked -= OnLinkClicked;
             }
             _disposed = true;
         }

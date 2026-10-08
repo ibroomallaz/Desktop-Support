@@ -52,7 +52,6 @@ public static class ServiceRegistration
         services.AddSingleton<IFileDialogService, FileDialogService>();
         services.AddSingleton<IImageCacheService, ImageCacheService>();
         services.AddSingleton<IDeepLinkRoutingService, DeepLinkRoutingService>();
-        services.AddSingleton<IFlowDocService, FlowDocService>();
         services.AddSingleton<IOutputTextSettingsProvider>(sp =>
             new OutputTextSettingsProvider(
                 sp.GetRequiredService<ISettingsService>(),

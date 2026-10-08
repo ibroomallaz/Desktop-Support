@@ -1,17 +1,10 @@
 using DSAMVVM.MVVM.ViewModel.Cards;
-using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using DSAMVVM.Core.Enums;
-using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Interfaces.AD;
-using DSAMVVM.Core.Interfaces.Integrations;
-using DSAMVVM.Core.Interfaces.UI;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
-using DSAMVVM.Core.Renderers;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
@@ -27,7 +20,6 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IDepartmentService _deptService;
         private readonly ISettingsService _settingsSvc;
         private readonly IOutputTextSettingsProvider _notifier;
-        private readonly IFlowDocService _flowDoc;
         private readonly IDeepLinkRoutingService _linkRouter;
 
         private const string ViewKey = "GroupView";
@@ -90,11 +82,6 @@ namespace DSAMVVM.MVVM.ViewModel
             OnPropertyChanged(nameof(IsDivSearch));
             OnPropertyChanged(nameof(QueryPlaceholder));
             OnPropertyChanged(nameof(CurrentViewContext));
-
-            if (string.IsNullOrEmpty(SearchLog))
-            {
-                OnPropertyChanged(nameof(SearchLog));
-            }
         }
 
         // --- Standard UI State ---
@@ -103,9 +90,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private bool _isLoading;
         public bool IsLoading { get => _isLoading; private set { _isLoading = value; OnPropertyChanged(nameof(IsLoading)); } }
-
-        private string _searchLog = string.Empty;
-        public string SearchLog { get => _searchLog; private set { _searchLog = value; OnPropertyChanged(nameof(SearchLog)); } }
 
         private double _effectiveFontSize = UiLimits.DefaultFontSize;
         public double EffectiveFontSize
@@ -139,14 +123,12 @@ namespace DSAMVVM.MVVM.ViewModel
             IDepartmentService deptService,
             ISettingsService settingsSvc,
             IOutputTextSettingsProvider notifier,
-            IFlowDocService flowDoc,
             IDeepLinkRoutingService linkRouter)
         {
             _ad = adService ?? throw new ArgumentNullException(nameof(adService));
             _deptService = deptService ?? throw new ArgumentNullException(nameof(deptService));
             _settingsSvc = settingsSvc ?? throw new ArgumentNullException(nameof(settingsSvc));
             _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
-            _flowDoc = flowDoc ?? throw new ArgumentNullException(nameof(flowDoc));
             _linkRouter = linkRouter ?? throw new ArgumentNullException(nameof(linkRouter));
 
             ClearCommand = new RelayCommand(_ => ClearLog());
@@ -168,21 +150,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
             RefreshEffectiveFont();
             _notifier.Changed += OnOutputFontSettingsChanged;
-            _flowDoc.LinkClicked += OnLinkClicked;
-        }
-
-        // --- Deep Link Handler ---
-        private async void OnLinkClicked(object? sender, string url)
-        {
-            if (sender is not string sourceView || !sourceView.StartsWith("GroupView")) return;
-
-            if (IsLoading) return;
-
-            string result = await _linkRouter.HandleLinkAsync(url);
-            if (!string.IsNullOrWhiteSpace(result))
-            {
-                SearchLog += result;
-            }
         }
 
         private void OnOutputFontSettingsChanged(object? sender, EventArgs e) => RefreshEffectiveFont();
@@ -212,14 +179,9 @@ namespace DSAMVVM.MVVM.ViewModel
             Error = null;
             _currentSearchQuery = context.Query;
 
-            var headerDoc = new FlowDocMarkupBuilder();
-            if (!string.IsNullOrEmpty(SearchLog)) headerDoc.AddHeader("New Search");
-
             if (string.IsNullOrWhiteSpace(context.Query))
             {
                 Error = "Empty query.";
-                headerDoc.AddError("Aborted: Empty query.");
-                SearchLog += headerDoc.ToString();
                 return;
             }
 
@@ -229,9 +191,6 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 UpdateMode(GroupSearchMode.GroupMembers);
             }
-
-            headerDoc.AddLabelValue("Query: ", context.Query);
-            SearchLog += headerDoc.ToString();
 
             searchService.AddToHistory(context.Query, target);
 
@@ -252,7 +211,6 @@ namespace DSAMVVM.MVVM.ViewModel
                     case GroupSearchMode.UserMim:
                     {
                         var mimResult = await _ad.GetUserMimGroupsAsync(context.Query);
-                        SearchLog += IdentityRenderer.RenderMimGroups(mimResult, context.Query);
 
                         var entry = GroupHistoryItemViewModel.CreateUserMim(context.Query, mimResult, _ad, _deptService, _linkRouter);
                         entry.IsExpanded = true;
@@ -264,7 +222,6 @@ namespace DSAMVVM.MVVM.ViewModel
                     {
                         var groupName = NormalizeGroupName(context.Query);
                         var adGroup = await _ad.GetGroupAsync(groupName);
-                        SearchLog += IdentityRenderer.RenderGroupMembers(adGroup, groupName);
 
                         var entry = GroupHistoryItemViewModel.CreateGroupMembers(context.Query, groupName, adGroup, _ad, _deptService, _linkRouter);
                         entry.IsExpanded = true;
@@ -274,21 +231,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
                     case GroupSearchMode.Department:
                     {
-                        var deptLog = await OrganizationalRenderer.RenderDepartmentContextAsync(context.Query, _deptService);
-                        if (string.IsNullOrWhiteSpace(deptLog))
-                        {
-                            var errDoc = new FlowDocMarkupBuilder();
-                            errDoc.AddError($"Department '{context.Query}' not found in configuration.");
-                            SearchLog += errDoc.ToString();
-                        }
-                        else
-                        {
-                            var titleDoc = new FlowDocMarkupBuilder();
-                            titleDoc.AddRaw(string.Empty);
-                            titleDoc.AddTitle($"Department: {context.Query}");
-                            SearchLog += titleDoc.ToString() + deptLog;
-                        }
-
                         var dept = await _deptService.GetDepartmentAsync(context.Query);
                         SupportTeam? team = null;
                         if (dept != null)
@@ -308,8 +250,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
                     case GroupSearchMode.Division:
                     {
-                        SearchLog += await OrganizationalRenderer.RenderDivisionSupportAsync(context.Query, _deptService);
-
                         var teams = await _deptService.GetTeamsByDivisionAsync(context.Query);
                         var entry = GroupHistoryItemViewModel.CreateDivision(context.Query, teams, _ad, _deptService, _linkRouter);
                         entry.IsExpanded = true;
@@ -322,10 +262,6 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 Error = ex.Message;
                 Log.Error(ViewKey, $"Exception during group search for '{context.Query}'", ex);
-
-                var failDoc = new FlowDocMarkupBuilder();
-                failDoc.AddError($"Search failed: {ex.Message}");
-                SearchLog += failDoc.ToString();
 
                 foreach (var item in History)
                 {
@@ -373,7 +309,6 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public void ClearLog()
         {
-            SearchLog = string.Empty;
             History.Clear();
         }
 
@@ -398,7 +333,6 @@ namespace DSAMVVM.MVVM.ViewModel
             if (disposing)
             {
                 _notifier.Changed -= OnOutputFontSettingsChanged;
-                _flowDoc.LinkClicked -= OnLinkClicked;
             }
             _disposed = true;
         }

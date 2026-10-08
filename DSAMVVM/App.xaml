@@ -15,14 +15,6 @@
             <!-- UI font  -->
             <FontFamily x:Key="UiFontFamily">Segoe UI</FontFamily>
 
-            <!-- FlowDocument font -->
-            <FontFamily x:Key="OutputFontFamily">Cascadia Code</FontFamily>
-
-            <!-- Implicit style for FlowDocument -->
-            <Style TargetType="{x:Type FlowDocument}">
-                <Setter Property="FontFamily" Value="{DynamicResource OutputFontFamily}" />
-            </Style>
-
             <!-- Views  -->
             <DataTemplate DataType="{x:Type viewModel:HomeViewModel}">
                 <view:HomeView/>
