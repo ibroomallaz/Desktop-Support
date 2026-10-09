@@ -182,14 +182,14 @@
                            Opacity="0.5"
                            Margin="0,0,0,12"/>
 
-                <TextBlock Text="No Computer Lookups Yet"
+                <TextBlock Text="{x:Static res:Strings.Computer_Empty_Title}"
                            FontSize="16"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource Brush.Text.Primary}"
                            HorizontalAlignment="Center"
                            Margin="0,0,0,6"/>
 
-                <TextBlock Text="Enter a hostname in the search bar above and press Enter."
+                <TextBlock Text="{x:Static res:Strings.Computer_Empty_Subtitle}"
                            FontSize="12"
                            Foreground="{DynamicResource Brush.Text.Muted}"
                            HorizontalAlignment="Center"/>
@@ -218,12 +218,12 @@
                         <Grid Margin="0,0,0,6">
                             <Grid.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header="Copy Card Summary" Command="{Binding CopySummaryCommand}">
+                                    <MenuItem Header="{x:Static res:Strings.Computer_Menu_CopySummary}" Command="{Binding CopySummaryCommand}">
                                         <MenuItem.Icon>
                                             <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="12"/>
                                         </MenuItem.Icon>
                                     </MenuItem>
-                                    <MenuItem Header="Copy Name Only" Command="{Binding CopyNameCommand}">
+                                    <MenuItem Header="{x:Static res:Strings.Computer_Menu_CopyName}" Command="{Binding CopyNameCommand}">
                                         <MenuItem.Icon>
                                             <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="12"/>
                                         </MenuItem.Icon>
@@ -296,7 +296,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="Not Found" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
+                                            <TextBlock Text="{x:Static res:Strings.Computer_Badge_NotFound}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                         </Border>
 
                                         <!-- Disabled Badge -->
@@ -311,7 +311,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="Disabled" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
+                                            <TextBlock Text="{x:Static res:Strings.Computer_Badge_Disabled}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                         </Border>
 
 
@@ -355,7 +355,7 @@
                                     <Button Grid.Column="6"
                                             Style="{StaticResource InlineLinkButton}"
                                             Command="{Binding CopySummaryCommand}"
-                                            ToolTip="Copy computer summary to clipboard (Rich Text &amp; Plain Text)"
+                                            ToolTip="{x:Static res:Strings.Computer_Tooltip_CopySummary}"
                                             Margin="0,0,8,0"
                                             Padding="4,2"
                                             VerticalAlignment="Center">
@@ -396,7 +396,7 @@
                                     <Button Grid.Column="7"
                                             Style="{StaticResource InlineLinkButton}"
                                             Command="{Binding RemoveCommand}"
-                                            ToolTip="Clear this record from history"
+                                            ToolTip="{x:Static res:Strings.Computer_Tooltip_ClearRecord}"
                                             Margin="0,0,8,0"
                                             Padding="4,2"
                                             VerticalAlignment="Center">
@@ -488,7 +488,7 @@
                                                     <!-- Hostname Copy Chip Button -->
                                                     <Button Style="{StaticResource ChipButton}"
                                                             Command="{Binding CopyNameCommand}"
-                                                            ToolTip="Click to copy hostname to clipboard"
+                                                            ToolTip="{x:Static res:Strings.Computer_Tooltip_CopyHostname}"
                                                             VerticalAlignment="Center"
                                                             Margin="0,0,8,0">
                                                         <StackPanel Orientation="Horizontal">
@@ -515,7 +515,7 @@
                                                             </TextBlock>
 
                                                             <!-- Copied Checkmark Feedback -->
-                                                            <TextBlock Text=" ✓ Copied"
+                                                            <TextBlock Text="{x:Static res:Strings.Computer_Badge_Copied}"
                                                                        FontSize="11"
                                                                        FontWeight="Bold"
                                                                        Foreground="#5CDA89"
@@ -553,7 +553,7 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </Border.Style>
-                                                        <TextBlock Text="Disabled" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
+                                                        <TextBlock Text="{x:Static res:Strings.Computer_Badge_Disabled}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                                     </Border>
                                                 </WrapPanel>
                                             </StackPanel>
@@ -595,7 +595,7 @@
                                                 <!-- Copy Summary Button -->
                                                 <Button Style="{StaticResource GhostActionButton}"
                                                         Command="{Binding CopySummaryCommand}"
-                                                        ToolTip="Copy computer summary (Rich Text &amp; Plain Text)"
+                                                        ToolTip="{x:Static res:Strings.Computer_Tooltip_CopySummaryShort}"
                                                         Padding="5,3"
                                                         Margin="0,0,4,0">
                                                     <Grid>
@@ -634,7 +634,7 @@
                                                 <!-- Refresh Entry Button -->
                                                 <Button Style="{StaticResource GhostActionButton}"
                                                         Command="{Binding RefreshCommand}"
-                                                        ToolTip="Re-query Active Directory for this computer"
+                                                        ToolTip="{x:Static res:Strings.Computer_Tooltip_Requery}"
                                                         Padding="5,3"
                                                         Margin="0,0,4,0">
                                                     <TextBlock Text="&#xE72C;"
@@ -646,7 +646,7 @@
                                                 <!-- Collapse Button (Chevron Up) -->
                                                 <Button Style="{StaticResource GhostActionButton}"
                                                         Command="{Binding ToggleExpandCommand}"
-                                                        ToolTip="Collapse card"
+                                                        ToolTip="{x:Static res:Strings.Computer_Tooltip_CollapseCard}"
                                                         Padding="5,3"
                                                         Margin="0,0,4,0">
                                                     <TextBlock Text="&#xE70E;"
@@ -658,7 +658,7 @@
                                                 <!-- Remove / Clear Record Button -->
                                                 <Button Style="{StaticResource GhostActionButton}"
                                                         Command="{Binding RemoveCommand}"
-                                                        ToolTip="Remove this record from history"
+                                                        ToolTip="{x:Static res:Strings.Computer_Tooltip_RemoveRecord}"
                                                         Padding="5,3">
                                                     <TextBlock Text="&#xE711;"
                                                                FontFamily="Segoe MDL2 Assets"
@@ -693,7 +693,7 @@
                                                 </Style>
                                             </Border.Style>
                                             <StackPanel>
-                                                <TextBlock Text="Computer Not Found in Active Directory"
+                                                <TextBlock Text="{x:Static res:Strings.Computer_Status_NotFoundInAd}"
                                                            FontWeight="Bold"
                                                            Foreground="#FF7B88"
                                                            FontSize="12"
@@ -732,7 +732,7 @@
                                                     CornerRadius="6"
                                                     Padding="10,8">
                                                 <StackPanel>
-                                                    <TextBlock Text="SYSTEM &amp; DOMAIN IDENTITY"
+                                                    <TextBlock Text="{x:Static res:Strings.Computer_Section_SystemDomainIdentity}"
                                                                FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                FontWeight="Bold"
                                                                Foreground="{DynamicResource Brush.Text.Muted}"
@@ -740,13 +740,13 @@
 
                                                     <!-- Operating System -->
                                                     <DockPanel Margin="0,0,0,4">
-                                                        <TextBlock Text="Operating System: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                        <TextBlock Text="{x:Static res:Strings.Computer_Label_OperatingSystem}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
                                                         <TextBlock Text="{Binding OperatingSystem}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
                                                     </DockPanel>
 
                                                     <!-- Hybrid Device Group Membership -->
                                                     <DockPanel Margin="0,0,0,4">
-                                                        <TextBlock Text="Hybrid Group: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                        <TextBlock Text="{x:Static res:Strings.Computer_Label_HybridGroup}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
                                                         <TextBlock FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold">
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
@@ -774,7 +774,7 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </StackPanel.Style>
-                                                        <TextBlock Text="Organizational Unit (OU): " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                        <TextBlock Text="{x:Static res:Strings.Computer_Label_Ou}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
                                                         <TextBlock Text="{Binding CleanOuPath}" FontSize="{Binding DataContext.Typography.NotesSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap" Margin="0,2,0,0"/>
                                                     </StackPanel>
                                                 </StackPanel>
@@ -788,7 +788,7 @@
                                                     CornerRadius="6"
                                                     Padding="10,8">
                                                 <StackPanel>
-                                                    <TextBlock Text="ACTIVITY &amp; STATUS"
+                                                    <TextBlock Text="{x:Static res:Strings.Computer_Section_ActivityStatus}"
                                                                FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                FontWeight="Bold"
                                                                Foreground="{DynamicResource Brush.Text.Muted}"
@@ -796,13 +796,13 @@
 
                                                     <!-- Last Logon Activity -->
                                                     <DockPanel Margin="0,0,0,6">
-                                                        <TextBlock Text="Last Logon: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                        <TextBlock Text="{x:Static res:Strings.Computer_Label_LastLogon}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
                                                         <TextBlock Text="{Binding LastLogonDate}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
                                                     </DockPanel>
 
                                                     <!-- Account Status -->
                                                     <DockPanel Margin="0,0,0,4">
-                                                        <TextBlock Text="Account Status: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                        <TextBlock Text="{x:Static res:Strings.Computer_Label_AccountStatus}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
                                                         <TextBlock FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold">
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
@@ -830,7 +830,7 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </StackPanel.Style>
-                                                        <TextBlock Text="Description / Notes: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                        <TextBlock Text="{x:Static res:Strings.Computer_Label_Description}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
                                                         <TextBlock Text="{Binding Description}" FontSize="{Binding DataContext.Typography.NotesSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap" Margin="0,1,0,0"/>
                                                     </StackPanel>
                                                 </StackPanel>
@@ -855,22 +855,22 @@
 
             <!-- Left Buttons: Clear, Collapse All, Expand All -->
             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <Button Content="Clear"
+                <Button Content="{x:Static res:Strings.Common_Button_Clear}"
                         Command="{Binding ClearCommand}"
                         Style="{DynamicResource Button.FlowDoc}"
                         Margin="0,0,8,0"
-                        ToolTip="Clear search history"/>
+                        ToolTip="{x:Static res:Strings.Common_Tooltip_ClearHistory}"/>
 
-                <Button Content="Collapse All"
+                <Button Content="{x:Static res:Strings.Common_Button_CollapseAll}"
                         Command="{Binding CollapseAllCommand}"
                         Style="{DynamicResource Button.FlowDoc}"
                         Margin="0,0,8,0"
-                        ToolTip="Collapse all history cards to single-line summaries"/>
+                        ToolTip="{x:Static res:Strings.Common_Tooltip_CollapseAll}"/>
 
-                <Button Content="Expand All"
+                <Button Content="{x:Static res:Strings.Common_Button_ExpandAll}"
                         Command="{Binding ExpandAllCommand}"
                         Style="{DynamicResource Button.FlowDoc}"
-                        ToolTip="Expand all history cards"/>
+                        ToolTip="{x:Static res:Strings.Common_Tooltip_ExpandAll}"/>
             </StackPanel>
 
             <!-- Right Buttons: Font Sizing -->
@@ -878,16 +878,16 @@
                 <Button Content="A−"
                         Command="{Binding DecreaseFontCommand}"
                         Style="{DynamicResource Button.FlowDoc.Small}"
-                        ToolTip="Decrease text size"/>
+                        ToolTip="{x:Static res:Strings.Common_Tooltip_TextSizeDecrease}"/>
                 <Button Content="A"
                         Command="{Binding ResetFontCommand}"
                         Style="{DynamicResource Button.FlowDoc.Small}"
-                        ToolTip="Reset text size"/>
+                        ToolTip="{x:Static res:Strings.Common_Tooltip_TextSizeReset}"/>
                 <Button Content="A+"
                         Command="{Binding IncreaseFontCommand}"
                         Style="{DynamicResource Button.FlowDoc.Small}"
                         Margin="6,0,0,0"
-                        ToolTip="Increase text size"/>
+                        ToolTip="{x:Static res:Strings.Common_Tooltip_TextSizeIncrease}"/>
             </StackPanel>
         </Grid>
     </Grid>

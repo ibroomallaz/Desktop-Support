@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -475,5 +475,158 @@
   <data name="Home_ServiceMeow_DefaultBlurb" xml:space="preserve">
     <value>Welcome to Desktop Support! Mascot data is standing by.</value>
     <comment>Fallback mascot welcome message</comment>
+  </data>
+  <!-- About ViewModel Additions -->
+  <data name="About_Button_Checking" xml:space="preserve">
+    <value>Checking...</value>
+    <comment>Button text while version check is running</comment>
+  </data>
+  <data name="About_Button_CheckUpdates" xml:space="preserve">
+    <value>Check for Updates</value>
+    <comment>Button text to initiate a version check</comment>
+  </data>
+  <data name="About_Status_Checking" xml:space="preserve">
+    <value>Checking for updates…</value>
+    <comment>Status notification when checking for updates</comment>
+  </data>
+  <data name="About_Status_UpdateAvailable" xml:space="preserve">
+    <value>Update available • {0}</value>
+    <comment>Status text when an update is available</comment>
+  </data>
+  <data name="About_Status_CheckedAt" xml:space="preserve">
+    <value>Checked at {0}</value>
+    <comment>Status text timestamp when app is up to date</comment>
+  </data>
+
+  <!-- Computer View -->
+  <data name="Computer_Empty_Title" xml:space="preserve">
+    <value>No Computer Lookups Yet</value>
+    <comment>Empty state title on Computer view</comment>
+  </data>
+  <data name="Computer_Empty_Subtitle" xml:space="preserve">
+    <value>Enter a hostname in the search bar above and press Enter.</value>
+    <comment>Empty state subtitle instructions on Computer view</comment>
+  </data>
+  <data name="Computer_Menu_CopySummary" xml:space="preserve">
+    <value>Copy Card Summary</value>
+    <comment>Context menu item to copy computer summary</comment>
+  </data>
+  <data name="Computer_Menu_CopyName" xml:space="preserve">
+    <value>Copy Name Only</value>
+    <comment>Context menu item to copy hostname only</comment>
+  </data>
+  <data name="Computer_Badge_NotFound" xml:space="preserve">
+    <value>Not Found</value>
+    <comment>Badge indicating computer object was not found</comment>
+  </data>
+  <data name="Computer_Badge_Disabled" xml:space="preserve">
+    <value>Disabled</value>
+    <comment>Badge indicating computer account is disabled</comment>
+  </data>
+  <data name="Computer_Badge_Copied" xml:space="preserve">
+    <value>✓ Copied</value>
+    <comment>Badge indicating hostname copied to clipboard</comment>
+  </data>
+  <data name="Computer_Status_NotFoundInAd" xml:space="preserve">
+    <value>Computer Not Found in Active Directory</value>
+    <comment>Expanded card message when computer object is missing from AD</comment>
+  </data>
+  <data name="Computer_Tooltip_CopySummary" xml:space="preserve">
+    <value>Copy computer summary to clipboard (Rich Text &amp; Plain Text)</value>
+    <comment>Tooltip for copying computer card summary</comment>
+  </data>
+  <data name="Computer_Tooltip_CopySummaryShort" xml:space="preserve">
+    <value>Copy computer summary (Rich Text &amp; Plain Text)</value>
+    <comment>Tooltip for copying computer summary in header</comment>
+  </data>
+  <data name="Computer_Tooltip_ClearRecord" xml:space="preserve">
+    <value>Clear this record from history</value>
+    <comment>Tooltip to dismiss/clear a compact record from history</comment>
+  </data>
+  <data name="Computer_Tooltip_RemoveRecord" xml:space="preserve">
+    <value>Remove this record from history</value>
+    <comment>Tooltip to remove an expanded computer card from history</comment>
+  </data>
+  <data name="Computer_Tooltip_CopyHostname" xml:space="preserve">
+    <value>Click to copy hostname to clipboard</value>
+    <comment>Tooltip on hostname pill to copy name</comment>
+  </data>
+  <data name="Computer_Tooltip_Requery" xml:space="preserve">
+    <value>Re-query Active Directory for this computer</value>
+    <comment>Tooltip to refresh/requery Active Directory for a computer</comment>
+  </data>
+  <data name="Computer_Tooltip_CollapseCard" xml:space="preserve">
+    <value>Collapse card</value>
+    <comment>Tooltip to collapse an expanded card</comment>
+  </data>
+  <data name="Computer_Section_SystemDomainIdentity" xml:space="preserve">
+    <value>SYSTEM &amp; DOMAIN IDENTITY</value>
+    <comment>Section header for computer system and domain identity</comment>
+  </data>
+  <data name="Computer_Label_OperatingSystem" xml:space="preserve">
+    <value>Operating System: </value>
+    <comment>Label for computer OS</comment>
+  </data>
+  <data name="Computer_Label_HybridGroup" xml:space="preserve">
+    <value>Hybrid Group: </value>
+    <comment>Label for computer Hybrid Group</comment>
+  </data>
+  <data name="Computer_Label_Ou" xml:space="preserve">
+    <value>Organizational Unit (OU): </value>
+    <comment>Label for computer OU</comment>
+  </data>
+  <data name="Computer_Section_ActivityStatus" xml:space="preserve">
+    <value>ACTIVITY &amp; STATUS</value>
+    <comment>Section header for computer activity and status</comment>
+  </data>
+  <data name="Computer_Label_LastLogon" xml:space="preserve">
+    <value>Last Logon: </value>
+    <comment>Label for computer last logon</comment>
+  </data>
+  <data name="Computer_Label_AccountStatus" xml:space="preserve">
+    <value>Account Status: </value>
+    <comment>Label for computer account status</comment>
+  </data>
+  <data name="Computer_Label_Description" xml:space="preserve">
+    <value>Description / Notes: </value>
+    <comment>Label for computer description or notes</comment>
+  </data>
+
+  <!-- Common Shared Toolbar Controls -->
+  <data name="Common_Button_Clear" xml:space="preserve">
+    <value>Clear</value>
+    <comment>Shared button text to clear history</comment>
+  </data>
+  <data name="Common_Tooltip_ClearHistory" xml:space="preserve">
+    <value>Clear search history</value>
+    <comment>Shared tooltip to clear search history</comment>
+  </data>
+  <data name="Common_Button_CollapseAll" xml:space="preserve">
+    <value>Collapse All</value>
+    <comment>Shared button text to collapse all history cards</comment>
+  </data>
+  <data name="Common_Tooltip_CollapseAll" xml:space="preserve">
+    <value>Collapse all history cards to single-line summaries</value>
+    <comment>Shared tooltip to collapse all history cards</comment>
+  </data>
+  <data name="Common_Button_ExpandAll" xml:space="preserve">
+    <value>Expand All</value>
+    <comment>Shared button text to expand all history cards</comment>
+  </data>
+  <data name="Common_Tooltip_ExpandAll" xml:space="preserve">
+    <value>Expand all history cards</value>
+    <comment>Shared tooltip to expand all history cards</comment>
+  </data>
+  <data name="Common_Tooltip_TextSizeDecrease" xml:space="preserve">
+    <value>Decrease text size</value>
+    <comment>Shared tooltip to decrease UI text size</comment>
+  </data>
+  <data name="Common_Tooltip_TextSizeReset" xml:space="preserve">
+    <value>Reset text size</value>
+    <comment>Shared tooltip to reset UI text size</comment>
+  </data>
+  <data name="Common_Tooltip_TextSizeIncrease" xml:space="preserve">
+    <value>Increase text size</value>
+    <comment>Shared tooltip to increase UI text size</comment>
   </data>
 </root>

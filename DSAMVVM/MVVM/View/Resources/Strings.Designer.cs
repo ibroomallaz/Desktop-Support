@@ -985,5 +985,338 @@ namespace DSAMVVM.MVVM.View.Resources {
                 return ResourceManager.GetString("Splash_Title", resourceCulture);
             }
         }
+        /// <summary>
+        ///   Looks up a localized string similar to Checking....
+        /// </summary>
+        public static string About_Button_Checking {
+            get {
+                return ResourceManager.GetString("About_Button_Checking", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Check for Updates.
+        /// </summary>
+        public static string About_Button_CheckUpdates {
+            get {
+                return ResourceManager.GetString("About_Button_CheckUpdates", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Checking for updates….
+        /// </summary>
+        public static string About_Status_Checking {
+            get {
+                return ResourceManager.GetString("About_Status_Checking", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Update available • {0}.
+        /// </summary>
+        public static string About_Status_UpdateAvailable {
+            get {
+                return ResourceManager.GetString("About_Status_UpdateAvailable", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Checked at {0}.
+        /// </summary>
+        public static string About_Status_CheckedAt {
+            get {
+                return ResourceManager.GetString("About_Status_CheckedAt", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to No Computer Lookups Yet.
+        /// </summary>
+        public static string Computer_Empty_Title {
+            get {
+                return ResourceManager.GetString("Computer_Empty_Title", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Enter a hostname in the search bar above and press Enter..
+        /// </summary>
+        public static string Computer_Empty_Subtitle {
+            get {
+                return ResourceManager.GetString("Computer_Empty_Subtitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Copy Card Summary.
+        /// </summary>
+        public static string Computer_Menu_CopySummary {
+            get {
+                return ResourceManager.GetString("Computer_Menu_CopySummary", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Copy Name Only.
+        /// </summary>
+        public static string Computer_Menu_CopyName {
+            get {
+                return ResourceManager.GetString("Computer_Menu_CopyName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Not Found.
+        /// </summary>
+        public static string Computer_Badge_NotFound {
+            get {
+                return ResourceManager.GetString("Computer_Badge_NotFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Disabled.
+        /// </summary>
+        public static string Computer_Badge_Disabled {
+            get {
+                return ResourceManager.GetString("Computer_Badge_Disabled", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to ✓ Copied.
+        /// </summary>
+        public static string Computer_Badge_Copied {
+            get {
+                return ResourceManager.GetString("Computer_Badge_Copied", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Computer Not Found in Active Directory.
+        /// </summary>
+        public static string Computer_Status_NotFoundInAd {
+            get {
+                return ResourceManager.GetString("Computer_Status_NotFoundInAd", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Copy computer summary to clipboard (Rich Text &amp; Plain Text).
+        /// </summary>
+        public static string Computer_Tooltip_CopySummary {
+            get {
+                return ResourceManager.GetString("Computer_Tooltip_CopySummary", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Copy computer summary (Rich Text &amp; Plain Text).
+        /// </summary>
+        public static string Computer_Tooltip_CopySummaryShort {
+            get {
+                return ResourceManager.GetString("Computer_Tooltip_CopySummaryShort", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Clear this record from history.
+        /// </summary>
+        public static string Computer_Tooltip_ClearRecord {
+            get {
+                return ResourceManager.GetString("Computer_Tooltip_ClearRecord", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Remove this record from history.
+        /// </summary>
+        public static string Computer_Tooltip_RemoveRecord {
+            get {
+                return ResourceManager.GetString("Computer_Tooltip_RemoveRecord", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Click to copy hostname to clipboard.
+        /// </summary>
+        public static string Computer_Tooltip_CopyHostname {
+            get {
+                return ResourceManager.GetString("Computer_Tooltip_CopyHostname", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Re-query Active Directory for this computer.
+        /// </summary>
+        public static string Computer_Tooltip_Requery {
+            get {
+                return ResourceManager.GetString("Computer_Tooltip_Requery", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Collapse card.
+        /// </summary>
+        public static string Computer_Tooltip_CollapseCard {
+            get {
+                return ResourceManager.GetString("Computer_Tooltip_CollapseCard", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to SYSTEM &amp; DOMAIN IDENTITY.
+        /// </summary>
+        public static string Computer_Section_SystemDomainIdentity {
+            get {
+                return ResourceManager.GetString("Computer_Section_SystemDomainIdentity", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Operating System: .
+        /// </summary>
+        public static string Computer_Label_OperatingSystem {
+            get {
+                return ResourceManager.GetString("Computer_Label_OperatingSystem", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Hybrid Group: .
+        /// </summary>
+        public static string Computer_Label_HybridGroup {
+            get {
+                return ResourceManager.GetString("Computer_Label_HybridGroup", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Organizational Unit (OU): .
+        /// </summary>
+        public static string Computer_Label_Ou {
+            get {
+                return ResourceManager.GetString("Computer_Label_Ou", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to ACTIVITY &amp; STATUS.
+        /// </summary>
+        public static string Computer_Section_ActivityStatus {
+            get {
+                return ResourceManager.GetString("Computer_Section_ActivityStatus", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Last Logon: .
+        /// </summary>
+        public static string Computer_Label_LastLogon {
+            get {
+                return ResourceManager.GetString("Computer_Label_LastLogon", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Account Status: .
+        /// </summary>
+        public static string Computer_Label_AccountStatus {
+            get {
+                return ResourceManager.GetString("Computer_Label_AccountStatus", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Description / Notes: .
+        /// </summary>
+        public static string Computer_Label_Description {
+            get {
+                return ResourceManager.GetString("Computer_Label_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Clear.
+        /// </summary>
+        public static string Common_Button_Clear {
+            get {
+                return ResourceManager.GetString("Common_Button_Clear", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Clear search history.
+        /// </summary>
+        public static string Common_Tooltip_ClearHistory {
+            get {
+                return ResourceManager.GetString("Common_Tooltip_ClearHistory", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Collapse All.
+        /// </summary>
+        public static string Common_Button_CollapseAll {
+            get {
+                return ResourceManager.GetString("Common_Button_CollapseAll", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Collapse all history cards to single-line summaries.
+        /// </summary>
+        public static string Common_Tooltip_CollapseAll {
+            get {
+                return ResourceManager.GetString("Common_Tooltip_CollapseAll", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Expand All.
+        /// </summary>
+        public static string Common_Button_ExpandAll {
+            get {
+                return ResourceManager.GetString("Common_Button_ExpandAll", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Expand all history cards.
+        /// </summary>
+        public static string Common_Tooltip_ExpandAll {
+            get {
+                return ResourceManager.GetString("Common_Tooltip_ExpandAll", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Decrease text size.
+        /// </summary>
+        public static string Common_Tooltip_TextSizeDecrease {
+            get {
+                return ResourceManager.GetString("Common_Tooltip_TextSizeDecrease", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Reset text size.
+        /// </summary>
+        public static string Common_Tooltip_TextSizeReset {
+            get {
+                return ResourceManager.GetString("Common_Tooltip_TextSizeReset", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Increase text size.
+        /// </summary>
+        public static string Common_Tooltip_TextSizeIncrease {
+            get {
+                return ResourceManager.GetString("Common_Tooltip_TextSizeIncrease", resourceCulture);
+            }
+        }
+
     }
 }

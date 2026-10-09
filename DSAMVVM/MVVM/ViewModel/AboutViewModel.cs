@@ -1,4 +1,5 @@
-﻿using DSAMVVM.Core.Enums;
+﻿using DSAMVVM.MVVM.View.Resources;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
@@ -39,7 +40,7 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
-        public string CheckButtonText => IsBusy ? "Checking..." : "Check for Updates";
+        public string CheckButtonText => IsBusy ? Strings.About_Button_Checking : Strings.About_Button_CheckUpdates;
 
         public UpdateStatus CurrentUpdateStatus
         {
@@ -198,7 +199,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
             try
             {
-                UiNotify.Progress(UiNotify.ProgressOf(key), "Checking for updates…");
+                UiNotify.Progress(UiNotify.ProgressOf(key), Strings.About_Status_Checking);
 
                 var appSettings = App.Services.GetRequiredService<AppSettings>();
                 var checker = new VersionCheckerUI(_http, _updater, appSettings);
@@ -207,19 +208,19 @@ namespace DSAMVVM.MVVM.ViewModel
                 if (updateFound)
                 {
                     CurrentUpdateStatus = UpdateStatus.UpdateAvailable;
-                    LastCheckedText = $"Update available • {DateTime.Now:t}";
+                    LastCheckedText = string.Format(Strings.About_Status_UpdateAvailable, $"{DateTime.Now:t}");
                 }
                 else
                 {
                     CurrentUpdateStatus = UpdateStatus.UpToDate;
-                    LastCheckedText = $"Checked at {DateTime.Now:t}";
+                    LastCheckedText = string.Format(Strings.About_Status_CheckedAt, $"{DateTime.Now:t}");
                     UiNotify.Success($"Desktop Support App is up to date (v{AppVersion}).", showStatusBar: true);
                 }
             }
             catch (Exception ex)
             {
                 CurrentUpdateStatus = UpdateStatus.Failed;
-                LastCheckedText = "Check failed";
+                LastCheckedText = Strings.About_CheckFailed;
                 UiNotify.Error("Version Check", $"Check for updates failed: {ex.Message}", ex);
             }
             finally
