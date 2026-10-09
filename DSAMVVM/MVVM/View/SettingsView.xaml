@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="DSAMVVM.MVVM.View.SettingsView"
+<UserControl x:Class="DSAMVVM.MVVM.View.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -544,11 +544,11 @@
                             </Grid.ColumnDefinitions>
                             <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
                             <StackPanel Grid.Column="1" Margin="16">
-                                <TextBlock Text="Support Mascot (ServiceMeow)" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                                <TextBlock Text="{x:Static res:Strings.Settings_Mascot_CardTitle}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
                                 <CheckBox x:Name="EnableServiceMeowCheck" Foreground="{DynamicResource Brush.Text.Primary}"
-                                          Content="Show ServiceMeow Mascot on Home Dashboard" Margin="0,0,0,8"
+                                          Content="{x:Static res:Strings.Settings_Mascot_EnableCheckbox}" Margin="0,0,0,8"
                                           IsChecked="{Binding EnableServiceMeow, Mode=TwoWay}"/>
-                                <TextBlock Text="Displays the Arizona Desktop Support pet mascot on the Home dashboard. When disabled, background pet synchronization and image downloads are stopped, and the Home dashboard expands to a clean full-width layout."
+                                <TextBlock Text="{x:Static res:Strings.Settings_Mascot_Description}"
                                            Foreground="{DynamicResource Brush.Text.Muted}" FontSize="11" Margin="24,0,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
                         </Grid>
@@ -568,10 +568,10 @@
                             <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
 
                             <StackPanel Grid.Column="1" Margin="16">
-                                <TextBlock Text="Quick Search (Overlay)" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                                <TextBlock Text="{x:Static res:Strings.Settings_QuickSearch_CardTitle}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
 
                                 <CheckBox x:Name="EnableQuickSearchCheck" Foreground="{DynamicResource Brush.Text.Primary}" 
-                                          Content="Enable Double-Tap Quick Search" Margin="0,0,0,12" 
+                                          Content="{x:Static res:Strings.Settings_QuickSearch_EnableCheckbox}" Margin="0,0,0,12" 
                                           IsChecked="{Binding EnableQuickSearch, Mode=TwoWay}"/>
 
                                 <StackPanel Visibility="{Binding ElementName=EnableQuickSearchCheck, Path=IsChecked, Converter={StaticResource BoolToVis}}" Margin="0,4,0,0">
@@ -582,7 +582,7 @@
                                             <ColumnDefinition Width="12"/>
                                             <ColumnDefinition Width="200"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Double-Tap Key" Style="{StaticResource FieldLabel}"/>
+                                        <TextBlock Text="{x:Static res:Strings.Settings_QuickSearch_DoubleTapKey}" Style="{StaticResource FieldLabel}"/>
 
                                         <ComboBox Grid.Column="2" Style="{DynamicResource Combo.Links.Dropdown}" 
                                                   ItemsSource="{Binding ModifierKeyOptions}" 
