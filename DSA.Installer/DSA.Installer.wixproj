@@ -1,4 +1,4 @@
-﻿<Project Sdk="WixToolset.Sdk/5.0.2">
+﻿<Project Sdk="WixToolset.Sdk/7.0.0">
   <PropertyGroup>
     <OutputType>Package</OutputType>
     <OutputName>DSA_Installer</OutputName>
@@ -8,6 +8,7 @@
     <SuppressIces>ICE38;ICE64;ICE91</SuppressIces>
     <SuppressValidation>true</SuppressValidation>
     <OutputPath>..\artifacts\$(Configuration)\</OutputPath>
+    <AcceptEula>wix7</AcceptEula>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

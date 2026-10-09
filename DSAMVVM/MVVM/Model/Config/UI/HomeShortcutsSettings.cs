@@ -73,7 +73,7 @@ namespace DSAMVVM.MVVM.Model.Config.UI
                 Icon = Glyphs.Ticket,
                 Title = "ServiceNow",
                 Description = "Incident & request queue",
-                Target = "https://service-now.arizona.edu",
+                Target = "https://uarizona.service-now.com/",
                 ColorPreset = ShortcutColorPresets.Blue,
                 IsCustom = false,
                 Order = 0
@@ -105,8 +105,8 @@ namespace DSAMVVM.MVVM.Model.Config.UI
                 Id = "kb",
                 Icon = Glyphs.Server,
                 Title = "Knowledge Base",
-                Description = "Desktop Support SOPs",
-                Target = "app://links",
+                Description = "UITS Knowledge Base",
+                Target = "https://uarizona.service-now.com/sp?id=kb_view2",
                 ColorPreset = ShortcutColorPresets.Rose,
                 IsCustom = false,
                 Order = 3

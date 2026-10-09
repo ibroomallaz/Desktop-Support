@@ -43,8 +43,8 @@
     <WixVariable Id="WixUIDialogBmp" Value="Resources\dialog.bmp" />
 
     <StandardDirectory Id="LocalAppDataFolder">
-      <Directory Id="CompanyFolder" Name="University of Arizona">
-        <Directory Id="ProductFolder" Name="Desktop Support App">
+      <Directory Id="CompanyFolder" Name="UArizona">
+        <Directory Id="ProductFolder" Name="DesktopSupportApp">
           <Directory Id="INSTALLFOLDER" Name="App" />
         </Directory>
       </Directory>
@@ -94,7 +94,7 @@
 
         <!-- Registry tracking for per-user component KeyPath and cleanup on uninstall -->
         <RegistryKey Root="HKCU"
-                     Key="Software\University of Arizona\Desktop Support App"
+                     Key="Software\UArizona\DesktopSupportApp"
                      ForceCreateOnInstall="yes"
                      ForceDeleteOnUninstall="yes">
           <RegistryValue Name="Installed"

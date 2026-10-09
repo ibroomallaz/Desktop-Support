@@ -38,6 +38,8 @@ namespace DSAMVVM.MVVM.ViewModel
         // ServiceMeow tracking state
         private ServiceMeowPet? _originalPet;
         private string? _originalPetOwnerNetId;
+        private string? _originalPetOwnerName;
+        private string? _originalPetOwnerTeam;
         private bool _isNewPet = true;
 
         // Section dropdown selection
@@ -1050,6 +1052,8 @@ namespace DSAMVVM.MVVM.ViewModel
                 Images = [.. pet.Images]
             };
             _originalPetOwnerNetId = pet.Owner?.NetId;
+            _originalPetOwnerName = pet.Owner?.Name;
+            _originalPetOwnerTeam = pet.Owner?.Team;
 
             PetOwnerNetId = pet.Owner?.NetId ?? string.Empty;
             PetOwnerName = pet.Owner?.Name ?? string.Empty;
@@ -1078,6 +1082,8 @@ namespace DSAMVVM.MVVM.ViewModel
             _isNewPet = true;
             _originalPet = null;
             _originalPetOwnerNetId = null;
+            _originalPetOwnerName = null;
+            _originalPetOwnerTeam = null;
 
             PetOwnerNetId = string.Empty;
             PetOwnerName = string.Empty;
@@ -1147,6 +1153,10 @@ namespace DSAMVVM.MVVM.ViewModel
 
                 if ((_originalPetOwnerNetId ?? string.Empty) != ownerNetId)
                     diff.Append($"Owner NetID: \"{_originalPetOwnerNetId}\" -> \"{ownerNetId}\"; ");
+                if ((_originalPetOwnerName ?? string.Empty) != ownerName)
+                    diff.Append($"Owner Name: \"{_originalPetOwnerName}\" -> \"{ownerName}\"; ");
+                if ((_originalPetOwnerTeam ?? string.Empty) != ownerTeam)
+                    diff.Append($"Owner Team: \"{_originalPetOwnerTeam}\" -> \"{ownerTeam}\"; ");
 
                 if (diff.Length == 0)
                 {

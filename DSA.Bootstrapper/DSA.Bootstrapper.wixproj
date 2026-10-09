@@ -1,4 +1,4 @@
-﻿<Project Sdk="WixToolset.Sdk/5.0.2">
+﻿<Project Sdk="WixToolset.Sdk/7.0.0">
   <PropertyGroup>
     <OutputType>Bundle</OutputType>
     <OutputName>DSA_Setup</OutputName>
@@ -6,6 +6,7 @@
     <Configurations>Debug;Release</Configurations>
     <InstallerPlatform>x64</InstallerPlatform>
     <OutputPath>..\artifacts\$(Configuration)\</OutputPath>
+    <AcceptEula>wix7</AcceptEula>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
