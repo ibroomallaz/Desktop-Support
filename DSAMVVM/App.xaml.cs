@@ -8,6 +8,7 @@ using DSAMVVM.MVVM.Services.Status;
 using DSAMVVM.MVVM.Services.Updates;
 using DSAMVVM.MVVM.View;
 using DSAMVVM.MVVM.View.Overlays;
+using DSAMVVM.MVVM.View.Resources;
 using DSAMVVM.MVVM.ViewModel;
 using DSAMVVM.MVVM.ViewModel.Overlays;
 using H.NotifyIcon;
@@ -87,7 +88,7 @@ namespace DSAMVVM
                 _splash.Top = area.Top + (area.Height - _splash.Height) / 2;
             };
             _splash.Show();
-            _splash.UpdateStatus("Starting…");
+            _splash.UpdateStatus(Strings.Splash_Status_Starting);
 
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -132,7 +133,7 @@ namespace DSAMVVM
             try
             {
                 var updateUi = _serviceProvider.GetRequiredService<VersionCheckerUI>();
-                _splash.UpdateStatus("Checking for updates");
+                _splash.UpdateStatus(Strings.Splash_Status_CheckingUpdates);
                 _ = Mark("Update check start");
 
                 var updateTask = updateUi.EnforceRequiredAsync();
@@ -435,56 +436,56 @@ namespace DSAMVVM
                 // --- Search Items ---
                 jumpList.JumpItems.Add(new JumpTask
                 {
-                    Title = "Search Users",
-                    Description = "Lookup user attributes, licenses, and groups",
+                    Title = Strings.JumpList_SearchUsers_Title,
+                    Description = Strings.JumpList_SearchUsers_Desc,
                     Arguments = "--mode user",
-                    CustomCategory = "Search",
+                    CustomCategory = Strings.JumpList_Category_Search,
                     IconResourcePath = exePath
                 });
 
                 jumpList.JumpItems.Add(new JumpTask
                 {
-                    Title = "Search Computers",
-                    Description = "Lookup device details",
+                    Title = Strings.JumpList_SearchComputers_Title,
+                    Description = Strings.JumpList_SearchComputers_Desc,
                     Arguments = "--mode computer",
-                    CustomCategory = "Search",
+                    CustomCategory = Strings.JumpList_Category_Search,
                     IconResourcePath = exePath
                 });
 
                 jumpList.JumpItems.Add(new JumpTask
                 {
-                    Title = "Search Groups",
-                    Description = "Lookup MIM groups and Dept Support",
+                    Title = Strings.JumpList_SearchGroups_Title,
+                    Description = Strings.JumpList_SearchGroups_Desc,
                     Arguments = "--mode group",
-                    CustomCategory = "Search",
+                    CustomCategory = Strings.JumpList_Category_Search,
                     IconResourcePath = exePath
                 });
                 // --- "Resources" Item ---
                 jumpList.JumpItems.Add(new JumpTask
                 {
-                    Title = "Quick Links",
-                    Description = "Helpful Links and locations",
+                    Title = Strings.JumpList_QuickLinks_Title,
+                    Description = Strings.JumpList_QuickLinks_Desc,
                     Arguments = "--mode links",
-                    CustomCategory = "Resources",
+                    CustomCategory = Strings.JumpList_Category_Resources,
                     IconResourcePath = exePath
                 });
 
                 // -- "Application" --
                 jumpList.JumpItems.Add(new JumpTask
                 {
-                    Title = "Check for Updates",
-                    Description = "Force a check for application updates",
+                    Title = Strings.JumpList_CheckUpdates_Title,
+                    Description = Strings.JumpList_CheckUpdates_Desc,
                     Arguments = "--mode update",
-                    CustomCategory = "Application",
+                    CustomCategory = Strings.JumpList_Category_Application,
                     IconResourcePath = exePath
                 });
                 // --- Settings Item ---
                 jumpList.JumpItems.Add(new JumpTask
                 {
-                    Title = "Settings",
-                    Description = "Configure application preferences",
+                    Title = Strings.JumpList_Settings_Title,
+                    Description = Strings.JumpList_Settings_Desc,
                     Arguments = "--mode settings",
-                    CustomCategory = "Application",
+                    CustomCategory = Strings.JumpList_Category_Application,
                     IconResourcePath = exePath
                 });
 
@@ -574,4 +575,3 @@ namespace DSAMVVM
         }
     }
 }
-

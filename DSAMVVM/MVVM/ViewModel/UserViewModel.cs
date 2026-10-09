@@ -239,7 +239,7 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             var s = App.Settings;
             bool perView = s.Ui.Font.ViewFontSizeOverride;
-            _settingsSvc.ResetOutputFontSize(s, perView ? ViewKey : null, perView, (int)UiLimits.DefaultFontSize);
+            _settingsSvc.ResetOutputFontSize(s, perView ? ViewKey : null, perView);
             _notifier.NotifyChanged();
             _settingsSvc.RequestSave(s, Path.Combine(Globals.g_AppDir, "settings.json"));
         }

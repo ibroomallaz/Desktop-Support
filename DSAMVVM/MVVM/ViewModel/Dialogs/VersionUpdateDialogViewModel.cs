@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Logging;
+﻿using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Schemas;
 using System.ComponentModel;
@@ -128,7 +127,11 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
         private static void OpenUrl(string? url)
         {
             if (string.IsNullOrWhiteSpace(url)) return;
-            try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); } catch { }
+            try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
+            catch
+            {
+                // ignored
+            }
         }
 
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

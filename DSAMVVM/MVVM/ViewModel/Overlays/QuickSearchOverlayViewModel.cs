@@ -1,7 +1,5 @@
-using DSAMVVM.MVVM.ViewModel.Cards;
+﻿using DSAMVVM.MVVM.ViewModel.Cards;
 using DSAMVVM.Core.Enums;
-using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Interfaces.UI;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
@@ -57,11 +55,9 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
             get => _resultCard;
             private set
             {
-                if (Set(ref _resultCard, value))
-                {
-                    OnPropertyChanged(nameof(HasResult));
-                    OnPropertyChanged(nameof(ShowResultContainer));
-                }
+                if (!Set(ref _resultCard, value)) return;
+                OnPropertyChanged(nameof(HasResult));
+                OnPropertyChanged(nameof(ShowResultContainer));
             }
         }
         public bool HasResult => ResultCard != null;
@@ -107,18 +103,19 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
 
             OpenInMainAppCommand = new RelayCommand(_ =>
             {
-                if (ResultCard is UserHistoryItemViewModel userVm)
+                switch (ResultCard)
                 {
-                    _linkRouter.RequestNavigation("user", userVm.NetId);
+                    case UserHistoryItemViewModel userVm:
+                        _linkRouter.RequestNavigation("user", userVm.NetId);
+                        break;
+                    case ComputerHistoryItemViewModel compVm:
+                        _linkRouter.RequestNavigation("computer", compVm.ComputerName);
+                        break;
+                    case GroupHistoryItemViewModel groupVm:
+                        _linkRouter.RequestNavigation("group", !string.IsNullOrWhiteSpace(groupVm.Query) ? groupVm.Query : groupVm.PrimaryHeaderTitle);
+                        break;
                 }
-                else if (ResultCard is ComputerHistoryItemViewModel compVm)
-                {
-                    _linkRouter.RequestNavigation("computer", compVm.ComputerName);
-                }
-                else if (ResultCard is GroupHistoryItemViewModel groupVm)
-                {
-                    _linkRouter.RequestNavigation("group", !string.IsNullOrWhiteSpace(groupVm.Query) ? groupVm.Query : groupVm.PrimaryHeaderTitle);
-                }
+
                 CloseAction?.Invoke();
             });
         }
@@ -141,7 +138,7 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
 
         public async Task ExecuteInlineSearchAsync(AppView category, FrameworkElement? anchorElement = null)
         {
-            var query = SearchText?.Trim();
+            var query = SearchText.Trim();
             if (string.IsNullOrWhiteSpace(query)) return;
 
             if (category == AppView.Group)
@@ -176,7 +173,7 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
                         Header = header,
                         InputGestureText = inputGesture
                     };
-                    item.Click += async (s, e) => await RunTargetedSearchAsync(query, AppView.Group, modeIdentifier);
+                    item.Click += async (_, _) => await RunTargetedSearchAsync(query, AppView.Group, modeIdentifier);
                     menu.Items.Add(item);
                 }
 
@@ -185,20 +182,33 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
                 AddMenuItem($"3. Search '{query}' in Department Support", "DEPT", "3");
                 AddMenuItem($"4. Search '{query}' in Division Support", "DIV", "4");
 
-                menu.KeyDown += async (s, e) =>
+                menu.KeyDown += async (_, e) =>
                 {
                     string? mode = null;
-                    if (e.Key == Key.D1 || e.Key == Key.NumPad1) mode = "MIM";
-                    else if (e.Key == Key.D2 || e.Key == Key.NumPad2) mode = "AD";
-                    else if (e.Key == Key.D3 || e.Key == Key.NumPad3) mode = "DEPT";
-                    else if (e.Key == Key.D4 || e.Key == Key.NumPad4) mode = "DIV";
-
-                    if (mode != null)
+                    switch (e.Key)
                     {
-                        e.Handled = true;
-                        menu.IsOpen = false;
-                        await RunTargetedSearchAsync(query, AppView.Group, mode);
+                        case Key.D1:
+                        case Key.NumPad1:
+                            mode = "MIM";
+                            break;
+                        case Key.D2:
+                        case Key.NumPad2:
+                            mode = "AD";
+                            break;
+                        case Key.D3:
+                        case Key.NumPad3:
+                            mode = "DEPT";
+                            break;
+                        case Key.D4:
+                        case Key.NumPad4:
+                            mode = "DIV";
+                            break;
                     }
+
+                    if (mode == null) return;
+                    e.Handled = true;
+                    menu.IsOpen = false;
+                    await RunTargetedSearchAsync(query, AppView.Group, mode);
                 };
 
                 Application.Current.Dispatcher.BeginInvoke(new Action(() =>

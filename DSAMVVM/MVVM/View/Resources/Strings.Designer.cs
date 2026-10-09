@@ -61,6 +61,330 @@ namespace DSAMVVM.MVVM.View.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Support App.
+        /// </summary>
+        public static string App_Title {
+            get {
+                return ResourceManager.GetString("App_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Desktop Support App.
+        /// </summary>
+        public static string Splash_Title {
+            get {
+                return ResourceManager.GetString("Splash_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UArizona.
+        /// </summary>
+        public static string Splash_OrgBadge {
+            get {
+                return ResourceManager.GetString("Splash_OrgBadge", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to University of Arizona • Desktop Support &amp; IT Services.
+        /// </summary>
+        public static string Splash_Subtitle {
+            get {
+                return ResourceManager.GetString("Splash_Subtitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Starting….
+        /// </summary>
+        public static string Splash_Status_Starting {
+            get {
+                return ResourceManager.GetString("Splash_Status_Starting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Checking for updates….
+        /// </summary>
+        public static string Splash_Status_CheckingUpdates {
+            get {
+                return ResourceManager.GetString("Splash_Status_CheckingUpdates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading services….
+        /// </summary>
+        public static string Splash_Status_LoadingServices {
+            get {
+                return ResourceManager.GetString("Splash_Status_LoadingServices", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading settings….
+        /// </summary>
+        public static string Splash_Status_LoadingSettings {
+            get {
+                return ResourceManager.GetString("Splash_Status_LoadingSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Report a Bug.
+        /// </summary>
+        public static string Feedback_ReportBug {
+            get {
+                return ResourceManager.GetString("Feedback_ReportBug", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Request a Feature.
+        /// </summary>
+        public static string Feedback_RequestFeature {
+            get {
+                return ResourceManager.GetString("Feedback_RequestFeature", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Support Team.
+        /// </summary>
+        public static string Feedback_UpdateSupportTeam {
+            get {
+                return ResourceManager.GetString("Feedback_UpdateSupportTeam", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add/Update Note.
+        /// </summary>
+        public static string Feedback_AddNote {
+            get {
+                return ResourceManager.GetString("Feedback_AddNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Home.
+        /// </summary>
+        public static string Nav_Home {
+            get {
+                return ResourceManager.GetString("Nav_Home", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User.
+        /// </summary>
+        public static string Nav_User {
+            get {
+                return ResourceManager.GetString("Nav_User", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Computer.
+        /// </summary>
+        public static string Nav_Computer {
+            get {
+                return ResourceManager.GetString("Nav_Computer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Groups.
+        /// </summary>
+        public static string Nav_Groups {
+            get {
+                return ResourceManager.GetString("Nav_Groups", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Entra.
+        /// </summary>
+        public static string Nav_Entra {
+            get {
+                return ResourceManager.GetString("Nav_Entra", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Links.
+        /// </summary>
+        public static string Nav_Links {
+            get {
+                return ResourceManager.GetString("Nav_Links", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to About.
+        /// </summary>
+        public static string Nav_About {
+            get {
+                return ResourceManager.GetString("Nav_About", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Admin.
+        /// </summary>
+        public static string Nav_Admin {
+            get {
+                return ResourceManager.GetString("Nav_Admin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Settings.
+        /// </summary>
+        public static string Nav_Settings {
+            get {
+                return ResourceManager.GetString("Nav_Settings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search.
+        /// </summary>
+        public static string JumpList_Category_Search {
+            get {
+                return ResourceManager.GetString("JumpList_Category_Search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Resources.
+        /// </summary>
+        public static string JumpList_Category_Resources {
+            get {
+                return ResourceManager.GetString("JumpList_Category_Resources", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Application.
+        /// </summary>
+        public static string JumpList_Category_Application {
+            get {
+                return ResourceManager.GetString("JumpList_Category_Application", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search Users.
+        /// </summary>
+        public static string JumpList_SearchUsers_Title {
+            get {
+                return ResourceManager.GetString("JumpList_SearchUsers_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lookup user attributes, licenses, and groups.
+        /// </summary>
+        public static string JumpList_SearchUsers_Desc {
+            get {
+                return ResourceManager.GetString("JumpList_SearchUsers_Desc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search Computers.
+        /// </summary>
+        public static string JumpList_SearchComputers_Title {
+            get {
+                return ResourceManager.GetString("JumpList_SearchComputers_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lookup device details.
+        /// </summary>
+        public static string JumpList_SearchComputers_Desc {
+            get {
+                return ResourceManager.GetString("JumpList_SearchComputers_Desc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search Groups.
+        /// </summary>
+        public static string JumpList_SearchGroups_Title {
+            get {
+                return ResourceManager.GetString("JumpList_SearchGroups_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lookup MIM groups and Dept Support.
+        /// </summary>
+        public static string JumpList_SearchGroups_Desc {
+            get {
+                return ResourceManager.GetString("JumpList_SearchGroups_Desc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Quick Links.
+        /// </summary>
+        public static string JumpList_QuickLinks_Title {
+            get {
+                return ResourceManager.GetString("JumpList_QuickLinks_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Helpful Links and locations.
+        /// </summary>
+        public static string JumpList_QuickLinks_Desc {
+            get {
+                return ResourceManager.GetString("JumpList_QuickLinks_Desc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check for Updates.
+        /// </summary>
+        public static string JumpList_CheckUpdates_Title {
+            get {
+                return ResourceManager.GetString("JumpList_CheckUpdates_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Force a check for application updates.
+        /// </summary>
+        public static string JumpList_CheckUpdates_Desc {
+            get {
+                return ResourceManager.GetString("JumpList_CheckUpdates_Desc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Settings.
+        /// </summary>
+        public static string JumpList_Settings_Title {
+            get {
+                return ResourceManager.GetString("JumpList_Settings_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Configure application preferences.
+        /// </summary>
+        public static string JumpList_Settings_Desc {
+            get {
+                return ResourceManager.GetString("JumpList_Settings_Desc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Search History.
         /// </summary>
         public static string Settings_SearchHistory_CardTitle {

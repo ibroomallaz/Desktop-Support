@@ -18,7 +18,7 @@
         Background="Transparent"
         AllowsTransparency="True"
         UseLayoutRounding="True"
-        Title="Support App">
+        Title="{x:Static res:Strings.App_Title}">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -58,7 +58,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="Support App"
+                <TextBlock Text="{x:Static res:Strings.App_Title}"
                            VerticalAlignment="Center"
                            FontSize="18"
                            Foreground="{DynamicResource Brush.Text.Primary}"
@@ -76,10 +76,10 @@
                             Margin="0,0,5,0">
                         <Button.ContextMenu>
                             <ContextMenu Placement="Bottom">
-                                <MenuItem Header="Report a Bug" Command="{Binding OpenFeedbackCommand}" CommandParameter="0"/>
-                                <MenuItem Header="Request a Feature" Command="{Binding OpenFeedbackCommand}" CommandParameter="1"/>
-                                <MenuItem Header="Update Support Team" Command="{Binding OpenFeedbackCommand}" CommandParameter="2"/>
-                                <MenuItem Header="Add/Update Note" Command="{Binding OpenFeedbackCommand}" CommandParameter="3"/>
+                                <MenuItem Header="{x:Static res:Strings.Feedback_ReportBug}" Command="{Binding OpenFeedbackCommand}" CommandParameter="0"/>
+                                <MenuItem Header="{x:Static res:Strings.Feedback_RequestFeature}" Command="{Binding OpenFeedbackCommand}" CommandParameter="1"/>
+                                <MenuItem Header="{x:Static res:Strings.Feedback_UpdateSupportTeam}" Command="{Binding OpenFeedbackCommand}" CommandParameter="2"/>
+                                <MenuItem Header="{x:Static res:Strings.Feedback_AddNote}" Command="{Binding OpenFeedbackCommand}" CommandParameter="3"/>
                             </ContextMenu>
                         </Button.ContextMenu>
                     </Button>
@@ -139,7 +139,7 @@
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled">
                         <StackPanel Margin="0,0,0,4">
-                            <RadioButton Content="Home"
+                            <RadioButton Content="{x:Static res:Strings.Nav_Home}"
                                          Tag="{x:Static res:Glyphs.Home}"
                                          GroupName="MainMenu"
                                          Style="{StaticResource Radio.Menu}"
@@ -148,7 +148,7 @@
                                                      Converter={StaticResource EnumEqualsConverter},
                                                      ConverterParameter={x:Static enums:AppView.Home}}"/>
 
-                            <RadioButton Content="User"
+                            <RadioButton Content="{x:Static res:Strings.Nav_User}"
                                          Tag="{x:Static res:Glyphs.User}"
                                          GroupName="MainMenu"
                                          Style="{StaticResource Radio.Menu}"
@@ -157,7 +157,7 @@
                                                      Converter={StaticResource EnumEqualsConverter},
                                                      ConverterParameter={x:Static enums:AppView.User}}"/>
 
-                            <RadioButton Content="Computer"
+                            <RadioButton Content="{x:Static res:Strings.Nav_Computer}"
                                          Tag="{x:Static res:Glyphs.Computer}"
                                          GroupName="MainMenu"
                                          Style="{StaticResource Radio.Menu}"
@@ -166,7 +166,7 @@
                                                      Converter={StaticResource EnumEqualsConverter},
                                                      ConverterParameter={x:Static enums:AppView.Computer}}"/>
 
-                            <RadioButton Content="Groups"
+                            <RadioButton Content="{x:Static res:Strings.Nav_Groups}"
                                          Tag="{x:Static res:Glyphs.Group}"
                                          GroupName="MainMenu"
                                          Style="{StaticResource Radio.Menu}"
@@ -175,7 +175,7 @@
                                                      Converter={StaticResource EnumEqualsConverter},
                                                      ConverterParameter={x:Static enums:AppView.Group}}"/>
 
-                            <RadioButton Content="Entra"
+                            <RadioButton Content="{x:Static res:Strings.Nav_Entra}"
                                          Tag="{x:Static res:Glyphs.Entra}"
                                          GroupName="MainMenu"
                                          Style="{StaticResource Radio.Menu}"
@@ -184,7 +184,7 @@
                                                      Converter={StaticResource EnumEqualsConverter},
                                                      ConverterParameter={x:Static enums:AppView.Entra}}"/>
 
-                            <RadioButton Content="Links"
+                            <RadioButton Content="{x:Static res:Strings.Nav_Links}"
                                          Tag="{x:Static res:Glyphs.Links}"
                                          GroupName="MainMenu"
                                          Style="{StaticResource Radio.Menu}"
@@ -193,7 +193,7 @@
                                                      Converter={StaticResource EnumEqualsConverter},
                                                      ConverterParameter={x:Static enums:AppView.Links}}"/>
 
-                            <RadioButton Content="About"
+                            <RadioButton Content="{x:Static res:Strings.Nav_About}"
                                          Tag="{x:Static res:Glyphs.About}"
                                          GroupName="MainMenu"
                                          Style="{StaticResource Radio.Menu}"
@@ -206,14 +206,14 @@
 
                     <StackPanel Grid.Row="1">
 
-                        <RadioButton Content="Admin"
-                                     Tag="&#xE7EF;"
+                        <RadioButton Content="{x:Static res:Strings.Nav_Admin}"
+                                     Tag="{x:Static res:Glyphs.Admin}"
                                      GroupName="MainMenu"
                                      Style="{StaticResource Radio.Menu}"
                                      Command="{Binding AdminCommand}"
                                      Visibility="{Binding ShowAdminView, Converter={StaticResource BoolToVis}}"
                                      IsChecked="{Binding SelectedView, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enums:AppView.Admin}}" />
-                        <RadioButton Content="Settings"
+                        <RadioButton Content="{x:Static res:Strings.Nav_Settings}"
                                      Tag="{x:Static res:Glyphs.Settings}"
                                      GroupName="MainMenu"
                                      Style="{StaticResource Radio.Menu}"

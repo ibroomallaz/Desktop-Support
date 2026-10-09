@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -58,6 +58,150 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+
+  <!-- App Shell & Title -->
+  <data name="App_Title" xml:space="preserve">
+    <value>Support App</value>
+    <comment>Main application display title</comment>
+  </data>
+
+  <!-- Splash Screen -->
+  <data name="Splash_Title" xml:space="preserve">
+    <value>Desktop Support App</value>
+    <comment>Full application title on splash screen</comment>
+  </data>
+  <data name="Splash_OrgBadge" xml:space="preserve">
+    <value>UArizona</value>
+    <comment>Organization pill badge on splash screen</comment>
+  </data>
+  <data name="Splash_Subtitle" xml:space="preserve">
+    <value>University of Arizona • Desktop Support &amp; IT Services</value>
+    <comment>Organization subtitle on splash screen</comment>
+  </data>
+  <data name="Splash_Status_Starting" xml:space="preserve">
+    <value>Starting…</value>
+    <comment>Initial splash status message</comment>
+  </data>
+  <data name="Splash_Status_CheckingUpdates" xml:space="preserve">
+    <value>Checking for updates…</value>
+    <comment>Splash status during update check</comment>
+  </data>
+  <data name="Splash_Status_LoadingServices" xml:space="preserve">
+    <value>Loading services…</value>
+    <comment>Splash status during DI configuration</comment>
+  </data>
+  <data name="Splash_Status_LoadingSettings" xml:space="preserve">
+    <value>Loading settings…</value>
+    <comment>Splash status during settings loading</comment>
+  </data>
+
+  <!-- Header Feedback Menu -->
+  <data name="Feedback_ReportBug" xml:space="preserve">
+    <value>Report a Bug</value>
+    <comment>Help/feedback menu option</comment>
+  </data>
+  <data name="Feedback_RequestFeature" xml:space="preserve">
+    <value>Request a Feature</value>
+    <comment>Help/feedback menu option</comment>
+  </data>
+  <data name="Feedback_UpdateSupportTeam" xml:space="preserve">
+    <value>Update Support Team</value>
+    <comment>Help/feedback menu option</comment>
+  </data>
+  <data name="Feedback_AddNote" xml:space="preserve">
+    <value>Add/Update Note</value>
+    <comment>Help/feedback menu option</comment>
+  </data>
+
+  <!-- Primary Sidebar Navigation -->
+  <data name="Nav_Home" xml:space="preserve">
+    <value>Home</value>
+    <comment>Sidebar navigation item</comment>
+  </data>
+  <data name="Nav_User" xml:space="preserve">
+    <value>User</value>
+    <comment>Sidebar navigation item</comment>
+  </data>
+  <data name="Nav_Computer" xml:space="preserve">
+    <value>Computer</value>
+    <comment>Sidebar navigation item</comment>
+  </data>
+  <data name="Nav_Groups" xml:space="preserve">
+    <value>Groups</value>
+    <comment>Sidebar navigation item</comment>
+  </data>
+  <data name="Nav_Entra" xml:space="preserve">
+    <value>Entra</value>
+    <comment>Sidebar navigation item</comment>
+  </data>
+  <data name="Nav_Links" xml:space="preserve">
+    <value>Links</value>
+    <comment>Sidebar navigation item</comment>
+  </data>
+  <data name="Nav_About" xml:space="preserve">
+    <value>About</value>
+    <comment>Sidebar navigation item</comment>
+  </data>
+  <data name="Nav_Admin" xml:space="preserve">
+    <value>Admin</value>
+    <comment>Sidebar navigation item</comment>
+  </data>
+  <data name="Nav_Settings" xml:space="preserve">
+    <value>Settings</value>
+    <comment>Sidebar navigation item</comment>
+  </data>
+
+  <!-- Windows JumpList Items -->
+  <data name="JumpList_Category_Search" xml:space="preserve">
+    <value>Search</value>
+    <comment>JumpList category name</comment>
+  </data>
+  <data name="JumpList_Category_Resources" xml:space="preserve">
+    <value>Resources</value>
+    <comment>JumpList category name</comment>
+  </data>
+  <data name="JumpList_Category_Application" xml:space="preserve">
+    <value>Application</value>
+    <comment>JumpList category name</comment>
+  </data>
+  <data name="JumpList_SearchUsers_Title" xml:space="preserve">
+    <value>Search Users</value>
+  </data>
+  <data name="JumpList_SearchUsers_Desc" xml:space="preserve">
+    <value>Lookup user attributes, licenses, and groups</value>
+  </data>
+  <data name="JumpList_SearchComputers_Title" xml:space="preserve">
+    <value>Search Computers</value>
+  </data>
+  <data name="JumpList_SearchComputers_Desc" xml:space="preserve">
+    <value>Lookup device details</value>
+  </data>
+  <data name="JumpList_SearchGroups_Title" xml:space="preserve">
+    <value>Search Groups</value>
+  </data>
+  <data name="JumpList_SearchGroups_Desc" xml:space="preserve">
+    <value>Lookup MIM groups and Dept Support</value>
+  </data>
+  <data name="JumpList_QuickLinks_Title" xml:space="preserve">
+    <value>Quick Links</value>
+  </data>
+  <data name="JumpList_QuickLinks_Desc" xml:space="preserve">
+    <value>Helpful Links and locations</value>
+  </data>
+  <data name="JumpList_CheckUpdates_Title" xml:space="preserve">
+    <value>Check for Updates</value>
+  </data>
+  <data name="JumpList_CheckUpdates_Desc" xml:space="preserve">
+    <value>Force a check for application updates</value>
+  </data>
+  <data name="JumpList_Settings_Title" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="JumpList_Settings_Desc" xml:space="preserve">
+    <value>Configure application preferences</value>
+  </data>
+
+  <!-- Settings Area -->
   <data name="Settings_SearchHistory_CardTitle" xml:space="preserve">
     <value>Search History</value>
     <comment>Settings card title for search history</comment>

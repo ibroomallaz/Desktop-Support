@@ -1,6 +1,7 @@
 ﻿<Window x:Class="DSAMVVM.MVVM.View.SplashWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:res="clr-namespace:DSAMVVM.MVVM.View.Resources"
         WindowStyle="None"
         ResizeMode="NoResize"
         AllowsTransparency="True"
@@ -110,7 +111,7 @@
                 <!-- Titles & Badges -->
                 <StackPanel VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="Desktop Support App"
+                        <TextBlock Text="{x:Static res:Strings.Splash_Title}"
                                    FontSize="20"
                                    FontWeight="Bold"
                                    Foreground="{DynamicResource Brush.Text.Primary}"
@@ -122,14 +123,14 @@
                                 CornerRadius="9"
                                 Padding="7,2"
                                 VerticalAlignment="Center">
-                            <TextBlock Text="UArizona"
+                            <TextBlock Text="{x:Static res:Strings.Splash_OrgBadge}"
                                        FontSize="10"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource Brush.Accent.Red.Light}"/>
                         </Border>
                     </StackPanel>
 
-                    <TextBlock Text="University of Arizona &#x2022; Desktop Support &amp; IT Services"
+                    <TextBlock Text="{x:Static res:Strings.Splash_Subtitle}"
                                FontSize="11"
                                Foreground="{DynamicResource Brush.Text.Muted}"
                                Margin="0,4,0,0"/>
@@ -170,7 +171,7 @@
                         </Ellipse>
 
                         <TextBlock x:Name="StatusText"
-                                   Text="Starting…"
+                                   Text="{x:Static res:Strings.Splash_Status_Starting}"
                                    Foreground="{DynamicResource Brush.Text.Muted}"
                                    FontSize="11"
                                    VerticalAlignment="Center"/>
