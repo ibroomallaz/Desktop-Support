@@ -1318,5 +1318,347 @@ namespace DSAMVVM.MVVM.View.Resources {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string similar to No User Lookups Yet.
+        /// </summary>
+        public static string User_Empty_Title {
+            get {
+                return ResourceManager.GetString("User_Empty_Title", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Enter a NetID in the search bar above and press Enter..
+        /// </summary>
+        public static string User_Empty_Subtitle {
+            get {
+                return ResourceManager.GetString("User_Empty_Subtitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Copy Card Summary.
+        /// </summary>
+        public static string User_Menu_CopySummary {
+            get {
+                return ResourceManager.GetString("User_Menu_CopySummary", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Copy NetID Only.
+        /// </summary>
+        public static string User_Menu_CopyNetId {
+            get {
+                return ResourceManager.GetString("User_Menu_CopyNetId", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Not Found.
+        /// </summary>
+        public static string User_Badge_NotFound {
+            get {
+                return ResourceManager.GetString("User_Badge_NotFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Locked.
+        /// </summary>
+        public static string User_Badge_Locked {
+            get {
+                return ResourceManager.GetString("User_Badge_Locked", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Locked Out.
+        /// </summary>
+        public static string User_Badge_LockedOut {
+            get {
+                return ResourceManager.GetString("User_Badge_LockedOut", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Disabled.
+        /// </summary>
+        public static string User_Badge_Disabled {
+            get {
+                return ResourceManager.GetString("User_Badge_Disabled", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to ⚠️ Missing MIM Wrkst.
+        /// </summary>
+        public static string User_Badge_MissingMimWrkst {
+            get {
+                return ResourceManager.GetString("User_Badge_MissingMimWrkst", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to User is missing the &apos;UA-MIM-Wrkst-AllDivUsers&apos; Group.
+        /// </summary>
+        public static string User_Banner_MissingMim {
+            get {
+                return ResourceManager.GetString("User_Banner_MissingMim", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to User Not Found or Search Aborted.
+        /// </summary>
+        public static string User_Status_NotFound {
+            get {
+                return ResourceManager.GetString("User_Status_NotFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to NetID: .
+        /// </summary>
+        public static string User_Label_NetId {
+            get {
+                return ResourceManager.GetString("User_Label_NetId", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Click to copy NetID to clipboard.
+        /// </summary>
+        public static string User_Tooltip_CopyNetId {
+            get {
+                return ResourceManager.GetString("User_Tooltip_CopyNetId", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Copy user summary to clipboard (Rich Text &amp; Plain Text).
+        /// </summary>
+        public static string User_Tooltip_CopySummary {
+            get {
+                return ResourceManager.GetString("User_Tooltip_CopySummary", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Copy user summary (Rich Text &amp; Plain Text).
+        /// </summary>
+        public static string User_Tooltip_CopySummaryShort {
+            get {
+                return ResourceManager.GetString("User_Tooltip_CopySummaryShort", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Re-query Active Directory for this user.
+        /// </summary>
+        public static string User_Tooltip_Requery {
+            get {
+                return ResourceManager.GetString("User_Tooltip_Requery", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to ORGANIZATION &amp; SUPPORT.
+        /// </summary>
+        public static string User_Section_OrgSupport {
+            get {
+                return ResourceManager.GetString("User_Section_OrgSupport", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Division: .
+        /// </summary>
+        public static string User_Label_Division {
+            get {
+                return ResourceManager.GetString("User_Label_Division", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Department: .
+        /// </summary>
+        public static string User_Label_Department {
+            get {
+                return ResourceManager.GetString("User_Label_Department", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Support Team: .
+        /// </summary>
+        public static string User_Label_SupportTeam {
+            get {
+                return ResourceManager.GetString("User_Label_SupportTeam", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to None.
+        /// </summary>
+        public static string User_Label_SupportTeamNone {
+            get {
+                return ResourceManager.GetString("User_Label_SupportTeamNone", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Notes: .
+        /// </summary>
+        public static string User_Label_Notes {
+            get {
+                return ResourceManager.GetString("User_Label_Notes", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to File Repository.
+        /// </summary>
+        public static string User_Button_FileRepository {
+            get {
+                return ResourceManager.GetString("User_Button_FileRepository", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to SOFTWARE LICENSES.
+        /// </summary>
+        public static string User_Section_SoftwareLicenses {
+            get {
+                return ResourceManager.GetString("User_Section_SoftwareLicenses", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Microsoft 365: .
+        /// </summary>
+        public static string User_Label_M365 {
+            get {
+                return ResourceManager.GetString("User_Label_M365", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Raw.
+        /// </summary>
+        public static string User_Button_Raw {
+            get {
+                return ResourceManager.GetString("User_Button_Raw", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Toggle raw license attributes.
+        /// </summary>
+        public static string User_Tooltip_ToggleRawLicense {
+            get {
+                return ResourceManager.GetString("User_Tooltip_ToggleRawLicense", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Adobe Licenses: .
+        /// </summary>
+        public static string User_Label_AdobeLicenses {
+            get {
+                return ResourceManager.GetString("User_Label_AdobeLicenses", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Check.
+        /// </summary>
+        public static string User_Button_CheckAdobe {
+            get {
+                return ResourceManager.GetString("User_Button_CheckAdobe", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Checking....
+        /// </summary>
+        public static string User_Button_CheckingAdobe {
+            get {
+                return ResourceManager.GetString("User_Button_CheckingAdobe", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Re-check.
+        /// </summary>
+        public static string User_Button_RecheckAdobe {
+            get {
+                return ResourceManager.GetString("User_Button_RecheckAdobe", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Acrobat Pro: .
+        /// </summary>
+        public static string User_Label_AcrobatPro {
+            get {
+                return ResourceManager.GetString("User_Label_AcrobatPro", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Creative Cloud: .
+        /// </summary>
+        public static string User_Label_CreativeCloud {
+            get {
+                return ResourceManager.GetString("User_Label_CreativeCloud", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to ✕ None.
+        /// </summary>
+        public static string User_Adobe_None {
+            get {
+                return ResourceManager.GetString("User_Adobe_None", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to ✓ Assigned.
+        /// </summary>
+        public static string User_Adobe_Assigned {
+            get {
+                return ResourceManager.GetString("User_Adobe_Assigned", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Refresh Dept Data.
+        /// </summary>
+        public static string User_Button_RefreshDeptData {
+            get {
+                return ResourceManager.GetString("User_Button_RefreshDeptData", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Reload departmental JSON data.
+        /// </summary>
+        public static string User_Tooltip_RefreshDeptData {
+            get {
+                return ResourceManager.GetString("User_Tooltip_RefreshDeptData", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Refreshing....
+        /// </summary>
+        public static string User_Button_RefreshingDeptData {
+            get {
+                return ResourceManager.GetString("User_Button_RefreshingDeptData", resourceCulture);
+            }
+        }
+
     }
 }

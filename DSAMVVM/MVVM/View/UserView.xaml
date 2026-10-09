@@ -1,4 +1,4 @@
-<UserControl x:Class="DSAMVVM.MVVM.View.UserView"
+﻿<UserControl x:Class="DSAMVVM.MVVM.View.UserView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -183,14 +183,14 @@
                            Opacity="0.5"
                            Margin="0,0,0,12"/>
 
-                <TextBlock Text="No User Lookups Yet"
+                <TextBlock Text="{x:Static res:Strings.User_Empty_Title}"
                            FontSize="16"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource Brush.Text.Primary}"
                            HorizontalAlignment="Center"
                            Margin="0,0,0,6"/>
 
-                <TextBlock Text="Enter a NetID in the search bar above and press Enter."
+                <TextBlock Text="{x:Static res:Strings.User_Empty_Subtitle}"
                            FontSize="12"
                            Foreground="{DynamicResource Brush.Text.Muted}"
                            HorizontalAlignment="Center"/>
@@ -219,12 +219,12 @@
                         <Grid Margin="0,0,0,6">
                             <Grid.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header="Copy Card Summary" Command="{Binding CopySummaryCommand}">
+                                    <MenuItem Header="{x:Static res:Strings.User_Menu_CopySummary}" Command="{Binding CopySummaryCommand}">
                                         <MenuItem.Icon>
                                             <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="12"/>
                                         </MenuItem.Icon>
                                     </MenuItem>
-                                    <MenuItem Header="Copy NetID Only" Command="{Binding CopyNetIdCommand}">
+                                    <MenuItem Header="{x:Static res:Strings.User_Menu_CopyNetId}" Command="{Binding CopyNetIdCommand}">
                                         <MenuItem.Icon>
                                             <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="12"/>
                                         </MenuItem.Icon>
@@ -311,7 +311,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="Not Found" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
+                                            <TextBlock Text="{x:Static res:Strings.User_Badge_NotFound}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                         </Border>
 
                                         <!-- Locked Pill -->
@@ -326,7 +326,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="Locked" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
+                                            <TextBlock Text="{x:Static res:Strings.User_Badge_Locked}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                         </Border>
 
                                         <!-- Disabled Pill -->
@@ -341,7 +341,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="Disabled" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
+                                            <TextBlock Text="{x:Static res:Strings.User_Badge_Disabled}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                         </Border>
 
                                         <!-- Missing MIM Wrkst Group Warning (ONLY if missing!) -->
@@ -356,7 +356,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="⚠ Missing MIM Wrkst" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FFC069" TextWrapping="NoWrap"/>
+                                            <TextBlock Text="{x:Static res:Strings.User_Badge_MissingMimWrkst}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FFC069" TextWrapping="NoWrap"/>
                                         </Border>
                                     </StackPanel>
 
@@ -381,7 +381,7 @@
                                     <Button Grid.Column="6"
                                             Style="{StaticResource InlineLinkButton}"
                                             Command="{Binding CopySummaryCommand}"
-                                            ToolTip="Copy user summary to clipboard (Rich Text &amp; Plain Text)"
+                                            ToolTip="{x:Static res:Strings.User_Tooltip_CopySummary}"
                                             Margin="0,0,8,0"
                                             Padding="4,2"
                                             VerticalAlignment="Center">
@@ -422,7 +422,7 @@
                                     <Button Grid.Column="7"
                                             Style="{StaticResource InlineLinkButton}"
                                             Command="{Binding RemoveCommand}"
-                                            ToolTip="Clear this record from history"
+                                            ToolTip="{x:Static res:Strings.Computer_Tooltip_ClearRecord}"
                                             Margin="0,0,8,0"
                                             Padding="4,2"
                                             VerticalAlignment="Center">
@@ -562,7 +562,7 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </Border.Style>
-                                                        <TextBlock Text="Locked Out" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
+                                                        <TextBlock Text="{x:Static res:Strings.User_Badge_LockedOut}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                                     </Border>
 
                                                     <!-- Disabled Pill (Only if disabled!) -->
@@ -577,16 +577,16 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </Border.Style>
-                                                        <TextBlock Text="Disabled" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
+                                                        <TextBlock Text="{x:Static res:Strings.User_Badge_Disabled}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
                                                     </Border>
 
                                                     <!-- NetID Chip Button with Copy -->
                                                     <Button Style="{StaticResource NetIdChipButton}"
                                                             Command="{Binding CopyNetIdCommand}"
-                                                            ToolTip="Click to copy NetID to clipboard"
+                                                            ToolTip="{x:Static res:Strings.User_Tooltip_CopyNetId}"
                                                             VerticalAlignment="Center">
                                                         <StackPanel Orientation="Horizontal">
-                                                            <TextBlock Text="NetID: " Foreground="{DynamicResource Brush.Text.Muted}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                                            <TextBlock Text="{x:Static res:Strings.User_Label_NetId}" Foreground="{DynamicResource Brush.Text.Muted}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                                                             <TextBlock Text="{Binding NetId}" FontWeight="SemiBold" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Primary}"/>
 
                                                             <!-- Copy Icon (default) -->
@@ -607,7 +607,7 @@
                                                             </TextBlock>
 
                                                             <!-- Copied Checkmark Feedback -->
-                                                            <TextBlock Text=" ✓ Copied"
+                                                            <TextBlock Text="{x:Static res:Strings.Computer_Badge_Copied}"
                                                                        FontSize="10"
                                                                        FontWeight="Bold"
                                                                        Foreground="#5CDA89"
@@ -665,7 +665,7 @@
                                                 <!-- Copy Summary Button -->
                                                 <Button Style="{StaticResource GhostActionButton}"
                                                         Command="{Binding CopySummaryCommand}"
-                                                        ToolTip="Copy user summary (Rich Text &amp; Plain Text)"
+                                                        ToolTip="{x:Static res:Strings.User_Tooltip_CopySummaryShort}"
                                                         Padding="5,3"
                                                         Margin="0,0,4,0">
                                                     <Grid>
@@ -704,7 +704,7 @@
                                                 <!-- Refresh Entry Button -->
                                                 <Button Style="{StaticResource GhostActionButton}"
                                                         Command="{Binding RefreshCommand}"
-                                                        ToolTip="Re-query Active Directory for this user"
+                                                        ToolTip="{x:Static res:Strings.User_Tooltip_Requery}"
                                                         Padding="5,3"
                                                         Margin="0,0,4,0">
                                                     <TextBlock Text="&#xE72C;"
@@ -716,7 +716,7 @@
                                                 <!-- Collapse Button (Chevron Up) -->
                                                 <Button Style="{StaticResource GhostActionButton}"
                                                         Command="{Binding ToggleExpandCommand}"
-                                                        ToolTip="Collapse card"
+                                                        ToolTip="{x:Static res:Strings.Computer_Tooltip_CollapseCard}"
                                                         Padding="5,3"
                                                         Margin="0,0,4,0">
                                                     <TextBlock Text="&#xE70E;"
@@ -728,7 +728,7 @@
                                                 <!-- Remove / Clear Record Button -->
                                                 <Button Style="{StaticResource GhostActionButton}"
                                                         Command="{Binding RemoveCommand}"
-                                                        ToolTip="Remove this record from history"
+                                                        ToolTip="{x:Static res:Strings.Computer_Tooltip_RemoveRecord}"
                                                         Padding="5,3">
                                                     <TextBlock Text="&#xE711;"
                                                                FontFamily="Segoe MDL2 Assets"
@@ -759,7 +759,7 @@
 
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="⚠  " Foreground="#FF7B88" FontWeight="Bold"/>
-                                                <TextBlock Text="User is missing the 'UA-MIM-Wrkst-AllDivUsers' Group"
+                                                <TextBlock Text="{x:Static res:Strings.User_Banner_MissingMim}"
                                                            FontWeight="SemiBold"
                                                            Foreground="#FF7B88"
                                                            FontSize="11"/>
@@ -791,7 +791,7 @@
                                                 </Style>
                                             </Border.Style>
                                             <StackPanel>
-                                                <TextBlock Text="User Not Found or Search Aborted"
+                                                <TextBlock Text="{x:Static res:Strings.User_Status_NotFound}"
                                                            FontWeight="Bold"
                                                            Foreground="#FF7B88"
                                                            FontSize="12"
@@ -830,7 +830,7 @@
                                                     CornerRadius="6"
                                                     Padding="10,8">
                                                 <StackPanel>
-                                                    <TextBlock Text="ORGANIZATION &amp; SUPPORT"
+                                                    <TextBlock Text="{x:Static res:Strings.User_Section_OrgSupport}"
                                                                FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                FontWeight="Bold"
                                                                Foreground="{DynamicResource Brush.Text.Muted}"
@@ -838,19 +838,19 @@
 
                                                     <!-- Division -->
                                                     <DockPanel Margin="0,0,0,4">
-                                                        <TextBlock Text="Division: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                        <TextBlock Text="{x:Static res:Strings.User_Label_Division}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
                                                         <TextBlock Text="{Binding DivisionDisplay}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}"/>
                                                     </DockPanel>
 
                                                     <!-- Department -->
                                                     <DockPanel Margin="0,0,0,4" LastChildFill="True">
-                                                        <TextBlock Text="Department: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left" VerticalAlignment="Top"/>
+                                                        <TextBlock Text="{x:Static res:Strings.User_Label_Department}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left" VerticalAlignment="Top"/>
                                                         <TextBlock Text="{Binding DepartmentDisplay}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap"/>
                                                     </DockPanel>
 
                                                     <!-- Support Team (Clickable to toggle manager & contact info) -->
                                                     <DockPanel Margin="0,0,0,4">
-                                                        <TextBlock Text="Support Team: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
+                                                        <TextBlock Text="{x:Static res:Strings.User_Label_SupportTeam}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}" DockPanel.Dock="Left"/>
                                                         <Button Command="{Binding NavigateTeamCommand}"
                                                                 ToolTip="{Binding SupportTeamName}"
                                                                 VerticalAlignment="Center">
@@ -866,7 +866,7 @@
                                                             </Button.Style>
                                                             <TextBlock Text="{Binding SupportTeamDisplayName}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold"/>
                                                         </Button>
-                                                        <TextBlock Text="None" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}">
+                                                        <TextBlock Text="{x:Static res:Strings.User_Label_SupportTeamNone}" FontSize="{Binding DataContext.Typography.BodySize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}">
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
                                                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -891,7 +891,7 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </StackPanel.Style>
-                                                        <TextBlock Text="Notes: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                        <TextBlock Text="{x:Static res:Strings.User_Label_Notes}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
                                                         <TextBlock Text="{Binding DepartmentNotes}" FontSize="{Binding DataContext.Typography.NotesSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Primary}" TextWrapping="Wrap"/>
                                                     </StackPanel>
 
@@ -910,7 +910,7 @@
                                                             </Button.Style>
                                                             <StackPanel Orientation="Horizontal">
                                                                 <TextBlock Text="&#xE8A7; " FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource Brush.Info.Light}"/>
-                                                                <TextBlock Text="File Repository" FontSize="10"/>
+                                                                <TextBlock Text="{x:Static res:Strings.User_Button_FileRepository}" FontSize="10"/>
                                                             </StackPanel>
                                                         </Button>
                                                     </WrapPanel>
@@ -925,7 +925,7 @@
                                                     CornerRadius="6"
                                                     Padding="10,8">
                                                 <StackPanel>
-                                                    <TextBlock Text="SOFTWARE LICENSES"
+                                                    <TextBlock Text="{x:Static res:Strings.User_Section_SoftwareLicenses}"
                                                                FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                FontWeight="Bold"
                                                                Foreground="{DynamicResource Brush.Text.Muted}"
@@ -933,7 +933,7 @@
 
                                                     <!-- Microsoft 365 License -->
                                                     <DockPanel Margin="0,0,0,6">
-                                                        <TextBlock Text="Microsoft 365: "
+                                                        <TextBlock Text="{x:Static res:Strings.User_Label_M365}"
                                                                    FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                    Foreground="{DynamicResource Brush.Text.Muted}"
                                                                    VerticalAlignment="Center"
@@ -947,9 +947,9 @@
                                                             <!-- Toggle Raw License Button -->
                                                             <Button Style="{StaticResource GhostActionButton}"
                                                                     Command="{Binding ToggleRawLicenseCommand}"
-                                                                    ToolTip="Toggle raw license attributes"
+                                                                    ToolTip="{x:Static res:Strings.User_Tooltip_ToggleRawLicense}"
                                                                     Padding="5,1">
-                                                                <TextBlock Text="Raw" FontSize="10"/>
+                                                                <TextBlock Text="{x:Static res:Strings.User_Button_Raw}" FontSize="10"/>
                                                             </Button>
                                                         </StackPanel>
                                                     </DockPanel>
@@ -985,24 +985,24 @@
 
                                                     <!-- Adobe License Check Section -->
                                                     <DockPanel Margin="0,0,0,6">
-                                                        <TextBlock Text="Adobe Licenses: "
+                                                        <TextBlock Text="{x:Static res:Strings.User_Label_AdobeLicenses}"
                                                                    FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                    Foreground="{DynamicResource Brush.Text.Muted}"
                                                                    VerticalAlignment="Center"
                                                                    DockPanel.Dock="Left"/>
 
-                                                        <Button Content="Check"
+                                                        <Button Content="{x:Static res:Strings.User_Button_CheckAdobe}"
                                                                 Command="{Binding CheckAdobeCommand}"
                                                                 HorizontalAlignment="Right">
                                                             <Button.Style>
                                                                 <Style TargetType="Button" BasedOn="{StaticResource GhostActionButton}">
                                                                     <Style.Triggers>
                                                                         <DataTrigger Binding="{Binding IsAdobeChecking}" Value="True">
-                                                                            <Setter Property="Content" Value="Checking…"/>
+                                                                            <Setter Property="Content" Value="{x:Static res:Strings.User_Button_CheckingAdobe}"/>
                                                                             <Setter Property="IsEnabled" Value="False"/>
                                                                         </DataTrigger>
                                                                         <DataTrigger Binding="{Binding HasAdobeChecked}" Value="True">
-                                                                            <Setter Property="Content" Value="Re-check"/>
+                                                                            <Setter Property="Content" Value="{x:Static res:Strings.User_Button_RecheckAdobe}"/>
                                                                         </DataTrigger>
                                                                     </Style.Triggers>
                                                                 </Style>
@@ -1030,15 +1030,15 @@
 
                                                         <StackPanel>
                                                             <DockPanel Margin="0,0,0,2">
-                                                                <TextBlock Text="Acrobat Pro: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                <TextBlock Text="{x:Static res:Strings.User_Label_AcrobatPro}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
                                                                 <TextBlock HorizontalAlignment="Right" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold">
                                                                     <TextBlock.Style>
                                                                         <Style TargetType="TextBlock">
-                                                                            <Setter Property="Text" Value="✗ None"/>
+                                                                            <Setter Property="Text" Value="{x:Static res:Strings.User_Adobe_None}"/>
                                                                             <Setter Property="Foreground" Value="#FF7B88"/>
                                                                             <Style.Triggers>
                                                                                 <DataTrigger Binding="{Binding HasAcrobatPro}" Value="True">
-                                                                                    <Setter Property="Text" Value="✓ Assigned"/>
+                                                                                    <Setter Property="Text" Value="{x:Static res:Strings.User_Adobe_Assigned}"/>
                                                                                     <Setter Property="Foreground" Value="#5CDA89"/>
                                                                                 </DataTrigger>
                                                                             </Style.Triggers>
@@ -1048,15 +1048,15 @@
                                                             </DockPanel>
 
                                                             <DockPanel>
-                                                                <TextBlock Text="Creative Cloud: " FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                                                <TextBlock Text="{x:Static res:Strings.User_Label_CreativeCloud}" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource Brush.Text.Muted}"/>
                                                                 <TextBlock HorizontalAlignment="Right" FontSize="{Binding DataContext.Typography.CaptionSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold">
                                                                     <TextBlock.Style>
                                                                         <Style TargetType="TextBlock">
-                                                                            <Setter Property="Text" Value="✗ None"/>
+                                                                            <Setter Property="Text" Value="{x:Static res:Strings.User_Adobe_None}"/>
                                                                             <Setter Property="Foreground" Value="#FF7B88"/>
                                                                             <Style.Triggers>
                                                                                 <DataTrigger Binding="{Binding HasCreativeCloud}" Value="True">
-                                                                                    <Setter Property="Text" Value="✓ Assigned"/>
+                                                                                    <Setter Property="Text" Value="{x:Static res:Strings.User_Adobe_Assigned}"/>
                                                                                     <Setter Property="Foreground" Value="#5CDA89"/>
                                                                                 </DataTrigger>
                                                                             </Style.Triggers>
@@ -1088,38 +1088,38 @@
 
             <!-- Left Buttons: Clear, Refresh Dept, Collapse All, Expand All -->
             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <Button Content="Clear"
+                <Button Content="{x:Static res:Strings.Common_Button_Clear}"
                         Command="{Binding ClearCommand}"
                         Style="{DynamicResource Button.FlowDoc}"
                         Margin="0,0,8,0"
-                        ToolTip="Clear search history"/>
+                        ToolTip="{x:Static res:Strings.Common_Tooltip_ClearHistory}"/>
 
-                <Button Content="Refresh Dept Data"
+                <Button Content="{x:Static res:Strings.User_Button_RefreshDeptData}"
                         Command="{Binding RefreshDeptCommand}"
                         Margin="0,0,8,0"
-                        ToolTip="Reload departmental JSON data">
+                        ToolTip="{x:Static res:Strings.User_Tooltip_RefreshDeptData}">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource Button.FlowDoc}">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsRefreshing}" Value="True">
                                     <Setter Property="IsEnabled" Value="False"/>
-                                    <Setter Property="Content" Value="Refreshing…"/>
+                                    <Setter Property="Content" Value="{x:Static res:Strings.User_Button_RefreshingDeptData}"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </Button.Style>
                 </Button>
 
-                <Button Content="Collapse All"
+                <Button Content="{x:Static res:Strings.Common_Button_CollapseAll}"
                         Command="{Binding CollapseAllCommand}"
                         Style="{DynamicResource Button.FlowDoc}"
                         Margin="0,0,8,0"
-                        ToolTip="Collapse all history cards to single-line summaries"/>
+                        ToolTip="{x:Static res:Strings.Common_Tooltip_CollapseAll}"/>
 
-                <Button Content="Expand All"
+                <Button Content="{x:Static res:Strings.Common_Button_ExpandAll}"
                         Command="{Binding ExpandAllCommand}"
                         Style="{DynamicResource Button.FlowDoc}"
-                        ToolTip="Expand all history cards"/>
+                        ToolTip="{x:Static res:Strings.Common_Tooltip_ExpandAll}"/>
             </StackPanel>
 
             <!-- Right Buttons: Font Sizing -->
@@ -1127,16 +1127,16 @@
                 <Button Content="A−"
                         Command="{Binding DecreaseFontCommand}"
                         Style="{DynamicResource Button.FlowDoc.Small}"
-                        ToolTip="Decrease text size"/>
+                        ToolTip="{x:Static res:Strings.Common_Tooltip_TextSizeDecrease}"/>
                 <Button Content="A"
                         Command="{Binding ResetFontCommand}"
                         Style="{DynamicResource Button.FlowDoc.Small}"
-                        ToolTip="Reset text size"/>
+                        ToolTip="{x:Static res:Strings.Common_Tooltip_TextSizeReset}"/>
                 <Button Content="A+"
                         Command="{Binding IncreaseFontCommand}"
                         Style="{DynamicResource Button.FlowDoc.Small}"
                         Margin="6,0,0,0"
-                        ToolTip="Increase text size"/>
+                        ToolTip="{x:Static res:Strings.Common_Tooltip_TextSizeIncrease}"/>
             </StackPanel>
         </Grid>
     </Grid>

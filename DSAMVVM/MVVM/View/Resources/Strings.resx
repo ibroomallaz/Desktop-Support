@@ -629,4 +629,157 @@
     <value>Increase text size</value>
     <comment>Shared tooltip to increase UI text size</comment>
   </data>
+  <!-- User View -->
+  <data name="User_Empty_Title" xml:space="preserve">
+    <value>No User Lookups Yet</value>
+    <comment>Empty state title on User view</comment>
+  </data>
+  <data name="User_Empty_Subtitle" xml:space="preserve">
+    <value>Enter a NetID in the search bar above and press Enter.</value>
+    <comment>Empty state subtitle instructions on User view</comment>
+  </data>
+  <data name="User_Menu_CopySummary" xml:space="preserve">
+    <value>Copy Card Summary</value>
+    <comment>Context menu item to copy user summary</comment>
+  </data>
+  <data name="User_Menu_CopyNetId" xml:space="preserve">
+    <value>Copy NetID Only</value>
+    <comment>Context menu item to copy NetID only</comment>
+  </data>
+  <data name="User_Badge_NotFound" xml:space="preserve">
+    <value>Not Found</value>
+    <comment>Badge indicating user was not found</comment>
+  </data>
+  <data name="User_Badge_Locked" xml:space="preserve">
+    <value>Locked</value>
+    <comment>Badge indicating user account is locked</comment>
+  </data>
+  <data name="User_Badge_LockedOut" xml:space="preserve">
+    <value>Locked Out</value>
+    <comment>Badge indicating user account is locked out</comment>
+  </data>
+  <data name="User_Badge_Disabled" xml:space="preserve">
+    <value>Disabled</value>
+    <comment>Badge indicating user account is disabled</comment>
+  </data>
+  <data name="User_Badge_MissingMimWrkst" xml:space="preserve">
+    <value>⚠️ Missing MIM Wrkst</value>
+    <comment>Badge indicating user missing MIM workstation group</comment>
+  </data>
+  <data name="User_Banner_MissingMim" xml:space="preserve">
+    <value>User is missing the 'UA-MIM-Wrkst-AllDivUsers' Group</value>
+    <comment>Banner warning when user lacks MIM workstation group</comment>
+  </data>
+  <data name="User_Status_NotFound" xml:space="preserve">
+    <value>User Not Found or Search Aborted</value>
+    <comment>Status message when user account was not found</comment>
+  </data>
+  <data name="User_Label_NetId" xml:space="preserve">
+    <value>NetID: </value>
+    <comment>Label for user NetID</comment>
+  </data>
+  <data name="User_Tooltip_CopyNetId" xml:space="preserve">
+    <value>Click to copy NetID to clipboard</value>
+    <comment>Tooltip on NetID chip button</comment>
+  </data>
+  <data name="User_Tooltip_CopySummary" xml:space="preserve">
+    <value>Copy user summary to clipboard (Rich Text &amp; Plain Text)</value>
+    <comment>Tooltip for copying user card summary</comment>
+  </data>
+  <data name="User_Tooltip_CopySummaryShort" xml:space="preserve">
+    <value>Copy user summary (Rich Text &amp; Plain Text)</value>
+    <comment>Tooltip for copying user summary in card header</comment>
+  </data>
+  <data name="User_Tooltip_Requery" xml:space="preserve">
+    <value>Re-query Active Directory for this user</value>
+    <comment>Tooltip to re-query Active Directory for user</comment>
+  </data>
+  <data name="User_Section_OrgSupport" xml:space="preserve">
+    <value>ORGANIZATION &amp; SUPPORT</value>
+    <comment>Section header for organization and support</comment>
+  </data>
+  <data name="User_Label_Division" xml:space="preserve">
+    <value>Division: </value>
+    <comment>Label for user division</comment>
+  </data>
+  <data name="User_Label_Department" xml:space="preserve">
+    <value>Department: </value>
+    <comment>Label for user department</comment>
+  </data>
+  <data name="User_Label_SupportTeam" xml:space="preserve">
+    <value>Support Team: </value>
+    <comment>Label for user support team</comment>
+  </data>
+  <data name="User_Label_SupportTeamNone" xml:space="preserve">
+    <value>None</value>
+    <comment>Placeholder when user has no assigned support team</comment>
+  </data>
+  <data name="User_Label_Notes" xml:space="preserve">
+    <value>Notes: </value>
+    <comment>Label for department notes</comment>
+  </data>
+  <data name="User_Button_FileRepository" xml:space="preserve">
+    <value>File Repository</value>
+    <comment>Button to open user department file repository</comment>
+  </data>
+  <data name="User_Section_SoftwareLicenses" xml:space="preserve">
+    <value>SOFTWARE LICENSES</value>
+    <comment>Section header for software licenses</comment>
+  </data>
+  <data name="User_Label_M365" xml:space="preserve">
+    <value>Microsoft 365: </value>
+    <comment>Label for Microsoft 365 license</comment>
+  </data>
+  <data name="User_Button_Raw" xml:space="preserve">
+    <value>Raw</value>
+    <comment>Button to toggle raw license string</comment>
+  </data>
+  <data name="User_Tooltip_ToggleRawLicense" xml:space="preserve">
+    <value>Toggle raw license attributes</value>
+    <comment>Tooltip for toggling raw license attributes</comment>
+  </data>
+  <data name="User_Label_AdobeLicenses" xml:space="preserve">
+    <value>Adobe Licenses: </value>
+    <comment>Label for Adobe licenses</comment>
+  </data>
+  <data name="User_Button_CheckAdobe" xml:space="preserve">
+    <value>Check</value>
+    <comment>Button to check Adobe license</comment>
+  </data>
+  <data name="User_Button_CheckingAdobe" xml:space="preserve">
+    <value>Checking...</value>
+    <comment>Button text while checking Adobe license</comment>
+  </data>
+  <data name="User_Button_RecheckAdobe" xml:space="preserve">
+    <value>Re-check</value>
+    <comment>Button text to re-check Adobe license</comment>
+  </data>
+  <data name="User_Label_AcrobatPro" xml:space="preserve">
+    <value>Acrobat Pro: </value>
+    <comment>Label for Acrobat Pro license</comment>
+  </data>
+  <data name="User_Label_CreativeCloud" xml:space="preserve">
+    <value>Creative Cloud: </value>
+    <comment>Label for Creative Cloud license</comment>
+  </data>
+  <data name="User_Adobe_None" xml:space="preserve">
+    <value>✕ None</value>
+    <comment>Badge indicating no Adobe license assigned</comment>
+  </data>
+  <data name="User_Adobe_Assigned" xml:space="preserve">
+    <value>✓ Assigned</value>
+    <comment>Badge indicating Adobe license is assigned</comment>
+  </data>
+  <data name="User_Button_RefreshDeptData" xml:space="preserve">
+    <value>Refresh Dept Data</value>
+    <comment>Button to refresh departmental JSON data</comment>
+  </data>
+  <data name="User_Tooltip_RefreshDeptData" xml:space="preserve">
+    <value>Reload departmental JSON data</value>
+    <comment>Tooltip to reload departmental JSON data</comment>
+  </data>
+  <data name="User_Button_RefreshingDeptData" xml:space="preserve">
+    <value>Refreshing...</value>
+    <comment>Button text while refreshing departmental data</comment>
+  </data>
 </root>
