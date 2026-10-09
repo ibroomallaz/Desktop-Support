@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:DSAMVVM.MVVM.ViewModel"
+             xmlns:res="clr-namespace:DSAMVVM.MVVM.View.Resources"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:AboutViewModel, IsDesignTimeCreatable=False}">
 
@@ -132,7 +133,7 @@
                     <!-- App Title, Subtitle & Version -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="Desktop Support App"
+                            <TextBlock Text="{x:Static res:Strings.About_AppTitle}"
                                        FontSize="19"
                                        FontWeight="Bold"
                                        Foreground="{DynamicResource Brush.Text.Primary}"
@@ -144,14 +145,14 @@
                                     CornerRadius="10"
                                     Padding="8,2"
                                     VerticalAlignment="Center">
-                                <TextBlock Text="UArizona"
+                                <TextBlock Text="{x:Static res:Strings.About_OrgBadge}"
                                            FontSize="10"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource Brush.Accent.Red.Light}"/>
                             </Border>
                         </StackPanel>
 
-                        <TextBlock Text="University of Arizona • Desktop Support &amp; IT Services"
+                        <TextBlock Text="{x:Static res:Strings.About_AppSubtitle}"
                                    FontSize="11"
                                    Foreground="{DynamicResource Brush.Text.Muted}"
                                    Margin="0,2,0,8"/>
@@ -160,7 +161,7 @@
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Button Style="{StaticResource SubtleLinkButton}"
                                     Command="{Binding ToggleVersionCommand}"
-                                    ToolTip="Click to toggle detailed build / file version">
+                                    ToolTip="{x:Static res:Strings.About_Tooltip_ToggleVersion}">
                                 <Border CornerRadius="11"
                                         Background="#18FFFFFF"
                                         BorderBrush="#30FFFFFF"
@@ -185,7 +186,7 @@
                             <!-- Copy Button -->
                             <Button Style="{StaticResource SubtleLinkButton}"
                                     Command="{Binding CopyVersionCommand}"
-                                    ToolTip="Copy version string to clipboard"
+                                    ToolTip="{x:Static res:Strings.About_Tooltip_CopyVersion}"
                                     Margin="6,0,0,0">
                                 <Border CornerRadius="8"
                                         Background="#10FFFFFF"
@@ -199,7 +200,7 @@
                                                    Foreground="{DynamicResource Brush.Text.Muted}"
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,4,0"/>
-                                        <TextBlock Text="Copy"
+                                        <TextBlock Text="{x:Static res:Strings.About_Copy}"
                                                    FontSize="10"
                                                    Foreground="{DynamicResource Brush.Text.Muted}"
                                                    VerticalAlignment="Center"/>
@@ -245,7 +246,7 @@
                                            Foreground="#3CD070"
                                            VerticalAlignment="Center"
                                            Margin="0,0,5,0"/>
-                                <TextBlock Text="Up to date"
+                                <TextBlock Text="{x:Static res:Strings.About_UpToDate}"
                                            FontSize="11"
                                            FontWeight="SemiBold"
                                            Foreground="#3CD070"
@@ -269,7 +270,7 @@
                                            Foreground="{DynamicResource Brush.Accent.Red.Light}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,5,0"/>
-                                <TextBlock Text="Check failed"
+                                <TextBlock Text="{x:Static res:Strings.About_CheckFailed}"
                                            FontSize="11"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource Brush.Accent.Red.Light}"
@@ -330,7 +331,7 @@
                                            Foreground="{DynamicResource Brush.Info.Light}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,8,0"/>
-                                <TextBlock Text="System &amp; Diagnostics"
+                                <TextBlock Text="{x:Static res:Strings.About_SystemDiagnostics_Title}"
                                            FontSize="14"
                                            FontWeight="Bold"
                                            Foreground="{DynamicResource Brush.Text.Primary}"
@@ -353,23 +354,23 @@
                                 </Grid.RowDefinitions>
 
                                 <!-- Row 0: Device Name -->
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Device:" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,3"/>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Static res:Strings.About_Label_Device}" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,3"/>
                                 <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding DeviceName}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,3" TextTrimming="CharacterEllipsis"/>
 
                                 <!-- Row 1: OS Edition & Build -->
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="OS Edition:" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,3"/>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Static res:Strings.About_Label_OsEdition}" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,3"/>
                                 <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding OsVersion}" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,3" TextTrimming="CharacterEllipsis"/>
 
                                 <!-- Row 2: Architecture -->
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Architecture:" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,3"/>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static res:Strings.About_Label_Architecture}" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,3"/>
                                 <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Architecture}" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,3"/>
 
                                 <!-- Row 3: Runtime -->
-                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Runtime:" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,3"/>
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static res:Strings.About_Label_Runtime}" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,3"/>
                                 <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding DotNetVersion}" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,3" TextTrimming="CharacterEllipsis"/>
 
                                 <!-- Row 4: Directory / Join Status -->
-                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Directory:" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,3"/>
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="{x:Static res:Strings.About_Label_Directory}" FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,3"/>
                                 <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding DirectoryStatus}" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,3" TextTrimming="CharacterEllipsis"/>
                             </Grid>
 
@@ -385,7 +386,7 @@
                                                    FontSize="11"
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,5,0"/>
-                                        <TextBlock Text="Open Logs" FontSize="11" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{x:Static res:Strings.About_Button_OpenLogs}" FontSize="11" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
 
@@ -399,7 +400,7 @@
                                                    FontSize="11"
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,5,0"/>
-                                        <TextBlock Text="Open App Data" FontSize="11" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{x:Static res:Strings.About_Button_OpenAppData}" FontSize="11" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
                             </WrapPanel>
@@ -428,7 +429,7 @@
                                            Foreground="{DynamicResource Brush.Info.Light}"
                                            VerticalAlignment="Center"
                                            Margin="0,0,8,0"/>
-                                <TextBlock Text="Developers"
+                                <TextBlock Text="{x:Static res:Strings.About_Developers_Title}"
                                            FontSize="14"
                                            FontWeight="Bold"
                                            Foreground="{DynamicResource Brush.Text.Primary}"
@@ -507,7 +508,7 @@
                                                                        Foreground="{DynamicResource Brush.Info.Light}"
                                                                        VerticalAlignment="Center"
                                                                        Margin="0,0,4,0"/>
-                                                            <TextBlock Text="Email"
+                                                            <TextBlock Text="{x:Static res:Strings.About_Button_Email}"
                                                                        FontSize="10"
                                                                        Foreground="{DynamicResource Brush.Text.Primary}"
                                                                        VerticalAlignment="Center"/>
@@ -544,7 +545,7 @@
                                        Foreground="{DynamicResource Brush.Info.Light}"
                                        VerticalAlignment="Center"
                                        Margin="0,0,8,0"/>
-                            <TextBlock Text="Documentation &amp; Resources"
+                            <TextBlock Text="{x:Static res:Strings.About_Documentation_Title}"
                                        FontSize="14"
                                        FontWeight="Bold"
                                        Foreground="{DynamicResource Brush.Text.Primary}"
@@ -580,11 +581,11 @@
                                     </Border>
 
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <TextBlock Text="Project SharePoint"
+                                        <TextBlock Text="{x:Static res:Strings.About_Doc_SharePoint_Title}"
                                                    FontSize="12"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource Brush.Text.Primary}"/>
-                                        <TextBlock Text="Guides &amp; documentation"
+                                        <TextBlock Text="{x:Static res:Strings.About_Doc_SharePoint_Desc}"
                                                    FontSize="10"
                                                    Foreground="{DynamicResource Brush.Text.Muted}"
                                                    Margin="0,2,0,0"/>
@@ -619,11 +620,11 @@
                                     </Border>
 
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <TextBlock Text="Release Notes"
+                                        <TextBlock Text="{x:Static res:Strings.About_Doc_ReleaseNotes_Title}"
                                                    FontSize="12"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource Brush.Text.Primary}"/>
-                                        <TextBlock Text="Change log &amp; history"
+                                        <TextBlock Text="{x:Static res:Strings.About_Doc_ReleaseNotes_Desc}"
                                                    FontSize="10"
                                                    Foreground="{DynamicResource Brush.Text.Muted}"
                                                    Margin="0,2,0,0"/>
@@ -658,11 +659,11 @@
                                     </Border>
 
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <TextBlock Text="GitHub Repository"
+                                        <TextBlock Text="{x:Static res:Strings.About_Doc_GitHub_Title}"
                                                    FontSize="12"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource Brush.Text.Primary}"/>
-                                        <TextBlock Text="Source code &amp; issues"
+                                        <TextBlock Text="{x:Static res:Strings.About_Doc_GitHub_Desc}"
                                                    FontSize="10"
                                                    Foreground="{DynamicResource Brush.Text.Muted}"
                                                    Margin="0,2,0,0"/>
@@ -676,7 +677,7 @@
 
             <!-- ===================== FOOTER ===================== -->
             <StackPanel HorizontalAlignment="Center" Margin="0,4,0,8">
-                <TextBlock Text="University of Arizona • Desktop Support Application"
+                <TextBlock Text="{x:Static res:Strings.About_Footer}"
                            FontSize="10"
                            Foreground="{DynamicResource Brush.Text.Muted}"
                            HorizontalAlignment="Center"/>

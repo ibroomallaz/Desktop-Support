@@ -1,6 +1,5 @@
-using DSAMVVM.MVVM.View.Dialogs;
+﻿using DSAMVVM.MVVM.View.Dialogs;
 using DSAMVVM.Core.Enums;
-using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
@@ -45,14 +44,14 @@ namespace DSAMVVM.MVVM.ViewModel
         private NetworkStateInfo _networkState = NetworkStateInfo.Disconnected();
         private ADStateInfo _adState = ADStateInfo.Checking();
 
-        private string _title = "Home";
+        private string _title = Strings.Nav_Home;
         public string Title
         {
             get => _title;
             set => Set(ref _title, value);
         }
 
-        private string _subtitle = "Quick access dashboard and environment status";
+        private string _subtitle = Strings.Home_Subtitle;
         public string Subtitle
         {
             get => _subtitle;
@@ -103,7 +102,7 @@ namespace DSAMVVM.MVVM.ViewModel
         // --- Active Directory Domain Controller Status ---
         public bool IsDcConnected => _adState.IsReachable;
 
-        public string DcStatusText => IsTestingDc ? "Probing domain controllers..." : _adState.StatusText;
+        public string DcStatusText => IsTestingDc ? Strings.Home_Status_ProbingDc : _adState.StatusText;
 
         public string DcStatusToolTip => _adState.ToolTipText;
 
@@ -222,7 +221,7 @@ namespace DSAMVVM.MVVM.ViewModel
         }
 
         // --- ServiceMeow Availability & Layout State ---
-        private bool _isServiceMeowEnabled = true;
+        private bool _isServiceMeowEnabled;
         public bool IsServiceMeowEnabled
         {
             get => _isServiceMeowEnabled;
@@ -426,9 +425,9 @@ namespace DSAMVVM.MVVM.ViewModel
             _currentPet = new ServiceMeowPet
             {
                 Name = "ServiceMeow",
-                Title = "Support Mascot",
+                Title = Strings.Home_ServiceMeow_Badge,
                 Species = "Cat",
-                Blurb = "Loading mascot of the day..."
+                Blurb = Strings.Home_ServiceMeow_PlaceholderBlurb
             };
 
             NextPetCommand = new RelayCommand(_ =>
@@ -603,9 +602,9 @@ namespace DSAMVVM.MVVM.ViewModel
                             CurrentPet = new ServiceMeowPet
                             {
                                 Name = "ServiceMeow",
-                                Title = "Support Mascot",
+                                Title = Strings.Home_ServiceMeow_Badge,
                                 Species = "Cat",
-                                Blurb = "Welcome to Desktop Support! Mascot data is standing by."
+                                Blurb = Strings.Home_ServiceMeow_DefaultBlurb
                             };
                         }
                     });

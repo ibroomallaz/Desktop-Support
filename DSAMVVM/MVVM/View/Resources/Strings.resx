@@ -234,4 +234,246 @@
     <value>Double-Tap Key</value>
     <comment>Settings label for modifier key dropdown</comment>
   </data>
+
+  <!-- About View -->
+  <data name="About_AppTitle" xml:space="preserve">
+    <value>Desktop Support App</value>
+    <comment>Main app title displayed in About hero banner</comment>
+  </data>
+  <data name="About_OrgBadge" xml:space="preserve">
+    <value>UArizona</value>
+    <comment>Organization badge in About hero banner</comment>
+  </data>
+  <data name="About_AppSubtitle" xml:space="preserve">
+    <value>University of Arizona • Desktop Support &amp; IT Services</value>
+    <comment>App subtitle displayed in About hero banner</comment>
+  </data>
+  <data name="About_Tooltip_ToggleVersion" xml:space="preserve">
+    <value>Click to toggle detailed build / file version</value>
+    <comment>Tooltip for version pill button in About view</comment>
+  </data>
+  <data name="About_Tooltip_CopyVersion" xml:space="preserve">
+    <value>Copy version string to clipboard</value>
+    <comment>Tooltip for version copy button in About view</comment>
+  </data>
+  <data name="About_Copy" xml:space="preserve">
+    <value>Copy</value>
+    <comment>Copy button label in About view</comment>
+  </data>
+  <data name="About_UpToDate" xml:space="preserve">
+    <value>Up to date</value>
+    <comment>Badge text when app version is current</comment>
+  </data>
+  <data name="About_CheckFailed" xml:space="preserve">
+    <value>Check failed</value>
+    <comment>Badge text when update check fails</comment>
+  </data>
+  <data name="About_SystemDiagnostics_Title" xml:space="preserve">
+    <value>System &amp; Diagnostics</value>
+    <comment>Card title for system specs and diagnostics</comment>
+  </data>
+  <data name="About_Label_Device" xml:space="preserve">
+    <value>Device:</value>
+    <comment>Label for device name</comment>
+  </data>
+  <data name="About_Label_OsEdition" xml:space="preserve">
+    <value>OS Edition:</value>
+    <comment>Label for OS edition</comment>
+  </data>
+  <data name="About_Label_Architecture" xml:space="preserve">
+    <value>Architecture:</value>
+    <comment>Label for processor architecture</comment>
+  </data>
+  <data name="About_Label_Runtime" xml:space="preserve">
+    <value>Runtime:</value>
+    <comment>Label for .NET runtime version</comment>
+  </data>
+  <data name="About_Label_Directory" xml:space="preserve">
+    <value>Directory:</value>
+    <comment>Label for domain join / directory status</comment>
+  </data>
+  <data name="About_Button_OpenLogs" xml:space="preserve">
+    <value>Open Logs</value>
+    <comment>Button to open log directory in Explorer</comment>
+  </data>
+  <data name="About_Button_OpenAppData" xml:space="preserve">
+    <value>Open App Data</value>
+    <comment>Button to open AppData directory in Explorer</comment>
+  </data>
+  <data name="About_Developers_Title" xml:space="preserve">
+    <value>Developers</value>
+    <comment>Card title for development team list</comment>
+  </data>
+  <data name="About_Button_Email" xml:space="preserve">
+    <value>Email</value>
+    <comment>Button to email a developer</comment>
+  </data>
+  <data name="About_Documentation_Title" xml:space="preserve">
+    <value>Documentation &amp; Resources</value>
+    <comment>Card title for documentation and external links</comment>
+  </data>
+  <data name="About_Doc_SharePoint_Title" xml:space="preserve">
+    <value>Project SharePoint</value>
+    <comment>SharePoint resource tile title</comment>
+  </data>
+  <data name="About_Doc_SharePoint_Desc" xml:space="preserve">
+    <value>Guides &amp; documentation</value>
+    <comment>SharePoint resource tile description</comment>
+  </data>
+  <data name="About_Doc_ReleaseNotes_Title" xml:space="preserve">
+    <value>Release Notes</value>
+    <comment>Release notes tile title</comment>
+  </data>
+  <data name="About_Doc_ReleaseNotes_Desc" xml:space="preserve">
+    <value>Change log &amp; history</value>
+    <comment>Release notes tile description</comment>
+  </data>
+  <data name="About_Doc_GitHub_Title" xml:space="preserve">
+    <value>GitHub Repository</value>
+    <comment>GitHub source tile title</comment>
+  </data>
+  <data name="About_Doc_GitHub_Desc" xml:space="preserve">
+    <value>Source code &amp; issues</value>
+    <comment>GitHub source tile description</comment>
+  </data>
+  <data name="About_Footer" xml:space="preserve">
+    <value>University of Arizona • Desktop Support Application</value>
+    <comment>Footer text in About view</comment>
+  </data>
+
+  <!-- Links View -->
+  <data name="Links_Banner_Title" xml:space="preserve">
+    <value>Links Directory</value>
+    <comment>Links view banner title</comment>
+  </data>
+  <data name="Links_Banner_Subtitle" xml:space="preserve">
+    <value>Quick access to common university portals and team resources</value>
+    <comment>Links view banner subtitle</comment>
+  </data>
+  <data name="Links_Tooltip_Reload" xml:space="preserve">
+    <value>Force refresh links data</value>
+    <comment>Tooltip for links refresh button</comment>
+  </data>
+  <data name="Links_Button_Reload" xml:space="preserve">
+    <value>Reload Links</value>
+    <comment>Label for links refresh button</comment>
+  </data>
+  <data name="Links_Tooltip_CopyUrl" xml:space="preserve">
+    <value>Copy URL to clipboard</value>
+    <comment>Tooltip for copying link URL</comment>
+  </data>
+  <data name="Links_Tooltip_OpenBrowser" xml:space="preserve">
+    <value>Open link in default browser</value>
+    <comment>Tooltip for opening link in browser</comment>
+  </data>
+  <data name="Links_Section_CommonLinks" xml:space="preserve">
+    <value>Common Links</value>
+    <comment>Common links card header</comment>
+  </data>
+  <data name="Links_Section_UniversityWide" xml:space="preserve">
+    <value>University-wide</value>
+    <comment>Subtitle tag for common links</comment>
+  </data>
+  <data name="Links_Section_Team" xml:space="preserve">
+    <value>Team</value>
+    <comment>Team links card header</comment>
+  </data>
+  <data name="Links_Empty_NoTeamLinks" xml:space="preserve">
+    <value>No links found for this team</value>
+    <comment>Empty state message when a team has no links configured</comment>
+  </data>
+
+  <!-- Home View & Dashboard -->
+  <data name="Home_Subtitle" xml:space="preserve">
+    <value>Quick access dashboard and environment status</value>
+    <comment>Home dashboard view subtitle</comment>
+  </data>
+  <data name="Home_Status_EntraLabel" xml:space="preserve">
+    <value>Entra:</value>
+    <comment>Label for Entra status on ribbon</comment>
+  </data>
+  <data name="Home_Status_AdLabel" xml:space="preserve">
+    <value>AD:</value>
+    <comment>Label for Active Directory status on ribbon</comment>
+  </data>
+  <data name="Home_Status_ProbingDc" xml:space="preserve">
+    <value>Probing domain controllers...</value>
+    <comment>Active Directory DC probe status in-flight message</comment>
+  </data>
+  <data name="Home_Tooltip_TestDc" xml:space="preserve">
+    <value>Probe Active Directory Domain Controllers</value>
+    <comment>Tooltip for DC test button</comment>
+  </data>
+  <data name="Home_Button_TestDc" xml:space="preserve">
+    <value>Test</value>
+    <comment>Button text for DC probe test</comment>
+  </data>
+  <data name="Home_RecentActivity_Title" xml:space="preserve">
+    <value>Recent Activity</value>
+    <comment>Section title for recent search activities</comment>
+  </data>
+  <data name="Home_RecentActivity_Subtitle" xml:space="preserve">
+    <value>· Quick Jump</value>
+    <comment>Subtitle tag for recent search activities</comment>
+  </data>
+  <data name="Home_RecentActivity_Empty" xml:space="preserve">
+    <value>No recent searches in this session</value>
+    <comment>Empty state message when no recent searches exist</comment>
+  </data>
+  <data name="Home_Shortcuts_Title" xml:space="preserve">
+    <value>Quick Shortcuts</value>
+    <comment>Section title for customizable quick shortcuts</comment>
+  </data>
+  <data name="Home_Tooltip_AdvancedShortcuts" xml:space="preserve">
+    <value>Open shortcut manager in Settings</value>
+    <comment>Tooltip for advanced shortcuts button</comment>
+  </data>
+  <data name="Home_Shortcuts_Advanced" xml:space="preserve">
+    <value>Advanced...</value>
+    <comment>Button text for advanced shortcut settings</comment>
+  </data>
+  <data name="Home_Shortcuts_Customize" xml:space="preserve">
+    <value>Customize</value>
+    <comment>Button text to enter shortcut edit mode</comment>
+  </data>
+  <data name="Home_Shortcuts_Done" xml:space="preserve">
+    <value>Done</value>
+    <comment>Button text to exit shortcut edit mode</comment>
+  </data>
+  <data name="Home_Tooltip_RemoveShortcut" xml:space="preserve">
+    <value>Remove shortcut</value>
+    <comment>Tooltip for shortcut removal badge</comment>
+  </data>
+  <data name="Home_Shortcuts_AddManage" xml:space="preserve">
+    <value>Add / Manage Shortcuts in Settings...</value>
+    <comment>Button label to add or manage shortcuts</comment>
+  </data>
+  <data name="Home_ServiceMeow_Header" xml:space="preserve">
+    <value>🐱 ServiceMeow</value>
+    <comment>Support mascot hero card title</comment>
+  </data>
+  <data name="Home_ServiceMeow_Badge" xml:space="preserve">
+    <value>Support Mascot</value>
+    <comment>Support mascot badge label</comment>
+  </data>
+  <data name="Home_Tooltip_ReloadMascot" xml:space="preserve">
+    <value>Reload Mascot Photo</value>
+    <comment>Tooltip for reloading mascot photo</comment>
+  </data>
+  <data name="Home_Tooltip_NextMascot" xml:space="preserve">
+    <value>Next Mascot</value>
+    <comment>Tooltip for cycling to the next mascot</comment>
+  </data>
+  <data name="Home_ServiceMeow_SubmitPet" xml:space="preserve">
+    <value>Submit Pet</value>
+    <comment>Button to submit a pet photo for mascot roster</comment>
+  </data>
+  <data name="Home_ServiceMeow_PlaceholderBlurb" xml:space="preserve">
+    <value>Loading mascot of the day...</value>
+    <comment>Initial loading message for mascot</comment>
+  </data>
+  <data name="Home_ServiceMeow_DefaultBlurb" xml:space="preserve">
+    <value>Welcome to Desktop Support! Mascot data is standing by.</value>
+    <comment>Fallback mascot welcome message</comment>
+  </data>
 </root>
