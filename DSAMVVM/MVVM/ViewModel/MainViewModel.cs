@@ -256,12 +256,13 @@ namespace DSAMVVM.MVVM.ViewModel
 
                 string normView = (targetView).Trim();
                 string normQuery = (targetQuery).Trim();
+                string? viewSubTarget = null;
 
                 // If path delimiters or query string was included in targetView
                 int qIdx = normView.IndexOf('?');
                 if (qIdx >= 0)
                 {
-                    if (string.IsNullOrEmpty(normQuery)) normQuery = normView[(qIdx + 1)..];
+                    viewSubTarget = normView[(qIdx + 1)..];
                     normView = normView[..qIdx];
                 }
                 else
@@ -269,9 +270,14 @@ namespace DSAMVVM.MVVM.ViewModel
                     int sIdx = normView.IndexOf('/');
                     if (sIdx >= 0)
                     {
-                        if (string.IsNullOrEmpty(normQuery)) normQuery = normView[(sIdx + 1)..];
+                        viewSubTarget = normView[(sIdx + 1)..];
                         normView = normView[..sIdx];
                     }
+                }
+
+                if (string.IsNullOrEmpty(normQuery) && !string.IsNullOrEmpty(viewSubTarget))
+                {
+                    normQuery = viewSubTarget;
                 }
 
                 AppView targetAppView = normView.ToLowerInvariant() switch
@@ -304,6 +310,16 @@ namespace DSAMVVM.MVVM.ViewModel
                     var (category, anchor) = ResolveSettingsTarget(normQuery);
                     SettingsVM.SelectCategoryAndAnchor(category, anchor);
                 }
+                else if (targetAppView == AppView.Group)
+                {
+                    var (groupMode, cleanQuery) = ResolveGroupTarget(viewSubTarget, normQuery);
+                    if (groupMode.HasValue)
+                    {
+                        GroupVM.SetSearchMode(groupMode.Value);
+                    }
+                    SearchQuery = cleanQuery;
+                    TriggerSearch();
+                }
                 else
                 {
                     SearchQuery = normQuery;
@@ -331,7 +347,15 @@ namespace DSAMVVM.MVVM.ViewModel
                 {
                     case "user": SelectedView = AppView.User; break;
                     case "computer": SelectedView = AppView.Computer; break;
-                    case "group": SelectedView = AppView.Group; break;
+                    case "group":
+                        SelectedView = AppView.Group;
+                        string? groupModeArg = GetArgValue(args, "--group-mode") ?? GetArgValue(args, "--groupmode");
+                        if (!string.IsNullOrEmpty(groupModeArg))
+                        {
+                            var parsedMode = GroupViewModel.ParseSearchMode(groupModeArg);
+                            if (parsedMode.HasValue) GroupVM.SetSearchMode(parsedMode.Value);
+                        }
+                        break;
                     case "settings":
                         SelectedView = AppView.Settings;
                         string? section = GetArgValue(args, "--section") ?? GetArgValue(args, "--tab") ?? GetArgValue(args, "--card");
@@ -362,6 +386,129 @@ namespace DSAMVVM.MVVM.ViewModel
                     ExecuteSearchCommand.Execute(null);
                 }
             }
+        }
+
+        private static (GroupViewModel.GroupSearchMode? Mode, string CleanQuery) ResolveGroupTarget(string? subTarget, string? query)
+        {
+            GroupViewModel.GroupSearchMode? resolvedMode = null;
+            string cleanQuery = (query ?? string.Empty).Trim();
+
+            // 1. Try resolving mode from subTarget (e.g. from targetView like "group/Department" or "group?mode=dept")
+            if (!string.IsNullOrWhiteSpace(subTarget))
+            {
+                var trimmedSub = subTarget.Trim();
+
+                if (trimmedSub.Contains('=') || trimmedSub.Contains('&'))
+                {
+                    var pairs = trimmedSub.Split('&', StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var pair in pairs)
+                    {
+                        var kv = pair.Split('=', 2);
+                        if (kv.Length == 2)
+                        {
+                            var key = kv[0].Trim().ToLowerInvariant();
+                            var val = kv[1].Trim();
+                            if (key is "mode" or "type" or "target")
+                            {
+                                resolvedMode = GroupViewModel.ParseSearchMode(val);
+                            }
+                            else if (key is "q" or "query" or "search" && string.IsNullOrEmpty(cleanQuery))
+                            {
+                                cleanQuery = val;
+                            }
+                        }
+                    }
+                }
+                else if (trimmedSub.Contains('/'))
+                {
+                    var parts = trimmedSub.Split('/', 2, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length > 0)
+                    {
+                        resolvedMode = GroupViewModel.ParseSearchMode(parts[0]);
+                    }
+                    if (parts.Length > 1 && string.IsNullOrEmpty(cleanQuery))
+                    {
+                        cleanQuery = parts[1].Trim();
+                    }
+                }
+                else
+                {
+                    resolvedMode = GroupViewModel.ParseSearchMode(trimmedSub);
+                    if (!resolvedMode.HasValue && string.IsNullOrEmpty(cleanQuery))
+                    {
+                        cleanQuery = trimmedSub;
+                    }
+                }
+            }
+
+            // 2. If mode not yet resolved, inspect cleanQuery (e.g. "mode=dept&q=1234", "dept/1234", "dept:1234")
+            if (!resolvedMode.HasValue && !string.IsNullOrWhiteSpace(cleanQuery))
+            {
+                if (cleanQuery.Contains('=') || cleanQuery.Contains('&'))
+                {
+                    var pairs = cleanQuery.Split('&', StringSplitOptions.RemoveEmptyEntries);
+                    string? extractedQ = null;
+                    foreach (var pair in pairs)
+                    {
+                        var kv = pair.Split('=', 2);
+                        if (kv.Length == 2)
+                        {
+                            var key = kv[0].Trim().ToLowerInvariant();
+                            var val = kv[1].Trim();
+                            if (key is "mode" or "type" or "target")
+                            {
+                                resolvedMode = GroupViewModel.ParseSearchMode(val);
+                            }
+                            else if (key is "q" or "query" or "search")
+                            {
+                                extractedQ = val;
+                            }
+                        }
+                    }
+                    if (extractedQ != null)
+                    {
+                        cleanQuery = extractedQ;
+                    }
+                }
+                else if (cleanQuery.Contains('/'))
+                {
+                    var parts = cleanQuery.Split('/', 2, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length > 0)
+                    {
+                        var modeFromPart = GroupViewModel.ParseSearchMode(parts[0]);
+                        if (modeFromPart.HasValue)
+                        {
+                            resolvedMode = modeFromPart;
+                            cleanQuery = parts.Length > 1 ? parts[1].Trim() : string.Empty;
+                        }
+                    }
+                }
+                else if (cleanQuery.Contains(':'))
+                {
+                    var parts = cleanQuery.Split(':', 2, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length > 0)
+                    {
+                        var modeFromPart = GroupViewModel.ParseSearchMode(parts[0]);
+                        if (modeFromPart.HasValue)
+                        {
+                            resolvedMode = modeFromPart;
+                            cleanQuery = parts.Length > 1 ? parts[1].Trim() : string.Empty;
+                        }
+                    }
+                }
+            }
+
+            // 3. Auto-inference fallback based on query pattern
+            if (!resolvedMode.HasValue && !string.IsNullOrWhiteSpace(cleanQuery))
+            {
+                if (cleanQuery.StartsWith("UA-", StringComparison.OrdinalIgnoreCase) ||
+                    cleanQuery.StartsWith("UA_", StringComparison.OrdinalIgnoreCase))
+                {
+                    resolvedMode = GroupViewModel.GroupSearchMode.GroupMembers;
+                }
+            }
+
+            return (resolvedMode, cleanQuery);
         }
 
         private static (SettingsCategory Category, string? Anchor) ResolveSettingsTarget(string? query)

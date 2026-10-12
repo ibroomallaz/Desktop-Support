@@ -347,7 +347,7 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
             {
                 if (HasDivision)
                 {
-                    linkRouter1.RequestNavigation("GroupView", DivisionCode);
+                    linkRouter1.RequestNavigation("group/division", DivisionCode);
                 }
             });
         }

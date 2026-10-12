@@ -374,7 +374,7 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
             {
                 if (param is string grp && !string.IsNullOrWhiteSpace(grp))
                 {
-                    _linkRouter.RequestNavigation("group", grp.Trim());
+                    _linkRouter.RequestNavigation("group/members", grp.Trim());
                 }
             });
 

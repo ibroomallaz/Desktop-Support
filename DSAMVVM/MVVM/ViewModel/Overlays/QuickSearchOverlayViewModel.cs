@@ -112,7 +112,16 @@ namespace DSAMVVM.MVVM.ViewModel.Overlays
                         _linkRouter.RequestNavigation("computer", compVm.ComputerName);
                         break;
                     case GroupHistoryItemViewModel groupVm:
-                        _linkRouter.RequestNavigation("group", !string.IsNullOrWhiteSpace(groupVm.Query) ? groupVm.Query : groupVm.PrimaryHeaderTitle);
+                        string query = !string.IsNullOrWhiteSpace(groupVm.Query)
+                            ? groupVm.Query
+                            : groupVm.Mode switch
+                            {
+                                GroupViewModel.GroupSearchMode.Department => groupVm.DeptNumber,
+                                GroupViewModel.GroupSearchMode.Division => groupVm.DivCode,
+                                GroupViewModel.GroupSearchMode.GroupMembers => !string.IsNullOrWhiteSpace(groupVm.NormalizedGroupName) ? groupVm.NormalizedGroupName : groupVm.Query,
+                                _ => groupVm.PrimaryHeaderTitle
+                            };
+                        _linkRouter.RequestNavigation($"group/{groupVm.Mode}", query);
                         break;
                 }
 

@@ -50,24 +50,22 @@ namespace DSAMVVM.Core.Services.Search
         {
             if (!_settings.Enabled) return;
 
-            if (e.Data.KeyCode == _settings.ModifierKeyCode)
+            if (e.Data.KeyCode != _settings.ModifierKeyCode) return;
+            if (_isTriggerKeyDown) return; // Prevent holding the key down from triggering it
+            _isTriggerKeyDown = true;
+
+            long currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            long diff = currentTime - _lastPressTime;
+
+            // Use the configured double-tap threshold (>50ms prevents mechanical switch bounce)
+            if (diff > 50 && diff < _settings.DoubleTapThresholdMs)
             {
-                if (_isTriggerKeyDown) return; // Prevent holding the key down from triggering it
-                _isTriggerKeyDown = true;
-
-                long currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                long diff = currentTime - _lastPressTime;
-
-                // Use the configured double-tap threshold (>50ms prevents mechanical switch bounce)
-                if (diff > 50 && diff < _settings.DoubleTapThresholdMs)
-                {
-                    _lastPressTime = 0;
-                    ExecuteCapture();
-                }
-                else
-                {
-                    _lastPressTime = currentTime;
-                }
+                _lastPressTime = 0;
+                ExecuteCapture();
+            }
+            else
+            {
+                _lastPressTime = currentTime;
             }
         }
 

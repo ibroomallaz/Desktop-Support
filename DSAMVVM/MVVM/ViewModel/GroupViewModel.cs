@@ -84,6 +84,33 @@ namespace DSAMVVM.MVVM.ViewModel
             OnPropertyChanged(nameof(CurrentViewContext));
         }
 
+        public void SetSearchMode(GroupSearchMode newMode)
+        {
+            UpdateMode(newMode);
+        }
+
+        public GroupSearchMode SearchMode
+        {
+            get => _searchMode;
+            set => UpdateMode(value);
+        }
+
+        public static GroupSearchMode? ParseSearchMode(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return null;
+            var cleaned = text.Trim().ToLowerInvariant();
+            if (cleaned.StartsWith("groupview.")) cleaned = cleaned["groupview.".Length..];
+            else if (cleaned.StartsWith("group.")) cleaned = cleaned["group.".Length..];
+            return cleaned switch
+            {
+                "usermim" or "mim" or "user" => GroupSearchMode.UserMim,
+                "groupmembers" or "members" or "group" or "ad" => GroupSearchMode.GroupMembers,
+                "department" or "dept" => GroupSearchMode.Department,
+                "division" or "div" => GroupSearchMode.Division,
+                _ => null
+            };
+        }
+
         // --- Standard UI State ---
         private string? _error;
         public string? Error { get => _error; private set { _error = value; OnPropertyChanged(nameof(Error)); } }
