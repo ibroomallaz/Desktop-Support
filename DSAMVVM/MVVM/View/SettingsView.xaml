@@ -109,16 +109,6 @@
                 </TextBlock>
             </DataTemplate>
 
-            <DataTemplate x:Key="PtItemTemplate">
-                <TextBlock Foreground="{DynamicResource Brush.Text.Primary}">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Text" Value="{Binding StringFormat={}{0} pt}"/>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-            </DataTemplate>
-
             <!-- Softened Slider Accent Palette (Harmonious UA Burgundy / Muted Rose) -->
             <SolidColorBrush x:Key="Brush.Slider.Track.Fill" Color="#8C1D40"/>
             <SolidColorBrush x:Key="Brush.Slider.Thumb.Fill" Color="#8C1D40"/>

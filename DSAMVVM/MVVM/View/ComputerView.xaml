@@ -20,7 +20,6 @@
                 <ResourceDictionary Source="/Theme/Controls/Card.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
             <!-- Subtle Link Button -->
             <Style x:Key="InlineLinkButton" TargetType="Button">
                 <Setter Property="Background" Value="Transparent"/>
@@ -858,13 +857,11 @@
                 <Button Content="{x:Static res:Strings.Common_Button_Clear}"
                         Command="{Binding ClearCommand}"
                         Style="{DynamicResource Button.FlowDoc}"
-                        Margin="0,0,8,0"
                         ToolTip="{x:Static res:Strings.Common_Tooltip_ClearHistory}"/>
 
                 <Button Content="{x:Static res:Strings.Common_Button_CollapseAll}"
                         Command="{Binding CollapseAllCommand}"
                         Style="{DynamicResource Button.FlowDoc}"
-                        Margin="0,0,8,0"
                         ToolTip="{x:Static res:Strings.Common_Tooltip_CollapseAll}"/>
 
                 <Button Content="{x:Static res:Strings.Common_Button_ExpandAll}"

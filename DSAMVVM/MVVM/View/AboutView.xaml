@@ -35,8 +35,6 @@
 
             <!-- Compact rounded button -->
             <Style x:Key="Button.Rounded.Compact" TargetType="Button" BasedOn="{StaticResource Button.Rounded}">
-                <Setter Property="Padding"   Value="10,4"/>
-                <Setter Property="MinHeight" Value="28"/>
                 <Setter Property="Height"    Value="28"/>
                 <Setter Property="FontSize"  Value="12"/>
                 <Setter Property="MinWidth"  Value="0"/>
@@ -230,7 +228,7 @@
                             </StackPanel>
                         </Button>
 
-                        <!-- Up To Date Indicator Badge -->
+                        <!-- Up-To-Date Indicator Badge -->
                         <Border Margin="0,6,0,0"
                                 Padding="8,3"
                                 CornerRadius="10"
