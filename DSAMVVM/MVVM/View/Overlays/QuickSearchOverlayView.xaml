@@ -1,4 +1,4 @@
-﻿<Window x:Class="DSAMVVM.MVVM.View.Overlays.QuickSearchOverlayView"
+<Window x:Class="DSAMVVM.MVVM.View.Overlays.QuickSearchOverlayView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:cards="clr-namespace:DSAMVVM.MVVM.ViewModel.Cards"
@@ -246,8 +246,8 @@
                                                 <Style TargetType="Border">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Affiliation}" Value="">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <DataTrigger Binding="{Binding HasAffiliation}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>

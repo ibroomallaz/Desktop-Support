@@ -65,7 +65,7 @@ namespace DSAMVVM.Core.Formatters
             {
                 builder.AddBadge($"DIV: {vm.DivisionCode}", isBold: true);
             }
-            if (!string.IsNullOrWhiteSpace(vm.Affiliation))
+            if (vm.HasAffiliation)
             {
                 builder.AddBadge(vm.Affiliation);
             }

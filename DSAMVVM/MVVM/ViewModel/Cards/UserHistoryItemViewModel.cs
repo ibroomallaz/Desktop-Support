@@ -63,6 +63,7 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
                 OnPropertyChanged(nameof(Initials));
                 OnPropertyChanged(nameof(HasInitials));
                 OnPropertyChanged(nameof(Affiliation));
+                OnPropertyChanged(nameof(HasAffiliation));
                 OnPropertyChanged(nameof(DepartmentDisplay));
                 OnPropertyChanged(nameof(DivisionDisplay));
                 OnPropertyChanged(nameof(DivisionCode));
@@ -88,6 +89,8 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
         public string Initials => CalculateInitials(DisplayName);
         public bool HasInitials => !string.IsNullOrWhiteSpace(Initials) && Initials.Length == 2;
         public string Affiliation => User?.EduAffiliation ?? string.Empty;
+        public bool HasAffiliation => !string.IsNullOrWhiteSpace(Affiliation) &&
+                                      !Affiliation.Equals("Unknown", StringComparison.OrdinalIgnoreCase);
 
         public string DepartmentDisplay
         {
