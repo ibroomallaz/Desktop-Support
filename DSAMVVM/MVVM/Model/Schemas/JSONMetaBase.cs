@@ -16,8 +16,7 @@ namespace DSAMVVM.MVVM.Model.Schemas
 
         public void Normalize()
         {
-            if (LastUpdatedUtc == null || LastUpdatedUtc == default)
-                LastUpdatedUtc = DateTime.UtcNow;
+            LastUpdatedUtc ??= DateTime.UtcNow;
         }
     }
 }

@@ -96,7 +96,7 @@ namespace DSAMVVM
             Services = _serviceProvider;
             Mark("Loading services");
 
-            if (!Globals.TryEnsureCoreDirs(out var ensureErr) && !string.IsNullOrWhiteSpace(ensureErr))
+            if (!AppDirectoryHelper.TryEnsureCoreDirs(out var ensureErr) && !string.IsNullOrWhiteSpace(ensureErr))
             {
                 MessageBox.Show(
                     $"Some application folders could not be created.\n\nDetails: {ensureErr}",
@@ -213,7 +213,7 @@ namespace DSAMVVM
             {
                 Mark("First window rendered");
 
-                try { _splash?.FadeOutAndClose(160); _splash = null; }
+                try { _splash?.FadeOutAndClose(); _splash = null; }
                 catch
                 {
                     // ignored

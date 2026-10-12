@@ -479,7 +479,6 @@
                                     <Grid Grid.Column="1" Margin="14,10">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto"/> <!-- Header -->
-                                            <RowDefinition Height="Auto"/> <!-- Warning Banner (only if missing MIM or locked) -->
                                             <RowDefinition Height="Auto"/> <!-- Divider -->
                                             <RowDefinition Height="*"/>    <!-- 2-Column Body -->
                                         </Grid.RowDefinitions>
@@ -578,6 +577,21 @@
                                                             </Style>
                                                         </Border.Style>
                                                         <TextBlock Text="{x:Static res:Strings.User_Badge_Disabled}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="Bold" Foreground="#FF7B88" TextWrapping="NoWrap"/>
+                                                    </Border>
+
+                                                    <!-- Missing MIM Wrkst Group Warning (ONLY if missing!) -->
+                                                    <Border CornerRadius="4" Background="#382810" BorderBrush="#5C421A" BorderThickness="1" Padding="6,1" Margin="0,0,6,0" VerticalAlignment="Center">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding HasMimWarning}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <TextBlock Text="{x:Static res:Strings.User_Badge_MissingMimWrkst}" FontSize="{Binding DataContext.Typography.BadgeSize, RelativeSource={RelativeSource AncestorType=UserControl}}" FontWeight="SemiBold" Foreground="#FFC069" TextWrapping="NoWrap"/>
                                                     </Border>
 
                                                     <!-- NetID Chip Button with Copy -->
@@ -738,42 +752,14 @@
                                             </StackPanel>
                                         </Grid>
 
-                                        <!-- 2. Warning Callout (ONLY VISIBLE IF MIM GROUP IS MISSING!) -->
+                                        <!-- 2. Divider -->
                                         <Border Grid.Row="1"
-                                                Background="#2D1518"
-                                                BorderBrush="#5E252C"
-                                                BorderThickness="1"
-                                                CornerRadius="6"
-                                                Padding="10,5"
-                                                Margin="0,8,0,0">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding HasMimWarning}" Value="True">
-                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="⚠  " Foreground="#FF7B88" FontWeight="Bold"/>
-                                                <TextBlock Text="{x:Static res:Strings.User_Banner_MissingMim}"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="#FF7B88"
-                                                           FontSize="11"/>
-                                            </StackPanel>
-                                        </Border>
-
-                                        <!-- 3. Divider -->
-                                        <Border Grid.Row="2"
                                                 Height="1"
                                                 Background="{DynamicResource Brush.Border}"
                                                 Margin="0,8,0,8"/>
 
                                         <!-- If User Not Found Error -->
-                                        <Border Grid.Row="3"
+                                        <Border Grid.Row="2"
                                                 Background="#251214"
                                                 BorderBrush="#4B171A"
                                                 BorderThickness="1"
@@ -803,8 +789,8 @@
                                             </StackPanel>
                                         </Border>
 
-                                        <!-- 4. Two-Column Body -->
-                                        <Grid Grid.Row="3">
+                                        <!-- 3. Two-Column Body -->
+                                        <Grid Grid.Row="2">
                                             <Grid.Style>
                                                 <Style TargetType="Grid">
                                                     <Setter Property="Visibility" Value="Visible"/>

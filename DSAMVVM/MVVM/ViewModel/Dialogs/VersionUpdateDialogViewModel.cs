@@ -1,4 +1,5 @@
 ﻿using DSAMVVM.Core.Logging;
+using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Schemas;
 using System.ComponentModel;
@@ -60,7 +61,7 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
         public ICommand CloseCommand { get; }
 
         // Logic to determine if we are about to do an admin-level upgrade
-        public bool WillUpgradeRuntime => !Globals.IsTargetRuntimePresent(_updateInfo.RequiredDotNetVersion);
+        public bool WillUpgradeRuntime => !DotNetRuntimeHelper.IsTargetRuntimePresent(_updateInfo.RequiredDotNetVersion);
 
         // Drives the visibility of the warning block in XAML
         public Visibility AdminWarningVisibility => WillUpgradeRuntime ? Visibility.Visible : Visibility.Collapsed;

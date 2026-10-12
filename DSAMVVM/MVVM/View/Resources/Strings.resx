@@ -219,7 +219,7 @@
     <comment>Settings checkbox label for enabling mascot</comment>
   </data>
   <data name="Settings_Mascot_Description" xml:space="preserve">
-    <value>Displays the Arizona Desktop Support pet mascot on the Home dashboard. When disabled, background pet synchronization and image downloads are stopped, and the Home dashboard expands to a clean full-width layout.</value>
+    <value>Displays the Arizona Desktop Support pet mascot on the Home dashboard. When disabled, background pet synchronization and image downloads are stopped.</value>
     <comment>Settings help text describing the mascot feature</comment>
   </data>
   <data name="Settings_QuickSearch_CardTitle" xml:space="preserve">
@@ -665,10 +665,6 @@
   <data name="User_Badge_MissingMimWrkst" xml:space="preserve">
     <value>⚠️ Missing MIM Wrkst</value>
     <comment>Badge indicating user missing MIM workstation group</comment>
-  </data>
-  <data name="User_Banner_MissingMim" xml:space="preserve">
-    <value>User is missing the 'UA-MIM-Wrkst-AllDivUsers' Group</value>
-    <comment>Banner warning when user lacks MIM workstation group</comment>
   </data>
   <data name="User_Status_NotFound" xml:space="preserve">
     <value>User Not Found or Search Aborted</value>

@@ -5,7 +5,6 @@ namespace DSAMVVM.MVVM.Model
 {
     public abstract class Globals
     {
-
 #pragma warning disable CA2211 // Non-constant fields should not be visible
         public static readonly string g_AppVersion = VersionDisplayHelper.GetSemVerDisplay();
         public static readonly string g_FileVersion = VersionDisplayHelper.GetFileVersionDisplay();
@@ -64,56 +63,5 @@ namespace DSAMVVM.MVVM.Model
         public const int g_LinkJSONSchema = 2;
         public const int g_VersionSchema = 3;
         public const int g_ServiceMeowJSONSchema = 1;
-
-        //.NET runtime requirement check for the update installer
-        public static bool IsTargetRuntimePresent(string? requiredVersion)
-        {
-            // If no version is specified in the JSON, we assume no change
-            if (string.IsNullOrWhiteSpace(requiredVersion)) return true;
-            if (!Version.TryParse(requiredVersion, out var required)) return true;
-
-            // Standard path for the .NET Desktop Runtime
-            const string runtimePath = @"C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App";
-
-            if (!Directory.Exists(runtimePath)) return false;
-
-            // Check all installed versions in the shared folder
-            return Directory.GetDirectories(runtimePath)
-                .Select(Path.GetFileName)
-                .Any(name => Version.TryParse(name, out var installed) && installed >= required);
-        }
-        // Ensure the core directories exist (throws if a file blocks a folder path)
-        public static void EnsureCoreDirs()
-        {
-            EnsureDirSafe(g_AppDir);
-            EnsureDirSafe(g_LogsDir);
-            EnsureDirSafe(g_SettingsLegacyDir);
-            EnsureDirSafe(g_DataDir);
-            EnsureDirSafe(g_ServiceMeowImageCacheDir);
-        }
-
-        // Best-effort creation; returns false and sets error on failure
-        public static bool TryEnsureCoreDirs(out string? error)
-        {
-            try
-            {
-                EnsureCoreDirs();
-                error = null;
-                return true;
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
-        }
-
-        // If a file exists where our folder should be, this is fatal
-        private static void EnsureDirSafe(string path)
-        {
-            if (File.Exists(path))
-                throw new IOException($"A file exists where a directory is expected: {path}");
-            Directory.CreateDirectory(path);
-        }
     }
 }

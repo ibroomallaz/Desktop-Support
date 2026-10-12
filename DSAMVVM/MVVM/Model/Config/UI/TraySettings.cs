@@ -8,7 +8,8 @@
 
         public void Normalize()
         {
-            if (!EnableTrayIcon) { MinimizeToTray = false; CloseToTray = false; }
+            if (EnableTrayIcon) return;
+            MinimizeToTray = false; CloseToTray = false;
         }
     }
 }
