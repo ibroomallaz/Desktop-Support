@@ -679,6 +679,12 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="🐱"
+                                           Foreground="{DynamicResource Brush.Text.Primary}"
+                                           FontSize="15"
+                                           FontWeight="Normal"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,6,0"/>
                                 <TextBlock Text="{x:Static res:Strings.Home_ServiceMeow_Header}"
                                            Foreground="{DynamicResource Brush.Text.Primary}"
                                            FontSize="15"

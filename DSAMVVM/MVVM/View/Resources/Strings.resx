@@ -449,7 +449,7 @@
     <comment>Button label to add or manage shortcuts</comment>
   </data>
   <data name="Home_ServiceMeow_Header" xml:space="preserve">
-    <value>🐱 ServiceMeow</value>
+    <value>ServiceMeow</value>
     <comment>Support mascot hero card title</comment>
   </data>
   <data name="Home_ServiceMeow_Badge" xml:space="preserve">

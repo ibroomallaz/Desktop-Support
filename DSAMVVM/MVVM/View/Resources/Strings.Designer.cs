@@ -393,7 +393,7 @@ namespace DSAMVVM.MVVM.View.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 🐱 ServiceMeow.
+        ///   Looks up a localized string similar to ServiceMeow.
         /// </summary>
         public static string Home_ServiceMeow_Header {
             get {
