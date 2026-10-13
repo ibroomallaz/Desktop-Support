@@ -10,19 +10,10 @@
              d:DesignHeight="40"
              d:DesignWidth="400">
 
-    <Grid UseLayoutRounding="True">
-        <Grid.Style>
-            <Style TargetType="Grid">
-                <Setter Property="Visibility" Value="Visible"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding CurrentStatusItem}" Value="{x:Null}">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-        </Grid.Style>
-
+    <!-- Root Grid animated via theme style Fx.StatusBarHost -->
+    <Grid Style="{StaticResource Fx.StatusBarHost}">
         <Border x:Name="StatusCard"
+                Margin="10,0,10,10"
                 Padding="12,5"
                 MinHeight="28"
                 VerticalAlignment="Bottom"
@@ -40,22 +31,22 @@
                     <Setter Property="BorderBrush" Value="{DynamicResource Brush.Status.Neutral.Border}"/>
                     <Style.Triggers>
                         <!-- Success -->
-                        <DataTrigger Binding="{Binding CurrentStatusItem.Level}" Value="{x:Static models:StatusLevel.Success}">
+                        <DataTrigger Binding="{Binding DisplayedItem.Level}" Value="{x:Static models:StatusLevel.Success}">
                             <Setter Property="Background" Value="{DynamicResource Brush.Status.Success.Bg}"/>
                             <Setter Property="BorderBrush" Value="{DynamicResource Brush.Status.Success.Border}"/>
                         </DataTrigger>
                         <!-- Warning -->
-                        <DataTrigger Binding="{Binding CurrentStatusItem.Level}" Value="{x:Static models:StatusLevel.Warning}">
+                        <DataTrigger Binding="{Binding DisplayedItem.Level}" Value="{x:Static models:StatusLevel.Warning}">
                             <Setter Property="Background" Value="{DynamicResource Brush.Status.Warning.Bg}"/>
                             <Setter Property="BorderBrush" Value="{DynamicResource Brush.Status.Warning.Border}"/>
                         </DataTrigger>
                         <!-- Error -->
-                        <DataTrigger Binding="{Binding CurrentStatusItem.Level}" Value="{x:Static models:StatusLevel.Error}">
+                        <DataTrigger Binding="{Binding DisplayedItem.Level}" Value="{x:Static models:StatusLevel.Error}">
                             <Setter Property="Background" Value="{DynamicResource Brush.Status.Error.Bg}"/>
                             <Setter Property="BorderBrush" Value="{DynamicResource Brush.Status.Error.Border}"/>
                         </DataTrigger>
                         <!-- Info -->
-                        <DataTrigger Binding="{Binding CurrentStatusItem.Level}" Value="{x:Static models:StatusLevel.Info}">
+                        <DataTrigger Binding="{Binding DisplayedItem.Level}" Value="{x:Static models:StatusLevel.Info}">
                             <Setter Property="Background" Value="{DynamicResource CardGradient.Surface.L1}"/>
                             <Setter Property="BorderBrush" Value="{DynamicResource Brush.Status.Neutral.Border}"/>
                         </DataTrigger>
@@ -82,19 +73,19 @@
                             <Setter Property="Text" Value="{x:Static res:Glyphs.About}"/>
                             <Setter Property="Foreground" Value="{DynamicResource Brush.Status.Info.Icon}"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding CurrentStatusItem.Level}" Value="{x:Static models:StatusLevel.Success}">
+                                <DataTrigger Binding="{Binding DisplayedItem.Level}" Value="{x:Static models:StatusLevel.Success}">
                                     <Setter Property="Text" Value="{x:Static res:Glyphs.Checkmark}"/>
                                     <Setter Property="Foreground" Value="{DynamicResource Brush.Status.Success.Icon}"/>
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding CurrentStatusItem.Level}" Value="{x:Static models:StatusLevel.Warning}">
+                                <DataTrigger Binding="{Binding DisplayedItem.Level}" Value="{x:Static models:StatusLevel.Warning}">
                                     <Setter Property="Text" Value="{x:Static res:Glyphs.Warning}"/>
                                     <Setter Property="Foreground" Value="{DynamicResource Brush.Status.Warning.Icon}"/>
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding CurrentStatusItem.Level}" Value="{x:Static models:StatusLevel.Error}">
+                                <DataTrigger Binding="{Binding DisplayedItem.Level}" Value="{x:Static models:StatusLevel.Error}">
                                     <Setter Property="Text" Value="{x:Static res:Glyphs.Warning}"/>
                                     <Setter Property="Foreground" Value="{DynamicResource Brush.Status.Error.Icon}"/>
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding CurrentStatusItem.Level}" Value="{x:Static models:StatusLevel.Info}">
+                                <DataTrigger Binding="{Binding DisplayedItem.Level}" Value="{x:Static models:StatusLevel.Info}">
                                     <Setter Property="Text" Value="{x:Static res:Glyphs.About}"/>
                                     <Setter Property="Foreground" Value="{DynamicResource Brush.Status.Info.Icon}"/>
                                 </DataTrigger>
@@ -110,7 +101,7 @@
                            VerticalAlignment="Center"
                            FontSize="11"
                            Foreground="{DynamicResource Brush.Text.Primary}"
-                           statusRend:StatusItemRenderer.Item="{Binding CurrentStatusItem}" />
+                           statusRend:StatusItemRenderer.Item="{Binding DisplayedItem}" />
 
                 <!-- Dismiss Button -->
                 <Button Grid.Column="2"

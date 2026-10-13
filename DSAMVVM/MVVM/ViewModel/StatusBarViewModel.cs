@@ -14,15 +14,63 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public StatusItem? CurrentStatusItem => StatusBus.Current;
 
+        private StatusItem? _displayedItem;
+        public StatusItem? DisplayedItem
+        {
+            get => _displayedItem;
+            private set
+            {
+                if (_displayedItem != value)
+                {
+                    _displayedItem = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private bool _isOpen;
+        public bool IsOpen
+        {
+            get => _isOpen;
+            private set
+            {
+                if (_isOpen == value) return;
+                _isOpen = value;
+                OnPropertyChanged();
+            }
+        }
+
         public StatusBarViewModel(StatusBus bus)
         {
             StatusBus = bus;
 
-            //Dismiss wiring
+            // Dismiss wiring
             DismissCommand = new RelayCommand(_ => DismissCurrent(), _ => CurrentStatusItem != null);
 
             // Existing listener to refresh the UI when the bus updates
-            StatusBus.CurrentChanged += (_, _) => OnPropertyChanged(nameof(CurrentStatusItem));
+            StatusBus.CurrentChanged += OnStatusChanged;
+
+            if (StatusBus.Current != null)
+            {
+                DisplayedItem = StatusBus.Current;
+                IsOpen = true;
+            }
+        }
+
+        private void OnStatusChanged(object? sender, EventArgs e)
+        {
+            OnPropertyChanged(nameof(CurrentStatusItem));
+
+            var current = StatusBus.Current;
+            if (current != null)
+            {
+                DisplayedItem = current;
+                IsOpen = true;
+            }
+            else
+            {
+                IsOpen = false;
+            }
         }
 
         private void DismissCurrent()
