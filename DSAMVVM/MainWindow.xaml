@@ -1,4 +1,4 @@
-﻿<Window x:Class="DSAMVVM.MainWindow"
+<Window x:Class="DSAMVVM.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -16,7 +16,7 @@
         Background="Transparent"
         AllowsTransparency="True"
         UseLayoutRounding="True"
-        Title="{x:Static res:Strings.App_Title}">
+        Title="{Binding WindowTitle, Mode=OneWay, FallbackValue={x:Static res:Strings.App_Title}, TargetNullValue={x:Static res:Strings.App_Title}}">
 
     <Window.TaskbarItemInfo>
         <TaskbarItemInfo Overlay="{Binding TaskbarOverlayIcon}"

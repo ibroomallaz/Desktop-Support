@@ -3,7 +3,7 @@
                     xmlns:tb="http://www.hardcodet.net/taskbar">
 
     <tb:TaskbarIcon x:Key="GlobalAppTrayIcon"
-                    ToolTipText="Support App"
+                    ToolTipText="{Binding TaskbarDescription}"
                     IconSource="pack://application:,,,/img/MainIcon.ico" 
                     Visibility="Visible"
                     DoubleClickCommand="{Binding ShowWindowCommand}">

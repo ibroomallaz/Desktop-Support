@@ -1,6 +1,8 @@
-﻿using System.Windows;
+﻿using System.ComponentModel;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using DSAMVVM.MVVM.ViewModel;
 
 namespace DSAMVVM
 {
@@ -9,6 +11,28 @@ namespace DSAMVVM
         public MainWindow()
         {
             InitializeComponent();
+            DataContextChanged += OnDataContextChanged;
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is MainViewModel oldVm)
+            {
+                oldVm.PropertyChanged -= OnViewModelPropertyChanged;
+            }
+            if (e.NewValue is MainViewModel newVm)
+            {
+                Title = newVm.WindowTitle;
+                newVm.PropertyChanged += OnViewModelPropertyChanged;
+            }
+        }
+
+        private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(MainViewModel.WindowTitle) && sender is MainViewModel vm)
+            {
+                Title = vm.WindowTitle;
+            }
         }
 
         // Allow dragging the window from the title bar
@@ -51,8 +75,6 @@ namespace DSAMVVM
             btn.ContextMenu.PlacementTarget = btn;
             btn.ContextMenu.IsOpen = true;
         }
-        
-        
 
         // Show history dropdown when clicking in the search box
         private void SearchBox_ShowHistory(object sender, MouseButtonEventArgs e)

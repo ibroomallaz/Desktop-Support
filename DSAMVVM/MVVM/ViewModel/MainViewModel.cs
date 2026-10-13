@@ -1,4 +1,4 @@
-using DSAMVVM.Core.Enums;
+﻿using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces.Infrastructure;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
@@ -46,6 +46,13 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             get => _taskbarDescription;
             private set => Set(ref _taskbarDescription, value);
+        }
+
+        private string _windowTitle = Strings.App_Title;
+        public string WindowTitle
+        {
+            get => _windowTitle;
+            set => Set(ref _windowTitle, value);
         }
 
         // VM factories
@@ -830,11 +837,13 @@ namespace DSAMVVM.MVVM.ViewModel
                     case NetworkConnectionType.OffCampus:
                         TaskbarOverlayIcon = TaskbarOverlayHelper.OffCampusBadge;
                         TaskbarDescription = $"{Strings.App_Title} \u2014 Network: Off Campus (VPN recommended for campus tools)";
+                        WindowTitle = $"{Strings.App_Title} \u2014 Network: Off Campus (VPN recommended)";
                         break;
 
                     case NetworkConnectionType.Disconnected:
                         TaskbarOverlayIcon = TaskbarOverlayHelper.DisconnectedBadge;
                         TaskbarDescription = $"{Strings.App_Title} \u2014 Network Disconnected";
+                        WindowTitle = $"{Strings.App_Title} \u2014 Network Disconnected";
                         break;
 
                     default:
@@ -842,6 +851,7 @@ namespace DSAMVVM.MVVM.ViewModel
                         TaskbarDescription = !string.IsNullOrWhiteSpace(state.Label)
                             ? $"{Strings.App_Title} \u2014 {state.Label}"
                             : Strings.App_Title;
+                        WindowTitle = Strings.App_Title;
                         break;
                 }
             });
