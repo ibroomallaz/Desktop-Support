@@ -18,6 +18,11 @@
         UseLayoutRounding="True"
         Title="{x:Static res:Strings.App_Title}">
 
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo Overlay="{Binding TaskbarOverlayIcon}"
+                         Description="{Binding TaskbarDescription}"/>
+    </Window.TaskbarItemInfo>
+
     <Window.Resources>
         <ResourceDictionary>
             <!-- geometry -->

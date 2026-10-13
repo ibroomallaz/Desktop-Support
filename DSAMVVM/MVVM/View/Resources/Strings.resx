@@ -371,7 +371,7 @@
     <comment>Common links card header</comment>
   </data>
   <data name="Links_Section_UniversityWide" xml:space="preserve">
-    <value>University-wide</value>
+    <value>Common EntSup Links</value>
     <comment>Subtitle tag for common links</comment>
   </data>
   <data name="Links_Section_Team" xml:space="preserve">

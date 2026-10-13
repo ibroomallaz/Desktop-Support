@@ -1,4 +1,5 @@
-﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Interfaces.Infrastructure;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
@@ -6,6 +7,7 @@ using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
 using DSAMVVM.MVVM.Services.Status;
 using DSAMVVM.MVVM.View.Dialogs;
+using DSAMVVM.MVVM.View.Helpers;
 using DSAMVVM.MVVM.View.Resources;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
@@ -13,6 +15,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace DSAMVVM.MVVM.ViewModel
@@ -26,8 +29,24 @@ namespace DSAMVVM.MVVM.ViewModel
         private readonly IDeepLinkRoutingService _linkRouter;
         private readonly IAuthenticationService _authService;
         private readonly IApplicationStateService _appStateService;
+        private readonly INetworkDetectionService? _networkService;
         public StatusBarViewModel StatusBar { get; }
         public bool IsUserSignedIn => _authService.IsAuthenticated;
+
+        // Taskbar State
+        private ImageSource? _taskbarOverlayIcon;
+        public ImageSource? TaskbarOverlayIcon
+        {
+            get => _taskbarOverlayIcon;
+            private set => Set(ref _taskbarOverlayIcon, value);
+        }
+
+        private string _taskbarDescription = Strings.App_Title;
+        public string TaskbarDescription
+        {
+            get => _taskbarDescription;
+            private set => Set(ref _taskbarDescription, value);
+        }
 
         // VM factories
         private readonly Func<UserViewModel> _userVMFactory;
@@ -199,7 +218,8 @@ namespace DSAMVVM.MVVM.ViewModel
             Func<ComputerViewModel> computerVMFactory,
             Func<GroupViewModel> groupVMFactory,
             Func<LinksViewModel> linksVMFactory,
-            Func<AdminViewModel> adminVMFactory)
+            Func<AdminViewModel> adminVMFactory,
+            INetworkDetectionService? networkService = null)
         {
             DeptService = deptService;
             _searchService = searchService;
@@ -207,6 +227,7 @@ namespace DSAMVVM.MVVM.ViewModel
             _linkRouter = linkRouter;
             _authService = authService;
             _appStateService = appStateService;
+            _networkService = networkService;
             StatusBar = statusBar;
 
             _userVMFactory = userVMFactory;
@@ -221,6 +242,12 @@ namespace DSAMVVM.MVVM.ViewModel
             // Subscribe to SettingsService changes
             var settingsService = App.Services.GetRequiredService<ISettingsService>();
             settingsService.SettingsChanged += OnSettingsChanged;
+
+            if (_networkService != null)
+            {
+                _networkService.NetworkStateChanged += (_, state) => UpdateTaskbarState(state);
+                UpdateTaskbarState(_networkService.CurrentState);
+            }
 
             InitializeViewModels(aboutVM);
             InitializeCommands();
@@ -792,6 +819,32 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             // Forces the UI to re-evaluate any elements bound to IsUserSignedIn
             OnPropertyChanged(nameof(IsUserSignedIn));
+        }
+
+        private void UpdateTaskbarState(NetworkStateInfo state)
+        {
+            UiNotify.RunOnUiAsync(() =>
+            {
+                switch (state.ConnectionType)
+                {
+                    case NetworkConnectionType.OffCampus:
+                        TaskbarOverlayIcon = TaskbarOverlayHelper.OffCampusBadge;
+                        TaskbarDescription = $"{Strings.App_Title} \u2014 Network: Off Campus (VPN recommended for campus tools)";
+                        break;
+
+                    case NetworkConnectionType.Disconnected:
+                        TaskbarOverlayIcon = TaskbarOverlayHelper.DisconnectedBadge;
+                        TaskbarDescription = $"{Strings.App_Title} \u2014 Network Disconnected";
+                        break;
+
+                    default:
+                        TaskbarOverlayIcon = null;
+                        TaskbarDescription = !string.IsNullOrWhiteSpace(state.Label)
+                            ? $"{Strings.App_Title} \u2014 {state.Label}"
+                            : Strings.App_Title;
+                        break;
+                }
+            });
         }
 
         [LibraryImport("user32.dll", EntryPoint = "SwitchToThisWindow")]

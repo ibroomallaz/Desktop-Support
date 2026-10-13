@@ -1068,7 +1068,7 @@ namespace DSAMVVM.MVVM.View.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to University-wide.
+        ///   Looks up a localized string similar to Common EntSup Links.
         /// </summary>
         public static string Links_Section_UniversityWide {
             get {
