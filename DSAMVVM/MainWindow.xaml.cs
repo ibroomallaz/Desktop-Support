@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using DSAMVVM.MVVM.View.Helpers;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,6 +13,7 @@ namespace DSAMVVM
         {
             InitializeComponent();
             DataContextChanged += OnDataContextChanged;
+            SourceInitialized += (_, _) => WindowBackdropHelper.ApplyModernAttributes(this);
         }
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)

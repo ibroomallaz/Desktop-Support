@@ -66,6 +66,25 @@
     <Color x:Key="Color.Pill.Admin.Border">#563F1D</Color>
     <Color x:Key="Color.Pill.Admin.Icon">#FFB84D</Color>
 
+    <!-- Status Card Severity Levels -->
+    <Color x:Key="Color.Status.Neutral.Border">#3E4C60</Color>
+    <Color x:Key="Color.Status.Info.Icon">#5BC3FF</Color>
+
+    <Color x:Key="Color.Status.Success.Bg">#112A20</Color>
+    <Color x:Key="Color.Status.Success.Border">#1F523B</Color>
+    <Color x:Key="Color.Status.Success.Icon">#3CD070</Color>
+
+    <Color x:Key="Color.Status.Warning.Bg">#2B2113</Color>
+    <Color x:Key="Color.Status.Warning.Border">#563F1D</Color>
+    <Color x:Key="Color.Status.Warning.Icon">#FFB84D</Color>
+
+    <Color x:Key="Color.Status.Error.Bg">#2B1417</Color>
+    <Color x:Key="Color.Status.Error.Border">#5C1D24</Color>
+    <Color x:Key="Color.Status.Error.Icon">#FF5252</Color>
+
+    <Color x:Key="Color.Status.Dismiss.Hover">#25FFFFFF</Color>
+    <Color x:Key="Color.Status.Dismiss.Pressed">#40FFFFFF</Color>
+
     <!-- ==== Brush wrappers ==== -->
     <SolidColorBrush x:Key="Brush.Surface"         Color="{DynamicResource Color.Surface.0}"/>
     <SolidColorBrush x:Key="Brush.Surface.1"       Color="{DynamicResource Color.Surface.1}"/>
@@ -122,6 +141,25 @@
     <SolidColorBrush x:Key="Brush.Pill.Admin.Bg"     Color="{DynamicResource Color.Pill.Admin.Bg}"/>
     <SolidColorBrush x:Key="Brush.Pill.Admin.Border" Color="{DynamicResource Color.Pill.Admin.Border}"/>
     <SolidColorBrush x:Key="Brush.Pill.Admin.Icon"   Color="{DynamicResource Color.Pill.Admin.Icon}"/>
+
+    <!-- Status Card Severity Brushes -->
+    <SolidColorBrush x:Key="Brush.Status.Neutral.Border" Color="{DynamicResource Color.Status.Neutral.Border}"/>
+    <SolidColorBrush x:Key="Brush.Status.Info.Icon"       Color="{DynamicResource Color.Status.Info.Icon}"/>
+
+    <SolidColorBrush x:Key="Brush.Status.Success.Bg"     Color="{DynamicResource Color.Status.Success.Bg}"/>
+    <SolidColorBrush x:Key="Brush.Status.Success.Border" Color="{DynamicResource Color.Status.Success.Border}"/>
+    <SolidColorBrush x:Key="Brush.Status.Success.Icon"   Color="{DynamicResource Color.Status.Success.Icon}"/>
+
+    <SolidColorBrush x:Key="Brush.Status.Warning.Bg"     Color="{DynamicResource Color.Status.Warning.Bg}"/>
+    <SolidColorBrush x:Key="Brush.Status.Warning.Border" Color="{DynamicResource Color.Status.Warning.Border}"/>
+    <SolidColorBrush x:Key="Brush.Status.Warning.Icon"   Color="{DynamicResource Color.Status.Warning.Icon}"/>
+
+    <SolidColorBrush x:Key="Brush.Status.Error.Bg"       Color="{DynamicResource Color.Status.Error.Bg}"/>
+    <SolidColorBrush x:Key="Brush.Status.Error.Border"   Color="{DynamicResource Color.Status.Error.Border}"/>
+    <SolidColorBrush x:Key="Brush.Status.Error.Icon"     Color="{DynamicResource Color.Status.Error.Icon}"/>
+
+    <SolidColorBrush x:Key="Brush.Status.Dismiss.Hover"   Color="{DynamicResource Color.Status.Dismiss.Hover}"/>
+    <SolidColorBrush x:Key="Brush.Status.Dismiss.Pressed" Color="{DynamicResource Color.Status.Dismiss.Pressed}"/>
 
     <!-- ==== Backward-compatibility aliases ==== -->
     <!-- Accent Copper / Blue -->

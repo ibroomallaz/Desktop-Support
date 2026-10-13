@@ -15,6 +15,12 @@
         public const string About = "\uE946";
         public const string Admin = "\uE7EF";
 
+        // ===== WINDOW CAPTION =====
+        public const string ChromeMinimize = "\uE921";
+        public const string ChromeMaximize = "\uE922";
+        public const string ChromeRestore = "\uE923";
+        public const string ChromeClose = "\uE8BB";
+
         // ===== TOP / STATUS =====
         public const string Warning = "\uE7BA";
         public const string Server = "\uE82D";

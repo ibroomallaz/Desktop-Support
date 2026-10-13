@@ -1,4 +1,4 @@
-<Window x:Class="DSAMVVM.MainWindow"
+﻿<Window x:Class="DSAMVVM.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -70,7 +70,7 @@
                 <StackPanel Orientation="Horizontal"
                             Grid.Column="2"
                             VerticalAlignment="Center"
-                            HorizontalAlignment="Left">
+                            HorizontalAlignment="Left" Margin="0,0,10,0">
                     <Button Style="{StaticResource Button.Rounded.Small}"
                             Content="{x:Static res:Glyphs.Warning}"
                             FontFamily="Segoe MDL2 Assets"
@@ -86,11 +86,15 @@
                     </Button>
 
                     <Button Style="{StaticResource Button.Rounded.Small}"
-                            Content="—"
+                            Content="{x:Static res:Glyphs.ChromeMinimize}"
+                            FontFamily="Segoe MDL2 Assets"
+                            ToolTip="Minimize"
                             Click="Minimize_Click" />
 
                     <Button Style="{StaticResource Button.Rounded.Small}"
-                            Content="X"
+                            Content="{x:Static res:Glyphs.ChromeClose}"
+                            FontFamily="Segoe MDL2 Assets"
+                            ToolTip="Close"
                             Click="Close_Click"/>
                 </StackPanel>
             </Grid>
