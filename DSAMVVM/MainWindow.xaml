@@ -52,50 +52,88 @@
                                 DataContext="{Binding StatusBar}"/>
 
             <!-- Header -->
-            <Grid DockPanel.Dock="Top" Height="40" Background="Transparent">
+            <Grid DockPanel.Dock="Top"
+                  Height="40"
+                  Background="Transparent"
+                  MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="29*"/>
-                    <ColumnDefinition Width="764*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Style>
+                            <Style TargetType="ColumnDefinition">
+                                <Setter Property="Width" Value="200"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedView}" Value="{x:Static enums:AppView.Admin}">
+                                        <Setter Property="Width" Value="56"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ColumnDefinition.Style>
+                    </ColumnDefinition>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
+                <!-- Title column (matches sidebar width) -->
                 <TextBlock Text="{x:Static res:Strings.App_Title}"
                            VerticalAlignment="Center"
                            FontSize="18"
                            Foreground="{DynamicResource Brush.Text.Primary}"
-                           Margin="20,0,0,0"
-                           MouseLeftButtonDown="TitleBar_MouseLeftButtonDown" Grid.ColumnSpan="2"/>
+                           Margin="20,0,10,0"
+                           TextTrimming="CharacterEllipsis"
+                           IsHitTestVisible="False"/>
 
-                <StackPanel Orientation="Horizontal"
-                            Grid.Column="2"
-                            VerticalAlignment="Center"
-                            HorizontalAlignment="Left" Margin="0,0,10,0">
-                    <Button Style="{StaticResource Button.Rounded.Small}"
-                            Content="{x:Static res:Glyphs.Warning}"
-                            FontFamily="Segoe MDL2 Assets"
-                            Click="FeedbackButton_Click">
-                        <Button.ContextMenu>
-                            <ContextMenu Placement="Bottom">
-                                <MenuItem Header="{x:Static res:Strings.Feedback_ReportBug}" Command="{Binding OpenFeedbackCommand}" CommandParameter="0"/>
-                                <MenuItem Header="{x:Static res:Strings.Feedback_RequestFeature}" Command="{Binding OpenFeedbackCommand}" CommandParameter="1"/>
-                                <MenuItem Header="{x:Static res:Strings.Feedback_UpdateSupportTeam}" Command="{Binding OpenFeedbackCommand}" CommandParameter="2"/>
-                                <MenuItem Header="{x:Static res:Strings.Feedback_AddNote}" Command="{Binding OpenFeedbackCommand}" CommandParameter="3"/>
-                            </ContextMenu>
-                        </Button.ContextMenu>
-                    </Button>
+                <!-- Content header column: perfectly aligned over the views -->
+                <Grid Grid.Column="1">
+                    <!-- Search Omnibar centered directly over the view content area -->
+                    <ComboBox Width="280"
+                              Height="28"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              Style="{StaticResource ComboBox.Search}"
+                              Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                              ItemsSource="{Binding SearchHistory}"
+                              Tag="{Binding SearchWatermark}"
+                              IsEnabled="{Binding IsSearchEnabled}"
+                              IsTextSearchEnabled="False"
+                              StaysOpenOnEdit="True"
+                              PreviewMouseDown="SearchBox_ShowHistory"
+                              PreviewTextInput="SearchBox_PreviewTextInput">
+                        <ComboBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding ExecuteSearchCommand}"/>
+                        </ComboBox.InputBindings>
+                    </ComboBox>
 
-                    <Button Style="{StaticResource Button.Rounded.Small}"
-                            Content="{x:Static res:Glyphs.ChromeMinimize}"
-                            FontFamily="Segoe MDL2 Assets"
-                            ToolTip="Minimize"
-                            Click="Minimize_Click" />
+                    <!-- Window control buttons pinned to the far right -->
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Margin="0,0,10,0">
+                        <Button Style="{StaticResource Button.Rounded.Small}"
+                                Content="{x:Static res:Glyphs.Warning}"
+                                FontFamily="Segoe MDL2 Assets"
+                                Click="FeedbackButton_Click">
+                            <Button.ContextMenu>
+                                <ContextMenu Placement="Bottom">
+                                    <MenuItem Header="{x:Static res:Strings.Feedback_ReportBug}" Command="{Binding OpenFeedbackCommand}" CommandParameter="0"/>
+                                    <MenuItem Header="{x:Static res:Strings.Feedback_RequestFeature}" Command="{Binding OpenFeedbackCommand}" CommandParameter="1"/>
+                                    <MenuItem Header="{x:Static res:Strings.Feedback_UpdateSupportTeam}" Command="{Binding OpenFeedbackCommand}" CommandParameter="2"/>
+                                    <MenuItem Header="{x:Static res:Strings.Feedback_AddNote}" Command="{Binding OpenFeedbackCommand}" CommandParameter="3"/>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
 
-                    <Button Style="{StaticResource Button.Rounded.Small}"
-                            Content="{x:Static res:Glyphs.ChromeClose}"
-                            FontFamily="Segoe MDL2 Assets"
-                            ToolTip="Close"
-                            Click="Close_Click"/>
-                </StackPanel>
+                        <Button Style="{StaticResource Button.Rounded.Small}"
+                                Content="{x:Static res:Glyphs.ChromeMinimize}"
+                                FontFamily="Segoe MDL2 Assets"
+                                ToolTip="Minimize"
+                                Click="Minimize_Click" />
+
+                        <Button Style="{StaticResource Button.Rounded.Small}"
+                                Content="{x:Static res:Glyphs.ChromeClose}"
+                                FontFamily="Segoe MDL2 Assets"
+                                ToolTip="Close"
+                                Click="Close_Click"/>
+                    </StackPanel>
+                </Grid>
             </Grid>
 
             <!-- Sidebar: top-right rounded + single right-edge separator -->
@@ -232,28 +270,7 @@
 
             <!-- Main content -->
             <Grid Margin="10">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <ComboBox Width="250"
-                          Margin="5"
-                          VerticalAlignment="Top"
-                          Style="{StaticResource ComboBox.Search}"
-                          Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                          ItemsSource="{Binding SearchHistory}"
-                          IsTextSearchEnabled="False"
-                          StaysOpenOnEdit="True"
-                          PreviewMouseDown="SearchBox_ShowHistory"
-                          PreviewTextInput="SearchBox_PreviewTextInput">
-                    <ComboBox.InputBindings>
-                        <KeyBinding Key="Enter" Command="{Binding ExecuteSearchCommand}"/>
-                    </ComboBox.InputBindings>
-                </ComboBox>
-
-                <ContentControl Grid.Row="1"
-                                Content="{Binding CurrentView}"
+                <ContentControl Content="{Binding CurrentView}"
                                 CacheMode="BitmapCache"
                                 Style="{StaticResource Fx.SlideFadeHost}"/>
             </Grid>

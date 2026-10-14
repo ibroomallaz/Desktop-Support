@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Interfaces.Infrastructure;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
@@ -82,6 +82,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public RelayCommand LinksCommand { get; private set; } = null!;
         public RelayCommand AboutCommand { get; private set; } = null!;
         public RelayCommand ExecuteSearchCommand { get; private set; } = null!;
+        public RelayCommand ClearSearchCommand { get; private set; } = null!;
         public RelayCommand SettingsCommand { get; private set; } = null!;
         public RelayCommand OpenFeedbackCommand { get; private set; } = null!;
         public RelayCommand AdminCommand { get; private set; } = null!;
@@ -123,6 +124,8 @@ namespace DSAMVVM.MVVM.ViewModel
 
                 _selectedView = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(IsSearchEnabled));
+                OnPropertyChanged(nameof(SearchWatermark));
 
                 _appStateService.CurrentView = value.ToString();
 
@@ -146,8 +149,28 @@ namespace DSAMVVM.MVVM.ViewModel
         public string? SearchQuery
         {
             get => _searchQuery;
-            set { if (_searchQuery != value) { _searchQuery = value; OnPropertyChanged(); } }
+            set
+            {
+                if (_searchQuery != value)
+                {
+                    _searchQuery = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(HasSearchQuery));
+                }
+            }
         }
+
+        public bool HasSearchQuery => !string.IsNullOrWhiteSpace(SearchQuery);
+        public bool IsSearchEnabled => SelectedView is AppView.User or AppView.Computer or AppView.Group or AppView.Admin;
+
+        public string SearchWatermark => SelectedView switch
+        {
+            AppView.User => "Search Users...",
+            AppView.Computer => "Search Computers...",
+            AppView.Group => "Search Groups...",
+            AppView.Admin => "Search Admin...",
+            _ => "Select view to search..."
+        };
 
         public ReadOnlyObservableCollection<string> SearchHistory => _searchService.SearchHistory;
 
@@ -691,6 +714,7 @@ namespace DSAMVVM.MVVM.ViewModel
             AdminCommand = new RelayCommand(_ => { SelectedView = AppView.Admin; RestoreWindow(); });
 
             ExecuteSearchCommand = new RelayCommand(_ => TriggerSearch());
+            ClearSearchCommand = new RelayCommand(_ => SearchQuery = string.Empty, _ => !string.IsNullOrEmpty(SearchQuery));
             ShowWindowCommand = new RelayCommand(_ => RestoreWindow());
             ExitApplicationCommand = new RelayCommand(_ => Application.Current.Shutdown());
             CheckUpdateCommand = new RelayCommand(_ =>
