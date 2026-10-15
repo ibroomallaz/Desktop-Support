@@ -121,8 +121,8 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public bool IsCompactSidebar => _isSidebarCollapsed || SelectedView == AppView.Admin;
         public double SidebarWidth => IsCompactSidebar ? 56 : 200;
-        public string SidebarToggleGlyph => IsCompactSidebar ? Glyphs.ChevronRight : Glyphs.ChevronLeft;
-        public string SidebarToggleText => IsCompactSidebar ? string.Empty : "Collapse";
+        public string SidebarToggleGlyph => Glyphs.GlobalNav;
+        public string SidebarToggleText => string.Empty;
         public string SidebarToggleToolTip => IsCompactSidebar ? "Expand navigation" : "Collapse navigation";
 
         private NavItem? _selectedNav;

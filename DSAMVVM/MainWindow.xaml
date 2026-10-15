@@ -61,20 +61,30 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Title column (fixed 200px, never collapses) -->
-                <TextBlock Text="{x:Static res:Strings.App_Title}"
-                           VerticalAlignment="Center"
-                           FontSize="18"
-                           Foreground="{DynamicResource Brush.Text.Primary}"
-                           Margin="20,0,10,0"
-                           TextTrimming="CharacterEllipsis"
-                           IsHitTestVisible="False"/>
+                <!-- Title column: Nav Toggle Button + Support App title -->
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="12,0,10,0">
+                    <Button Style="{StaticResource Button.Rounded.Small}"
+                            Content="{Binding SidebarToggleGlyph}"
+                            FontFamily="Segoe MDL2 Assets"
+                            FontSize="13"
+                            Command="{Binding ToggleSidebarCommand}"
+                            ToolTip="{Binding SidebarToggleToolTip}"
+                            Margin="0,0,10,0"/>
+
+                    <TextBlock Text="{x:Static res:Strings.App_Title}"
+                               VerticalAlignment="Center"
+                               FontSize="18"
+                               Foreground="{DynamicResource Brush.Text.Primary}"
+                               TextTrimming="CharacterEllipsis"
+                               IsHitTestVisible="False"/>
+                </StackPanel>
 
                 <!-- Content header column: perfectly aligned over the views -->
                 <Grid Grid.Column="1">
                     <!-- Search Omnibar centered directly over the view content area -->
                     <ComboBox Width="280"
-                              Height="28"
                               HorizontalAlignment="Center"
                               VerticalAlignment="Center"
                               Style="{StaticResource ComboBox.Search}"
@@ -150,7 +160,6 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <ScrollViewer Grid.Row="0"
@@ -167,11 +176,6 @@
                              SelectedValue="{Binding SelectedView, Mode=TwoWay}"
                              SelectedValuePath="View"
                              Style="{StaticResource Nav.ListBox}"/>
-
-                    <!-- Collapse / Expand Toggle Button -->
-                    <Button Grid.Row="2"
-                            Command="{Binding ToggleSidebarCommand}"
-                            Style="{StaticResource Nav.ToggleButton}"/>
 
                 </Grid>
             </Border>

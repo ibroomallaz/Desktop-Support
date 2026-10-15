@@ -4,6 +4,7 @@
     public static class Glyphs
     {
         // ===== NAV =====
+        public const string GlobalNav = "\uE700";
         public const string Home = "\uE80F";
         public const string Search = "\uE721";
         public const string User = "\uE77B";
