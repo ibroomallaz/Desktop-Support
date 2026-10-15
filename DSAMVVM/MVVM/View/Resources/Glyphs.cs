@@ -14,6 +14,8 @@
         public const string Entra = "\uE753";
         public const string About = "\uE946";
         public const string Admin = "\uE7EF";
+        public const string ChevronLeft = "\uE76B";
+        public const string ChevronRight = "\uE76C";
 
         // ===== WINDOW CAPTION =====
         public const string ChromeMinimize = "\uE921";

@@ -86,12 +86,45 @@ namespace DSAMVVM.MVVM.ViewModel
         public RelayCommand SettingsCommand { get; private set; } = null!;
         public RelayCommand OpenFeedbackCommand { get; private set; } = null!;
         public RelayCommand AdminCommand { get; private set; } = null!;
+        public RelayCommand ToggleSidebarCommand { get; private set; } = null!;
 
         public ICommand ShowWindowCommand { get; private set; } = null!;
         public ICommand CheckUpdateCommand { get; private set; } = null!;
         public ICommand ExitApplicationCommand { get; private set; } = null!;
 
         public ObservableCollection<NavItem> NavItems { get; } = [];
+        public ObservableCollection<NavItem> PrimaryNavItems { get; } = [];
+        public ObservableCollection<NavItem> FooterNavItems { get; } = [];
+
+        // Sidebar Collapse State
+        private bool _userSidebarPreference;
+        private bool _isSidebarCollapsed;
+        public bool IsSidebarCollapsed
+        {
+            get => _isSidebarCollapsed;
+            set
+            {
+                if (Set(ref _isSidebarCollapsed, value))
+                {
+                    if (SelectedView != AppView.Admin)
+                    {
+                        _userSidebarPreference = value;
+                    }
+                    OnPropertyChanged(nameof(IsCompactSidebar));
+                    OnPropertyChanged(nameof(SidebarWidth));
+                    OnPropertyChanged(nameof(SidebarToggleGlyph));
+                    OnPropertyChanged(nameof(SidebarToggleText));
+                    OnPropertyChanged(nameof(SidebarToggleToolTip));
+                }
+            }
+        }
+
+        public bool IsCompactSidebar => _isSidebarCollapsed || SelectedView == AppView.Admin;
+        public double SidebarWidth => IsCompactSidebar ? 56 : 200;
+        public string SidebarToggleGlyph => IsCompactSidebar ? Glyphs.ChevronRight : Glyphs.ChevronLeft;
+        public string SidebarToggleText => IsCompactSidebar ? string.Empty : "Collapse";
+        public string SidebarToggleToolTip => IsCompactSidebar ? "Expand navigation" : "Collapse navigation";
+
         private NavItem? _selectedNav;
         public NavItem? SelectedNav
         {
@@ -122,10 +155,31 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 if (_selectedView == value) return;
 
+                var prevView = _selectedView;
                 _selectedView = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(IsSearchEnabled));
                 OnPropertyChanged(nameof(SearchWatermark));
+
+                _selectedNav = NavItems.FirstOrDefault(n => n.View == value);
+                OnPropertyChanged(nameof(SelectedNav));
+
+                if (value == AppView.Admin)
+                {
+                    IsSidebarCollapsed = true;
+                }
+                else if (prevView == AppView.Admin)
+                {
+                    IsSidebarCollapsed = _userSidebarPreference;
+                }
+                else
+                {
+                    OnPropertyChanged(nameof(IsCompactSidebar));
+                    OnPropertyChanged(nameof(SidebarWidth));
+                    OnPropertyChanged(nameof(SidebarToggleGlyph));
+                    OnPropertyChanged(nameof(SidebarToggleText));
+                    OnPropertyChanged(nameof(SidebarToggleToolTip));
+                }
 
                 _appStateService.CurrentView = value.ToString();
 
@@ -206,31 +260,48 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private void SyncAdminNavItem()
         {
-            var adminItem = NavItems.FirstOrDefault(n => n.View == AppView.Admin);
+            var adminItemInNav = NavItems.FirstOrDefault(n => n.View == AppView.Admin);
+            var adminItemInFooter = FooterNavItems.FirstOrDefault(n => n.View == AppView.Admin);
 
             if (_hasUnlockedAdmin && _showAdminView)
             {
-                if (adminItem == null)
+                if (adminItemInNav == null || adminItemInFooter == null)
                 {
-                    var settingsIndex = NavItems.IndexOf(NavItems.First(n => n.View == AppView.Settings));
-                    NavItems.Insert(settingsIndex, new NavItem
+                    var newAdminItem = new NavItem
                     {
-                        Title = "Admin",
+                        Title = Strings.Nav_Admin,
                         Glyph = Glyphs.Admin,
                         View = AppView.Admin,
                         Command = AdminCommand
-                    });
+                    };
+
+                    if (adminItemInFooter == null)
+                    {
+                        FooterNavItems.Insert(0, newAdminItem);
+                    }
+
+                    if (adminItemInNav == null)
+                    {
+                        var settingsIndex = NavItems.IndexOf(NavItems.First(n => n.View == AppView.Settings));
+                        NavItems.Insert(settingsIndex, newAdminItem);
+                    }
                 }
             }
             else
             {
-                if (adminItem != null)
+                if (adminItemInFooter != null)
                 {
-                    NavItems.Remove(adminItem);
-                    if (SelectedView == AppView.Admin)
-                    {
-                        SelectedView = AppView.Home;
-                    }
+                    FooterNavItems.Remove(adminItemInFooter);
+                }
+
+                if (adminItemInNav != null)
+                {
+                    NavItems.Remove(adminItemInNav);
+                }
+
+                if (SelectedView == AppView.Admin)
+                {
+                    SelectedView = AppView.Home;
                 }
             }
         }
@@ -651,14 +722,38 @@ namespace DSAMVVM.MVVM.ViewModel
         private void InitializeNavigation()
         {
             NavItems.Clear();
-            NavItems.Add(new NavItem { Title = "Home", Glyph = Glyphs.Home, View = AppView.Home, Command = HomeViewCommand });
-            NavItems.Add(new NavItem { Title = "User", Glyph = Glyphs.User, View = AppView.User, Command = UserCommand });
-            NavItems.Add(new NavItem { Title = "Computer", Glyph = Glyphs.Computer, View = AppView.Computer, Command = ComputerCommand });
-            NavItems.Add(new NavItem { Title = "Group", Glyph = Glyphs.Group, View = AppView.Group, Command = GroupCommand });
-            NavItems.Add(new NavItem { Title = "Entra", Glyph = Glyphs.Entra, View = AppView.Entra, Command = EntraCommand });
-            NavItems.Add(new NavItem { Title = "Links", Glyph = Glyphs.Links, View = AppView.Links, Command = LinksCommand });
-            NavItems.Add(new NavItem { Title = "About", Glyph = Glyphs.About, View = AppView.About, Command = AboutCommand });
-            NavItems.Add(new NavItem { Title = "Settings", Glyph = Glyphs.Settings, View = AppView.Settings, Command = SettingsCommand });
+            PrimaryNavItems.Clear();
+            FooterNavItems.Clear();
+
+            var home = new NavItem { Title = Strings.Nav_Home, Glyph = Glyphs.Home, View = AppView.Home, Command = HomeViewCommand };
+            var user = new NavItem { Title = Strings.Nav_User, Glyph = Glyphs.User, View = AppView.User, Command = UserCommand };
+            var computer = new NavItem { Title = Strings.Nav_Computer, Glyph = Glyphs.Computer, View = AppView.Computer, Command = ComputerCommand };
+            var group = new NavItem { Title = Strings.Nav_Groups, Glyph = Glyphs.Group, View = AppView.Group, Command = GroupCommand };
+            var entra = new NavItem { Title = Strings.Nav_Entra, Glyph = Glyphs.Entra, View = AppView.Entra, Command = EntraCommand };
+            var links = new NavItem { Title = Strings.Nav_Links, Glyph = Glyphs.Links, View = AppView.Links, Command = LinksCommand };
+            var about = new NavItem { Title = Strings.Nav_About, Glyph = Glyphs.About, View = AppView.About, Command = AboutCommand };
+            var settings = new NavItem { Title = Strings.Nav_Settings, Glyph = Glyphs.Settings, View = AppView.Settings, Command = SettingsCommand };
+
+            PrimaryNavItems.Add(home);
+            PrimaryNavItems.Add(user);
+            PrimaryNavItems.Add(computer);
+            PrimaryNavItems.Add(group);
+            PrimaryNavItems.Add(entra);
+            PrimaryNavItems.Add(links);
+            PrimaryNavItems.Add(about);
+
+            FooterNavItems.Add(settings);
+
+            NavItems.Add(home);
+            NavItems.Add(user);
+            NavItems.Add(computer);
+            NavItems.Add(group);
+            NavItems.Add(entra);
+            NavItems.Add(links);
+            NavItems.Add(about);
+            NavItems.Add(settings);
+
+            SyncAdminNavItem();
         }
 
         public void BootstrapInitialView()
@@ -712,6 +807,7 @@ namespace DSAMVVM.MVVM.ViewModel
             AboutCommand = new RelayCommand(_ => { SelectedView = AppView.About; RestoreWindow(); });
             SettingsCommand = new RelayCommand(_ => { SelectedView = AppView.Settings; RestoreWindow(); });
             AdminCommand = new RelayCommand(_ => { SelectedView = AppView.Admin; RestoreWindow(); });
+            ToggleSidebarCommand = new RelayCommand(_ => IsSidebarCollapsed = !IsSidebarCollapsed);
 
             ExecuteSearchCommand = new RelayCommand(_ => TriggerSearch());
             ClearSearchCommand = new RelayCommand(_ => SearchQuery = string.Empty, _ => !string.IsNullOrEmpty(SearchQuery));
@@ -860,20 +956,20 @@ namespace DSAMVVM.MVVM.ViewModel
                 {
                     case NetworkConnectionType.OffCampus:
                         TaskbarOverlayIcon = TaskbarOverlayHelper.OffCampusBadge;
-                        TaskbarDescription = $"{Strings.App_Title} \u2014 Network: Off Campus (VPN recommended for campus tools)";
-                        WindowTitle = $"{Strings.App_Title} \u2014 Network: Off Campus (VPN recommended)";
+                        TaskbarDescription = $"{Strings.App_Title} — Network: Off Campus (VPN recommended for campus tools)";
+                        WindowTitle = $"{Strings.App_Title} — Network: Off Campus (VPN recommended)";
                         break;
 
                     case NetworkConnectionType.Disconnected:
                         TaskbarOverlayIcon = TaskbarOverlayHelper.DisconnectedBadge;
-                        TaskbarDescription = $"{Strings.App_Title} \u2014 Network Disconnected";
-                        WindowTitle = $"{Strings.App_Title} \u2014 Network Disconnected";
+                        TaskbarDescription = $"{Strings.App_Title} — Network Disconnected";
+                        WindowTitle = $"{Strings.App_Title} — Network Disconnected";
                         break;
 
                     default:
                         TaskbarOverlayIcon = null;
                         TaskbarDescription = !string.IsNullOrWhiteSpace(state.Label)
-                            ? $"{Strings.App_Title} \u2014 {state.Label}"
+                            ? $"{Strings.App_Title} — {state.Label}"
                             : Strings.App_Title;
                         WindowTitle = Strings.App_Title;
                         break;

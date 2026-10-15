@@ -57,22 +57,11 @@
                   Background="Transparent"
                   MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition>
-                        <ColumnDefinition.Style>
-                            <Style TargetType="ColumnDefinition">
-                                <Setter Property="Width" Value="200"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedView}" Value="{x:Static enums:AppView.Admin}">
-                                        <Setter Property="Width" Value="56"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ColumnDefinition.Style>
-                    </ColumnDefinition>
+                    <ColumnDefinition Width="200"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Title column (matches sidebar width) -->
+                <!-- Title column (fixed 200px, never collapses) -->
                 <TextBlock Text="{x:Static res:Strings.App_Title}"
                            VerticalAlignment="Center"
                            FontSize="18"
@@ -150,120 +139,39 @@
                     <Style TargetType="Border">
                         <Setter Property="Width" Value="200"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding SelectedView}" Value="{x:Static enums:AppView.Admin}">
+                            <DataTrigger Binding="{Binding IsCompactSidebar}" Value="True">
                                 <Setter Property="Width" Value="56"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
 
-                <Border.Resources>
-                    <Style x:Key="Radio.Menu" TargetType="{x:Type RadioButton}" BasedOn="{StaticResource Radio.Menu}">
-                        <Setter Property="ToolTip" Value="{Binding Content, RelativeSource={RelativeSource Self}}"/>
-                        <Setter Property="ToolTipService.IsEnabled" Value="False"/>
-                        <Setter Property="ToolTipService.InitialShowDelay" Value="100"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding SelectedView}" Value="{x:Static enums:AppView.Admin}">
-                                <Setter Property="ToolTipService.IsEnabled" Value="True"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Resources>
-
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <ScrollViewer Grid.Row="0"
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled">
-                        <StackPanel Margin="0,0,0,4">
-                            <RadioButton Content="{x:Static res:Strings.Nav_Home}"
-                                         Tag="{x:Static res:Glyphs.Home}"
-                                         GroupName="MainMenu"
-                                         Style="{StaticResource Radio.Menu}"
-                                         Command="{Binding HomeViewCommand}"
-                                         IsChecked="{Binding SelectedView, Mode=TwoWay,
-                                                     Converter={StaticResource EnumEqualsConverter},
-                                                     ConverterParameter={x:Static enums:AppView.Home}}"/>
-
-                            <RadioButton Content="{x:Static res:Strings.Nav_User}"
-                                         Tag="{x:Static res:Glyphs.User}"
-                                         GroupName="MainMenu"
-                                         Style="{StaticResource Radio.Menu}"
-                                         Command="{Binding UserCommand}"
-                                         IsChecked="{Binding SelectedView, Mode=TwoWay,
-                                                     Converter={StaticResource EnumEqualsConverter},
-                                                     ConverterParameter={x:Static enums:AppView.User}}"/>
-
-                            <RadioButton Content="{x:Static res:Strings.Nav_Computer}"
-                                         Tag="{x:Static res:Glyphs.Computer}"
-                                         GroupName="MainMenu"
-                                         Style="{StaticResource Radio.Menu}"
-                                         Command="{Binding ComputerCommand}"
-                                         IsChecked="{Binding SelectedView, Mode=TwoWay,
-                                                     Converter={StaticResource EnumEqualsConverter},
-                                                     ConverterParameter={x:Static enums:AppView.Computer}}"/>
-
-                            <RadioButton Content="{x:Static res:Strings.Nav_Groups}"
-                                         Tag="{x:Static res:Glyphs.Group}"
-                                         GroupName="MainMenu"
-                                         Style="{StaticResource Radio.Menu}"
-                                         Command="{Binding GroupCommand}"
-                                         IsChecked="{Binding SelectedView, Mode=TwoWay,
-                                                     Converter={StaticResource EnumEqualsConverter},
-                                                     ConverterParameter={x:Static enums:AppView.Group}}"/>
-
-                            <RadioButton Content="{x:Static res:Strings.Nav_Entra}"
-                                         Tag="{x:Static res:Glyphs.Entra}"
-                                         GroupName="MainMenu"
-                                         Style="{StaticResource Radio.Menu}"
-                                         Command="{Binding EntraCommand}"
-                                         IsChecked="{Binding SelectedView, Mode=TwoWay,
-                                                     Converter={StaticResource EnumEqualsConverter},
-                                                     ConverterParameter={x:Static enums:AppView.Entra}}"/>
-
-                            <RadioButton Content="{x:Static res:Strings.Nav_Links}"
-                                         Tag="{x:Static res:Glyphs.Links}"
-                                         GroupName="MainMenu"
-                                         Style="{StaticResource Radio.Menu}"
-                                         Command="{Binding LinksCommand}"
-                                         IsChecked="{Binding SelectedView, Mode=TwoWay,
-                                                     Converter={StaticResource EnumEqualsConverter},
-                                                     ConverterParameter={x:Static enums:AppView.Links}}"/>
-
-                            <RadioButton Content="{x:Static res:Strings.Nav_About}"
-                                         Tag="{x:Static res:Glyphs.About}"
-                                         GroupName="MainMenu"
-                                         Style="{StaticResource Radio.Menu}"
-                                         Command="{Binding AboutCommand}"
-                                         IsChecked="{Binding SelectedView, Mode=TwoWay,
-                                                     Converter={StaticResource EnumEqualsConverter},
-                                                     ConverterParameter={x:Static enums:AppView.About}}"/>
-                        </StackPanel>
+                        <ListBox ItemsSource="{Binding PrimaryNavItems}"
+                                 SelectedValue="{Binding SelectedView, Mode=TwoWay}"
+                                 SelectedValuePath="View"
+                                 Style="{StaticResource Nav.ListBox}"/>
                     </ScrollViewer>
 
-                    <StackPanel Grid.Row="1">
+                    <ListBox Grid.Row="1"
+                             ItemsSource="{Binding FooterNavItems}"
+                             SelectedValue="{Binding SelectedView, Mode=TwoWay}"
+                             SelectedValuePath="View"
+                             Style="{StaticResource Nav.ListBox}"/>
 
-                        <RadioButton Content="{x:Static res:Strings.Nav_Admin}"
-                                     Tag="{x:Static res:Glyphs.Admin}"
-                                     GroupName="MainMenu"
-                                     Style="{StaticResource Radio.Menu}"
-                                     Command="{Binding AdminCommand}"
-                                     Visibility="{Binding ShowAdminView, Converter={StaticResource BoolToVis}}"
-                                     IsChecked="{Binding SelectedView, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enums:AppView.Admin}}" />
-                        <RadioButton Content="{x:Static res:Strings.Nav_Settings}"
-                                     Tag="{x:Static res:Glyphs.Settings}"
-                                     GroupName="MainMenu"
-                                     Style="{StaticResource Radio.Menu}"
-                                     Command="{Binding SettingsCommand}"
-                                     Margin="0,12,0,6"
-                                     IsChecked="{Binding SelectedView, Mode=TwoWay,
-                                                 Converter={StaticResource EnumEqualsConverter},
-                                                 ConverterParameter={x:Static enums:AppView.Settings}}"/>
-                    </StackPanel>
+                    <!-- Collapse / Expand Toggle Button -->
+                    <Button Grid.Row="2"
+                            Command="{Binding ToggleSidebarCommand}"
+                            Style="{StaticResource Nav.ToggleButton}"/>
 
                 </Grid>
             </Border>
