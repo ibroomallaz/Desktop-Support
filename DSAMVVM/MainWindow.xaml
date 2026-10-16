@@ -1,4 +1,4 @@
-﻿<Window x:Class="DSAMVVM.MainWindow"
+<Window x:Class="DSAMVVM.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -63,8 +63,20 @@
 
                 <!-- Title column: Nav Toggle Button + Support App title -->
                 <StackPanel Orientation="Horizontal"
+                            Background="Transparent"
                             VerticalAlignment="Center"
                             Margin="12,0,10,0">
+                    <StackPanel.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Developer Tools" IsEnabled="False" FontWeight="SemiBold"/>
+                            <Separator/>
+                            <MenuItem Header="{Binding DevModeStatusText}" IsCheckable="True" IsChecked="{Binding IsDevModeEnabled, Mode=OneWay}" Command="{Binding ToggleDevModeCommand}"/>
+                            <MenuItem Header="{Binding AdminModeStatusText}" IsCheckable="True" IsChecked="{Binding HasUnlockedAdmin, Mode=OneWay}" Command="{Binding ToggleAdminModeCommand}"/>
+                            <Separator/>
+                            <MenuItem Header="Open App Data Folder" Command="{Binding OpenAppDataFolderCommand}"/>
+                            <MenuItem Header="Open Logs Folder" Command="{Binding OpenLogsFolderCommand}"/>
+                        </ContextMenu>
+                    </StackPanel.ContextMenu>
                     <Button Style="{StaticResource Button.Rounded.Small}"
                             Content="{Binding SidebarToggleGlyph}"
                             FontFamily="Segoe MDL2 Assets"

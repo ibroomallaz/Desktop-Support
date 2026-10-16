@@ -1,4 +1,4 @@
-﻿<Project Sdk="WixToolset.Sdk/7.0.0">
+<Project Sdk="WixToolset.Sdk/7.0.0">
   <PropertyGroup>
     <OutputType>Package</OutputType>
     <OutputName>DSA_Installer</OutputName>
@@ -23,4 +23,8 @@
   <ItemGroup>
     <ProjectReference Include="..\DSAMVVM\DSAMVVM.csproj" Publish="true" />
   </ItemGroup>
+
+  <Target Name="CleanStalePublishDir" BeforeTargets="ResolveProjectReferences;BeforeBuild;BeforeRebuild">
+    <RemoveDir Directories="$(BaseIntermediateOutputPath)$(Configuration)\publish" />
+  </Target>
 </Project>

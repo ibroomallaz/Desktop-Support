@@ -350,7 +350,7 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="Custom text size" Style="{StaticResource FieldLabel}"/>
                                     <Slider x:Name="GeneralSizeSlider" Grid.Column="2" Style="{StaticResource Slider.Themed}"
-                                            Minimum="8" Maximum="24" TickFrequency="1"
+                                            Minimum="8" Maximum="24" TickFrequency="0.5"
                                             IsSnapToTickEnabled="True" Value="{Binding DefaultFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                     <TextBlock Grid.Column="4" Style="{StaticResource FieldLabel}">
                                         <Run Text="{Binding ElementName=GeneralSizeSlider, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
@@ -391,7 +391,7 @@
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
                                                 <Slider x:Name="UserSize" Style="{StaticResource Slider.Themed}"
-                                                        Minimum="8" Maximum="24" TickFrequency="1" IsSnapToTickEnabled="True"
+                                                        Minimum="8" Maximum="24" TickFrequency="0.5" IsSnapToTickEnabled="True"
                                                         Value="{Binding UserFontSize, Mode=TwoWay}"/>
                                                 <TextBlock Grid.Column="2" Style="{StaticResource FieldLabel}">
                                                     <Run Text="{Binding ElementName=UserSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
@@ -425,7 +425,7 @@
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
                                                 <Slider x:Name="ComputerSize" Style="{StaticResource Slider.Themed}"
-                                                        Minimum="8" Maximum="24" TickFrequency="1" IsSnapToTickEnabled="True"
+                                                        Minimum="8" Maximum="24" TickFrequency="0.5" IsSnapToTickEnabled="True"
                                                         Value="{Binding ComputerFontSize, Mode=TwoWay}"/>
                                                 <TextBlock Grid.Column="2" Style="{StaticResource FieldLabel}">
                                                     <Run Text="{Binding ElementName=ComputerSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
@@ -459,7 +459,7 @@
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
                                                 <Slider x:Name="GroupSize" Style="{StaticResource Slider.Themed}"
-                                                        Minimum="8" Maximum="24" TickFrequency="1" IsSnapToTickEnabled="True"
+                                                        Minimum="8" Maximum="24" TickFrequency="0.5" IsSnapToTickEnabled="True"
                                                         Value="{Binding GroupFontSize, Mode=TwoWay}"/>
                                                 <TextBlock Grid.Column="2" Style="{StaticResource FieldLabel}">
                                                     <Run Text="{Binding ElementName=GroupSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
@@ -493,7 +493,7 @@
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
                                                 <Slider x:Name="EntraSize" Style="{StaticResource Slider.Themed}"
-                                                        Minimum="8" Maximum="24" TickFrequency="1" IsSnapToTickEnabled="True"
+                                                        Minimum="8" Maximum="24" TickFrequency="0.5" IsSnapToTickEnabled="True"
                                                         Value="{Binding EntraFontSize, Mode=TwoWay}"/>
                                                 <TextBlock Grid.Column="2" Style="{StaticResource FieldLabel}">
                                                     <Run Text="{Binding ElementName=EntraSize, Path=Value, StringFormat=F0}"/><Run Text=" pt"/>
@@ -980,6 +980,95 @@
                                           Visibility="{Binding HasUnlockedAdmin, Converter={StaticResource BoolToVis}}"
                                           Foreground="{DynamicResource Brush.Text.Primary}"
                                           Margin="0,20,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+                <!-- ============================================== -->
+                <!-- 5. DEVELOPER SETTINGS SECTION                  -->
+                <!-- ============================================== -->
+                <StackPanel Visibility="{Binding IsDeveloperSelected, Converter={StaticResource BoolToVis}}">
+                    <!-- Developer Overrides & Administration Card -->
+                    <Border x:Name="CardDevTools" Style="{StaticResource Card.Container}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
+                            <StackPanel Grid.Column="1" Margin="16">
+                                <TextBlock Text="Administration &amp; Source Overrides" FontSize="16" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,6"/>
+                                <TextBlock Text="Configure JSON Administration access and internal testing update feeds."
+                                           FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,0,0,16"/>
+
+                                <!-- JSON Admin -->
+                                <TextBlock Text="JSON Administration" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,8"/>
+                                <CheckBox Foreground="{DynamicResource Brush.Text.Primary}"
+                                          Content="Enable JSON Admin"
+                                          IsChecked="{Binding HasUnlockedAdmin, Mode=TwoWay}"
+                                          Margin="0,0,0,8"/>
+                                <CheckBox Foreground="{DynamicResource Brush.Text.Primary}"
+                                          Content="Show Admin in Navigation Bar"
+                                          IsChecked="{Binding ShowAdminView, Mode=TwoWay}"
+                                          IsEnabled="{Binding HasUnlockedAdmin}"
+                                          Margin="24,0,0,16"/>
+
+                                <!-- Update Channel Override -->
+                                <TextBlock Text="Update Source Overrides" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,8"/>
+                                <CheckBox Foreground="{DynamicResource Brush.Text.Primary}"
+                                          Content="Use Internal Testing Sources"
+                                          IsChecked="{Binding UseInternalTestingSources, Mode=TwoWay}"
+                                          ToolTip="Switches update source feeds to internal test feeds."/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Status Bar & Notification Test Activators Card -->
+                    <Border x:Name="CardDevStatusTests" Style="{StaticResource Card.Container}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
+                            <StackPanel Grid.Column="1" Margin="16">
+                                <TextBlock Text="Status Bar &amp; Notification Activators" FontSize="16" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,6"/>
+                                <TextBlock Text="Trigger test warnings, errors, and status bar alerts to verify UI behavior and dismissal."
+                                           FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" Margin="0,0,0,16"/>
+
+                                <WrapPanel Orientation="Horizontal">
+                                    <Button Command="{Binding TriggerTestInfoCommand}"
+                                            Style="{StaticResource Button.Rounded.Compact}"
+                                            Padding="14,6" Margin="0,0,10,10">
+                                        <TextBlock Text="Trigger Test Info" Foreground="{DynamicResource Brush.Text.Primary}" FontSize="12"/>
+                                    </Button>
+
+                                    <Button Command="{Binding TriggerTestWarningCommand}"
+                                            Style="{StaticResource Button.Rounded.Compact}"
+                                            Padding="14,6" Margin="0,0,10,10">
+                                        <TextBlock Text="Trigger Test Warning" Foreground="{DynamicResource Brush.Text.Primary}" FontSize="12"/>
+                                    </Button>
+
+                                    <Button Command="{Binding TriggerTestStickyWarningCommand}"
+                                            Style="{StaticResource Button.Rounded.Compact}"
+                                            Padding="14,6" Margin="0,0,10,10">
+                                        <TextBlock Text="Trigger Sticky Warning" Foreground="{DynamicResource Brush.Warning}" FontSize="12" FontWeight="SemiBold"/>
+                                    </Button>
+
+                                    <Button Command="{Binding TriggerTestStickyErrorCommand}"
+                                            Style="{StaticResource Button.Rounded.Compact}"
+                                            Padding="14,6" Margin="0,0,10,10">
+                                        <TextBlock Text="Trigger Sticky Error" Foreground="{DynamicResource Brush.Accent.Red.Light}" FontSize="12" FontWeight="SemiBold"/>
+                                    </Button>
+
+                                    <Button Command="{Binding ClearStatusBarCommand}"
+                                            Style="{StaticResource Button.Rounded.Compact}"
+                                            Padding="14,6" Margin="0,0,10,10">
+                                        <TextBlock Text="Clear Status Bar" Foreground="{DynamicResource Brush.Text.Muted}" FontSize="12"/>
+                                    </Button>
+                                </WrapPanel>
                             </StackPanel>
                         </Grid>
                     </Border>

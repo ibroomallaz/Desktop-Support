@@ -11,6 +11,7 @@ using DSAMVVM.MVVM.View.Helpers;
 using DSAMVVM.MVVM.View.Resources;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
@@ -86,6 +87,11 @@ namespace DSAMVVM.MVVM.ViewModel
         public RelayCommand SettingsCommand { get; private set; } = null!;
         public RelayCommand OpenFeedbackCommand { get; private set; } = null!;
         public RelayCommand AdminCommand { get; private set; } = null!;
+        public RelayCommand ToggleDevModeCommand { get; private set; } = null!;
+        public RelayCommand ToggleAdminModeCommand { get; private set; } = null!;
+        public RelayCommand OpenLogsFolderCommand { get; private set; } = null!;
+        public RelayCommand OpenAppDataFolderCommand { get; private set; } = null!;
+
         public RelayCommand ToggleSidebarCommand { get; private set; } = null!;
 
         public ICommand ShowWindowCommand { get; private set; } = null!;
@@ -228,6 +234,22 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public ReadOnlyObservableCollection<string> SearchHistory => _searchService.SearchHistory;
 
+        // Developer Mode State (Session-only)
+        private bool _isDevModeEnabled;
+        public bool IsDevModeEnabled
+        {
+            get => _isDevModeEnabled;
+            set
+            {
+                if (Set(ref _isDevModeEnabled, value))
+                {
+                    SettingsVM.IsDevModeEnabled = value;
+                    OnPropertyChanged(nameof(DevModeStatusText));
+                }
+            }
+        }
+        public string DevModeStatusText => IsDevModeEnabled ? "Disable Developer Settings" : "Enable Developer Settings";
+
         private bool _showAdminView;
         public bool ShowAdminView
         {
@@ -253,10 +275,12 @@ namespace DSAMVVM.MVVM.ViewModel
                 {
                     _hasUnlockedAdmin = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(AdminModeStatusText));
                     SyncAdminNavItem();
                 }
             }
         }
+        public string AdminModeStatusText => HasUnlockedAdmin ? "Disable JSON Admin" : "Enable JSON Admin";
 
         private void SyncAdminNavItem()
         {
@@ -282,8 +306,12 @@ namespace DSAMVVM.MVVM.ViewModel
 
                     if (adminItemInNav == null)
                     {
-                        var settingsIndex = NavItems.IndexOf(NavItems.First(n => n.View == AppView.Settings));
-                        NavItems.Insert(settingsIndex, newAdminItem);
+                        var settingsNav = NavItems.FirstOrDefault(n => n.View == AppView.Settings);
+                        if (settingsNav != null)
+                        {
+                            var settingsIndex = NavItems.IndexOf(settingsNav);
+                            NavItems.Insert(settingsIndex, newAdminItem);
+                        }
                     }
                 }
             }
@@ -351,8 +379,13 @@ namespace DSAMVVM.MVVM.ViewModel
             }
 
             InitializeViewModels(aboutVM);
+
             InitializeCommands();
             InitializeNavigation();
+
+            HasUnlockedAdmin = App.Settings.Ui.HasUnlockedAdmin;
+            ShowAdminView = App.Settings.Ui.ShowAdminView;
+            IsDevModeEnabled = App.Settings.Ui.EnableDevSettings;
 
             // Set the initial view state in the application state service to avoid "Unknown" without changing view
             _appStateService.CurrentView = _selectedView.ToString();
@@ -363,9 +396,11 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             UiNotify.RunOnUiAsync(() =>
             {
-                // Sync Admin state safely
+                // Sync Admin and Dev state safely
                 HasUnlockedAdmin = newSettings.Ui.HasUnlockedAdmin;
                 ShowAdminView = newSettings.Ui.ShowAdminView;
+                IsDevModeEnabled = newSettings.Ui.EnableDevSettings;
+                SettingsVM.SyncExternalAdminAndDevState(newSettings.Ui.HasUnlockedAdmin, newSettings.Ui.ShowAdminView, newSettings.Ui.EnableDevSettings);
             });
         }
 
@@ -809,6 +844,52 @@ namespace DSAMVVM.MVVM.ViewModel
             AdminCommand = new RelayCommand(_ => { SelectedView = AppView.Admin; RestoreWindow(); });
             ToggleSidebarCommand = new RelayCommand(_ => IsSidebarCollapsed = !IsSidebarCollapsed);
 
+            ToggleDevModeCommand = new RelayCommand(_ =>
+            {
+                bool newState = !IsDevModeEnabled;
+                IsDevModeEnabled = newState;
+
+                var settings = App.Settings;
+                settings.Ui.EnableDevSettings = newState;
+                SettingsVM.SyncExternalAdminAndDevState(HasUnlockedAdmin, ShowAdminView, newState);
+                App.Services.GetRequiredService<ISettingsService>().RequestSave(settings, Globals.g_SettingsPath);
+
+                if (newState)
+                {
+                    UiNotify.Info("Developer settings enabled and saved.", showStatusBar: true);
+                }
+                else
+                {
+                    UiNotify.Info("Developer settings disabled.", showStatusBar: true);
+                }
+            });
+
+            ToggleAdminModeCommand = new RelayCommand(_ =>
+            {
+                bool newState = !HasUnlockedAdmin;
+                HasUnlockedAdmin = newState;
+                ShowAdminView = newState;
+
+                var settings = App.Settings;
+                settings.Ui.HasUnlockedAdmin = newState;
+                settings.Ui.ShowAdminView = newState;
+                SettingsVM.SyncExternalAdminAndDevState(newState, newState, IsDevModeEnabled);
+                App.Services.GetRequiredService<ISettingsService>().RequestSave(settings, Globals.g_SettingsPath);
+
+                if (newState)
+                {
+                    SelectedView = AppView.Admin;
+                    UiNotify.Info("JSON Admin enabled and saved to settings.", showStatusBar: true);
+                }
+                else
+                {
+                    UiNotify.Info("JSON Admin disabled.", showStatusBar: true);
+                }
+            });
+
+            OpenLogsFolderCommand = new RelayCommand(_ => OpenFolder(Globals.g_LogsDir));
+            OpenAppDataFolderCommand = new RelayCommand(_ => OpenFolder(Globals.g_AppDir));
+
             ExecuteSearchCommand = new RelayCommand(_ => TriggerSearch());
             ClearSearchCommand = new RelayCommand(_ => SearchQuery = string.Empty, _ => !string.IsNullOrEmpty(SearchQuery));
             ShowWindowCommand = new RelayCommand(_ => RestoreWindow());
@@ -823,6 +904,16 @@ namespace DSAMVVM.MVVM.ViewModel
 
             // Initialize the OpenFeedbackCommand
             OpenFeedbackCommand = new RelayCommand(ExecuteOpenFeedback);
+        }
+
+        private static void OpenFolder(string path)
+        {
+            try
+            {
+                Directory.CreateDirectory(path);
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true });
+            }
+            catch (Exception ex) { UiNotify.Warn($"Failed to open folder: {ex.Message}"); }
         }
 
         private static void ExecuteOpenFeedback(object? parameter)
@@ -856,64 +947,6 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             var query = (SearchQuery ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(query)) return;
-
-            string lowerQuery = query.ToLowerInvariant();
-
-            //Admin intercept
-            if (lowerQuery == "-admin")
-            {
-                HasUnlockedAdmin = true;
-                ShowAdminView = true;
-
-                var settings = App.Settings;
-                settings.Ui.HasUnlockedAdmin = true;
-                settings.Ui.ShowAdminView = true;
-                App.Services.GetRequiredService<ISettingsService>().RequestSave(settings, Globals.g_SettingsPath);
-
-                SearchQuery = string.Empty;
-                SelectedView = AppView.Admin;
-
-                UiNotify.Info("Admin mode unlocked! You can now toggle this in Settings.", showStatusBar: true);
-                Log.Info("Admin", "Admin panel unlocked via command prompt.");
-                return;
-            }
-
-            // Internal testing toggle intercept
-            if (lowerQuery is "-test-" or "-production-")
-            {
-                bool useTest = lowerQuery == "-test-";
-                var appSettings = App.Settings;
-                appSettings.Updates.UseInternalTestingSources = useTest;
-
-                var settingsService = App.Services.GetRequiredService<ISettingsService>();
-                settingsService.RequestSave(appSettings, Globals.g_SettingsPath);
-
-                string mode = useTest ? "TEST" : "PRODUCTION";
-                UiNotify.Info($"Update source toggled to: {mode}", showStatusBar: true);
-
-                SearchQuery = string.Empty;
-                return;
-            }
-            // Internal testing error intercept
-            if (lowerQuery == "-debug-error-")
-            {
-                var bus = App.Services.GetRequiredService<StatusBus>();
-
-                var testError = new StatusItemBuilder()
-                    .Key("DEBUG_STICKY_ERROR")
-                    .Level(StatusLevel.Error)
-                    .Sticky()
-                    .Priority(1)
-                    .Text("DEBUG: This is a persistent high-priority error. Test the ")
-                    .Bold("✕")
-                    .Text(" button!")
-                    .Build();
-
-                bus.Report(testError);
-
-                SearchQuery = string.Empty;
-                return;
-            }
 
             if (CurrentView is not ISearchableViewModel searchable) return;
 

@@ -41,6 +41,7 @@
         public const string QuickSearch = "\uE721";
         public const string DataAndLinks = "\uE774";
         public const string Maintenance = "\uE90F";
+        public const string Developer = "\uEBE8";
 
         // ===== ACTIONS & SHORTCUTS =====
         public const string Ticket = "\uE8EC";

@@ -1,3 +1,4 @@
+using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
@@ -51,7 +52,7 @@ namespace DSAMVVM.MVVM.ViewModel
         private AppSettings _settings;
 
         // --- Navigation / Categories ---
-        public IReadOnlyList<SettingsCategoryItem> Categories { get; } =
+        private readonly List<SettingsCategoryItem> _baseCategories =
         [
             new SettingsCategoryItem
             {
@@ -83,6 +84,29 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         ];
 
+        private readonly SettingsCategoryItem _devCategory = new()
+        {
+            Category = SettingsCategory.Developer,
+            Title = "Developer Settings",
+            Description = "Session-only debugging flags, test update feed, and quick diagnostic tools.",
+            Glyph = Glyphs.Developer
+        };
+
+        public ObservableCollection<SettingsCategoryItem> Categories { get; } = [];
+
+        private bool _isDevModeEnabled;
+        public bool IsDevModeEnabled
+        {
+            get => _isDevModeEnabled;
+            set
+            {
+                if (Set(ref _isDevModeEnabled, value))
+                {
+                    SyncCategories();
+                }
+            }
+        }
+
         private SettingsCategoryItem _selectedCategory;
         public SettingsCategoryItem SelectedCategory
         {
@@ -95,6 +119,7 @@ namespace DSAMVVM.MVVM.ViewModel
                     OnPropertyChanged(nameof(IsQuickSearchSelected));
                     OnPropertyChanged(nameof(IsDataAndLinksSelected));
                     OnPropertyChanged(nameof(IsSystemAndMaintenanceSelected));
+                    OnPropertyChanged(nameof(IsDeveloperSelected));
                 }
             }
         }
@@ -103,6 +128,7 @@ namespace DSAMVVM.MVVM.ViewModel
         public bool IsQuickSearchSelected => SelectedCategory.Category == SettingsCategory.QuickSearch;
         public bool IsDataAndLinksSelected => SelectedCategory.Category == SettingsCategory.DataAndLinks;
         public bool IsSystemAndMaintenanceSelected => SelectedCategory.Category == SettingsCategory.SystemAndMaintenance;
+        public bool IsDeveloperSelected => SelectedCategory?.Category == SettingsCategory.Developer;
 
         public void SelectCategory(SettingsCategory category)
         {
@@ -162,6 +188,13 @@ namespace DSAMVVM.MVVM.ViewModel
         public ICommand MoveShortcutUpCommand { get; }
         public ICommand MoveShortcutDownCommand { get; }
         public ICommand ResetShortcutsCommand { get; }
+
+        // --- Developer Diagnostic Commands ---
+        public ICommand TriggerTestInfoCommand { get; }
+        public ICommand TriggerTestWarningCommand { get; }
+        public ICommand TriggerTestStickyWarningCommand { get; }
+        public ICommand TriggerTestStickyErrorCommand { get; }
+        public ICommand ClearStatusBarCommand { get; }
 
         // --- Collections ---
         public IReadOnlyList<AppLogLevel> LogLevels { get; } =
@@ -522,7 +555,13 @@ namespace DSAMVVM.MVVM.ViewModel
         public bool HasUnlockedAdmin
         {
             get => _hasUnlockedAdmin;
-            set => Set(ref _hasUnlockedAdmin, value);
+            set
+            {
+                if (Set(ref _hasUnlockedAdmin, value))
+                {
+                    SetModified();
+                }
+            }
         }
 
         private bool _showAdminView;
@@ -532,6 +571,19 @@ namespace DSAMVVM.MVVM.ViewModel
             set
             {
                 if (Set(ref _showAdminView, value))
+                {
+                    SetModified();
+                }
+            }
+        }
+
+        private bool _useInternalTestingSources;
+        public bool UseInternalTestingSources
+        {
+            get => _useInternalTestingSources;
+            set
+            {
+                if (Set(ref _useInternalTestingSources, value))
                 {
                     SetModified();
                 }
@@ -559,7 +611,9 @@ namespace DSAMVVM.MVVM.ViewModel
             _searchSvc = searchSvc;
 
             _settings = App.Settings;
-            _selectedCategory = Categories[0];
+            _isDevModeEnabled = _settings.Ui.EnableDevSettings;
+            SyncCategories();
+            _selectedCategory = Categories.First();
 
             LoadValuesFromSettings();
 
@@ -570,6 +624,26 @@ namespace DSAMVVM.MVVM.ViewModel
             OpenLogsCommand = new RelayCommand(_ => OpenLogsFolder());
             BrowseDeptCommand = new RelayCommand(_ => BrowseForFile(path => DeptUri = path));
             BrowseLinksCommand = new RelayCommand(_ => BrowseForFile(path => LinksUri = path));
+
+            // Developer Diagnostic Commands
+            TriggerTestInfoCommand = new RelayCommand(_ => UiNotify.Info("DEBUG: Test info notification triggered.", showStatusBar: true));
+            TriggerTestWarningCommand = new RelayCommand(_ => UiNotify.Warn("DEBUG: Test non-sticky warning notification triggered.", sticky: false));
+            TriggerTestStickyWarningCommand = new RelayCommand(_ => UiNotify.Warn("DEBUG: Persistent sticky warning. Click the dismiss button to clear.", sticky: true, key: "DEBUG_STICKY_WARN"));
+            TriggerTestStickyErrorCommand = new RelayCommand(_ =>
+            {
+                var testError = new StatusItemBuilder()
+                    .Key("DEBUG_STICKY_ERROR")
+                    .Level(StatusLevel.Error)
+                    .Sticky()
+                    .Priority(1)
+                    .Text("DEBUG: This is a persistent high-priority error. Test the ")
+                    .Bold("✕")
+                    .Text(" button!")
+                    .Build();
+
+                UiNotify.Push(testError);
+            });
+            ClearStatusBarCommand = new RelayCommand(_ => UiNotify.ClearStatus());
 
             // Shortcuts Commands
             AddCustomShortcutCommand = new RelayCommand(_ => AddCustomShortcut());
@@ -588,6 +662,55 @@ namespace DSAMVVM.MVVM.ViewModel
                     DefaultFontSize = d;
                 }
             });
+        }
+
+        public void SyncExternalAdminAndDevState(bool hasUnlockedAdmin, bool showAdminView, bool isDevModeEnabled)
+        {
+            if (Set(ref _hasUnlockedAdmin, hasUnlockedAdmin, nameof(HasUnlockedAdmin)))
+            {
+                _settings.Ui.HasUnlockedAdmin = hasUnlockedAdmin;
+            }
+            if (Set(ref _showAdminView, showAdminView, nameof(ShowAdminView)))
+            {
+                _settings.Ui.ShowAdminView = showAdminView;
+            }
+            if (Set(ref _isDevModeEnabled, isDevModeEnabled, nameof(IsDevModeEnabled)))
+            {
+                _settings.Ui.EnableDevSettings = isDevModeEnabled;
+                SyncCategories();
+            }
+        }
+
+        private void SyncCategories()
+        {
+            if (Categories.Count == 0)
+            {
+                foreach (var cat in _baseCategories)
+                {
+                    Categories.Add(cat);
+                }
+            }
+
+            if (_isDevModeEnabled)
+            {
+                if (!Categories.Contains(_devCategory))
+                {
+                    Categories.Add(_devCategory);
+                }
+            }
+            else
+            {
+                if (SelectedCategory == _devCategory)
+                {
+                    SelectedCategory = Categories.FirstOrDefault() ?? _baseCategories[0];
+                }
+                Categories.Remove(_devCategory);
+            }
+
+            if (SelectedCategory == null || !Categories.Contains(SelectedCategory))
+            {
+                SelectedCategory = Categories.FirstOrDefault() ?? _baseCategories[0];
+            }
         }
 
         // --- Logic ---
@@ -649,9 +772,11 @@ namespace DSAMVVM.MVVM.ViewModel
             }
             OnPropertyChanged(nameof(CanAddShortcut));
 
-            //Load Admin State
+            // Load Admin & Dev State
             HasUnlockedAdmin = _settings.Ui.HasUnlockedAdmin;
             ShowAdminView = _settings.Ui.ShowAdminView;
+            IsDevModeEnabled = _settings.Ui.EnableDevSettings;
+            UseInternalTestingSources = _settings.Updates.UseInternalTestingSources;
 
             HasUnsavedChanges = false;
             StatusMessage = "Settings are up to date.";
@@ -842,9 +967,11 @@ namespace DSAMVVM.MVVM.ViewModel
                 }).ToList();
                 _settings.Ui.Shortcuts.Normalize();
 
-                // Sync Admin State
+                // Sync Admin & Dev State
                 _settings.Ui.HasUnlockedAdmin = HasUnlockedAdmin;
                 _settings.Ui.ShowAdminView = ShowAdminView;
+                _settings.Ui.EnableDevSettings = IsDevModeEnabled;
+                _settings.Updates.UseInternalTestingSources = UseInternalTestingSources;
 
                 _settings.ApplyDefaultsAndClamp();
 

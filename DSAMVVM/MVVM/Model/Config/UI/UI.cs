@@ -1,4 +1,4 @@
-﻿namespace DSAMVVM.MVVM.Model.Config.UI
+namespace DSAMVVM.MVVM.Model.Config.UI
 {
     public sealed class Ui
     {
@@ -13,6 +13,7 @@
         //Admin panel settings
         public bool HasUnlockedAdmin { get; set; }
         public bool ShowAdminView { get; set; }
+        public bool EnableDevSettings { get; set; }
 
         public void NormalizeAll()
         {

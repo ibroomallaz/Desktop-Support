@@ -5,6 +5,7 @@
         Appearance,
         QuickSearch,
         DataAndLinks,
-        SystemAndMaintenance
+        SystemAndMaintenance,
+        Developer
     }
 }
