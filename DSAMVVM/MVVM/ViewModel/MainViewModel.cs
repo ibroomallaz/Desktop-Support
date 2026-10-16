@@ -387,6 +387,11 @@ namespace DSAMVVM.MVVM.ViewModel
             ShowAdminView = App.Settings.Ui.ShowAdminView;
             IsDevModeEnabled = App.Settings.Ui.EnableDevSettings;
 
+            if (App.Settings.Ui.CollapseSidebarByDefault)
+            {
+                IsSidebarCollapsed = true;
+            }
+
             // Set the initial view state in the application state service to avoid "Unknown" without changing view
             _appStateService.CurrentView = _selectedView.ToString();
         }
@@ -401,6 +406,11 @@ namespace DSAMVVM.MVVM.ViewModel
                 ShowAdminView = newSettings.Ui.ShowAdminView;
                 IsDevModeEnabled = newSettings.Ui.EnableDevSettings;
                 SettingsVM.SyncExternalAdminAndDevState(newSettings.Ui.HasUnlockedAdmin, newSettings.Ui.ShowAdminView, newSettings.Ui.EnableDevSettings);
+
+                if (SelectedView != AppView.Admin)
+                {
+                    IsSidebarCollapsed = newSettings.Ui.CollapseSidebarByDefault;
+                }
             });
         }
 

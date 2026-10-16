@@ -58,7 +58,7 @@ namespace DSAMVVM.MVVM.ViewModel
             {
                 Category = SettingsCategory.Appearance,
                 Title = "Appearance & Interface",
-                Description = "Search text sizes, per-tab overrides, system tray options, ServiceMeow mascot, and history limit.",
+                Description = "Search text sizes, per-tab overrides, sidebar navigation, system tray options, ServiceMeow mascot, and history limit.",
                 Glyph = Glyphs.Appearance
             },
             new SettingsCategoryItem
@@ -483,6 +483,22 @@ namespace DSAMVVM.MVVM.ViewModel
         private string _linksUri = string.Empty;
         public string LinksUri { get => _linksUri; set { if (Set(ref _linksUri, value)) SetModified(); } }
 
+        private bool _collapseSidebarByDefault;
+        public bool CollapseSidebarByDefault
+        {
+            get => _collapseSidebarByDefault;
+            set
+            {
+                if (Set(ref _collapseSidebarByDefault, value))
+                {
+                    var settings = App.Settings;
+                    settings.Ui.CollapseSidebarByDefault = value;
+                    _settings.Ui.CollapseSidebarByDefault = value;
+                    _settingsSvc.RequestSave(settings, Globals.g_SettingsPath);
+                }
+            }
+        }
+
         private bool _enableTrayIcon;
         public bool EnableTrayIcon
         {
@@ -753,6 +769,9 @@ namespace DSAMVVM.MVVM.ViewModel
             EnableTrayIcon = _settings.Ui.Tray.EnableTrayIcon;
             MinimizeToTray = _settings.Ui.Tray.MinimizeToTray;
             CloseToTray = _settings.Ui.Tray.CloseToTray;
+            _collapseSidebarByDefault = _settings.Ui.CollapseSidebarByDefault;
+            OnPropertyChanged(nameof(CollapseSidebarByDefault));
+
             EnableServiceMeow = _settings.Ui.ServiceMeow.Enabled;
             EnablePreReleaseChannel = _settings.Updates.EnablePreReleaseChannel;
 
@@ -971,6 +990,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 _settings.Ui.HasUnlockedAdmin = HasUnlockedAdmin;
                 _settings.Ui.ShowAdminView = ShowAdminView;
                 _settings.Ui.EnableDevSettings = IsDevModeEnabled;
+                _settings.Ui.CollapseSidebarByDefault = CollapseSidebarByDefault;
                 _settings.Updates.UseInternalTestingSources = UseInternalTestingSources;
 
                 _settings.ApplyDefaultsAndClamp();

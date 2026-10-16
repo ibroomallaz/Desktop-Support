@@ -506,6 +506,30 @@
                         </Grid>
                     </Border>
 
+                    <!-- Sidebar Navigation -->
+                    <Border x:Name="CardSidebar" Style="{StaticResource Card.Container}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="{DynamicResource CardGradient.Accent}" CornerRadius="12,0,0,12"/>
+                            <StackPanel Grid.Column="1" Margin="16">
+                                <TextBlock Text="Sidebar Navigation" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" Margin="0,0,0,12"/>
+                                <CheckBox x:Name="CollapseSidebarByDefaultCheck"
+                                          Foreground="{DynamicResource Brush.Text.Primary}"
+                                          Content="Sidebar collapsed by default"
+                                          Margin="0,0,0,6"
+                                          IsChecked="{Binding CollapseSidebarByDefault, Mode=TwoWay}"/>
+                                <TextBlock Text="When checked, the application starts with the sidebar collapsed. You can still toggle it anytime using the navigation button in the title bar without affecting this default."
+                                           Foreground="{DynamicResource Brush.Text.Muted}"
+                                           FontSize="11"
+                                           Margin="24,0,0,0"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
                     <!-- System Tray -->
                     <Border x:Name="CardSystemTray" Style="{StaticResource Card.Container}">
                         <Grid>

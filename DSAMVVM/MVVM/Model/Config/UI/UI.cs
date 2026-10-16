@@ -1,4 +1,4 @@
-namespace DSAMVVM.MVVM.Model.Config.UI
+﻿namespace DSAMVVM.MVVM.Model.Config.UI
 {
     public sealed class Ui
     {
@@ -14,6 +14,9 @@ namespace DSAMVVM.MVVM.Model.Config.UI
         public bool HasUnlockedAdmin { get; set; }
         public bool ShowAdminView { get; set; }
         public bool EnableDevSettings { get; set; }
+
+        // Navigation / Sidebar
+        public bool CollapseSidebarByDefault { get; set; }
 
         public void NormalizeAll()
         {
