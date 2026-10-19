@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
-using DSAMVVM.MVVM.Model;
+﻿using DSAMVVM.MVVM.Model;
 using System.Net;
 
 namespace DSAMVVM.Core.Models
@@ -23,7 +22,7 @@ namespace DSAMVVM.Core.Models
         string? SubmitterNetId = null
     ) : ITeamsMessagePayload
     {
-        public static string AppVersion => Globals.g_AppVersion ?? "Unknown";
+        public static string AppVersion => Globals.g_AppVersion;
 
         // Routes the subject line formatting based on the injected FeedbackType
         public string GetSubject()

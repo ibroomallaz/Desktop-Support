@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
-using DSAMVVM.MVVM.Model.Config;
+﻿using DSAMVVM.MVVM.Model.Config;
 using System.Collections.Concurrent;
 
 namespace DSAMVVM.Core.Services.UI

@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Logging;
+﻿using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Broker;

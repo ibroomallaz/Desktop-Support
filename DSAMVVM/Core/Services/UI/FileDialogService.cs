@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 
 namespace DSAMVVM.Core.Services.UI
 {

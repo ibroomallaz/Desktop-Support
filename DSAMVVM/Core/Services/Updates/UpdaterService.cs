@@ -1,5 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
-using DSAMVVM.Core.Logging;
+﻿using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Services.Infrastructure;
 using DSAMVVM.MVVM.Model.Schemas;
 using Microsoft.Extensions.DependencyInjection;
