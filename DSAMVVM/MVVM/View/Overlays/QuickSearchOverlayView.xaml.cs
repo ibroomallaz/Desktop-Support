@@ -1,4 +1,5 @@
 ﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.MVVM.View.Helpers;
 using DSAMVVM.MVVM.ViewModel.Overlays;
 using System.Windows;
 using System.Windows.Documents;
@@ -16,6 +17,8 @@ namespace DSAMVVM.MVVM.View.Overlays
         public QuickSearchOverlayView(string capturedText, QuickSearchOverlayViewModel viewModel)
         {
             InitializeComponent();
+            SourceInitialized += (_, _) => WindowBackdropHelper.ApplyModernAttributes(this);
+
             _viewModel = viewModel;
             DataContext = _viewModel;
 
@@ -49,7 +52,7 @@ namespace DSAMVVM.MVVM.View.Overlays
             };
         }
 
-        // --- RADICALLY SIMPLIFIED LINK ROUTING ---
+        // ---  LINK ROUTING ---
         private async void OnHyperlinkClicked(object sender, RequestNavigateEventArgs e)
         {
             e.Handled = true; // Prevent default WPF behavior
@@ -85,48 +88,36 @@ namespace DSAMVVM.MVVM.View.Overlays
 
             if (e.Key == Key.Escape)
             {
-                this.Close();
+                Close();
                 e.Handled = true;
+                return;
             }
-            else if (e.Key == Key.Enter)
-            {
-                if (Keyboard.Modifiers == ModifierKeys.Shift)
-                {
-                    await _viewModel.ExecuteInlineSearchAsync(AppView.Computer);
-                }
-                else if (Keyboard.Modifiers == ModifierKeys.Control)
-                {
-                    await _viewModel.ExecuteInlineSearchAsync(AppView.Group, BtnGroupTarget);
-                }
-                else
-                {
-                    await _viewModel.ExecuteInlineSearchAsync(AppView.User);
-                }
 
-                e.Handled = true;
-            }
-            else if (Keyboard.Modifiers == ModifierKeys.Alt)
+            AppView? targetView = (e.Key, Keyboard.Modifiers, e.SystemKey) switch
             {
-                if (e.SystemKey == Key.U) { await _viewModel.ExecuteInlineSearchAsync(AppView.User); e.Handled = true; }
-                else if (e.SystemKey == Key.C) { await _viewModel.ExecuteInlineSearchAsync(AppView.Computer); e.Handled = true; }
-                else if (e.SystemKey == Key.G) { await _viewModel.ExecuteInlineSearchAsync(AppView.Group, BtnGroupTarget); e.Handled = true; }
-            }
+                (Key.Enter, ModifierKeys.Shift, _)   => AppView.Computer,
+                (Key.Enter, ModifierKeys.Control, _) => AppView.Group,
+                (Key.Enter, ModifierKeys.None, _)    => AppView.User,
+                (_, ModifierKeys.Alt, Key.U)         => AppView.User,
+                (_, ModifierKeys.Alt, Key.C)         => AppView.Computer,
+                (_, ModifierKeys.Alt, Key.G)         => AppView.Group,
+                _                                    => null
+            };
+
+            if (targetView is not { } view) return;
+            e.Handled = true;
+            await TriggerSearchAsync(view);
         }
 
         // --- BUTTON CLICK ROUTING ---
-        private async void BtnUser_Click(object sender, RoutedEventArgs e)
-        {
-            await _viewModel.ExecuteInlineSearchAsync(AppView.User);
-        }
+        private async void BtnUser_Click(object sender, RoutedEventArgs e) => await TriggerSearchAsync(AppView.User);
+        private async void BtnComputer_Click(object sender, RoutedEventArgs e) => await TriggerSearchAsync(AppView.Computer);
+        private async void BtnGroup_Click(object sender, RoutedEventArgs e) => await TriggerSearchAsync(AppView.Group);
 
-        private async void BtnComputer_Click(object sender, RoutedEventArgs e)
+        private Task TriggerSearchAsync(AppView view)
         {
-            await _viewModel.ExecuteInlineSearchAsync(AppView.Computer);
-        }
-
-        private async void BtnGroup_Click(object sender, RoutedEventArgs e)
-        {
-            await _viewModel.ExecuteInlineSearchAsync(AppView.Group, BtnGroupTarget);
+            var anchor = view == AppView.Group ? BtnGroupTarget : null;
+            return _viewModel.ExecuteInlineSearchAsync(view, anchor);
         }
     }
 }

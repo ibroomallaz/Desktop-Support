@@ -5,8 +5,17 @@
         xmlns:res="clr-namespace:DSAMVVM.MVVM.View.Resources"
         Title="QuickSearch" Width="560"
         SizeToContent="Height"
-        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        WindowStyle="None" ResizeMode="NoResize" Background="Transparent"
+        UseLayoutRounding="True"
         Topmost="True" ShowInTaskbar="False" WindowStartupLocation="CenterScreen">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0"
+                      CornerRadius="0"
+                      GlassFrameThickness="-1"
+                      ResizeBorderThickness="0"
+                      UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
 
     <Window.Resources>
         <ResourceDictionary>
@@ -15,6 +24,8 @@
                 <ResourceDictionary Source="/Theme/Decor/Gradient.UA.xaml"/>
                 <ResourceDictionary Source="/Theme/Controls/Button.Rounded.xaml"/>
                 <ResourceDictionary Source="/Theme/Controls/Card.xaml"/>
+                <ResourceDictionary Source="/Theme/Controls/ScrollBar.xaml"/>
+                <ResourceDictionary Source="/Theme/Controls/ContextMenu.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
@@ -136,6 +147,44 @@
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="Border" Property="Opacity" Value="0.75"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Search Target Action Button (crisp Ideal glyph rendering + high-contrast keycaps) -->
+            <Style x:Key="QuickSearchTargetButton" TargetType="Button">
+                <Setter Property="Background" Value="{DynamicResource Brush.Surface.Hover}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="10,6"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="TextOptions.TextFormattingMode" Value="Ideal"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Root"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="8"
+                                    Padding="{TemplateBinding Padding}"
+                                    SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource ButtonGradient.Neutral}"/>
+                                    <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Border.Active}"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource ButtonGradient.Primary}"/>
+                                    <Setter TargetName="Root" Property="BorderBrush" Value="#66B34A63"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -1314,15 +1363,14 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <!-- Outer Window Frame with Rich Drop Shadow -->
-    <Border Background="{DynamicResource Brush.Surface}" 
-            CornerRadius="12" 
-            BorderBrush="{DynamicResource Brush.Border}" 
-            BorderThickness="1" 
+    <!-- Outer Window Frame: matches MainWindow blue gradient + native 8px DWM corners & shadow -->
+    <Border Background="{DynamicResource AppGradient.Window.Blue}"
+            CornerRadius="8"
+            BorderBrush="{DynamicResource Brush.Border}"
+            BorderThickness="1"
+            ClipToBounds="True"
+            SnapsToDevicePixels="True"
             Padding="14">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="20" Opacity="0.55" ShadowDepth="6" Color="#000000"/>
-        </Border.Effect>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/> <!-- Title / Drag Header -->
@@ -1341,7 +1389,6 @@
 
                 <!-- Branding -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Width="6" Height="6" CornerRadius="3" Background="{DynamicResource Brush.Accent.Red}" Margin="0,0,6,0" VerticalAlignment="Center"/>
                     <TextBlock Text="QUICK SEARCH" Foreground="{DynamicResource Brush.Text.Muted}" FontSize="10" FontWeight="Bold"/>
                 </StackPanel>
 
@@ -1413,8 +1460,8 @@
                         </Button.Style>
                         <TextBlock Text="{x:Static res:Glyphs.Dismiss}"
                                    FontFamily="Segoe MDL2 Assets"
-                                   FontSize="11"
-                                   Foreground="{DynamicResource Brush.Text.Muted}"/>
+                                   FontSize="12"
+                                   Foreground="{DynamicResource Brush.Text.Primary}"/>
                     </Button>
                 </Grid>
             </Border>
@@ -1425,13 +1472,31 @@
                     <!-- User Target Button -->
                     <Button Click="BtnUser_Click"
                             ToolTip="Search Active Directory User (Enter)"
-                            Style="{DynamicResource Button.Rounded}"
-                            Margin="0,0,6,0">
+                            Style="{StaticResource QuickSearchTargetButton}"
+                            Margin="0,0,8,0">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{x:Static res:Glyphs.User}" FontFamily="Segoe MDL2 Assets" FontSize="11" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="User" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <Border Background="{DynamicResource Brush.Surface.1}" CornerRadius="3" Padding="4,1" VerticalAlignment="Center">
-                                <TextBlock Text="↵ Enter" FontSize="9" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                            <TextBlock Text="{x:Static res:Glyphs.User}"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource Brush.Pill.User.Icon}"
+                                       Margin="0,0,6,0"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Text="User"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <Border Background="{DynamicResource Brush.Surface.1}"
+                                    BorderBrush="{DynamicResource Brush.Border}"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="6,2"
+                                    VerticalAlignment="Center">
+                                <TextBlock Text="Enter"
+                                           FontSize="10.5"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush.Text.Primary}"/>
                             </Border>
                         </StackPanel>
                     </Button>
@@ -1439,13 +1504,31 @@
                     <!-- Computer Target Button -->
                     <Button Click="BtnComputer_Click"
                             ToolTip="Search Active Directory Computer (Shift + Enter)"
-                            Style="{DynamicResource Button.Rounded}"
-                            Margin="0,0,6,0">
+                            Style="{StaticResource QuickSearchTargetButton}"
+                            Margin="0,0,8,0">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{x:Static res:Glyphs.Computer}" FontFamily="Segoe MDL2 Assets" FontSize="11" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Computer" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <Border Background="{DynamicResource Brush.Surface.1}" CornerRadius="3" Padding="4,1" VerticalAlignment="Center">
-                                <TextBlock Text="⇧ Enter" FontSize="9" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                            <TextBlock Text="{x:Static res:Glyphs.Computer}"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource Brush.Pill.Device.Icon}"
+                                       Margin="0,0,6,0"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Text="Computer"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <Border Background="{DynamicResource Brush.Surface.1}"
+                                    BorderBrush="{DynamicResource Brush.Border}"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="6,2"
+                                    VerticalAlignment="Center">
+                                <TextBlock Text="Shift + Enter"
+                                           FontSize="10.5"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush.Text.Primary}"/>
                             </Border>
                         </StackPanel>
                     </Button>
@@ -1454,12 +1537,30 @@
                     <Button x:Name="BtnGroupTarget"
                             Click="BtnGroup_Click"
                             ToolTip="Search AD Groups or Support Teams (Ctrl + Enter)"
-                            Style="{DynamicResource Button.Rounded}">
+                            Style="{StaticResource QuickSearchTargetButton}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{x:Static res:Glyphs.Group}" FontFamily="Segoe MDL2 Assets" FontSize="11" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Group" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <Border Background="{DynamicResource Brush.Surface.1}" CornerRadius="3" Padding="4,1" VerticalAlignment="Center">
-                                <TextBlock Text="^ Enter" FontSize="9" Foreground="{DynamicResource Brush.Text.Muted}"/>
+                            <TextBlock Text="{x:Static res:Glyphs.Group}"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource Brush.Pill.Group.Icon}"
+                                       Margin="0,0,6,0"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Text="Group"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <Border Background="{DynamicResource Brush.Surface.1}"
+                                    BorderBrush="{DynamicResource Brush.Border}"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="6,2"
+                                    VerticalAlignment="Center">
+                                <TextBlock Text="Ctrl + Enter"
+                                           FontSize="10.5"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush.Text.Primary}"/>
                             </Border>
                         </StackPanel>
                     </Button>

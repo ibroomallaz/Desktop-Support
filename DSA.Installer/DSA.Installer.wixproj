@@ -1,4 +1,4 @@
-<Project Sdk="WixToolset.Sdk/7.0.0">
+﻿<Project Sdk="WixToolset.Sdk/7.0.0">
   <PropertyGroup>
     <OutputType>Package</OutputType>
     <OutputName>DSA_Installer</OutputName>
@@ -24,7 +24,11 @@
     <ProjectReference Include="..\DSAMVVM\DSAMVVM.csproj" Publish="true" />
   </ItemGroup>
 
-  <Target Name="CleanStalePublishDir" BeforeTargets="ResolveProjectReferences;BeforeBuild;BeforeRebuild">
-    <RemoveDir Directories="$(BaseIntermediateOutputPath)$(Configuration)\publish" />
+  <!-- Ensure DSAMVVM is always freshly published even when Rider builds with BuildProjectReferences=false -->
+  <Target Name="PublishAppForWix" BeforeTargets="BeforeBuild">
+    <RemoveDir Directories="$(BaseIntermediateOutputPath)$(Configuration)\publish\DSAMVVM" />
+    <MSBuild Projects="..\DSAMVVM\DSAMVVM.csproj"
+             Targets="Publish"
+             Properties="Configuration=$(Configuration);PublishDir=$(MSBuildProjectDirectory)\$(BaseIntermediateOutputPath)$(Configuration)\publish\DSAMVVM\" />
   </Target>
 </Project>
