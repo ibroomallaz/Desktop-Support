@@ -59,7 +59,7 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
         public int SelectedFeedbackIndex
         {
             get => _selectedFeedbackIndex;
-            init
+            set
             {
                 _selectedFeedbackIndex = value;
                 OnPropertyChanged();
@@ -82,7 +82,7 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
         public string EditableDepartment
         {
             get => _editableDepartment;
-            set { _editableDepartment = value; OnPropertyChanged(); }
+            set { _editableDepartment = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanSubmit)); }
         }
 
         public string EditableTeam

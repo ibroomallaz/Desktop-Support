@@ -12,11 +12,18 @@
         d:DataContext="{d:DesignInstance Type=viewModel:MainViewModel}"
         Height="600" Width="920"
         WindowStyle="None"
-        ResizeMode="NoResize"
+        ResizeMode="CanMinimize"
         Background="Transparent"
-        AllowsTransparency="True"
         UseLayoutRounding="True"
         Title="{Binding WindowTitle, Mode=OneWay, FallbackValue={x:Static res:Strings.App_Title}, TargetNullValue={x:Static res:Strings.App_Title}}">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0"
+                      CornerRadius="0"
+                      GlassFrameThickness="-1"
+                      ResizeBorderThickness="0"
+                      UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
 
     <Window.TaskbarItemInfo>
         <TaskbarItemInfo Overlay="{Binding TaskbarOverlayIcon}"
@@ -25,25 +32,22 @@
 
     <Window.Resources>
         <ResourceDictionary>
-            <!-- geometry -->
+            <!-- geometry: aligned to Windows 11 native 8px DWM corner radius -->
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-            <CornerRadius x:Key="AppCorner.All">20</CornerRadius>
-            <!-- sidebar: round top-right-->
-            <CornerRadius x:Key="AppCorner.Sidebar">20,20,0,20</CornerRadius>
+            <CornerRadius x:Key="AppCorner.All">8</CornerRadius>
+            <!-- sidebar: round top corners, flush 8px bottom-left window corner -->
+            <CornerRadius x:Key="AppCorner.Sidebar">12,12,0,8</CornerRadius>
 
             <util:EnumEqualsConverter x:Key="EnumEqualsConverter"/>
         </ResourceDictionary>
     </Window.Resources>
 
-    <!-- Outer shell: blue ramp with soft shadow -->
+    <!-- Outer shell: blue ramp with native DWM frame & shadow -->
     <Border Background="{StaticResource AppGradient.Window.Blue}"
             CornerRadius="{StaticResource AppCorner.All}"
             Padding="0"
             ClipToBounds="True"
             SnapsToDevicePixels="True">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.5"/>
-        </Border.Effect>
 
         <DockPanel LastChildFill="True" UseLayoutRounding="True" SnapsToDevicePixels="True">
 
@@ -64,7 +68,7 @@
                 <!-- Title column: Nav Toggle Button + Support App title -->
                 <StackPanel Orientation="Horizontal"
                             Background="Transparent"
-                            VerticalAlignment="Center"
+                            VerticalAlignment="Stretch"
                             Margin="12,0,10,0">
                     <StackPanel.ContextMenu>
                         <ContextMenu>
@@ -89,8 +93,7 @@
                                VerticalAlignment="Center"
                                FontSize="18"
                                Foreground="{DynamicResource Brush.Text.Primary}"
-                               TextTrimming="CharacterEllipsis"
-                               IsHitTestVisible="False"/>
+                               TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
 
                 <!-- Content header column: perfectly aligned over the views -->

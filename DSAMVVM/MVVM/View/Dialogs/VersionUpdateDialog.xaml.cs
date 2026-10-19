@@ -1,4 +1,5 @@
-﻿using DSAMVVM.MVVM.ViewModel.Dialogs;
+﻿using DSAMVVM.MVVM.View.Helpers;
+using DSAMVVM.MVVM.ViewModel.Dialogs;
 using System.Windows;
 using System.Windows.Input;
 
@@ -10,6 +11,7 @@ namespace DSAMVVM.MVVM.View.Dialogs
         public VersionUpdateDialog()
         {
             InitializeComponent();
+            SourceInitialized += (_, _) => WindowBackdropHelper.ApplyModernAttributes(this);
             Loaded += OnLoaded;
             SizeChanged += OnSizeChanged;
         }

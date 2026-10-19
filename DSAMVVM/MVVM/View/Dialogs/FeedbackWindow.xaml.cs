@@ -1,4 +1,5 @@
 ﻿using DSAMVVM.Core.Services.Graph;
+using DSAMVVM.MVVM.View.Helpers;
 using DSAMVVM.MVVM.ViewModel.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
@@ -13,6 +14,7 @@ namespace DSAMVVM.MVVM.View.Dialogs
         public FeedbackWindow(int defaultIndex = 0)
         {
             InitializeComponent();
+            SourceInitialized += (_, _) => WindowBackdropHelper.ApplyModernAttributes(this);
 
             var authService = App.Services.GetRequiredService<IAuthenticationService>();
             var routingService = App.Services.GetRequiredService<TeamsRoutingService>();
@@ -24,11 +26,9 @@ namespace DSAMVVM.MVVM.View.Dialogs
             };
 
             // Bridges the ViewModel close request to the Window's DialogResult
-            _viewModel.RequestClose += (s, result) => DialogResult = result;
+            _viewModel.RequestClose += (_, result) => DialogResult = result;
 
             DataContext = _viewModel;
-
-            // Note: DetailsTextBox.Focus() was removed here because the input fields are now dynamically swapped.
         }
 
         private void OnTitleBarDrag(object sender, MouseButtonEventArgs e)
