@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="DSAMVVM.MVVM.View.AboutView"
+<UserControl x:Class="DSAMVVM.MVVM.View.AboutView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -10,11 +10,6 @@
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/Theme/Colors/Colors.UA.xaml"/>
-                <ResourceDictionary Source="/Theme/Decor/Gradient.UA.xaml"/>
-                <ResourceDictionary Source="/Theme/Controls/Button.Rounded.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 

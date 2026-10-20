@@ -10,13 +10,6 @@
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/Theme/Colors/Colors.UA.xaml"/>
-                <ResourceDictionary Source="/Theme/Decor/Gradient.UA.xaml"/>
-                <ResourceDictionary Source="/Theme/Controls/Button.Rounded.xaml"/>
-                <ResourceDictionary Source="/Theme/Controls/LinksComboBoxTheme.xaml"/>
-                <ResourceDictionary Source="/Theme/Colors/Shortcuts.Palette.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
 
             <Style x:Key="Card.Container" TargetType="Border">
                 <Setter Property="Padding" Value="0"/>

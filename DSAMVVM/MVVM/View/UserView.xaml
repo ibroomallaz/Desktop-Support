@@ -12,13 +12,6 @@
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/Theme/Colors/Colors.UA.xaml"/>
-                <ResourceDictionary Source="/Theme/Decor/Gradient.UA.xaml"/>
-                <ResourceDictionary Source="/Theme/Controls/Button.Rounded.xaml"/>
-                <ResourceDictionary Source="/Theme/Controls/Button.FlowDoc.xaml"/>
-                <ResourceDictionary Source="/Theme/Controls/Card.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
 
             <!-- Compact Ghost Button -->
             <Style x:Key="GhostActionButton" TargetType="Button">
