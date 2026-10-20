@@ -316,6 +316,10 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             entry.RemoveRequested += item => History.Remove(item);
             History.Add(entry);
+            while (History.Count > Globals.g_MaxFeedCap)
+            {
+                History.RemoveAt(0);
+            }
         }
 
         public void CollapseAll()

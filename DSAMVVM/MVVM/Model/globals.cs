@@ -63,5 +63,8 @@ namespace DSAMVVM.MVVM.Model
         public const int g_LinkJSONSchema = 2;
         public const int g_VersionSchema = 3;
         public const int g_ServiceMeowJSONSchema = 1;
+
+        // Feed caps
+        public const int g_MaxFeedCap = 50;
     }
 }
