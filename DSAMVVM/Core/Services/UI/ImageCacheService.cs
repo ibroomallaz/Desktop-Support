@@ -9,13 +9,14 @@ using System.Windows.Media.Imaging;
 
 namespace DSAMVVM.Core.Services.UI
 {
-    // Service for downloading, caching, and serving images from local disk without file locking or race conditions.
+    // Service for downloading, caching, and serving images from local disk and memory without file locking or race conditions.
     public class ImageCacheService(IHttpService http) : IImageCacheService
     {
         private const string Tag = "ImageCache";
         private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
         private readonly string _cacheDirectory = Globals.g_ServiceMeowImageCacheDir;
         private readonly ConcurrentDictionary<string, SemaphoreSlim> _fileLocks = new();
+        private readonly ConcurrentDictionary<string, ImageSource> _memoryCache = new(StringComparer.OrdinalIgnoreCase);
 
         public async Task<ImageSource?> GetImageAsync(
             string? url,
@@ -24,6 +25,19 @@ namespace DSAMVVM.Core.Services.UI
             CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(url)) return null;
+
+            var memKey = $"{url.Trim()}_{decodePixelWidth}";
+
+            // 0. Fast-path: check in-memory cache first to avoid disk I/O and bitmap re-decoding
+            if (!forceRefresh && _memoryCache.TryGetValue(memKey, out var memoryImage))
+            {
+                return memoryImage;
+            }
+
+            if (forceRefresh)
+            {
+                _memoryCache.TryRemove(memKey, out _);
+            }
 
             bool isWeb = false;
             bool isLocalFile = false;
@@ -61,12 +75,19 @@ namespace DSAMVVM.Core.Services.UI
 
             try
             {
+                // Re-check memory cache inside lock in case another task loaded it concurrently
+                if (!forceRefresh && _memoryCache.TryGetValue(memKey, out var concurrentMemImage))
+                {
+                    return concurrentMemImage;
+                }
+
                 // 1. If not forcing a refresh and cached file exists, load immediately from disk cache
                 if (!forceRefresh && File.Exists(localPath))
                 {
                     var cachedBitmap = LoadBitmapFromDisk(localPath, decodePixelWidth);
                     if (cachedBitmap != null)
                     {
+                        _memoryCache[memKey] = cachedBitmap;
                         return cachedBitmap;
                     }
 
@@ -86,6 +107,7 @@ namespace DSAMVVM.Core.Services.UI
                         var localBitmap = LoadBitmapFromDisk(localPath, decodePixelWidth);
                         if (localBitmap != null)
                         {
+                            _memoryCache[memKey] = localBitmap;
                             return localBitmap;
                         }
                     }
@@ -106,6 +128,7 @@ namespace DSAMVVM.Core.Services.UI
                         var downloadedBitmap = LoadBitmapFromDisk(localPath, decodePixelWidth);
                         if (downloadedBitmap != null)
                         {
+                            _memoryCache[memKey] = downloadedBitmap;
                             return downloadedBitmap;
                         }
                     }
@@ -121,7 +144,12 @@ namespace DSAMVVM.Core.Services.UI
                         if (File.Exists(localPath))
                         {
                             Log.Info(Tag, $"Falling back to existing disk cache for '{url}'");
-                            return LoadBitmapFromDisk(localPath, decodePixelWidth);
+                            var fallbackBitmap = LoadBitmapFromDisk(localPath, decodePixelWidth);
+                            if (fallbackBitmap != null)
+                            {
+                                _memoryCache[memKey] = fallbackBitmap;
+                                return fallbackBitmap;
+                            }
                         }
                     }
                 }
@@ -152,6 +180,8 @@ namespace DSAMVVM.Core.Services.UI
 
         public Task ClearCacheAsync(CancellationToken ct = default)
         {
+            _memoryCache.Clear();
+
             return Task.Run(() =>
             {
                 try
@@ -256,5 +286,3 @@ namespace DSAMVVM.Core.Services.UI
         }
     }
 }
-
-
