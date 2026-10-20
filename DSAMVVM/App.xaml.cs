@@ -147,17 +147,14 @@ namespace DSAMVVM
                 }
                 else
                 {
-                    Log.Warn("UpdateCheck", "Update check exceeded 3s; finishing while splash is visible.");
-                    try
+                    Log.Warn("UpdateCheck", "Update check exceeded 3s; proceeding to start application without blocking.");
+                    _ = updateTask.ContinueWith(t =>
                     {
-                        await updateTask.ConfigureAwait(true);
-                        if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
-                        Mark("Update check done");
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warn("UpdateCheck", $"Required update check (post-timeout) failed: {ex.Message}");
-                    }
+                        if (t.IsFaulted && t.Exception != null)
+                        {
+                            Log.Warn("UpdateCheck", $"Required update check (background) failed: {t.Exception.InnerException?.Message ?? t.Exception.Message}");
+                        }
+                    }, TaskScheduler.Default);
                 }
             }
             catch (Exception ex)
