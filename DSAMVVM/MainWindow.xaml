@@ -198,7 +198,6 @@
             <!-- Main content -->
             <Grid Margin="10">
                 <ContentControl Content="{Binding CurrentView}"
-                                CacheMode="BitmapCache"
                                 Style="{StaticResource Fx.SlideFadeHost}"/>
             </Grid>
         </DockPanel>
