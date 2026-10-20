@@ -11,7 +11,7 @@ using DSAMVVM.MVVM.Model.AD;
 
 namespace DSAMVVM.MVVM.ViewModel.Cards
 {
-    public class UserHistoryItemViewModel : ObservableObject
+    public partial class UserHistoryItemViewModel : ObservableObject
     {
         private readonly IADService _adService;
         private readonly IDepartmentService _deptService;
@@ -56,6 +56,7 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
             private set
             {
                 _user = value;
+                _initials = null;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(IsFound));
                 OnPropertyChanged(nameof(DisplayName));
@@ -86,7 +87,8 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
             : (!string.IsNullOrWhiteSpace(User?.Name) ? User.Name : Query);
 
         public string NetId => User?.Name ?? Query;
-        public string Initials => CalculateInitials(DisplayName);
+        private string? _initials;
+        public string Initials => _initials ??= CalculateInitials(DisplayName);
         public bool HasInitials => !string.IsNullOrWhiteSpace(Initials) && Initials.Length == 2;
         public string Affiliation => User?.EduAffiliation ?? string.Empty;
         public bool HasAffiliation => !string.IsNullOrWhiteSpace(Affiliation) &&
@@ -511,15 +513,21 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
             }
         }
 
+        [GeneratedRegex(@"[\(\[\<].*?[\)\]\>]")]
+        private static partial Regex BracketsRegex();
+
+        [GeneratedRegex(@"[^\p{L}\s,\-]")]
+        private static partial Regex NonLetterCharsRegex();
+
         private static string CalculateInitials(string name)
         {
             if (string.IsNullOrWhiteSpace(name)) return "";
 
             // 1. Strip any parenthesized, bracketed, or angle-bracketed content e.g. "(ibroomall)", "[Staff]"
-            var cleaned = Regex.Replace(name, @"[\(\[\<].*?[\)\]\>]", "").Trim();
+            var cleaned = BracketsRegex().Replace(name, "").Trim();
 
             // 2. Remove any non-letter characters except comma, space, hyphen
-            cleaned = Regex.Replace(cleaned, @"[^\p{L}\s,\-]", "").Trim();
+            cleaned = NonLetterCharsRegex().Replace(cleaned, "").Trim();
 
             if (string.IsNullOrWhiteSpace(cleaned)) return "";
 
