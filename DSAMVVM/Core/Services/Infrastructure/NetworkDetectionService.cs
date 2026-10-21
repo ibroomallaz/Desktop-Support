@@ -32,7 +32,7 @@ namespace DSAMVVM.Core.Services.Infrastructure
         public NetworkDetectionService()
         {
             // Debounce reactive network events by 600ms to allow DHCP / adapter negotiation to settle
-            _debounceTimer = new Timer(_ => Refresh(), null, Timeout.Infinite, Timeout.Infinite);
+            _debounceTimer = new Timer(_ => _ = RefreshAsync(), null, Timeout.Infinite, Timeout.Infinite);
 
             try
             {
@@ -44,8 +44,8 @@ namespace DSAMVVM.Core.Services.Infrastructure
                 Log.Warn("NetworkService", $"Failed to subscribe to network change events: {ex.Message}");
             }
 
-            // Run initial detection
-            Refresh();
+            // Run initial detection asynchronously on background thread pool so constructor never blocks startup
+            _ = Task.Run(Refresh);
         }
 
         private void OnNetworkChanged(object? sender, EventArgs e) =>

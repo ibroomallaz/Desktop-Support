@@ -31,6 +31,8 @@ namespace DSAMVVM.MVVM.Services.Updates
         private VersionCheckResult? _cached;
         private DateTime _lastFetchUtc;
         private readonly TimeSpan _cacheWindow = TimeSpan.FromMinutes(2);
+        private Task<VersionCheckResult?>? _pendingFetch;
+        private readonly Lock _fetchLock = new();
         private string? _lastPromptedStable;
         private string? _lastPromptedPre;
 
@@ -138,24 +140,57 @@ namespace DSAMVVM.MVVM.Services.Updates
             return showed;
         }
 
-        // Reduces redundant network requests during automated polling cycles
+        // Reduces redundant network requests during automated polling cycles and concurrent startup checks
         private async Task<VersionCheckResult?> FetchAsync()
         {
-            if (_cached != null && (DateTime.UtcNow - _lastFetchUtc) < _cacheWindow)
+            Task<VersionCheckResult?> taskToAwait;
+
+            lock (_fetchLock)
             {
-                Log.Debug(Cat, "fetch.cache.hit");
-                return _cached;
+                if (_cached != null && (DateTime.UtcNow - _lastFetchUtc) < _cacheWindow)
+                {
+                    Log.Debug(Cat, "fetch.cache.hit");
+                    return _cached;
+                }
+
+                if (_pendingFetch != null)
+                {
+                    Log.Debug(Cat, "fetch.deduplicate.in-flight");
+                    taskToAwait = _pendingFetch;
+                }
+                else
+                {
+                    taskToAwait = _pendingFetch = ExecuteFetchAsync();
+                }
             }
 
-            var url = ActiveVersionUrl;
-            var res = await VersionChecker.CheckVersionAsync(url, _http);
-            if (res.Success || res.Info != null || res.HasAnyStable || res.HasAnyPre)
+            return await taskToAwait;
+        }
+
+        private async Task<VersionCheckResult?> ExecuteFetchAsync()
+        {
+            try
             {
-                _cached = res;
-                _lastFetchUtc = DateTime.UtcNow;
-                Log.Debug(Cat, "fetch.cache.store");
+                var url = ActiveVersionUrl;
+                var res = await VersionChecker.CheckVersionAsync(url, _http);
+                if (res.Success || res.Info != null || res.HasAnyStable || res.HasAnyPre)
+                {
+                    lock (_fetchLock)
+                    {
+                        _cached = res;
+                        _lastFetchUtc = DateTime.UtcNow;
+                    }
+                    Log.Debug(Cat, "fetch.cache.store");
+                }
+                return res;
             }
-            return res;
+            finally
+            {
+                lock (_fetchLock)
+                {
+                    _pendingFetch = null;
+                }
+            }
         }
 
         // Determines version hierarchy and handles session-level deduplication before triggering UI
