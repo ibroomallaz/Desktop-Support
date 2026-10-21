@@ -10,7 +10,7 @@ namespace DSAMVVM.Core.Services.AD
         private static readonly string[] UserProps = [
             "displayName","distinguishedName","userAccountControl",
             "department","Department","eduPersonPrimaryAffiliation","extensionAttribute15",
-            "msDS-User-Account-Control-Computed"
+            "msDS-User-Account-Control-Computed","memberOf"
         ];
 
         // computer props used by UI and services
@@ -183,6 +183,15 @@ namespace DSAMVVM.Core.Services.AD
         }
 
         // ---- property helpers ----
+
+        public static string DnToCn(string dn)
+        {
+            var i = dn.IndexOf("CN=", StringComparison.OrdinalIgnoreCase);
+            if (i < 0) return dn;
+            var rest = dn[(i + 3)..];
+            var j = rest.IndexOf(',');
+            return j > 0 ? rest[..j] : rest;
+        }
 
         public static bool IsMemberOf(SearchResult? r, string exactGroupCn)
         {

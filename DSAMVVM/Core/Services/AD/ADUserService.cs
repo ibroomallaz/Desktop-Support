@@ -49,23 +49,45 @@ namespace DSAMVVM.Core.Services.AD
                     info.License = ParseLicense(rawLicense);
 
                     var userDn = DirectoryUtility.GetString(r, "distinguishedName");
+                    var memberOf = DirectoryUtility.GetStrings(r, "memberOf");
 
-                    info.HasMimWrkstGroup = !string.IsNullOrWhiteSpace(userDn) &&
-                                            DirectoryUtility.HasMimWrkstGroup(_ldap, userDn);
-
-                    // Second query only if needed to resolve Division rollup group
-                    var result = !string.IsNullOrWhiteSpace(userDn)
-                        ? DirectoryUtility.FindDivisionRollupGroup(_ldap, userDn)
-                        : null;
-
-                    if (result?.Properties["cn"].Count > 0)
+                    if (memberOf.Count > 0)
                     {
-                        var cn = result.Properties["cn"][0].ToString();
-                        info.Division = cn?.Length >= 4 ? cn[..4] : "N/A";
+                        // In-memory evaluation avoids redundant LDAP round-trips
+                        info.HasMimWrkstGroup = DirectoryUtility.IsMemberOf(r, "UA-MIM-Wrkst-AllDivUsers");
+
+                        var rollupCn = memberOf
+                            .Select(DirectoryUtility.DnToCn)
+                            .FirstOrDefault(cn => cn.Contains("MIM-DivisionRollup", StringComparison.OrdinalIgnoreCase));
+
+                        if (!string.IsNullOrWhiteSpace(rollupCn))
+                        {
+                            info.Division = rollupCn.Length >= 4 ? rollupCn[..4] : "N/A";
+                        }
+                        else
+                        {
+                            info.Division = "No Departmental MIM group";
+                        }
                     }
                     else
                     {
-                        info.Division = "No Departmental MIM group";
+                        // Fallback if memberOf is empty or unpopulated (e.g. permission restriction)
+                        info.HasMimWrkstGroup = !string.IsNullOrWhiteSpace(userDn) &&
+                                                DirectoryUtility.HasMimWrkstGroup(_ldap, userDn);
+
+                        var result = !string.IsNullOrWhiteSpace(userDn)
+                            ? DirectoryUtility.FindDivisionRollupGroup(_ldap, userDn)
+                            : null;
+
+                        if (result?.Properties["cn"].Count > 0)
+                        {
+                            var cn = result.Properties["cn"][0].ToString();
+                            info.Division = cn?.Length >= 4 ? cn[..4] : "N/A";
+                        }
+                        else
+                        {
+                            info.Division = "No Departmental MIM group";
+                        }
                     }
                 }
                 catch (DirectoryServicesCOMException ex)

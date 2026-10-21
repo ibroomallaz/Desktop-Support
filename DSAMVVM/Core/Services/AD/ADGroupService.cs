@@ -148,13 +148,6 @@ namespace DSAMVVM.Core.Services.AD
         private static string Esc(string s) =>
             s.Replace("\\", "\\5c").Replace("*", "\\2a").Replace("(", "\\28").Replace(")", "\\29").Replace("\0", "");
 
-        private static string DnToCn(string dn)
-        {
-            var i = dn.IndexOf("CN=", StringComparison.OrdinalIgnoreCase);
-            if (i < 0) return dn;
-            var rest = dn[(i + 3)..];
-            var j = rest.IndexOf(',');
-            return j > 0 ? rest[..j] : rest;
-        }
+        private static string DnToCn(string dn) => DirectoryUtility.DnToCn(dn);
     }
 }
