@@ -46,7 +46,11 @@ namespace DSAMVVM.MVVM.Model.Config.UI
         public string ColorPreset
         {
             get => _colorPreset;
-            set => Set(ref _colorPreset, ShortcutColorPresets.Normalize(value));
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value)) return;
+                Set(ref _colorPreset, ShortcutColorPresets.Normalize(value));
+            }
         }
 
         private bool _isCustom;

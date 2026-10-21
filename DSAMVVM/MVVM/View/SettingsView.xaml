@@ -814,7 +814,8 @@
                                                     <ComboBox Grid.Column="4" Height="28" VerticalAlignment="Center"
                                                               Style="{DynamicResource Combo.Links.Dropdown}"
                                                               ItemsSource="{Binding DataContext.AvailableColorPresets, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                              SelectedItem="{Binding ColorPreset, Mode=TwoWay}"
+                                                              SelectedValue="{Binding ColorPreset, Mode=TwoWay}"
+                                                              SelectedValuePath="."
                                                               ItemTemplate="{StaticResource ColorPresetItemTemplate}"/>
 
                                                     <!-- Action buttons (Up, Down, Delete) -->

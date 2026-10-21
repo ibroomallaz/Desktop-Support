@@ -45,7 +45,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
     public class SettingsViewModel : ObservableObject
     {
-        private readonly ISettingsService _settingsSvc;
+        private readonly ISettingsService _settingsSvc = null!;
         private readonly IOutputTextSettingsProvider? _notifier;
         private readonly ISearchService? _searchSvc;
 
@@ -151,10 +151,20 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public void SelectCategoryAndAnchor(SettingsCategory category, string? anchor = null)
         {
+            RefreshFromSettings();
             SelectCategory(category);
             if (!string.IsNullOrWhiteSpace(anchor))
             {
                 RequestScrollToAnchor(anchor);
+            }
+        }
+
+        public void RefreshFromSettings()
+        {
+            if (!HasUnsavedChanges)
+            {
+                _settings = App.Settings;
+                LoadValuesFromSettings();
             }
         }
 
@@ -469,7 +479,15 @@ namespace DSAMVVM.MVVM.ViewModel
         public bool UseCustomDept { get => _useCustomDept; set { if (Set(ref _useCustomDept, value)) SetModified(); } }
 
         private string _deptSource = "Web";
-        public string DeptSource { get => _deptSource; set { if (Set(ref _deptSource, value)) SetModified(); } }
+        public string DeptSource
+        {
+            get => _deptSource;
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value)) return;
+                if (Set(ref _deptSource, value)) SetModified();
+            }
+        }
 
         private string _deptUri = string.Empty;
         public string DeptUri { get => _deptUri; set { if (Set(ref _deptUri, value)) SetModified(); } }
@@ -478,7 +496,15 @@ namespace DSAMVVM.MVVM.ViewModel
         public bool UseCustomLinks { get => _useCustomLinks; set { if (Set(ref _useCustomLinks, value)) SetModified(); } }
 
         private string _linksSource = "Web";
-        public string LinksSource { get => _linksSource; set { if (Set(ref _linksSource, value)) SetModified(); } }
+        public string LinksSource
+        {
+            get => _linksSource;
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value)) return;
+                if (Set(ref _linksSource, value)) SetModified();
+            }
+        }
 
         private string _linksUri = string.Empty;
         public string LinksUri { get => _linksUri; set { if (Set(ref _linksUri, value)) SetModified(); } }
@@ -622,7 +648,7 @@ namespace DSAMVVM.MVVM.ViewModel
             IDepartmentService? deptService = null,
             ILinksService? linksService = null)
         {
-            _settingsSvc = settingsSvc;
+            _settingsSvc = settingsSvc ?? throw new ArgumentNullException(nameof(settingsSvc));
             _notifier = notifier;
             _searchSvc = searchSvc;
 
@@ -630,6 +656,21 @@ namespace DSAMVVM.MVVM.ViewModel
             _isDevModeEnabled = _settings.Ui.EnableDevSettings;
             SyncCategories();
             _selectedCategory = Categories.First();
+
+            if (_settingsSvc != null)
+            {
+                _settingsSvc.SettingsChanged += (_, newSettings) =>
+                {
+                    if (!HasUnsavedChanges)
+                    {
+                        UiNotify.RunOnUiAsync(() =>
+                        {
+                            _settings = newSettings;
+                            LoadValuesFromSettings();
+                        });
+                    }
+                };
+            }
 
             LoadValuesFromSettings();
 

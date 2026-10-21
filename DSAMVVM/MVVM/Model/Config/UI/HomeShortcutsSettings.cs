@@ -23,9 +23,9 @@ namespace DSAMVVM.MVVM.Model.Config.UI
             var defaults = GetDefaultShortcuts();
             var defaultsById = defaults.ToDictionary(d => d.Id, StringComparer.OrdinalIgnoreCase);
 
-            // Detect legacy condition where all items collapsed to the same color preset (e.g. all Blue during migration)
+            // Detect legacy condition where all items collapsed to Blue during migration
             bool allUniformColor = Items.Count > 1 &&
-                                   Items.All(x => string.Equals(x.ColorPreset, Items[0].ColorPreset, StringComparison.OrdinalIgnoreCase));
+                                   Items.All(x => string.Equals(x.ColorPreset, ShortcutColorPresets.Blue, StringComparison.OrdinalIgnoreCase));
 
             for (int i = 0; i < Items.Count; i++)
             {

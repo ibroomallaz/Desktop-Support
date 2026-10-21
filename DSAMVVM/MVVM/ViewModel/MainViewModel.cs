@@ -189,6 +189,11 @@ namespace DSAMVVM.MVVM.ViewModel
 
                 _appStateService.CurrentView = value.ToString();
 
+                if (value == AppView.Settings)
+                {
+                    SettingsVM.RefreshFromSettings();
+                }
+
                 CurrentView = value switch
                 {
                     AppView.Home => HomeVM,
