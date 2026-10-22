@@ -34,7 +34,10 @@ namespace DSAMVVM.Core.Services.Integrations
                 _appStateService.RecentDepartment = departmentNumber.Trim();
             }
 
-            var dept = _departments?.FirstOrDefault(d => d.Number == departmentNumber);
+            var searchNum = departmentNumber?.Trim();
+            var dept = _departments?.FirstOrDefault(d =>
+                d.Number.Equals(searchNum, StringComparison.OrdinalIgnoreCase) ||
+                (searchNum != null && int.TryParse(searchNum, out _) && d.Number.Equals(searchNum.PadLeft(4, '0'), StringComparison.OrdinalIgnoreCase)));
 
             // Caches the resolved support team in the application state
             if (dept != null && !string.IsNullOrWhiteSpace(dept.Team))

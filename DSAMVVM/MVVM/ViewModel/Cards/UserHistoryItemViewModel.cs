@@ -343,9 +343,14 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
             RefreshCommand = new RelayCommand(async _ => await RefreshAsync());
             NavigateTeamCommand = new RelayCommand(_ =>
             {
-                if (!string.IsNullOrWhiteSpace(SupportTeamName))
+                var deptNum = User?.DepartmentNumber?.Trim();
+                if (!string.IsNullOrWhiteSpace(deptNum))
                 {
-                    linkRouter1.RequestNavigation("GroupView", SupportTeamName);
+                    linkRouter1.RequestNavigation("group/dept", deptNum);
+                }
+                else if (!string.IsNullOrWhiteSpace(SupportTeamName))
+                {
+                    linkRouter1.RequestNavigation("group/dept", SupportTeamName.Trim());
                 }
             });
             NavigateDivisionSupportCommand = new RelayCommand(_ =>
