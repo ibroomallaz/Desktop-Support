@@ -540,15 +540,13 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _quickSearchModifierKey;
             set
             {
-                if (Set(ref _quickSearchModifierKey, value))
+                if (!Set(ref _quickSearchModifierKey, value)) return;
+                if (_selectedModifierKeyOption?.Key != value)
                 {
-                    if (_selectedModifierKeyOption?.Key != value)
-                    {
-                        _selectedModifierKeyOption = ModifierKeyOptions.FirstOrDefault(x => x.Key == value);
-                        OnPropertyChanged(nameof(SelectedModifierKeyOption));
-                    }
-                    SetModified();
+                    _selectedModifierKeyOption = ModifierKeyOptions.FirstOrDefault(x => x.Key == value);
+                    OnPropertyChanged(nameof(SelectedModifierKeyOption));
                 }
+                SetModified();
             }
         }
 
@@ -633,20 +631,17 @@ namespace DSAMVVM.MVVM.ViewModel
             SyncCategories();
             _selectedCategory = Categories.First();
 
-            if (_settingsSvc != null)
+            _settingsSvc.SettingsChanged += (_, newSettings) =>
             {
-                _settingsSvc.SettingsChanged += (_, newSettings) =>
+                if (!HasUnsavedChanges)
                 {
-                    if (!HasUnsavedChanges)
+                    UiNotify.RunOnUiAsync(() =>
                     {
-                        UiNotify.RunOnUiAsync(() =>
-                        {
-                            _settings = newSettings;
-                            LoadValuesFromSettings();
-                        });
-                    }
-                };
-            }
+                        _settings = newSettings;
+                        LoadValuesFromSettings();
+                    });
+                }
+            };
 
             LoadValuesFromSettings();
 
