@@ -130,8 +130,8 @@ namespace DSAMVVM.Core.Utilities
             if (string.IsNullOrWhiteSpace(newVersion)) return false;
             if (string.IsNullOrWhiteSpace(currentVersion)) return true;
 
-            var (baseCurr, labelCurr, numCurr) = ExtractPrerelease(currentVersion);
-            var (baseNew, labelNew, numNew) = ExtractPrerelease(newVersion);
+            (string baseCurr, string? labelCurr, int numCurr) = ExtractPrerelease(currentVersion);
+            (string baseNew, string? labelNew, int numNew) = ExtractPrerelease(newVersion);
 
             var baseCurrOk = Version.TryParse(baseCurr, out var vCurr);
             var baseNewOk = Version.TryParse(baseNew, out var vNew);
@@ -251,10 +251,7 @@ namespace DSAMVVM.Core.Utilities
         // Case-insensitive property lookup
         private static JToken? Find(JObject obj, string name)
         {
-            foreach (var p in obj.Properties())
-                if (string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase))
-                    return p.Value;
-            return null;
+            return (from p in obj.Properties() where string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase) select p.Value).FirstOrDefault();
         }
 
         // Case-insensitive string reader
@@ -270,11 +267,7 @@ namespace DSAMVVM.Core.Utilities
         // Case-insensitive bool reader
         private static bool ReadBool(JObject? obj, string name)
         {
-            if (obj == null) return false;
-            foreach (var p in obj.Properties())
-                if (string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase))
-                    return p.Value.Type == JTokenType.Boolean && p.Value.Value<bool>();
-            return false;
+            return obj != null && (from p in obj.Properties() where string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase) select p.Value.Type == JTokenType.Boolean && p.Value.Value<bool>()).FirstOrDefault();
         }
 
         private static string Val(string? s) => string.IsNullOrWhiteSpace(s) ? "(none)" : s;

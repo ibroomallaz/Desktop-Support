@@ -7,8 +7,6 @@ namespace DSAMVVM.Core.Services.AD
 {
     public class ADComputerService(string ldapPath)
     {
-        private readonly string _ldapPath = ldapPath;
-
         public Task<ADComputerInfo> GetComputerAsync(string hostname)
         {
             return Task.Run(() =>
@@ -18,7 +16,7 @@ namespace DSAMVVM.Core.Services.AD
                 try
                 {
                     // single computer search with required attributes preloaded
-                    var r = DirectoryUtility.FindComputerByCn(_ldapPath, hostname);
+                    var r = DirectoryUtility.FindComputerByCn(ldapPath, hostname);
                     if (r == null)
                     {
                         info.Exists = false;
@@ -77,13 +75,10 @@ namespace DSAMVVM.Core.Services.AD
                 var highObj = type.InvokeMember("HighPart", BindingFlags.GetProperty, null, ts, null!);
                 var lowObj = type.InvokeMember("LowPart", BindingFlags.GetProperty, null, ts, null!);
 
-                if (highObj is int highPart && lowObj is int lowPart)
-                {
-                    var fileTime = ((long)highPart << 32) | (uint)lowPart;
-                    return DateTime.FromFileTime(fileTime).ToString("MMM dd, yyyy h:mm tt");
-                }
+                if (highObj is not int highPart || lowObj is not int lowPart) return "Unknown";
+                var fileTime = ((long)highPart << 32) | (uint)lowPart;
+                return DateTime.FromFileTime(fileTime).ToString("MMM dd, yyyy h:mm tt");
 
-                return "Unknown";
             }
             catch
             {

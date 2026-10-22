@@ -43,13 +43,11 @@ namespace DSAMVVM.MVVM.ViewModel.Dialogs
             get => _isAuthenticated;
             set
             {
-                if (_isAuthenticated != value)
-                {
-                    _isAuthenticated = value;
-                    OnPropertyChanged();
-                    OnPropertyChanged(nameof(SubmitButtonText));
-                    OnPropertyChanged(nameof(CanSubmit));
-                }
+                if (_isAuthenticated == value) return;
+                _isAuthenticated = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(SubmitButtonText));
+                OnPropertyChanged(nameof(CanSubmit));
             }
         }
 

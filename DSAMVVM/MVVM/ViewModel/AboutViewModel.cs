@@ -47,14 +47,12 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _updateStatus;
             private set
             {
-                if (_updateStatus != value)
-                {
-                    _updateStatus = value;
-                    OnPropertyChanged();
-                    OnPropertyChanged(nameof(IsUpToDate));
-                    OnPropertyChanged(nameof(IsChecking));
-                    OnPropertyChanged(nameof(HasCheckFailed));
-                }
+                if (_updateStatus == value) return;
+                _updateStatus = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsUpToDate));
+                OnPropertyChanged(nameof(IsChecking));
+                OnPropertyChanged(nameof(HasCheckFailed));
             }
         }
 
@@ -67,11 +65,9 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _lastCheckedText;
             private set
             {
-                if (_lastCheckedText != value)
-                {
-                    _lastCheckedText = value;
-                    OnPropertyChanged();
-                }
+                if (_lastCheckedText == value) return;
+                _lastCheckedText = value;
+                OnPropertyChanged();
             }
         }
 
@@ -311,17 +307,18 @@ namespace DSAMVVM.MVVM.ViewModel
                     // ignored
                 }
 
-                if (isDomainJoined && isEntraJoined)
-                    return $"{joinName} (Hybrid Entra)";
-                if (isDomainJoined)
-                    return $"{joinName} (Domain)";
+                switch (isDomainJoined)
+                {
+                    case true when isEntraJoined:
+                        return $"{joinName} (Hybrid Entra)";
+                    case true:
+                        return $"{joinName} (Domain)";
+                }
+
                 if (isEntraJoined)
                     return "Entra ID (Cloud)";
 
-                if (!string.IsNullOrWhiteSpace(joinName))
-                    return $"Workgroup: {joinName}";
-
-                return "Workgroup (Standalone)";
+                return !string.IsNullOrWhiteSpace(joinName) ? $"Workgroup: {joinName}" : "Workgroup (Standalone)";
             }
             catch
             {

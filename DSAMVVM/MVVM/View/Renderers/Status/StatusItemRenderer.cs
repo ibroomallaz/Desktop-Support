@@ -25,8 +25,7 @@ namespace DSAMVVM.MVVM.View.Renderers.Status
             if (d is not TextBlock tb) return;
             tb.Inlines.Clear();
 
-            var item = e.NewValue as StatusItem;
-            if (item == null || item.Spans.Count == 0) return;
+            if (e.NewValue is not StatusItem item || item.Spans.Count == 0) return;
 
             IReadOnlyList<StatusSpan> spans = item.Spans;
 

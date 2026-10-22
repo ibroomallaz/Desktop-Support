@@ -21,7 +21,7 @@ namespace DSAMVVM.Core.IO
             try
             {
                 json = await http.GetStringAsync(remoteUrl, ct);
-                log?.Invoke($"web.ok bytes={(json?.Length ?? 0)}");
+                log?.Invoke($"web.ok bytes={json?.Length ?? 0}");
             }
             catch (HttpRequestException ex)
             {

@@ -110,18 +110,16 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _isSidebarCollapsed;
             set
             {
-                if (Set(ref _isSidebarCollapsed, value))
+                if (!Set(ref _isSidebarCollapsed, value)) return;
+                if (SelectedView != AppView.Admin)
                 {
-                    if (SelectedView != AppView.Admin)
-                    {
-                        _userSidebarPreference = value;
-                    }
-                    OnPropertyChanged(nameof(IsCompactSidebar));
-                    OnPropertyChanged(nameof(SidebarWidth));
-                    OnPropertyChanged(nameof(SidebarToggleGlyph));
-                    OnPropertyChanged(nameof(SidebarToggleText));
-                    OnPropertyChanged(nameof(SidebarToggleToolTip));
+                    _userSidebarPreference = value;
                 }
+                OnPropertyChanged(nameof(IsCompactSidebar));
+                OnPropertyChanged(nameof(SidebarWidth));
+                OnPropertyChanged(nameof(SidebarToggleGlyph));
+                OnPropertyChanged(nameof(SidebarToggleText));
+                OnPropertyChanged(nameof(SidebarToggleToolTip));
             }
         }
 
@@ -216,12 +214,10 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _searchQuery;
             set
             {
-                if (_searchQuery != value)
-                {
-                    _searchQuery = value;
-                    OnPropertyChanged();
-                    OnPropertyChanged(nameof(HasSearchQuery));
-                }
+                if (_searchQuery == value) return;
+                _searchQuery = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasSearchQuery));
             }
         }
 
@@ -246,11 +242,9 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _isDevModeEnabled;
             set
             {
-                if (Set(ref _isDevModeEnabled, value))
-                {
-                    SettingsVM.IsDevModeEnabled = value;
-                    OnPropertyChanged(nameof(DevModeStatusText));
-                }
+                if (!Set(ref _isDevModeEnabled, value)) return;
+                SettingsVM.IsDevModeEnabled = value;
+                OnPropertyChanged(nameof(DevModeStatusText));
             }
         }
         public string DevModeStatusText => IsDevModeEnabled ? "Disable Developer Settings" : "Enable Developer Settings";
@@ -261,12 +255,10 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _showAdminView;
             set
             {
-                if (_showAdminView != value)
-                {
-                    _showAdminView = value;
-                    OnPropertyChanged();
-                    SyncAdminNavItem();
-                }
+                if (_showAdminView == value) return;
+                _showAdminView = value;
+                OnPropertyChanged();
+                SyncAdminNavItem();
             }
         }
 
@@ -276,13 +268,11 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _hasUnlockedAdmin;
             set
             {
-                if (_hasUnlockedAdmin != value)
-                {
-                    _hasUnlockedAdmin = value;
-                    OnPropertyChanged();
-                    OnPropertyChanged(nameof(AdminModeStatusText));
-                    SyncAdminNavItem();
-                }
+                if (_hasUnlockedAdmin == value) return;
+                _hasUnlockedAdmin = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(AdminModeStatusText));
+                SyncAdminNavItem();
             }
         }
         public string AdminModeStatusText => HasUnlockedAdmin ? "Disable JSON Admin" : "Enable JSON Admin";
@@ -294,29 +284,27 @@ namespace DSAMVVM.MVVM.ViewModel
 
             if (_hasUnlockedAdmin && _showAdminView)
             {
-                if (adminItemInNav == null || adminItemInFooter == null)
+                if (adminItemInNav != null && adminItemInFooter != null) return;
+                var newAdminItem = new NavItem
                 {
-                    var newAdminItem = new NavItem
-                    {
-                        Title = Strings.Nav_Admin,
-                        Glyph = Glyphs.Admin,
-                        View = AppView.Admin,
-                        Command = AdminCommand
-                    };
+                    Title = Strings.Nav_Admin,
+                    Glyph = Glyphs.Admin,
+                    View = AppView.Admin,
+                    Command = AdminCommand
+                };
 
-                    if (adminItemInFooter == null)
-                    {
-                        FooterNavItems.Insert(0, newAdminItem);
-                    }
+                if (adminItemInFooter == null)
+                {
+                    FooterNavItems.Insert(0, newAdminItem);
+                }
 
-                    if (adminItemInNav == null)
+                if (adminItemInNav == null)
+                {
+                    var settingsNav = NavItems.FirstOrDefault(n => n.View == AppView.Settings);
+                    if (settingsNav != null)
                     {
-                        var settingsNav = NavItems.FirstOrDefault(n => n.View == AppView.Settings);
-                        if (settingsNav != null)
-                        {
-                            var settingsIndex = NavItems.IndexOf(settingsNav);
-                            NavItems.Insert(settingsIndex, newAdminItem);
-                        }
+                        var settingsIndex = NavItems.IndexOf(settingsNav);
+                        NavItems.Insert(settingsIndex, newAdminItem);
                     }
                 }
             }
@@ -485,12 +473,12 @@ namespace DSAMVVM.MVVM.ViewModel
 
                 if (targetAppView == AppView.Settings)
                 {
-                    var (category, anchor) = ResolveSettingsTarget(normQuery);
+                    (SettingsCategory category, string? anchor) = ResolveSettingsTarget(normQuery);
                     SettingsVM.SelectCategoryAndAnchor(category, anchor);
                 }
                 else if (targetAppView == AppView.Group)
                 {
-                    var (groupMode, cleanQuery) = ResolveGroupTarget(viewSubTarget, normQuery);
+                    (GroupViewModel.GroupSearchMode? groupMode, string cleanQuery) = ResolveGroupTarget(viewSubTarget, normQuery);
                     if (groupMode.HasValue)
                     {
                         GroupVM.SetSearchMode(groupMode.Value);
@@ -556,13 +544,11 @@ namespace DSAMVVM.MVVM.ViewModel
             }
 
             string? query = GetArgValue(args, "--query");
-            if (!string.IsNullOrEmpty(query))
+            if (string.IsNullOrEmpty(query)) return;
+            SearchQuery = query;
+            if (ExecuteSearchCommand.CanExecute(null))
             {
-                SearchQuery = query;
-                if (ExecuteSearchCommand.CanExecute(null))
-                {
-                    ExecuteSearchCommand.Execute(null);
-                }
+                ExecuteSearchCommand.Execute(null);
             }
         }
 
@@ -677,13 +663,11 @@ namespace DSAMVVM.MVVM.ViewModel
             }
 
             // 3. Auto-inference fallback based on query pattern
-            if (!resolvedMode.HasValue && !string.IsNullOrWhiteSpace(cleanQuery))
+            if (resolvedMode.HasValue || string.IsNullOrWhiteSpace(cleanQuery)) return (resolvedMode, cleanQuery);
+            if (cleanQuery.StartsWith("UA-", StringComparison.OrdinalIgnoreCase) ||
+                cleanQuery.StartsWith("UA_", StringComparison.OrdinalIgnoreCase))
             {
-                if (cleanQuery.StartsWith("UA-", StringComparison.OrdinalIgnoreCase) ||
-                    cleanQuery.StartsWith("UA_", StringComparison.OrdinalIgnoreCase))
-                {
-                    resolvedMode = GroupViewModel.GroupSearchMode.GroupMembers;
-                }
+                resolvedMode = GroupViewModel.GroupSearchMode.GroupMembers;
             }
 
             return (resolvedMode, cleanQuery);
@@ -808,17 +792,15 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public void BootstrapInitialView()
         {
-            if (CurrentView == null || SelectedView == AppView.Home)
-            {
-                CurrentView = HomeVM;
-                var d = Application.Current?.Dispatcher;
-                if (d is not null)
-                    d.BeginInvoke(() => SelectedView = AppView.Home, DispatcherPriority.Loaded);
-                else
-                    SelectedView = AppView.Home;
+            if (CurrentView != null && SelectedView != AppView.Home) return;
+            CurrentView = HomeVM;
+            var d = Application.Current?.Dispatcher;
+            if (d is not null)
+                d.BeginInvoke(() => SelectedView = AppView.Home, DispatcherPriority.Loaded);
+            else
+                SelectedView = AppView.Home;
 
-                SelectedNav = NavItems.FirstOrDefault(n => n.View == AppView.Home);
-            }
+            SelectedNav = NavItems.FirstOrDefault(n => n.View == AppView.Home);
         }
 
         public void StartWarmup()
@@ -869,14 +851,8 @@ namespace DSAMVVM.MVVM.ViewModel
                 SettingsVM.SyncExternalAdminAndDevState(HasUnlockedAdmin, ShowAdminView, newState);
                 App.Services.GetRequiredService<ISettingsService>().RequestSave(settings, Globals.g_SettingsPath);
 
-                if (newState)
-                {
-                    UiNotify.Info("Developer settings enabled and saved.", showStatusBar: true);
-                }
-                else
-                {
-                    UiNotify.Info("Developer settings disabled.", showStatusBar: true);
-                }
+                UiNotify.Info(newState ? "Developer settings enabled and saved." : "Developer settings disabled.",
+                    showStatusBar: true);
             });
 
             ToggleAdminModeCommand = new RelayCommand(_ =>

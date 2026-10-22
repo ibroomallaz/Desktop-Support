@@ -85,7 +85,7 @@ namespace DSAMVVM.Core.Services.Infrastructure
             Directory.CreateDirectory(destinationDirectory);
 
             var changesList = stagedChanges.ToList();
-            bool hasDeptChanges = changesList.Any(c => c.Section == AdminSection.Department || c.Section == AdminSection.SupportTeam);
+            bool hasDeptChanges = changesList.Any(c => c.Section is AdminSection.Department or AdminSection.SupportTeam);
             bool hasLinkChanges = changesList.Any(c => c.Section == AdminSection.Links);
             bool hasMeowChanges = changesList.Any(c => c.Section == AdminSection.ServiceMeow);
 
@@ -113,12 +113,10 @@ namespace DSAMVVM.Core.Services.Infrastructure
                 exportedFiles.Add(linksPath);
             }
 
-            if (hasMeowChanges)
-            {
-                string meowPath = Path.Combine(destinationDirectory, "servicemeow.json");
-                await ExportServiceMeowJsonAsync(changesList, meowPath);
-                exportedFiles.Add(meowPath);
-            }
+            if (!hasMeowChanges) return exportedFiles;
+            string meowPath = Path.Combine(destinationDirectory, "servicemeow.json");
+            await ExportServiceMeowJsonAsync(changesList, meowPath);
+            exportedFiles.Add(meowPath);
 
             return exportedFiles;
         }

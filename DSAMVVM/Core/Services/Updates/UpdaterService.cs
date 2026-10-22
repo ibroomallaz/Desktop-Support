@@ -104,7 +104,7 @@ namespace DSAMVVM.Core.Services.Updates
         private static bool IsDotNetRuntimeInstalled(string requiredVersionString)
         {
             if (!Version.TryParse(requiredVersionString, out var requiredVersion)) return false;
-            var runtimePath = @"C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App";
+            const string runtimePath = @"C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App";
             if (!Directory.Exists(runtimePath)) return false;
 
             return Directory.GetDirectories(runtimePath)

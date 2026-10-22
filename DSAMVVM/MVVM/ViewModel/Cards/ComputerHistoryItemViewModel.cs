@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using DSAMVVM.Core.Formatters;
 using DSAMVVM.Core.Logging;
@@ -27,8 +24,7 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
             {
                 var diff = DateTime.Now - Timestamp;
                 if (diff.TotalMinutes < 1) return "just now";
-                if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes} min ago";
-                return $"{(int)diff.TotalHours}h ago";
+                return diff.TotalMinutes < 60 ? $"{(int)diff.TotalMinutes} min ago" : $"{(int)diff.TotalHours}h ago";
             }
         }
 
@@ -40,13 +36,11 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
             get => _isExpanded;
             set
             {
-                if (_isExpanded != value)
-                {
-                    _isExpanded = value;
-                    OnPropertyChanged();
-                    OnPropertyChanged(nameof(IsStale));
-                    OnPropertyChanged(nameof(RelativeAgeText));
-                }
+                if (_isExpanded == value) return;
+                _isExpanded = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsStale));
+                OnPropertyChanged(nameof(RelativeAgeText));
             }
         }
 
@@ -166,12 +160,10 @@ namespace DSAMVVM.MVVM.ViewModel.Cards
             try
             {
                 var builder = ComputerCardClipboardHelper.BuildSummary(this);
-                if (builder.CopyToClipboard())
-                {
-                    IsSummaryCopied = true;
-                    UiNotify.Success($"Copied summary for '{ComputerName}' to clipboard.", showStatusBar: true);
-                    _ = Task.Delay(1500).ContinueWith(_ => UiNotify.RunOnUiAsync(() => IsSummaryCopied = false));
-                }
+                if (!builder.CopyToClipboard()) return;
+                IsSummaryCopied = true;
+                UiNotify.Success($"Copied summary for '{ComputerName}' to clipboard.", showStatusBar: true);
+                _ = Task.Delay(1500).ContinueWith(_ => UiNotify.RunOnUiAsync(() => IsSummaryCopied = false));
             }
             catch (Exception ex)
             {

@@ -20,11 +20,9 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _displayedItem;
             private set
             {
-                if (_displayedItem != value)
-                {
-                    _displayedItem = value;
-                    OnPropertyChanged();
-                }
+                if (_displayedItem == value) return;
+                _displayedItem = value;
+                OnPropertyChanged();
             }
         }
 
@@ -50,11 +48,9 @@ namespace DSAMVVM.MVVM.ViewModel
             // Existing listener to refresh the UI when the bus updates
             StatusBus.CurrentChanged += OnStatusChanged;
 
-            if (StatusBus.Current != null)
-            {
-                DisplayedItem = StatusBus.Current;
-                IsOpen = true;
-            }
+            if (StatusBus.Current == null) return;
+            DisplayedItem = StatusBus.Current;
+            IsOpen = true;
         }
 
         private void OnStatusChanged(object? sender, EventArgs e)

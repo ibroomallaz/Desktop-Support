@@ -9,6 +9,6 @@ namespace DSAMVVM.Core.Utilities
             => value != null && parameter != null && value.Equals(parameter);
 
         public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-            => value is bool and true && parameter != null ? parameter : Binding.DoNothing;
+            => value is true && parameter != null ? parameter : Binding.DoNothing;
     }
 }

@@ -41,12 +41,7 @@ namespace DSAMVVM.Core.Services.Integrations
 
         public Task<ImageSource?> GetImageAsync(string? url, bool forceRefresh = false, int decodePixelWidth = 500, CancellationToken ct = default)
         {
-            if (string.IsNullOrWhiteSpace(url))
-            {
-                return Task.FromResult<ImageSource?>(null);
-            }
-
-            return _imageCacheService.GetImageAsync(url, forceRefresh: forceRefresh, decodePixelWidth: decodePixelWidth, ct: ct);
+            return string.IsNullOrWhiteSpace(url) ? Task.FromResult<ImageSource?>(null) : _imageCacheService.GetImageAsync(url, forceRefresh: forceRefresh, decodePixelWidth: decodePixelWidth, ct: ct);
         }
 
         public ServiceMeowPet? GetRandomPet()
@@ -223,11 +218,9 @@ namespace DSAMVVM.Core.Services.Integrations
                 sw.Stop();
                 UiNotify.RemoveKey(progressKey);
 
-                if (_cache != null)
-                {
-                    string sourceDesc = loadedFromCache ? "Cache Backup" : source;
-                    Log.Info(Tag, $"Loaded ServiceMeow from {sourceDesc} in {sw.ElapsedMilliseconds}ms ({_cache.AllPets.Count} pets).");
-                }
+                if (_cache == null) return _cache;
+                string sourceDesc = loadedFromCache ? "Cache Backup" : source;
+                Log.Info(Tag, $"Loaded ServiceMeow from {sourceDesc} in {sw.ElapsedMilliseconds}ms ({_cache.AllPets.Count} pets).");
 
                 return _cache;
             }
@@ -257,15 +250,13 @@ namespace DSAMVVM.Core.Services.Integrations
                 foreach (var removedUrl in oldUrls.Except(newUrls))
                 {
                     var path = _imageCacheService.GetCachedFilePath(removedUrl);
-                    if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                    if (string.IsNullOrEmpty(path) || !File.Exists(path)) continue;
+                    try
                     {
-                        try
-                        {
-                            File.Delete(path);
-                            Log.Info(Tag, $"Purged removed pet image from cache: {path}");
-                        }
-                        catch { /* best-effort delete */ }
+                        File.Delete(path);
+                        Log.Info(Tag, $"Purged removed pet image from cache: {path}");
                     }
+                    catch { /* best-effort delete */ }
                 }
 
                 // Pre-cache newly added or updated images

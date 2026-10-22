@@ -33,6 +33,10 @@ namespace DSAMVVM.MVVM.Services.Status
 
         public void Report(StatusItem item)
         {
+            var d = Application.Current?.Dispatcher;
+            if (d != null && !d.CheckAccess()) d.Invoke(OnUi); else OnUi();
+            return;
+
             void OnUi()
             {
                 if (item.Level == StatusLevel.Error)
@@ -103,13 +107,14 @@ namespace DSAMVVM.MVVM.Services.Status
                     StartTimerIfNeeded();
                 }
             }
-
-            var d = Application.Current?.Dispatcher;
-            if (d != null && !d.CheckAccess()) d.Invoke(OnUi); else OnUi();
         }
 
         public void RemoveByKey(string key)
         {
+            var d = Application.Current?.Dispatcher;
+            if (d != null && !d.CheckAccess()) d.Invoke(OnUi); else OnUi();
+            return;
+
             void OnUi()
             {
                 _byKey.Remove(key);
@@ -135,13 +140,14 @@ namespace DSAMVVM.MVVM.Services.Status
                 if (Current == null && DequeueToCurrentOrClear())
                     StartTimerIfNeeded();
             }
-
-            var d = Application.Current?.Dispatcher;
-            if (d != null && !d.CheckAccess()) d.Invoke(OnUi); else OnUi();
         }
 
         public void Clear()
         {
+            var d = Application.Current?.Dispatcher;
+            if (d != null && !d.CheckAccess()) d.Invoke(OnUi); else OnUi();
+            return;
+
             void OnUi()
             {
                 StopTimer();
@@ -149,9 +155,6 @@ namespace DSAMVVM.MVVM.Services.Status
                 _byKey.Clear();
                 SetCurrent(null);
             }
-
-            var d = Application.Current?.Dispatcher;
-            if (d != null && !d.CheckAccess()) d.Invoke(OnUi); else OnUi();
         }
 
         private void Advance()
@@ -191,13 +194,7 @@ namespace DSAMVVM.MVVM.Services.Status
         private void StartTimerIfNeeded()
         {
             if (!AutoRotateEnabled) return;
-            if (Current == null) { StopTimer(); return; }
-
-            if (Current.Sticky && StickyPinsRotation)
-            {
-                StopTimer();
-                return;
-            }
+            if (Current == null || Current.Sticky && StickyPinsRotation) { StopTimer(); return; }
 
             // Faster dwell with more items remaining; last item gets the longest.
             int remainingCount = _queue.Count + 1;
@@ -208,23 +205,18 @@ namespace DSAMVVM.MVVM.Services.Status
             if (_timer.IsEnabled)
             {
                 _timer.Stop();
-                _timer.Start();
             }
-            else
-            {
-                _timer.Start();
-            }
+
+            _timer.Start();
         }
 
         private void StopTimer() => _timer.Stop();
 
         private void SetCurrent(StatusItem? msg)
         {
-            if (!ReferenceEquals(Current, msg))
-            {
-                Current = msg;
-                CurrentChanged?.Invoke(this, EventArgs.Empty);
-            }
+            if (ReferenceEquals(Current, msg)) return;
+            Current = msg;
+            CurrentChanged?.Invoke(this, EventArgs.Empty);
         }
 
         // Put an interrupted non-sticky back at the front,

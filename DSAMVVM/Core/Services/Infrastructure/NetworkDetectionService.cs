@@ -175,7 +175,7 @@ namespace DSAMVVM.Core.Services.Infrastructure
                 // 5. Check if any physical adapter is connected but stuck on APIPA (169.254.x.x - DHCP failed)
                 var apipaAdapter = interfaces.FirstOrDefault(nic =>
                     !IsVirtualAdapter(nic) &&
-                    (GetIpv4Address(nic)?.StartsWith("169.254.") == true));
+                    GetIpv4Address(nic)?.StartsWith("169.254.") == true);
 
                 if (apipaAdapter != null)
                 {

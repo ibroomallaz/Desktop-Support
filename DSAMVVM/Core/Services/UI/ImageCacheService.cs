@@ -28,15 +28,14 @@ namespace DSAMVVM.Core.Services.UI
 
             var memKey = $"{url.Trim()}_{decodePixelWidth}";
 
-            // 0. Fast-path: check in-memory cache first to avoid disk I/O and bitmap re-decoding
-            if (!forceRefresh && _memoryCache.TryGetValue(memKey, out var memoryImage))
+            switch (forceRefresh)
             {
-                return memoryImage;
-            }
-
-            if (forceRefresh)
-            {
-                _memoryCache.TryRemove(memKey, out _);
+                // 0. Fast-path: check in-memory cache first to avoid disk I/O and bitmap re-decoding
+                case false when _memoryCache.TryGetValue(memKey, out var memoryImage):
+                    return memoryImage;
+                case true:
+                    _memoryCache.TryRemove(memKey, out _);
+                    break;
             }
 
             bool isWeb = false;
@@ -75,24 +74,26 @@ namespace DSAMVVM.Core.Services.UI
 
             try
             {
-                // Re-check memory cache inside lock in case another task loaded it concurrently
-                if (!forceRefresh && _memoryCache.TryGetValue(memKey, out var concurrentMemImage))
+                switch (forceRefresh)
                 {
-                    return concurrentMemImage;
-                }
-
-                // 1. If not forcing a refresh and cached file exists, load immediately from disk cache
-                if (!forceRefresh && File.Exists(localPath))
-                {
-                    var cachedBitmap = LoadBitmapFromDisk(localPath, decodePixelWidth);
-                    if (cachedBitmap != null)
+                    // Re-check memory cache inside lock in case another task loaded it concurrently
+                    case false when _memoryCache.TryGetValue(memKey, out var concurrentMemImage):
+                        return concurrentMemImage;
+                    // 1. If not forcing a refresh and cached file exists, load immediately from disk cache
+                    case false when File.Exists(localPath):
                     {
-                        _memoryCache[memKey] = cachedBitmap;
-                        return cachedBitmap;
-                    }
+                        var cachedBitmap = LoadBitmapFromDisk(localPath, decodePixelWidth);
+                        if (cachedBitmap != null)
+                        {
+                            _memoryCache[memKey] = cachedBitmap;
+                            return cachedBitmap;
+                        }
 
-                    // If file was unreadable or corrupted, delete it
-                    try { File.Delete(localPath); } catch { /* best-effort */ }
+                        // If file was unreadable or corrupted, delete it
+                        try { File.Delete(localPath); } catch { /* best-effort */ }
+
+                        break;
+                    }
                 }
 
                 // 2. Fetch and cache image (Local file copy or Web download)
@@ -186,12 +187,10 @@ namespace DSAMVVM.Core.Services.UI
             {
                 try
                 {
-                    if (Directory.Exists(_cacheDirectory))
+                    if (!Directory.Exists(_cacheDirectory)) return;
+                    foreach (var file in Directory.GetFiles(_cacheDirectory))
                     {
-                        foreach (var file in Directory.GetFiles(_cacheDirectory))
-                        {
-                            try { File.Delete(file); } catch { /* best-effort */ }
-                        }
+                        try { File.Delete(file); } catch { /* best-effort */ }
                     }
                 }
                 catch (Exception ex)

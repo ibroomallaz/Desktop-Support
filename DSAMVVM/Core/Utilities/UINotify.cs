@@ -187,12 +187,9 @@ namespace DSAMVVM.Core.Utilities
 
         public static bool TryExecute(string commandToken)
         {
-            if (_commands.TryGetValue(commandToken, out var fn))
-            {
-                FireAndLogAsync(fn);
-                return true;
-            }
-            return false;
+            if (!_commands.TryGetValue(commandToken, out var fn)) return false;
+            FireAndLogAsync(fn);
+            return true;
         }
 
         // internals

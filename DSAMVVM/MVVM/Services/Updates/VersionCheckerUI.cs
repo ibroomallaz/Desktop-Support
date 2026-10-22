@@ -131,11 +131,9 @@ namespace DSAMVVM.MVVM.Services.Updates
             UiNotify.Info($"Version: {_installedVersion}.", showStatusBar: true, key: StatusKey);
             Log.Debug(Cat, "report.success");
 
-            if (!showed && showUpToDatePopup)
-            {
-                UiNotify.Success($"You’re up to date. Version: ({_installedVersion}).", showStatusBar: true, key: StatusKey);
-                Log.Info(Cat, "check.up-to-date.notified");
-            }
+            if (showed || !showUpToDatePopup) return showed;
+            UiNotify.Success($"You’re up to date. Version: ({_installedVersion}).", showStatusBar: true, key: StatusKey);
+            Log.Info(Cat, "check.up-to-date.notified");
 
             return showed;
         }
@@ -173,15 +171,13 @@ namespace DSAMVVM.MVVM.Services.Updates
             {
                 var url = ActiveVersionUrl;
                 var res = await VersionChecker.CheckVersionAsync(url, _http);
-                if (res.Success || res.Info != null || res.HasAnyStable || res.HasAnyPre)
+                if (res is { Success: false, Info: null, HasAnyStable: false, HasAnyPre: false }) return res;
+                lock (_fetchLock)
                 {
-                    lock (_fetchLock)
-                    {
-                        _cached = res;
-                        _lastFetchUtc = DateTime.UtcNow;
-                    }
-                    Log.Debug(Cat, "fetch.cache.store");
+                    _cached = res;
+                    _lastFetchUtc = DateTime.UtcNow;
                 }
+                Log.Debug(Cat, "fetch.cache.store");
                 return res;
             }
             finally

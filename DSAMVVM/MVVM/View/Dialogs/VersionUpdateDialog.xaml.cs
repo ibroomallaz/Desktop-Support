@@ -6,7 +6,7 @@ using System.Windows.Input;
 namespace DSAMVVM.MVVM.View.Dialogs
 {
     // Initializes the graphical components and handles dynamic sizing for the version update dialog
-    public partial class VersionUpdateDialog : Window
+    public partial class VersionUpdateDialog
     {
         public VersionUpdateDialog()
         {
@@ -51,10 +51,8 @@ namespace DSAMVVM.MVVM.View.Dialogs
         // Enables dragging the window by clicking and holding the custom title bar
         private void OnTitleBarDrag(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
-            {
-                try { DragMove(); } catch { /* Ignore potential move errors if window is closing */ }
-            }
+            if (e.ChangedButton != MouseButton.Left) return;
+            try { DragMove(); } catch { /* Ignore potential move errors if window is closing */ }
         }
     }
 }

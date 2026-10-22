@@ -16,7 +16,7 @@ namespace DSAMVVM.MVVM.Model.Config.UI
                     Items = GetDefaultShortcuts();
                     return;
                 case > MaxShortcuts:
-                    Items = Items.Take(MaxShortcuts).ToList();
+                    Items = [.. Items.Take(MaxShortcuts)];
                     break;
             }
 

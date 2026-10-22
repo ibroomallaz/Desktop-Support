@@ -99,12 +99,9 @@ namespace DSAMVVM.Core.Services.Infrastructure
                     return expanded;
                 }
                 Log.Warn(Tag, "ResolveDeptPath: custom file path is empty, falling back to local app data.");
-                dataDir = Globals.g_DataDir;
             }
-            else
-            {
-                dataDir = Globals.g_DataDir;
-            }
+
+            dataDir = Globals.g_DataDir;
 
             Directory.CreateDirectory(dataDir);
             Log.Debug(Tag, $"ResolveDeptPath: resolved directory \"{dataDir}\".");
@@ -229,18 +226,16 @@ namespace DSAMVVM.Core.Services.Infrastructure
                         _saveTimer = null;
                     }
 
-                    if (toSave != null && !string.IsNullOrWhiteSpace(path))
+                    if (toSave == null || string.IsNullOrWhiteSpace(path)) return;
+                    Log.Debug(Tag, $"RequestSave[TIMER]: persisting queued settings to \"{path}\".");
+                    try
                     {
-                        Log.Debug(Tag, $"RequestSave[TIMER]: persisting queued settings to \"{path}\".");
-                        try
-                        {
-                            await SaveAsync(toSave, path).ConfigureAwait(false);
-                            Log.Info(Tag, "RequestSave[TIMER]: settings persisted.");
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Warn(Tag, $"RequestSave[TIMER]: SaveAsync failed. Will rely on later flush. Reason: {ex.Message}");
-                        }
+                        await SaveAsync(toSave, path).ConfigureAwait(false);
+                        Log.Info(Tag, "RequestSave[TIMER]: settings persisted.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn(Tag, $"RequestSave[TIMER]: SaveAsync failed. Will rely on later flush. Reason: {ex.Message}");
                     }
                 }, null, SaveDebounce, Timeout.InfiniteTimeSpan);
 

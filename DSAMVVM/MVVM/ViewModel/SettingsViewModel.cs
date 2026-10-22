@@ -45,7 +45,7 @@ namespace DSAMVVM.MVVM.ViewModel
 
     public class SettingsViewModel : ObservableObject
     {
-        private readonly ISettingsService _settingsSvc = null!;
+        private readonly ISettingsService _settingsSvc;
         private readonly IOutputTextSettingsProvider? _notifier;
         private readonly ISearchService? _searchSvc;
 
@@ -113,14 +113,12 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _selectedCategory;
             set
             {
-                if (Set(ref _selectedCategory, value))
-                {
-                    OnPropertyChanged(nameof(IsAppearanceSelected));
-                    OnPropertyChanged(nameof(IsQuickSearchSelected));
-                    OnPropertyChanged(nameof(IsDataAndLinksSelected));
-                    OnPropertyChanged(nameof(IsSystemAndMaintenanceSelected));
-                    OnPropertyChanged(nameof(IsDeveloperSelected));
-                }
+                if (!Set(ref _selectedCategory, value)) return;
+                OnPropertyChanged(nameof(IsAppearanceSelected));
+                OnPropertyChanged(nameof(IsQuickSearchSelected));
+                OnPropertyChanged(nameof(IsDataAndLinksSelected));
+                OnPropertyChanged(nameof(IsSystemAndMaintenanceSelected));
+                OnPropertyChanged(nameof(IsDeveloperSelected));
             }
         }
 
@@ -161,11 +159,9 @@ namespace DSAMVVM.MVVM.ViewModel
 
         public void RefreshFromSettings()
         {
-            if (!HasUnsavedChanges)
-            {
-                _settings = App.Settings;
-                LoadValuesFromSettings();
-            }
+            if (HasUnsavedChanges) return;
+            _settings = App.Settings;
+            LoadValuesFromSettings();
         }
 
         // --- State Flags ---
@@ -292,15 +288,13 @@ namespace DSAMVVM.MVVM.ViewModel
             set
             {
                 var v = UiLimits.ClampFontSize(value);
-                if (Set(ref _defaultFontSize, v))
+                if (!Set(ref _defaultFontSize, v)) return;
+                if (!UsePerViewOverride) SyncPerViewToDefault();
+                if (_selectedUnifiedPreset is not { IsCustom: true })
                 {
-                    if (!UsePerViewOverride) SyncPerViewToDefault();
-                    if (_selectedUnifiedPreset == null || !_selectedUnifiedPreset.IsCustom)
-                    {
-                        SyncPresetToSize(v, p => _selectedUnifiedPreset = p, nameof(SelectedUnifiedPreset), nameof(IsUnifiedCustomSelected));
-                    }
-                    SetModified();
+                    SyncPresetToSize(v, p => _selectedUnifiedPreset = p, nameof(SelectedUnifiedPreset), nameof(IsUnifiedCustomSelected));
                 }
+                SetModified();
             }
         }
 
@@ -310,15 +304,13 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _selectedUnifiedPreset;
             set
             {
-                if (Set(ref _selectedUnifiedPreset, value) && value != null)
+                if (!Set(ref _selectedUnifiedPreset, value) || value == null) return;
+                if (value.TargetSize.HasValue)
                 {
-                    if (value.TargetSize.HasValue)
-                    {
-                        DefaultFontSize = value.TargetSize.Value;
-                    }
-                    OnPropertyChanged(nameof(IsUnifiedCustomSelected));
-                    SetModified();
+                    DefaultFontSize = value.TargetSize.Value;
                 }
+                OnPropertyChanged(nameof(IsUnifiedCustomSelected));
+                SetModified();
             }
         }
         public bool IsUnifiedCustomSelected => SelectedUnifiedPreset?.IsCustom == true;
@@ -343,14 +335,12 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _userFontSize;
             set
             {
-                if (Set(ref _userFontSize, UiLimits.ClampFontSize(value)))
+                if (!Set(ref _userFontSize, UiLimits.ClampFontSize(value))) return;
+                if (_selectedUserPreset is not { IsCustom: true })
                 {
-                    if (_selectedUserPreset == null || !_selectedUserPreset.IsCustom)
-                    {
-                        SyncPresetToSize(value, p => _selectedUserPreset = p, nameof(SelectedUserPreset), nameof(IsUserCustomSelected));
-                    }
-                    SetModified();
+                    SyncPresetToSize(value, p => _selectedUserPreset = p, nameof(SelectedUserPreset), nameof(IsUserCustomSelected));
                 }
+                SetModified();
             }
         }
         public double ComputerFontSize
@@ -358,14 +348,12 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _computerFontSize;
             set
             {
-                if (Set(ref _computerFontSize, UiLimits.ClampFontSize(value)))
+                if (!Set(ref _computerFontSize, UiLimits.ClampFontSize(value))) return;
+                if (_selectedComputerPreset is not { IsCustom: true })
                 {
-                    if (_selectedComputerPreset == null || !_selectedComputerPreset.IsCustom)
-                    {
-                        SyncPresetToSize(value, p => _selectedComputerPreset = p, nameof(SelectedComputerPreset), nameof(IsComputerCustomSelected));
-                    }
-                    SetModified();
+                    SyncPresetToSize(value, p => _selectedComputerPreset = p, nameof(SelectedComputerPreset), nameof(IsComputerCustomSelected));
                 }
+                SetModified();
             }
         }
         public double GroupFontSize
@@ -373,14 +361,12 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _groupFontSize;
             set
             {
-                if (Set(ref _groupFontSize, UiLimits.ClampFontSize(value)))
+                if (!Set(ref _groupFontSize, UiLimits.ClampFontSize(value))) return;
+                if (_selectedGroupPreset is not { IsCustom: true })
                 {
-                    if (_selectedGroupPreset == null || !_selectedGroupPreset.IsCustom)
-                    {
-                        SyncPresetToSize(value, p => _selectedGroupPreset = p, nameof(SelectedGroupPreset), nameof(IsGroupCustomSelected));
-                    }
-                    SetModified();
+                    SyncPresetToSize(value, p => _selectedGroupPreset = p, nameof(SelectedGroupPreset), nameof(IsGroupCustomSelected));
                 }
+                SetModified();
             }
         }
         public double EntraFontSize
@@ -388,14 +374,12 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _entraFontSize;
             set
             {
-                if (Set(ref _entraFontSize, UiLimits.ClampFontSize(value)))
+                if (!Set(ref _entraFontSize, UiLimits.ClampFontSize(value))) return;
+                if (_selectedEntraPreset is not { IsCustom: true })
                 {
-                    if (_selectedEntraPreset == null || !_selectedEntraPreset.IsCustom)
-                    {
-                        SyncPresetToSize(value, p => _selectedEntraPreset = p, nameof(SelectedEntraPreset), nameof(IsEntraCustomSelected));
-                    }
-                    SetModified();
+                    SyncPresetToSize(value, p => _selectedEntraPreset = p, nameof(SelectedEntraPreset), nameof(IsEntraCustomSelected));
                 }
+                SetModified();
             }
         }
 
@@ -405,12 +389,10 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _selectedUserPreset;
             set
             {
-                if (Set(ref _selectedUserPreset, value) && value != null)
-                {
-                    if (value.TargetSize.HasValue) UserFontSize = value.TargetSize.Value;
-                    OnPropertyChanged(nameof(IsUserCustomSelected));
-                    SetModified();
-                }
+                if (!Set(ref _selectedUserPreset, value) || value == null) return;
+                if (value.TargetSize.HasValue) UserFontSize = value.TargetSize.Value;
+                OnPropertyChanged(nameof(IsUserCustomSelected));
+                SetModified();
             }
         }
         public bool IsUserCustomSelected => SelectedUserPreset?.IsCustom == true;
@@ -421,12 +403,10 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _selectedComputerPreset;
             set
             {
-                if (Set(ref _selectedComputerPreset, value) && value != null)
-                {
-                    if (value.TargetSize.HasValue) ComputerFontSize = value.TargetSize.Value;
-                    OnPropertyChanged(nameof(IsComputerCustomSelected));
-                    SetModified();
-                }
+                if (!Set(ref _selectedComputerPreset, value) || value == null) return;
+                if (value.TargetSize.HasValue) ComputerFontSize = value.TargetSize.Value;
+                OnPropertyChanged(nameof(IsComputerCustomSelected));
+                SetModified();
             }
         }
         public bool IsComputerCustomSelected => SelectedComputerPreset?.IsCustom == true;
@@ -437,12 +417,10 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _selectedGroupPreset;
             set
             {
-                if (Set(ref _selectedGroupPreset, value) && value != null)
-                {
-                    if (value.TargetSize.HasValue) GroupFontSize = value.TargetSize.Value;
-                    OnPropertyChanged(nameof(IsGroupCustomSelected));
-                    SetModified();
-                }
+                if (!Set(ref _selectedGroupPreset, value) || value == null) return;
+                if (value.TargetSize.HasValue) GroupFontSize = value.TargetSize.Value;
+                OnPropertyChanged(nameof(IsGroupCustomSelected));
+                SetModified();
             }
         }
         public bool IsGroupCustomSelected => SelectedGroupPreset?.IsCustom == true;
@@ -453,12 +431,10 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _selectedEntraPreset;
             set
             {
-                if (Set(ref _selectedEntraPreset, value) && value != null)
-                {
-                    if (value.TargetSize.HasValue) EntraFontSize = value.TargetSize.Value;
-                    OnPropertyChanged(nameof(IsEntraCustomSelected));
-                    SetModified();
-                }
+                if (!Set(ref _selectedEntraPreset, value) || value == null) return;
+                if (value.TargetSize.HasValue) EntraFontSize = value.TargetSize.Value;
+                OnPropertyChanged(nameof(IsEntraCustomSelected));
+                SetModified();
             }
         }
         public bool IsEntraCustomSelected => SelectedEntraPreset?.IsCustom == true;
@@ -911,12 +887,10 @@ namespace DSAMVVM.MVVM.ViewModel
         private void RemoveShortcut(HomeShortcutItem? item)
         {
             if (item == null) return;
-            if (Shortcuts.Remove(item))
-            {
-                for (int i = 0; i < Shortcuts.Count; i++) Shortcuts[i].Order = i;
-                OnPropertyChanged(nameof(CanAddShortcut));
-                SetModified();
-            }
+            if (!Shortcuts.Remove(item)) return;
+            for (int i = 0; i < Shortcuts.Count; i++) Shortcuts[i].Order = i;
+            OnPropertyChanged(nameof(CanAddShortcut));
+            SetModified();
         }
 
         private void MoveShortcutUp(HomeShortcutItem? item)
@@ -935,12 +909,10 @@ namespace DSAMVVM.MVVM.ViewModel
         {
             if (item == null) return;
             int idx = Shortcuts.IndexOf(item);
-            if (idx >= 0 && idx < Shortcuts.Count - 1)
-            {
-                Shortcuts.Move(idx, idx + 1);
-                for (int i = 0; i < Shortcuts.Count; i++) Shortcuts[i].Order = i;
-                SetModified();
-            }
+            if (idx < 0 || idx >= Shortcuts.Count - 1) return;
+            Shortcuts.Move(idx, idx + 1);
+            for (int i = 0; i < Shortcuts.Count; i++) Shortcuts[i].Order = i;
+            SetModified();
         }
 
         private void ResetShortcutsToDefaults()
@@ -1154,12 +1126,10 @@ namespace DSAMVVM.MVVM.ViewModel
 
         private void EnsureHistoryOption(int value)
         {
-            if (!HistorySizeOptions.Contains(value))
-            {
-                HistorySizeOptions.Add(value);
-                HistorySizeOptions.Sort();
-                OnPropertyChanged(nameof(HistorySizeOptions));
-            }
+            if (HistorySizeOptions.Contains(value)) return;
+            HistorySizeOptions.Add(value);
+            HistorySizeOptions.Sort();
+            OnPropertyChanged(nameof(HistorySizeOptions));
         }
 
         private static void TryFlushPendingSaves(ISettingsService svc)

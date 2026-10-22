@@ -8,8 +8,6 @@ namespace DSAMVVM.Core.Services.AD
 {
     public partial class ADUserService(string ldap)
     {
-        private readonly string _ldap = ldap;
-
         public Task<ADUserInfo> GetUserAsync(string netid)
         {
             return Task.Run(() =>
@@ -19,7 +17,7 @@ namespace DSAMVVM.Core.Services.AD
                 try
                 {
                     // Single, tight user search with required attributes preloaded
-                    var r = DirectoryUtility.FindUserBySam(_ldap, netid);
+                    var r = DirectoryUtility.FindUserBySam(ldap, netid);
                     if (r == null)
                     {
                         info.Exists = false;
@@ -73,10 +71,10 @@ namespace DSAMVVM.Core.Services.AD
                     {
                         // Fallback if memberOf is empty or unpopulated (e.g. permission restriction)
                         info.HasMimWrkstGroup = !string.IsNullOrWhiteSpace(userDn) &&
-                                                DirectoryUtility.HasMimWrkstGroup(_ldap, userDn);
+                                                DirectoryUtility.HasMimWrkstGroup(ldap, userDn);
 
                         var result = !string.IsNullOrWhiteSpace(userDn)
-                            ? DirectoryUtility.FindDivisionRollupGroup(_ldap, userDn)
+                            ? DirectoryUtility.FindDivisionRollupGroup(ldap, userDn)
                             : null;
 
                         if (result?.Properties["cn"].Count > 0)
@@ -148,7 +146,7 @@ namespace DSAMVVM.Core.Services.AD
             {
                 try
                 {
-                    var r = DirectoryUtility.FindUserByEmployeeId(_ldap, userNumber);
+                    var r = DirectoryUtility.FindUserByEmployeeId(ldap, userNumber);
                     if (r != null) return DirectoryUtility.GetString(r, "displayName");
                 }
                 catch
@@ -166,7 +164,7 @@ namespace DSAMVVM.Core.Services.AD
             {
                 try
                 {
-                    var groups = DirectoryUtility.GetUserGroupsBySam(_ldap, netid);
+                    var groups = DirectoryUtility.GetUserGroupsBySam(ldap, netid);
                     return EvaluateAdobeLicenses(groups);
                 }
                 catch (Exception)

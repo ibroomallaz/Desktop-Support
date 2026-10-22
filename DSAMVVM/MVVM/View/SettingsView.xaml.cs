@@ -28,21 +28,17 @@ namespace DSAMVVM.MVVM.View
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            if (DataContext is SettingsViewModel vm)
+            if (DataContext is not SettingsViewModel vm) return;
+            if (_subscribedVm != vm)
             {
-                if (_subscribedVm != vm)
-                {
-                    UnsubscribeVm();
-                    SubscribeVm(vm);
-                }
-
-                if (!string.IsNullOrWhiteSpace(vm.PendingAnchor))
-                {
-                    var anchor = vm.PendingAnchor;
-                    vm.PendingAnchor = null;
-                    ScrollToAnchor(anchor);
-                }
+                UnsubscribeVm();
+                SubscribeVm(vm);
             }
+
+            if (string.IsNullOrWhiteSpace(vm.PendingAnchor)) return;
+            var anchor = vm.PendingAnchor;
+            vm.PendingAnchor = null;
+            ScrollToAnchor(anchor);
         }
 
         private void OnUnloaded(object sender, RoutedEventArgs e)
@@ -58,11 +54,9 @@ namespace DSAMVVM.MVVM.View
 
         private void UnsubscribeVm()
         {
-            if (_subscribedVm != null)
-            {
-                _subscribedVm.ScrollToAnchorRequested -= OnScrollToAnchorRequested;
-                _subscribedVm = null;
-            }
+            if (_subscribedVm == null) return;
+            _subscribedVm.ScrollToAnchorRequested -= OnScrollToAnchorRequested;
+            _subscribedVm = null;
         }
 
         private void OnScrollToAnchorRequested(string anchor)
@@ -76,11 +70,9 @@ namespace DSAMVVM.MVVM.View
 
             Dispatcher.InvokeAsync(() =>
             {
-                if (FindName(anchor) is FrameworkElement element)
-                {
-                    element.BringIntoView();
-                    FlashElement(element);
-                }
+                if (FindName(anchor) is not FrameworkElement element) return;
+                element.BringIntoView();
+                FlashElement(element);
             }, DispatcherPriority.Loaded);
         }
 

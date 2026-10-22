@@ -206,7 +206,7 @@ namespace DSAMVVM.Core.Services.Integrations
                     Log.Info("Dept.Loader", $"Loaded {_teamMap.Count} support team definitions.");
 
                     // Hydrate Departments and link to Support Teams.
-                    _departments = [.. (wrapper.DepartmentList).Select(d =>
+                    _departments = [.. wrapper.DepartmentList.Select(d =>
                     {
                         SupportTeam? matchedTeam = null;
                         if (string.IsNullOrWhiteSpace(d.Team)) return new DepartmentAdapter(d, matchedTeam);
@@ -245,22 +245,19 @@ namespace DSAMVVM.Core.Services.Integrations
 
         private sealed class DepartmentAdapter(Department source, SupportTeam? teamInfo) : IDepartment
         {
-            private readonly Department _source = source;
-            private readonly SupportTeam? _teamInfo = teamInfo;
+            public string Number => source.Number;
+            public bool SupportKnown => source.SupportKnown;
+            public string? Team => string.IsNullOrWhiteSpace(source.Team) ? null : source.Team.Trim();
+            public string? Notes => source.Notes;
+            public string? FileRepoPath => string.IsNullOrWhiteSpace(source.FileRepoPath) ? null : source.FileRepoPath;
 
-            public string Number => _source.Number;
-            public bool SupportKnown => _source.SupportKnown;
-            public string? Team => string.IsNullOrWhiteSpace(_source.Team) ? null : _source.Team.Trim();
-            public string? Notes => _source.Notes;
-            public string? FileRepoPath => string.IsNullOrWhiteSpace(_source.FileRepoPath) ? null : _source.FileRepoPath;
-
-            public string? ManagerName => _teamInfo?.ManagerName;
-            public string? ManagerNetId => _teamInfo?.ManagerNetID;
+            public string? ManagerName => teamInfo?.ManagerName;
+            public string? ManagerNetId => teamInfo?.ManagerNetID;
 
             public string? SupportPhoneNumber =>
-                string.IsNullOrWhiteSpace(_teamInfo?.PhoneNumber) ? null : _teamInfo.PhoneNumber.Trim();
+                string.IsNullOrWhiteSpace(teamInfo?.PhoneNumber) ? null : teamInfo.PhoneNumber.Trim();
 
-            public List<SupportedDivs>? SupportedDivisions => _teamInfo?.SupportedDivisions;
+            public List<SupportedDivs>? SupportedDivisions => teamInfo?.SupportedDivisions;
         }
     }
 }

@@ -52,12 +52,10 @@ namespace DSAMVVM.Core.Services.Search
                 _historyCap = Math.Max(0, capacity);
                 if (!_historyEnabled || _historyCap == 0)
                 {
-                    if (_history.Count > 0 || _entries.Count > 0)
-                    {
-                        _history.Clear();
-                        _entries.Clear();
-                        DispatchHistoryUpdate();
-                    }
+                    if (_history.Count <= 0 && _entries.Count <= 0) return;
+                    _history.Clear();
+                    _entries.Clear();
+                    DispatchHistoryUpdate();
                     return;
                 }
                 TrimToCap_NoLock();

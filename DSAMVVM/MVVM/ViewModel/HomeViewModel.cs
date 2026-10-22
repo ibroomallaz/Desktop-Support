@@ -538,7 +538,7 @@ namespace DSAMVVM.MVVM.ViewModel
         private void NextPetPhoto()
         {
             var images = CurrentPet?.ValidImages;
-            if (images == null || images.Count <= 1) return;
+            if (images is not { Count: > 1 }) return;
             CurrentImageIndex = (CurrentImageIndex + 1) % images.Count;
             _ = LoadPetImageAsync(CurrentPet, CurrentImageIndex, forceRefresh: false);
         }
@@ -546,7 +546,7 @@ namespace DSAMVVM.MVVM.ViewModel
         private void PrevPetPhoto()
         {
             var images = CurrentPet?.ValidImages;
-            if (images == null || images.Count <= 1) return;
+            if (images is not { Count: > 1 }) return;
             CurrentImageIndex = (CurrentImageIndex - 1 + images.Count) % images.Count;
             _ = LoadPetImageAsync(CurrentPet, CurrentImageIndex, forceRefresh: false);
         }

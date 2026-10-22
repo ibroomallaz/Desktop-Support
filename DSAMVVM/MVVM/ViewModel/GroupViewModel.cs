@@ -124,12 +124,10 @@ namespace DSAMVVM.MVVM.ViewModel
             get => _effectiveFontSize;
             private set
             {
-                if (Math.Abs(_effectiveFontSize - value) > 0.01)
-                {
-                    _effectiveFontSize = value;
-                    OnPropertyChanged(nameof(EffectiveFontSize));
-                    OnPropertyChanged(nameof(Typography));
-                }
+                if (!(Math.Abs(_effectiveFontSize - value) > 0.01)) return;
+                _effectiveFontSize = value;
+                OnPropertyChanged(nameof(EffectiveFontSize));
+                OnPropertyChanged(nameof(Typography));
             }
         }
 

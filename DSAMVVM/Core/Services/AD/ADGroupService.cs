@@ -29,13 +29,7 @@ namespace DSAMVVM.Core.Services.AD
                     var memberships = DirectoryUtility.GetStrings(sr, "memberOf");
                     if (memberships.Count > 0)
                     {
-                        foreach (var dn in memberships)
-                        {
-                            if (string.IsNullOrEmpty(dn)) continue;
-                            var cn = DnToCn(dn); // CN=Foo,OU=Bar -> Foo
-                            if (cn.Contains("MIM", StringComparison.OrdinalIgnoreCase))
-                                groups.Add(cn);
-                        }
+                        groups.AddRange(from dn in memberships where !string.IsNullOrEmpty(dn) select DnToCn(dn) into cn where cn.Contains("MIM", StringComparison.OrdinalIgnoreCase) select cn);
                     }
 
                     // fallback if memberOf is empty/filtered: group search by member DN
@@ -111,8 +105,7 @@ namespace DSAMVVM.Core.Services.AD
                     // ranged attribute read handles very large groups safely
                     var membersDn = DirectoryUtility.GetAllMemberDns(sr);
                     var members = new List<string>(capacity: membersDn.Count);
-                    foreach (var dn in membersDn)
-                        if (!string.IsNullOrEmpty(dn)) members.Add(DnToCn(dn)); // CN=Foo,OU=Bar -> Foo
+                    members.AddRange(from dn in membersDn where !string.IsNullOrEmpty(dn) select DnToCn(dn));
 
                     // alphabetize members for display consistency
                     members.Sort(StringComparer.OrdinalIgnoreCase);
@@ -140,9 +133,12 @@ namespace DSAMVVM.Core.Services.AD
         {
             s = s.Trim();
             var allDigits = s.All(char.IsDigit);
-            if (allDigits && s.Length == 5) return $"UA-MIM-{s}";
-            if (allDigits && s.Length == 4) return $"UA-MIM-0{s}";
-            return s;
+            return allDigits switch
+            {
+                true when s.Length == 5 => $"UA-MIM-{s}",
+                true when s.Length == 4 => $"UA-MIM-0{s}",
+                _ => s
+            };
         }
 
         private static string Esc(string s) =>

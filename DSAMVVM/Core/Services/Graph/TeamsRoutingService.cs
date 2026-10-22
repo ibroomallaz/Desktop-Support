@@ -75,7 +75,7 @@ namespace DSAMVVM.Core.Services.Graph
 
                     if (config.Channels != null)
                     {
-                        foreach (var (chName, chId) in config.Channels)
+                        foreach ((string chName, string chId) in config.Channels)
                         {
                             if (!string.IsNullOrWhiteSpace(chName) && !string.IsNullOrWhiteSpace(chId))
                             {

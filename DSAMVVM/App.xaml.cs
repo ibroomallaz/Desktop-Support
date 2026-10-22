@@ -150,7 +150,7 @@ namespace DSAMVVM
                     Log.Warn("UpdateCheck", "Update check exceeded 3s; proceeding to start application without blocking.");
                     _ = updateTask.ContinueWith(t =>
                     {
-                        if (t.IsFaulted && t.Exception != null)
+                        if (t is { IsFaulted: true, Exception: not null })
                         {
                             Log.Warn("UpdateCheck", $"Required update check (background) failed: {t.Exception.InnerException?.Message ?? t.Exception.Message}");
                         }

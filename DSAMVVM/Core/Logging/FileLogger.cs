@@ -84,11 +84,9 @@ namespace DSAMVVM.Core.Logging
                 try
                 {
                     _writer?.Flush();
-                    if (_writer?.BaseStream is FileStream fs)
-                    {
-                        fs.SetLength(0);
-                        fs.Seek(0, SeekOrigin.Begin);
-                    }
+                    if (_writer?.BaseStream is not FileStream fs) return;
+                    fs.SetLength(0);
+                    fs.Seek(0, SeekOrigin.Begin);
                 }
                 catch
                 {
