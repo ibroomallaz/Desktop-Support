@@ -214,7 +214,7 @@ public class LinksViewModel : ObservableObject
 
         try
         {
-            UiNotify.Info("Refreshing links\u2026", showStatusBar: true, key: StatusKey);
+            UiNotify.Info("Refreshing links…", showStatusBar: true, key: StatusKey);
 
             await _linksService.ReloadLinksDataAsync().ConfigureAwait(false);
             var data = _linksService.GetCachedLinksData();
@@ -318,12 +318,15 @@ public class LinksViewModel : ObservableObject
 
     private void PersistLastTeam()
     {
-        if (!string.IsNullOrWhiteSpace(SelectedTeam) &&
+        string? newLastTeam = (!string.IsNullOrWhiteSpace(SelectedTeam) &&
             TeamNames.Any(n => string.Equals(n, SelectedTeam, StringComparison.OrdinalIgnoreCase)))
-            Settings.Ui.Links.LastTeam = SelectedTeam;
-        else
-            Settings.Ui.Links.LastTeam = null;
+            ? SelectedTeam
+            : null;
 
+        if (string.Equals(Settings.Ui.Links.LastTeam, newLastTeam, StringComparison.Ordinal))
+            return;
+
+        Settings.Ui.Links.LastTeam = newLastTeam;
         _settingsService.RequestSave(Settings, Globals.g_SettingsPath);
     }
 }

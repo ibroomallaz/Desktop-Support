@@ -105,6 +105,7 @@ namespace DSAMVVM.MVVM.ViewModel
         // Sidebar Collapse State
         private bool _userSidebarPreference;
         private bool _isSidebarCollapsed;
+        private bool _lastCollapseSidebarByDefault;
         public bool IsSidebarCollapsed
         {
             get => _isSidebarCollapsed;
@@ -380,6 +381,7 @@ namespace DSAMVVM.MVVM.ViewModel
             ShowAdminView = App.Settings.Ui.ShowAdminView;
             IsDevModeEnabled = App.Settings.Ui.EnableDevSettings;
 
+            _lastCollapseSidebarByDefault = App.Settings.Ui.CollapseSidebarByDefault;
             if (App.Settings.Ui.CollapseSidebarByDefault)
             {
                 IsSidebarCollapsed = true;
@@ -400,9 +402,13 @@ namespace DSAMVVM.MVVM.ViewModel
                 IsDevModeEnabled = newSettings.Ui.EnableDevSettings;
                 SettingsVM.SyncExternalAdminAndDevState(newSettings.Ui.HasUnlockedAdmin, newSettings.Ui.ShowAdminView, newSettings.Ui.EnableDevSettings);
 
-                if (SelectedView != AppView.Admin)
+                if (newSettings.Ui.CollapseSidebarByDefault != _lastCollapseSidebarByDefault)
                 {
-                    IsSidebarCollapsed = newSettings.Ui.CollapseSidebarByDefault;
+                    _lastCollapseSidebarByDefault = newSettings.Ui.CollapseSidebarByDefault;
+                    if (SelectedView != AppView.Admin)
+                    {
+                        IsSidebarCollapsed = newSettings.Ui.CollapseSidebarByDefault;
+                    }
                 }
             });
         }
