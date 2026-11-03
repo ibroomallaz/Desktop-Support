@@ -27,7 +27,7 @@ public interface IJsonMeta
 ```
 
 ### How Schema Upgrades Work
-1. **Source of Truth Constants:** Active schema integer constants are defined centrally in [`Globals.cs`](../DSAMVVM/MVVM/Model/globals.cs#L58-L62):
+1. **Source of Truth Constants:** Active schema integer constants are defined centrally in [`Globals.cs`](../DSAMVVM/MVVM/Model/globals.cs#L61-L65):
    - `Globals.g_VersionSchema`
    - `Globals.g_DepartmentJSONSchema`
    - `Globals.g_LinkJSONSchema`
@@ -45,7 +45,7 @@ public interface IJsonMeta
 - **Consumed By:** [`VersionChecker`](../DSAMVVM/Core/Utilities/VersionChecker.cs), [`VersionCheckerUI`](../DSAMVVM/MVVM/Services/Updates/VersionCheckerUI.cs), [`UpdaterService`](../DSAMVVM/Core/Services/Updates/UpdaterService.cs)
 
 > [!IMPORTANT]
-> Unlike `departments.json`, `links.json`, and `servicemeow.json`, the **Version Manifest** is not edited via `AdminView`. Maintainers update this file on Box when publishing a new release.
+> Unlike `departments.json`, `links.json`, and `servicemeow.json`, the **Version Manifest** (`WNC/Apps/DSA/json`) is not edited via `AdminView`. Maintainers update this file on Box when publishing a new release (see [`docs/WORKFLOWS.md`](WORKFLOWS.md#2-release--deployment-workflow)).
 
 ### Annotated JSON Example
 ```json
@@ -56,8 +56,8 @@ public interface IJsonMeta
     "Current": {
       "version": "4.5.1",
       "location": "https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/ProjectHome.aspx",
-      "msiUrl": "https://arizona.box.com/shared/static/example_msi_link.msi",
-      "setupUrl": "https://arizona.box.com/shared/static/example_setup_link.exe",
+      "msiUrl": "https://arizona.box.com/shared/static/example_4-5-1.dat",
+      "setupUrl": "https://arizona.box.com/shared/static/example_4-5-1-setup.dat",
       "requiredDotNetVersion": "10.0.0",
       "changelog": "https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/Change-Log.aspx"
     },
@@ -65,8 +65,8 @@ public interface IJsonMeta
       "exists": false,
       "version": "4.6.0-beta1",
       "location": "https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/ProjectHome.aspx",
-      "msiUrl": "https://arizona.box.com/shared/static/example_beta_msi.msi",
-      "setupUrl": "https://arizona.box.com/shared/static/example_beta_setup.exe",
+      "msiUrl": "https://arizona.box.com/shared/static/example_4-6-0-b1.dat",
+      "setupUrl": "https://arizona.box.com/shared/static/example_4-6-0-b1-setup.dat",
       "requiredDotNetVersion": "10.0.0",
       "changelog": "https://emailarizona.sharepoint.com/sites/TLC-desktopsupportapp/SitePages/Change-Log.aspx"
     }
@@ -82,14 +82,14 @@ public interface IJsonMeta
 | Field Path | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | `SchemaVersion` | `int` | Yes | Root schema version matching `Globals.g_VersionSchema` (Note: `VersionManifest` inherits `JsonMetaBase` directly at the root level). |
-| `Version.Current.version` | `string` | Yes | Latest production semantic version (compared against `AssemblyVersion`). |
-| `Version.Current.msiUrl` | `string` | Yes | Direct Box static download URL for `DSA_Installer.msi`. |
-| `Version.Current.setupUrl` | `string` | Optional | Direct Box static download URL for `DSA_Setup.exe` (used when `.NET` runtime installation is needed). |
+| `Version.Current.version` | `string` | Yes | Latest production semantic version (compared against `Globals.g_AppVersion` / `<Version>`). |
+| `Version.Current.msiUrl` | `string` | Yes | Direct Box static download URL for the MSI binary (`<version>.dat` in `WNC/Apps/DSA/bin`, downloaded as `DSA_Installer.msi`). |
+| `Version.Current.setupUrl` | `string` | Optional | Direct Box static download URL for the bootstrapper binary (`<version>-setup.dat` in `WNC/Apps/DSA/bin`, downloaded as `setup.exe` when `.NET` runtime installation is needed). |
 | `Version.Current.requiredDotNetVersion` | `string` | Optional | Minimum `Microsoft.WindowsDesktop.App` runtime version required (e.g., `"10.0.0"`). |
 | `Version.Current.location` | `string` | Optional | Fallback web URL opened if automated download/installation fails. |
 | `Version.Current.changelog` | `string` | Optional | URL to the release notes / changelog page. |
 | `Version.PreRelease.exists` | `bool` | Yes | Set to `true` when an active beta/pre-release build is available for opt-in testers. |
-| `Required.minVersion` | `string` | Optional | Any running client with an `AssemblyVersion` **below** this version is forced to update at startup (`EnforceRequiredAsync`). |
+| `Required.minVersion` | `string` | Optional | Any running client with a `Globals.g_AppVersion` (`<Version>`) **below** this version is forced to update at startup (`EnforceRequiredAsync`). |
 | `Required.message` | `string` | Optional | Custom explanation displayed in the mandatory update dialog. |
 
 ---

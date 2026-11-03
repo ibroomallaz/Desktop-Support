@@ -338,7 +338,7 @@ flowchart TD
 - [`JsonFileCache`](../DSAMVVM/Core/IO/JsonFileCache.cs): Handles low-level atomic reading and writing of JSON cache files in `%LOCALAPPDATA%\UArizona\DesktopSupportApp\data\`.
 
 ### Remote Feed Schemas & Data Models
-Each remote JSON feed contains a `Meta` header inheriting from [`JsonMetaBase`](../DSAMVVM/MVVM/Model/Schemas/JSONMetaBase.cs) (`SchemaVersion`, `LastUpdatedUtc`) validated against the active schema constants defined in [`Globals.cs`](../DSAMVVM/MVVM/Model/globals.cs#L58-L62):
+Each remote JSON feed contains a `Meta` header inheriting from [`JsonMetaBase`](../DSAMVVM/MVVM/Model/Schemas/JSONMetaBase.cs) (`SchemaVersion`, `LastUpdatedUtc`) validated against the active schema constants defined in [`Globals.cs`](../DSAMVVM/MVVM/Model/globals.cs#L61-L65):
 
 | Dataset / Feed | Model Class | Schema Constant in `Globals` | Local Cache File | Contents & Mutability |
 | :--- | :--- | :--- | :--- | :--- |
@@ -378,7 +378,7 @@ DSA includes an integrated background updater to keep support workstations synch
 ```mermaid
 flowchart TD
     Trigger["VersionUpdateScheduler (Every 6h or Startup)"] --> Fetch["VersionCheckerUI fetches VersionManifest JSON from Box CDN"]
-    Fetch --> Compare{"Newer than AssemblyVersion?"}
+    Fetch --> Compare{"Newer than Globals.g_AppVersion?"}
     Compare -- "No" --> UpToDate["Up to Date - No Action"]
     Compare -- "Yes" --> Prompt["Show VersionUpdateDialog (or Enforce if Required)"]
     Prompt --> DotNetCheck{"Required .NET Runtime Installed?"}
