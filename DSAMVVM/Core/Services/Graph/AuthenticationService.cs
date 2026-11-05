@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Logging;
+using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Broker;
@@ -10,6 +10,9 @@ using System.Windows.Interop;
 
 namespace DSAMVVM.Core.Services.Graph
 {
+    /// <summary>
+    /// Manages MSAL/WAM authentication, token acquisition, and SSO browser handshakes for Microsoft Graph and Teams integration.
+    /// </summary>
     public partial class AuthenticationService : IAuthenticationService
     {
         private static readonly string[] DefaultScopes = ["User.Read"];
@@ -19,8 +22,14 @@ namespace DSAMVVM.Core.Services.Graph
         internal string? _capturedAuthUri;
         private bool _isAuthenticated;
 
+        /// <summary>
+        /// Occurs when the user signs in or out, providing the current authentication status.
+        /// </summary>
         public event Action<bool>? AuthenticationStateChanged;
 
+        /// <summary>
+        /// Gets whether an active authenticated account session is present.
+        /// </summary>
         public bool IsAuthenticated
         {
             get => _isAuthenticated;
@@ -80,7 +89,9 @@ namespace DSAMVVM.Core.Services.Graph
             Log.Info("AuthService", "Teams routing configuration extracted and applied from ID Token.");
         }
 
-        // Silent token cache verification with default scopes
+        /// <summary>
+        /// Verifies cached credentials silently using default scopes.
+        /// </summary>
         public async Task<bool> CheckCachedSignInAsync()
         {
             try
@@ -130,7 +141,9 @@ namespace DSAMVVM.Core.Services.Graph
             }
         }
 
-        // Silent token cache verification with fallback to interactive browser flows
+        /// <summary>
+        /// Acquires a Graph access token silently from cache/WAM, falling back to interactive authentication if required.
+        /// </summary>
         public async Task<string> GetGraphAccessTokenAsync(string[] scopes)
         {
             Log.Info("AuthService", $"Extracting access token for scopes: {string.Join(", ", scopes)}");
@@ -159,7 +172,9 @@ namespace DSAMVVM.Core.Services.Graph
             }
         }
 
-        // Interactive token acquisition sequence routing through the WAM broker or fallback web UI
+        /// <summary>
+        /// Initiates an interactive token acquisition flow via WAM broker or browser SSO.
+        /// </summary>
         public async Task<string> AcquireTokenInteractiveAsync(string[] scopes, IntPtr? parentWindowHandle = null)
         {
             IntPtr windowHandle = parentWindowHandle ?? IntPtr.Zero;
@@ -308,6 +323,9 @@ namespace DSAMVVM.Core.Services.Graph
             Log.Info("AuthService", "Authorization URI cleanly extracted from active link tracking handle.");
         }
 
+        /// <summary>
+        /// Signs out the current user and clears cached MSAL account tokens.
+        /// </summary>
         public async Task SignOutAsync()
         {
             var accounts = (await _pca.GetAccountsAsync()).ToList();

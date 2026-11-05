@@ -6,12 +6,18 @@ using System.Text.Json.Serialization;
 
 namespace DSAMVVM.Core.Services.Graph
 {
+    /// <summary>
+    /// Resolves target Teams channel and team IDs from Entra ID token claims or remote Box configuration.
+    /// </summary>
     public class TeamsRoutingService
     {
         private static readonly HttpClient HttpClient = new();
         private readonly Dictionary<string, string> _channels = new(StringComparer.OrdinalIgnoreCase);
         public string TeamId { get; private set; } = string.Empty;
 
+        /// <summary>
+        /// Parses role claims from an identity token to extract Team ID and channel mappings.
+        /// </summary>
         public void InitializeFromClaims(IEnumerable<Claim> claims)
         {
             var roleClaims = claims.Where(c => c.Type == "roles");
@@ -93,6 +99,9 @@ namespace DSAMVVM.Core.Services.Graph
             }
         }
 
+        /// <summary>
+        /// Resolves the Microsoft Teams channel ID mapped to a specified key.
+        /// </summary>
         public string GetChannelId(string channelKey)
         {
             if (_channels.TryGetValue(channelKey, out string? id) && !string.IsNullOrWhiteSpace(id))

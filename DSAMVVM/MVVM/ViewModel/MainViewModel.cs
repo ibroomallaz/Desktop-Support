@@ -1,11 +1,9 @@
 using DSAMVVM.Core.Enums;
-using DSAMVVM.Core.Interfaces.Infrastructure;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
-using DSAMVVM.MVVM.Services.Status;
 using DSAMVVM.MVVM.View.Dialogs;
 using DSAMVVM.MVVM.View.Helpers;
 using DSAMVVM.MVVM.View.Resources;
@@ -21,6 +19,10 @@ using System.Windows.Threading;
 
 namespace DSAMVVM.MVVM.ViewModel
 {
+    /// <summary>
+    /// Root ViewModel for the shell window, managing top-level navigation,
+    /// child view lifecycles, global search routing, and sidebar state.
+    /// </summary>
     public partial class MainViewModel : ObservableObject
     {
         // Services
@@ -106,6 +108,9 @@ namespace DSAMVVM.MVVM.ViewModel
         private bool _userSidebarPreference;
         private bool _isSidebarCollapsed;
         private bool _lastCollapseSidebarByDefault;
+        /// <summary>
+        /// Gets or sets whether the navigation sidebar is collapsed to compact icon-only mode.
+        /// </summary>
         public bool IsSidebarCollapsed
         {
             get => _isSidebarCollapsed;
@@ -146,13 +151,23 @@ namespace DSAMVVM.MVVM.ViewModel
         }
 
         private object? _currentView;
+        /// <summary>
+        /// Gets or sets the active ViewModel displayed in the primary content area.
+        /// </summary>
         public object? CurrentView
         {
             get => _currentView;
-            set { if (_currentView != value) { _currentView = value; OnPropertyChanged(); } }
+            set
+            {
+                if (_currentView == value) return;
+                _currentView = value; OnPropertyChanged();
+            }
         }
 
         private AppView _selectedView = AppView.Home;
+        /// <summary>
+        /// Gets or sets the active view enum, updating <see cref="CurrentView"/> and synchronizing sidebar navigation.
+        /// </summary>
         public AppView SelectedView
         {
             get => _selectedView;
@@ -210,6 +225,9 @@ namespace DSAMVVM.MVVM.ViewModel
         }
 
         private string? _searchQuery;
+        /// <summary>
+        /// Gets or sets the text filter query entered into the global search bar.
+        /// </summary>
         public string? SearchQuery
         {
             get => _searchQuery;
@@ -223,6 +241,9 @@ namespace DSAMVVM.MVVM.ViewModel
         }
 
         public bool HasSearchQuery => !string.IsNullOrWhiteSpace(SearchQuery);
+        /// <summary>
+        /// Gets whether the currently active view supports global search.
+        /// </summary>
         public bool IsSearchEnabled => SelectedView is AppView.User or AppView.Computer or AppView.Group or AppView.Admin;
 
         public string SearchWatermark => SelectedView switch
@@ -299,15 +320,11 @@ namespace DSAMVVM.MVVM.ViewModel
                     FooterNavItems.Insert(0, newAdminItem);
                 }
 
-                if (adminItemInNav == null)
-                {
-                    var settingsNav = NavItems.FirstOrDefault(n => n.View == AppView.Settings);
-                    if (settingsNav != null)
-                    {
-                        var settingsIndex = NavItems.IndexOf(settingsNav);
-                        NavItems.Insert(settingsIndex, newAdminItem);
-                    }
-                }
+                if (adminItemInNav != null) return;
+                var settingsNav = NavItems.FirstOrDefault(n => n.View == AppView.Settings);
+                if (settingsNav == null) return;
+                var settingsIndex = NavItems.IndexOf(settingsNav);
+                NavItems.Insert(settingsIndex, newAdminItem);
             }
             else
             {
@@ -328,6 +345,9 @@ namespace DSAMVVM.MVVM.ViewModel
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="MainViewModel"/> with required shell services and child ViewModel factories.
+        /// </summary>
         public MainViewModel(
             IDepartmentService deptService,
             ISearchService searchService,
@@ -500,6 +520,9 @@ namespace DSAMVVM.MVVM.ViewModel
             });
         }
 
+        /// <summary>
+        /// Parses startup arguments or incoming IPC arguments to navigate or trigger specific views.
+        /// </summary>
         public void ProcessArgs(string[]? args)
         {
             if (args == null || args.Length == 0) return;

@@ -1,12 +1,18 @@
-﻿using DSAMVVM.Core.Utilities;
+using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
 using System.DirectoryServices;
 using System.Reflection;
 
 namespace DSAMVVM.Core.Services.AD
 {
+    /// <summary>
+    /// Queries Active Directory via LDAP for computer object attributes, OU hierarchy, and logon timestamps.
+    /// </summary>
     public class ADComputerService(string ldapPath)
     {
+        /// <summary>
+        /// Asynchronously retrieves Active Directory computer details and hybrid device membership for the given hostname.
+        /// </summary>
         public Task<ADComputerInfo> GetComputerAsync(string hostname)
         {
             return Task.Run(() =>

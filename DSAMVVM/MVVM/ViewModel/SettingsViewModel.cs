@@ -735,7 +735,7 @@ namespace DSAMVVM.MVVM.ViewModel
                 Categories.Remove(_devCategory);
             }
 
-            if (SelectedCategory == null || !Categories.Contains(SelectedCategory))
+            if (!Categories.Contains(SelectedCategory))
             {
                 SelectedCategory = Categories.FirstOrDefault() ?? _baseCategories[0];
             }

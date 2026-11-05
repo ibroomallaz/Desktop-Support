@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Logging;
+using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using System.Diagnostics;
 using System.DirectoryServices;
@@ -8,6 +8,9 @@ using Timer = System.Timers.Timer;
 
 namespace DSAMVVM.Core.Services.AD;
 
+/// <summary>
+/// Continuously monitors and probes domain controller connectivity via DNS resolution and LDAP TCP handshakes.
+/// </summary>
 public class ADDetectionService : IADDetectionService, IDisposable
 {
     private const string DefaultDcHost = "bluecat.arizona.edu";
@@ -21,8 +24,14 @@ public class ADDetectionService : IADDetectionService, IDisposable
     private ADStateInfo _currentState = ADStateInfo.Checking();
     private bool _disposed;
 
+    /// <summary>
+    /// Occurs when domain controller reachability or latency state changes.
+    /// </summary>
     public event Action<ADStateInfo>? StateChanged;
 
+    /// <summary>
+    /// Gets the most recent Active Directory connectivity and latency status.
+    /// </summary>
     public ADStateInfo CurrentState
     {
         get => _currentState;
@@ -89,6 +98,9 @@ public class ADDetectionService : IADDetectionService, IDisposable
         _debounceTimer.Start();
     }
 
+    /// <summary>
+    /// Actively probes the domain controller pool via DNS lookup and TCP port 389 connection.
+    /// </summary>
     public async Task<ADStateInfo> ProbeDomainControllerAsync(CancellationToken ct = default)
     {
         if (!await _probeLock.WaitAsync(0, ct).ConfigureAwait(false))

@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Models;
+using DSAMVVM.Core.Models;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
 using System.DirectoryServices;
@@ -6,8 +6,14 @@ using System.Text.RegularExpressions;
 
 namespace DSAMVVM.Core.Services.AD
 {
+    /// <summary>
+    /// Queries Active Directory via LDAP for user identity attributes, Microsoft 365 licensing, and Adobe entitlements.
+    /// </summary>
     public partial class ADUserService(string ldap)
     {
+        /// <summary>
+        /// Asynchronously retrieves Active Directory user details, division rollups, and M365 licensing for the given NetID.
+        /// </summary>
         public Task<ADUserInfo> GetUserAsync(string netid)
         {
             return Task.Run(() =>
@@ -140,6 +146,9 @@ namespace DSAMVVM.Core.Services.AD
             return "No valid O365 license found";
         }
 
+        /// <summary>
+        /// Resolves an employee''s display name from their university employee ID number.
+        /// </summary>
         public Task<string?> LookupNameByEmployeeID(string userNumber)
         {
             return Task.Run(() =>
@@ -157,7 +166,9 @@ namespace DSAMVVM.Core.Services.AD
             });
         }
 
-        // Fetches a user's group membership and evaluates it for Adobe entitlements
+        /// <summary>
+        /// Retrieves user group memberships and evaluates Adobe Acrobat Pro and Creative Cloud entitlements.
+        /// </summary>
         public Task<AdobeLicenseStatus> CheckAdobeLicensesAsync(string netid)
         {
             return Task.Run(() =>
@@ -175,7 +186,9 @@ namespace DSAMVVM.Core.Services.AD
             });
         }
 
-        // Evaluates a provided collection of Active Directory groups to determine Adobe software entitlements
+        /// <summary>
+        /// Evaluates a collection of group CNs to determine Adobe software licensing status.
+        /// </summary>
         public static AdobeLicenseStatus EvaluateAdobeLicenses(IEnumerable<string>? userGroups)
         {
             bool hasPro = false;

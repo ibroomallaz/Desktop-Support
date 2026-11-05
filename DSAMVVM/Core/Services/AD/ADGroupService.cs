@@ -1,15 +1,21 @@
-﻿using DSAMVVM.Core.Utilities;
+using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model.AD;
 using System.DirectoryServices;
 
 namespace DSAMVVM.Core.Services.AD
 {
+    /// <summary>
+    /// Queries Active Directory via LDAP for security group memberships, MIM affiliations, and member rosters.
+    /// </summary>
     public class ADGroupService(string ldapPath)
     {
         private readonly string _ldapPath = ldapPath;
 
         private DirectoryEntry Root() => new(_ldapPath);
 
+        /// <summary>
+        /// Retrieves all Microsoft Identity Manager (MIM) groups to which a NetID belongs.
+        /// </summary>
         public Task<MimLookupResult> GetUserMimGroupsAsync(string netid) =>
             Task.Run(() =>
             {
@@ -69,6 +75,9 @@ namespace DSAMVVM.Core.Services.AD
                 }
             });
 
+        /// <summary>
+        /// Retrieves member rosters and counts for an Active Directory group by name or sAMAccountName.
+        /// </summary>
         public Task<ADGroupInfo> GetGroupAsync(string groupName) =>
             Task.Run(() =>
             {

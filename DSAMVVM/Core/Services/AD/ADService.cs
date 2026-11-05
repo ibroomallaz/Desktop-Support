@@ -1,9 +1,12 @@
-﻿using DSAMVVM.Core.Models;
+using DSAMVVM.Core.Models;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.AD;
 
 namespace DSAMVVM.Core.Services.AD
 {
+    /// <summary>
+    /// Unified facade aggregating <see cref="ADUserService"/>, <see cref="ADComputerService"/>, and <see cref="ADGroupService"/>.
+    /// </summary>
     public class ADService(string ldapPath) : IADService
     {
         private readonly ADUserService _userService = new(ldapPath);

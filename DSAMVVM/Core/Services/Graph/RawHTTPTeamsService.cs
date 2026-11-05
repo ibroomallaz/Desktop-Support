@@ -1,16 +1,20 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 
 namespace DSAMVVM.Core.Services.Graph
 {
+    /// <summary>
+    /// Lightweight alternative for posting messages directly to the Microsoft Graph Teams API via raw HTTP.
+    /// </summary>
     public class RawHttpTeamsService
     {
         private static readonly Lazy<HttpClient> FallbackClient = new(() => new HttpClient());
 
-        // --- METHOD: RAW HTTP CHANNEL POST ---
-        // Issues a direct JSON string payload via shared HttpClient using a pre-fetched delegated access token.
+        /// <summary>
+        /// Posts a raw text message directly to a Teams channel endpoint using a pre-fetched delegated access token.
+        /// </summary>
         public static async Task<bool> PostMessageRawAsync(string accessToken, string teamId, string channelId, string messageText)
         {
             var requestUrl = $"https://graph.microsoft.com/v1.0/teams/{teamId}/channels/{channelId}/messages";

@@ -1,10 +1,12 @@
-﻿using DSAMVVM.Core.Logging;
+using DSAMVVM.Core.Logging;
 using Microsoft.Graph;
 using Microsoft.Kiota.Abstractions.Authentication;
 
 namespace DSAMVVM.Core.Services.Graph
 {
-    // Token bridge implementation for Microsoft Graph authentication.
+    /// <summary>
+    /// Implements a Kiota token provider delegating to <see cref="AuthenticationService"/>.
+    /// </summary>
     public class InlineTokenProvider(AuthenticationService authService, string[] scopes) : IAccessTokenProvider
     {
         public AllowedHostsValidator AllowedHostsValidator { get; } = new AllowedHostsValidator();
@@ -15,6 +17,9 @@ namespace DSAMVVM.Core.Services.Graph
         }
     }
 
+    /// <summary>
+    /// Provides Microsoft Graph client operations for sending diagnostic and formatted messages to Microsoft Teams channels.
+    /// </summary>
     public abstract class GraphTeamsService
     {
         // Executes a diagnostic post to verify Entra Token routing GUIDs.
@@ -46,7 +51,9 @@ namespace DSAMVVM.Core.Services.Graph
             }
         }
 
-        // Transmits a formatted message payload to a specified Teams channel, returning the created ChatMessage if successful.
+        /// <summary>
+        /// Transmits a formatted message payload to a specified Teams channel.
+        /// </summary>
         public static async Task<Microsoft.Graph.Models.ChatMessage?> PostMessageAsync(GraphServiceClient graphClient, ITeamsMessagePayload payload)
         {
             try
