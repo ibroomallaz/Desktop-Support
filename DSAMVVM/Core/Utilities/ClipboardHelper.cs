@@ -1,9 +1,12 @@
-﻿using System.Text;
+using System.Text;
 using System.Windows;
 using DSAMVVM.Core.Logging;
 
 namespace DSAMVVM.Core.Utilities
 {
+    /// <summary>
+    /// Formats and copies dual plain text and CF_HTML fragments to the Windows clipboard.
+    /// </summary>
     public static class ClipboardHelper
     {
         private const string HeaderTemplate =
@@ -20,6 +23,9 @@ namespace DSAMVVM.Core.Utilities
             "<!--EndFragment-->\r\n</body>\r\n</html>";
 
 
+        /// <summary>
+        /// Places plain text and rich HTML content onto the clipboard simultaneously.
+        /// </summary>
         public static bool CopyRichAndPlainText(string htmlFragment, string plainText)
         {
             if (string.IsNullOrEmpty(htmlFragment) && string.IsNullOrEmpty(plainText))

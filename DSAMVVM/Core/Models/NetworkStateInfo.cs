@@ -1,8 +1,11 @@
-﻿using System.Text;
+using System.Text;
 using DSAMVVM.Core.Enums;
 
 namespace DSAMVVM.Core.Models
 {
+    /// <summary>
+    /// Immutable record representing network interface connectivity, IP assignments, and campus network affiliation.
+    /// </summary>
     public sealed record NetworkStateInfo
     {
         public NetworkConnectionType ConnectionType { get; init; } = NetworkConnectionType.Disconnected;

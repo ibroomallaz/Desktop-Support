@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Windows;
 using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Models;
@@ -6,6 +6,9 @@ using DSAMVVM.MVVM.Model.Config;
 
 namespace DSAMVVM.Core.Services.Search
 {
+    /// <summary>
+    /// Manages search execution, recent query history, and category filtering across Active Directory and departments.
+    /// </summary>
     public class SearchService : ISearchService
     {
         private readonly IADService _ad;
@@ -21,6 +24,9 @@ namespace DSAMVVM.Core.Services.Search
         private readonly ObservableCollection<string> _searchHistory = [];
         private readonly ObservableCollection<SearchHistoryEntry> _recentSearches = [];
 
+        /// <summary>
+        /// Gets the observable collection of recent query text history.
+        /// </summary>
         public ReadOnlyObservableCollection<string> SearchHistory { get; }
         public ReadOnlyObservableCollection<SearchHistoryEntry> RecentSearches { get; }
 
@@ -44,6 +50,9 @@ namespace DSAMVVM.Core.Services.Search
             _historyCap = Math.Max(0, settings.Ui.Search.MaxSearchHistory);
         }
 
+        /// <summary>
+        /// Configures capacity and enabled status of search history tracking.
+        /// </summary>
         public void ConfigureHistory(bool enabled, int capacity)
         {
             lock (_gate)

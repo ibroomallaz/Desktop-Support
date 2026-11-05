@@ -1,8 +1,11 @@
-﻿namespace DSAMVVM.Core.Models
+namespace DSAMVVM.Core.Models
 {
     using DSAMVVM.Core.Enums;
     using System.Windows.Input;
 
+    /// <summary>
+    /// Navigation item model binding navigation view categories to sidebar menu glyphs and commands.
+    /// </summary>
     public sealed class NavItem
     {
         public string Title { get; init; } = "";

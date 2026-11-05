@@ -1,10 +1,12 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 
 namespace DSAMVVM.Core.Services.Infrastructure
 {
-    // Shared HTTP utility. HttpClient is reused app-wide with connection pooling.
+    /// <summary>
+    /// Provides shared, connection-pooled HTTP client operations and file downloads for the application.
+    /// </summary>
     public sealed class HttpService : IHttpService
     {
         private readonly HttpClient _client;
@@ -26,6 +28,9 @@ namespace DSAMVVM.Core.Services.Infrastructure
             _client.DefaultRequestHeaders.UserAgent.ParseAdd("DesktopSupportApp/4.0");
         }
 
+        /// <summary>
+        /// Asynchronously fetches the string response body from the specified URL.
+        /// </summary>
         public Task<string> GetStringAsync(string url, CancellationToken ct = default)
             => GetStringAsync(url, TimeSpan.FromSeconds(15), ct);
 
@@ -42,6 +47,9 @@ namespace DSAMVVM.Core.Services.Infrastructure
         public Task DownloadFileAsync(string url, string filePath, CancellationToken ct = default)
             => DownloadFileAsync(url, filePath, TimeSpan.FromSeconds(60), ct);
 
+        /// <summary>
+        /// Downloads a remote file to the destination path using atomic temporary file replacement.
+        /// </summary>
         public async Task DownloadFileAsync(string url, string filePath, TimeSpan timeout, CancellationToken ct = default)
         {
             var dir = Path.GetDirectoryName(filePath);
@@ -90,6 +98,9 @@ namespace DSAMVVM.Core.Services.Infrastructure
             return await _client.SendAsync(request, cts.Token);
         }
 
+        /// <summary>
+        /// Launches the specified URL in the system''s default web browser.
+        /// </summary>
         public bool TryOpenUrl(string target, out Exception? error)
         {
             try

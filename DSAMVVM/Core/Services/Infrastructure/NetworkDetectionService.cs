@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
@@ -8,6 +8,9 @@ using DSAMVVM.Core.Models;
 
 namespace DSAMVVM.Core.Services.Infrastructure
 {
+    /// <summary>
+    /// Monitors system network adapters, detecting campus LAN, WiFi, VPN connections, and off-campus state.
+    /// </summary>
     public sealed class NetworkDetectionService : INetworkDetectionService
     {
         private const string CampusDomainSuffix = "arizona.edu";
@@ -17,6 +20,9 @@ namespace DSAMVVM.Core.Services.Infrastructure
         private readonly Timer _debounceTimer;
         private readonly Lock _lock = new();
 
+        /// <summary>
+        /// Gets the current network reachability and campus connection status.
+        /// </summary>
         public NetworkStateInfo CurrentState
         {
             get { lock (_lock) return _currentState; }
@@ -27,6 +33,9 @@ namespace DSAMVVM.Core.Services.Infrastructure
             }
         }
 
+        /// <summary>
+        /// Occurs when adapter availability, IP address changes, or campus connection state changes.
+        /// </summary>
         public event EventHandler<NetworkStateInfo>? NetworkStateChanged;
 
         public NetworkDetectionService()
@@ -54,6 +63,9 @@ namespace DSAMVVM.Core.Services.Infrastructure
         private void OnNetworkAvailabilityChanged(object? sender, NetworkAvailabilityEventArgs e) =>
             _debounceTimer.Change(600, Timeout.Infinite);
 
+        /// <summary>
+        /// Re-evaluates all network interfaces and broadcasts updated network state if changes occurred.
+        /// </summary>
         public NetworkStateInfo Refresh()
         {
             var detected = DetectCurrentState();

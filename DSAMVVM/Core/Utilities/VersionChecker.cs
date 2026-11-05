@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model.Schemas;
 using Newtonsoft.Json;
@@ -42,11 +42,16 @@ namespace DSAMVVM.Core.Utilities
         public bool HasAnyPre => !string.IsNullOrWhiteSpace(PreVersion) || PreExists;
     }
 
+    /// <summary>
+    /// Fetches and parses remote JSON version manifests to determine available updates and minimum version requirements.
+    /// </summary>
     public static partial class VersionChecker
     {
         private const string Cat = "VersionChecker";
 
-        // Fetches JSON, logs discovered fields, fills both the model (if possible) and raw values
+        /// <summary>
+        /// Downloads and parses the version manifest JSON from the specified URL.
+        /// </summary>
         public static async Task<VersionCheckResult> CheckVersionAsync(string url, IHttpService http)
         {
             try

@@ -1,8 +1,11 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System.Net.Http;
 
 namespace DSAMVVM.Core.IO
 {
+    /// <summary>
+    /// Loads remote JSON endpoints with automatic fallback to local disk cache upon network failure.
+    /// </summary>
     public static class RemoteWithBackUpLoader
     {
         public static async Task<T?> LoadAsync<T>(

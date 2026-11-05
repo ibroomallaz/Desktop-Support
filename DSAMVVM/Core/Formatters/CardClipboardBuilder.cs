@@ -1,9 +1,12 @@
-﻿using System.Net;
+using System.Net;
 using System.Text;
 using DSAMVVM.Core.Utilities;
 
 namespace DSAMVVM.Core.Formatters
 {
+    /// <summary>
+    /// Fluent builder that generates synchronized plain text and rich HTML representations of card data for clipboard copying.
+    /// </summary>
     public class CardClipboardBuilder
     {
         private readonly StringBuilder _html = new();
@@ -113,6 +116,9 @@ namespace DSAMVVM.Core.Formatters
             return (fullHtml, fullPlain);
         }
 
+        /// <summary>
+        /// Copies formatted plain text and rich HTML content to the system clipboard.
+        /// </summary>
         public bool CopyToClipboard()
         {
             (string html, string plain) = Build();

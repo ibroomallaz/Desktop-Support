@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Logging;
+using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
 using System.Collections.Concurrent;
 using System.IO;
@@ -8,7 +8,9 @@ using System.Windows.Threading;
 
 namespace DSAMVVM.Core.Utilities
 {
-    // UI notification facade: modal alerts + status bar helpers.
+    /// <summary>
+    /// Centralized notification coordinator providing modal error dialogs, notifications, and status bar message dispatch.
+    /// </summary>
     public static class UiNotify
     {
         // bus delegates (set at startup)
@@ -17,6 +19,9 @@ namespace DSAMVVM.Core.Utilities
         private static Action? _clear;
 
         // one-time init
+        /// <summary>
+        /// Registers global delegates for dispatching status notifications and clearing messages.
+        /// </summary>
         public static void Initialize(Action<StatusItem> report, Action<string>? removeKey = null, Action? clear = null)
         {
             _report = report;

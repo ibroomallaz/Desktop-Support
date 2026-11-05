@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Logging;
+using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model;
 using System.Collections.Concurrent;
 using System.IO;
@@ -9,7 +9,9 @@ using System.Windows.Media.Imaging;
 
 namespace DSAMVVM.Core.Services.UI
 {
-    // Service for downloading, caching, and serving images from local disk and memory without file locking or race conditions.
+    /// <summary>
+    /// Downloads, caches, and decodes remote and local image assets with thread-safe disk storage and memory caching.
+    /// </summary>
     public class ImageCacheService(IHttpService http) : IImageCacheService
     {
         private const string Tag = "ImageCache";
@@ -18,6 +20,9 @@ namespace DSAMVVM.Core.Services.UI
         private readonly ConcurrentDictionary<string, SemaphoreSlim> _fileLocks = new();
         private readonly ConcurrentDictionary<string, ImageSource> _memoryCache = new(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// Retrieves or downloads an image from disk or network, caching the decoded bitmap.
+        /// </summary>
         public async Task<ImageSource?> GetImageAsync(
             string? url,
             bool forceRefresh = false,

@@ -1,7 +1,10 @@
-﻿using DSAMVVM.MVVM.ViewModel.Cards;
+using DSAMVVM.MVVM.ViewModel.Cards;
 
 namespace DSAMVVM.Core.Formatters
 {
+    /// <summary>
+    /// Formats <see cref="UserHistoryItemViewModel"/> identity, licensing, and department details for clipboard export.
+    /// </summary>
     public static class UserCardClipboardHelper
     {
         public static CardClipboardBuilder BuildSummary(UserHistoryItemViewModel vm)

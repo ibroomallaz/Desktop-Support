@@ -1,5 +1,7 @@
-﻿namespace DSAMVVM.Core.Models
+namespace DSAMVVM.Core.Models
 {
-    // Represents the evaluation result of a user's Adobe licensing entitlements
+    /// <summary>
+    /// Represents evaluated user Adobe licensing entitlements for Acrobat Pro and Creative Cloud.
+    /// </summary>
     public record AdobeLicenseStatus(bool HasAcrobatPro, bool HasCreativeCloud);
 }

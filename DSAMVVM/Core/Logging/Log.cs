@@ -1,9 +1,11 @@
-﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.MVVM.Model.Config;
 
 namespace DSAMVVM.Core.Logging
 {
-    // Static facade: level filtering, settings integration, and clear helpers.
+    /// <summary>
+    /// Static logging facade providing level filtering, settings integration, and diagnostic methods.
+    /// </summary>
     public static class Log
     {
         public static IAppLogger? Instance { get; private set; }
@@ -11,6 +13,9 @@ namespace DSAMVVM.Core.Logging
         private static AppLogLevel _min = AppLogLevel.Warn;
         private static int _retentionDays = 14;
 
+        /// <summary>
+        /// Initializes the global logging instance with configured minimum level and log retention policies.
+        /// </summary>
         public static void Initialize(IAppLogger logger, AppLogLevel min = AppLogLevel.Warn, int retentionDays = 14)
         {
             Instance = logger;

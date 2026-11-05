@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Logging;
+using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Data;
@@ -9,7 +9,9 @@ using System.Windows.Media;
 
 namespace DSAMVVM.Core.Services.Integrations
 {
-    // Loads ServiceMeow data using a Remote-First strategy with local offline fallback and image caching.
+    /// <summary>
+    /// Manages ServiceMeow mascot pet profiles, metadata, and cached profile images.
+    /// </summary>
     public class ServiceMeowService(IHttpService http, IImageCacheService imageCacheService) : IServiceMeowService
     {
         private const string Tag = "ServiceMeow";
@@ -23,12 +25,18 @@ namespace DSAMVVM.Core.Services.Integrations
 
         public ServiceMeowData? GetCachedData() => _cache;
 
+        /// <summary>
+        /// Asynchronously loads or refreshes ServiceMeow pet profile data.
+        /// </summary>
         public Task<ServiceMeowData?> LoadServiceMeowDataAsync(CancellationToken ct = default)
             => LoadInternalAsync(isReload: false, ct);
 
         public Task ReloadServiceMeowDataAsync(CancellationToken ct = default)
             => LoadInternalAsync(isReload: true, ct);
 
+        /// <summary>
+        /// Resolves and decodes a cached image for the given pet profile.
+        /// </summary>
         public Task<ImageSource?> GetPetImageAsync(ServiceMeowPet? pet, bool forceRefresh = false, CancellationToken ct = default)
         {
             if (pet == null || string.IsNullOrWhiteSpace(pet.ImageUrl))
@@ -44,6 +52,9 @@ namespace DSAMVVM.Core.Services.Integrations
             return string.IsNullOrWhiteSpace(url) ? Task.FromResult<ImageSource?>(null) : _imageCacheService.GetImageAsync(url, forceRefresh: forceRefresh, decodePixelWidth: decodePixelWidth, ct: ct);
         }
 
+        /// <summary>
+        /// Returns a randomly selected pet profile from cached data.
+        /// </summary>
         public ServiceMeowPet? GetRandomPet()
         {
             var pets = _cache?.AllPets;

@@ -1,8 +1,11 @@
-﻿using DSAMVVM.MVVM.Model.Config;
+using DSAMVVM.MVVM.Model.Config;
 using System.Collections.Concurrent;
 
 namespace DSAMVVM.Core.Services.UI
 {
+    /// <summary>
+    /// Caches and evaluates view-specific output font sizes and styling preferences.
+    /// </summary>
     public sealed class OutputTextSettingsProvider(ISettingsService settingsSvc, Func<AppSettings> settingsAccessor) : IOutputTextSettingsProvider
     {
         private readonly ISettingsService _settingsSvc = settingsSvc ?? throw new ArgumentNullException(nameof(settingsSvc));

@@ -1,7 +1,10 @@
-﻿using DSAMVVM.MVVM.ViewModel.Cards;
+using DSAMVVM.MVVM.ViewModel.Cards;
 
 namespace DSAMVVM.Core.Formatters
 {
+    /// <summary>
+    /// Formats <see cref="ComputerHistoryItemViewModel"/> system, OS, and domain status for clipboard export.
+    /// </summary>
     public static class ComputerCardClipboardHelper
     {
         public static CardClipboardBuilder BuildSummary(ComputerHistoryItemViewModel vm)

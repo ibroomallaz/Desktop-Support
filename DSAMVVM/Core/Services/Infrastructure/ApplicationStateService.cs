@@ -1,5 +1,8 @@
-﻿namespace DSAMVVM.Core.Services.Infrastructure
+namespace DSAMVVM.Core.Services.Infrastructure
 {
+    /// <summary>
+    /// Tracks transient application state across views, including recent queries, active views, and diagnostics.
+    /// </summary>
     public class ApplicationStateService : IApplicationStateService
     {
         public string CurrentView { get; set; } = "Unknown";

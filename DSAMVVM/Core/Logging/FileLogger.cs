@@ -1,10 +1,12 @@
-﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Enums;
 using System.IO;
 using System.Text;
 
 namespace DSAMVVM.Core.Logging
 {
-    // Daily rolling file logger with retention; cleanup is deferred until SetRetentionDays is called.
+    /// <summary>
+    /// Daily rolling file logger supporting retention cleanup, thread-safe asynchronous writes, and fallback directory handling.
+    /// </summary>
     public sealed class FileLogger : IAppLogger, IDisposable
     {
         private readonly Lock _sync = new();

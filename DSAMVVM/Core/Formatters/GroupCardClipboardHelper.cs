@@ -1,8 +1,11 @@
-﻿using DSAMVVM.MVVM.ViewModel;
+using DSAMVVM.MVVM.ViewModel;
 using DSAMVVM.MVVM.ViewModel.Cards;
 
 namespace DSAMVVM.Core.Formatters
 {
+    /// <summary>
+    /// Formats <see cref="GroupHistoryItemViewModel"/> membership and departmental routing details for clipboard export.
+    /// </summary>
     public static class GroupCardClipboardHelper
     {
         public static CardClipboardBuilder BuildSummary(GroupHistoryItemViewModel vm)

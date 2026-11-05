@@ -1,10 +1,13 @@
-﻿using DSAMVVM.Core.Logging;
+using DSAMVVM.Core.Logging;
 using Newtonsoft.Json;
 using System.IO;
 using System.Text;
 
 namespace DSAMVVM.Core.IO
 {
+    /// <summary>
+    /// Thread-safe local JSON disk cache supporting atomic temporary file writes.
+    /// </summary>
     public sealed class JsonFileCache<T>(string path)
     {
         private readonly string _path = path ?? throw new ArgumentNullException(nameof(path));
@@ -14,6 +17,9 @@ namespace DSAMVVM.Core.IO
             NullValueHandling = NullValueHandling.Include
         };
 
+        /// <summary>
+        /// Reads and deserializes cached JSON from disk.
+        /// </summary>
         public async Task<T?> ReadAsync()
         {
             try
@@ -36,6 +42,9 @@ namespace DSAMVVM.Core.IO
             }
         }
 
+        /// <summary>
+        /// Atomically writes the specified model to disk cache.
+        /// </summary>
         public async Task WriteAsync(T model)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_path)!);

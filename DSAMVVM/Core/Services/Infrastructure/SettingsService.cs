@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Utilities;
+using DSAMVVM.Core.Utilities;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Config;
@@ -9,17 +9,25 @@ using System.Text;
 
 namespace DSAMVVM.Core.Services.Infrastructure
 {
+    /// <summary>
+    /// Manages loading, validating, sanitizing, and persisting <see cref="AppSettings"/> JSON files.
+    /// </summary>
     public class SettingsService : ISettingsService
     {
         private const string Tag = "SettingsService";
         private const int MinFont = (int)UiLimits.MinFontSize;
         private const int MaxFont = (int)UiLimits.MaxFontSize;
 
-        //Reactive Event Broker
+        /// <summary>
+        /// Occurs when application settings are updated or reloaded.
+        /// </summary>
         public event EventHandler<AppSettings>? SettingsChanged;
 
         // Load / Save (core)
 
+        /// <summary>
+        /// Loads settings from the specified file path, falling back to defaults if missing or corrupted.
+        /// </summary>
         public async Task<AppSettings> LoadAsync(string settingsPath, CancellationToken ct = default)
         {
             var path = Expand(settingsPath);
@@ -62,6 +70,9 @@ namespace DSAMVVM.Core.Services.Infrastructure
             return settings;
         }
 
+        /// <summary>
+        /// Persists settings to disk, validating and sanitizing options before writing.
+        /// </summary>
         public async Task SaveAsync(AppSettings settings, string settingsPath, CancellationToken ct = default)
         {
             ArgumentNullException.ThrowIfNull(settings);

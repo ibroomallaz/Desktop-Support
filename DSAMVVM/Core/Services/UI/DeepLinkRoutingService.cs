@@ -1,9 +1,15 @@
-﻿using DSAMVVM.Core.Logging;
+using DSAMVVM.Core.Logging;
 
 namespace DSAMVVM.Core.Services.UI
 {
+    /// <summary>
+    /// Parses application URI protocols (e.g., "dsa://nav/") and broadcasts view navigation requests.
+    /// </summary>
     public class DeepLinkRoutingService : IDeepLinkRoutingService
     {
+        /// <summary>
+        /// Occurs when an inbound URI request resolves to a target view and query.
+        /// </summary>
         public event Action<string, string>? NavigationRequested;
 
         public void RequestNavigation(string targetView, string targetQuery)
@@ -11,6 +17,9 @@ namespace DSAMVVM.Core.Services.UI
             NavigationRequested?.Invoke(targetView, targetQuery);
         }
 
+        /// <summary>
+        /// Parses an incoming URL and dispatches navigation if a valid application schema is present.
+        /// </summary>
         public Task<string> HandleLinkAsync(string url, string? contextNetId = null)
         {
             if (string.IsNullOrWhiteSpace(url)) return Task.FromResult(string.Empty);

@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Logging;
+using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Services.Infrastructure;
 using DSAMVVM.MVVM.Model.Schemas;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +8,9 @@ using System.Windows;
 
 namespace DSAMVVM.Core.Services.Updates
 {
+    /// <summary>
+    /// Downloads application update packages and prerequisites, initiating silent MSI or bootstrapper installation.
+    /// </summary>
     public class UpdaterService(IHttpService http) : IUpdaterService
     {
         private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
@@ -17,6 +20,9 @@ namespace DSAMVVM.Core.Services.Updates
         {
         }
 
+        /// <summary>
+        /// Downloads the required installer payload, reports progress, and executes silent installation with restart handoff.
+        /// </summary>
         public async Task DownloadAndInstallAsync(CurrentVersion updateInfo, IProgress<string>? progressReporter = null)
         {
             var tempDir = Path.Combine(Path.GetTempPath(), $"DSA_Update_{Guid.NewGuid():N}");

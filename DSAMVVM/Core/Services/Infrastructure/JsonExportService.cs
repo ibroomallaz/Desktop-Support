@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model.Admin;
 using Newtonsoft.Json;
@@ -6,6 +6,9 @@ using System.IO;
 
 namespace DSAMVVM.Core.Services.Infrastructure
 {
+    /// <summary>
+    /// Exports formatted administrative JSON configurations (departments, links, ServiceMeow) with staged change sets.
+    /// </summary>
     public class JsonExportService(IAdminService adminService) : IJsonExportService
     {
         private const string Tag = "JsonExportService";

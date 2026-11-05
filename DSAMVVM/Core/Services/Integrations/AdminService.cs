@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Admin;
@@ -9,6 +9,9 @@ using System.IO;
 
 namespace DSAMVVM.Core.Services.Integrations
 {
+    /// <summary>
+    /// Orchestrates administrative CRUD workflows, schema staging, and JSON updates for departments, links, and ServiceMeow data.
+    /// </summary>
     public class AdminService(IDepartmentService deptService, ILinksService linksService, IServiceMeowService? meowService = null) : IAdminService
     {
         private const string Tag = "AdminService";
@@ -31,6 +34,9 @@ namespace DSAMVVM.Core.Services.Integrations
 
         // --- Department Operations ---
 
+        /// <summary>
+        /// Loads current department data structures from disk or active cache for editing.
+        /// </summary>
         public async Task<DepartmentListWrapper> LoadDepartmentsAsync()
         {
             try
@@ -370,6 +376,9 @@ namespace DSAMVVM.Core.Services.Integrations
 
         // --- Staging Helpers ---
 
+        /// <summary>
+        /// Applies staged department modifications, creations, or deletions to the provided dataset.
+        /// </summary>
         public DepartmentListWrapper ApplyDepartmentChanges(DepartmentListWrapper wrapper, IEnumerable<StagedChange> stagedChanges)
         {
             ArgumentNullException.ThrowIfNull(wrapper);

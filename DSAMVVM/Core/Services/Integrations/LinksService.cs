@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Logging;
+using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
 using DSAMVVM.MVVM.Model.Data;
@@ -9,7 +9,9 @@ using static DSAMVVM.Core.Utilities.UiNotify;
 
 namespace DSAMVVM.Core.Services.Integrations
 {
-    // Service for loading Links data using a Remote-First strategy with local offline fallback.
+    /// <summary>
+    /// Fetches and caches categorized application and technician quick links with remote and local offline support.
+    /// </summary>
     public class LinksService(IHttpService http) : ILinksService
     {
         private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
@@ -20,7 +22,13 @@ namespace DSAMVVM.Core.Services.Integrations
 
         public LinksData? GetCachedLinksData() => _cache;
 
+        /// <summary>
+        /// Loads links data from cache, network source, or local offline fallback.
+        /// </summary>
         public Task<LinksData?> LoadLinksDataAsync() => LoadInternalAsync(isReload: false, CancellationToken.None);
+        /// <summary>
+        /// Forces a fresh reload of links data from the configured network or local source.
+        /// </summary>
         public Task ReloadLinksDataAsync() => LoadInternalAsync(isReload: true, CancellationToken.None);
 
         // Core logic for fetching, caching, and parsing data.

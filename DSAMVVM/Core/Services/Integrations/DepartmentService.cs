@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Interfaces;
+using DSAMVVM.Core.Interfaces;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Utilities;
 using DSAMVVM.MVVM.Model;
@@ -9,7 +9,9 @@ using System.IO;
 
 namespace DSAMVVM.Core.Services.Integrations
 {
-    // Loads Department data using a Remote-First strategy with local offline fallback.
+    /// <summary>
+    /// Loads and manages department configurations and support team assignments using a remote-first, cached fallback strategy.
+    /// </summary>
     public class DepartmentService(IHttpService http, IApplicationStateService appStateService) : IDepartmentService
     {
         private readonly IHttpService _http = http ?? throw new ArgumentNullException(nameof(http));
@@ -24,6 +26,9 @@ namespace DSAMVVM.Core.Services.Integrations
 
         public async Task PreCacheDataAsync() => await EnsureDataLoaded();
 
+        /// <summary>
+        /// Retrieves department details by numeric department code, updating application state tracking.
+        /// </summary>
         public async Task<IDepartment?> GetDepartmentAsync(string departmentNumber)
         {
             await EnsureDataLoaded();
@@ -48,6 +53,9 @@ namespace DSAMVVM.Core.Services.Integrations
             return dept;
         }
 
+        /// <summary>
+        /// Retrieves support team metadata and direct contact links for the specified team name.
+        /// </summary>
         public async Task<SupportTeam?> GetSupportTeamAsync(string teamName)
         {
             await EnsureDataLoaded();

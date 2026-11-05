@@ -1,8 +1,10 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 
 namespace DSAMVVM.Core.Services.Updates
 {
-    // Periodic + resume scheduler (UI-neutral, lean: single-flight, jitter, backoff, resume debounce)
+    /// <summary>
+    /// Schedules periodic background version checks with exponential backoff, jitter, and system sleep/resume debouncing.
+    /// </summary>
     public sealed class VersionUpdateScheduler : IDisposable
     {
         private readonly IVersionCheckHandler _handler;
@@ -26,6 +28,9 @@ namespace DSAMVVM.Core.Services.Updates
             SystemEvents.PowerModeChanged += OnPowerModeChanged;
         }
 
+        /// <summary>
+        /// Starts the periodic timer to execute version checks at the configured interval.
+        /// </summary>
         public void Start(TimeSpan interval, bool runImmediately = false)
         {
             Stop();
@@ -56,6 +61,9 @@ namespace DSAMVVM.Core.Services.Updates
             }, cts.Token);
         }
 
+        /// <summary>
+        /// Stops the recurring timer and cancels any pending scheduled check.
+        /// </summary>
         public void Stop()
         {
             lock (_gate)

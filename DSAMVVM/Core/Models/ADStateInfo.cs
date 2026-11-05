@@ -1,5 +1,8 @@
-﻿namespace DSAMVVM.Core.Models;
+namespace DSAMVVM.Core.Models;
 
+/// <summary>
+/// Immutable snapshot representing Active Directory domain controller reachability and network latency.
+/// </summary>
 public sealed record ADStateInfo
 {
     public bool IsReachable { get; init; }

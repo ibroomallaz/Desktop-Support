@@ -1,7 +1,10 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 
 namespace DSAMVVM.Core.Services.UI
 {
+    /// <summary>
+    /// Provides platform dialogs for opening files, saving files, and selecting destination directories.
+    /// </summary>
     public class FileDialogService : IFileDialogService
     {
         public string? SelectFolder(string? description = null, string? initialDirectory = null)

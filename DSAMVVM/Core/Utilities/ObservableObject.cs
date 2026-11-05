@@ -1,8 +1,11 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace DSAMVVM.Core.Utilities
 {
+    /// <summary>
+    /// Base class implementing <see cref="INotifyPropertyChanged"/> with optimized setter helpers.
+    /// </summary>
     public abstract class ObservableObject : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;

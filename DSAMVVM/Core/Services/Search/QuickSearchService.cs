@@ -1,4 +1,4 @@
-﻿using DSAMVVM.MVVM.Model.Config;
+using DSAMVVM.MVVM.Model.Config;
 using SharpHook;
 using SharpHook.Data;
 using SharpHook.Simulation;
@@ -6,6 +6,9 @@ using System.Windows;
 
 namespace DSAMVVM.Core.Services.Search
 {
+    /// <summary>
+    /// Manages global system keyboard hooks to trigger quick search shortcuts (e.g., double-tap modifier keys).
+    /// </summary>
     public class QuickSearchService : IQuickSearchService
     {
         private readonly TaskPoolGlobalHook _hook;
@@ -15,6 +18,9 @@ namespace DSAMVVM.Core.Services.Search
         private long _lastPressTime;
         private bool _isTriggerKeyDown;
 
+        /// <summary>
+        /// Occurs when the global quick search shortcut sequence is activated by the user.
+        /// </summary>
         public event EventHandler<string>? QuickSearchTriggered;
 
         public QuickSearchService()
@@ -26,7 +32,9 @@ namespace DSAMVVM.Core.Services.Search
             _hook.KeyReleased += OnKeyReleased;
         }
 
-        // Method to accept on startup and when Apply is clicked in settings
+        /// <summary>
+        /// Applies trigger keycodes and activation preferences for global keyboard interception.
+        /// </summary>
         public void Configure(QuickSearchSettings settings)
         {
             _settings = settings;
