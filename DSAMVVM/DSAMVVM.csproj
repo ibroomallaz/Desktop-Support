@@ -31,14 +31,14 @@
 
   <ItemGroup>
     <PackageReference Include="H.NotifyIcon.Wpf" Version="2.4.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.13" />
-    <PackageReference Include="Microsoft.Graph" Version="6.8.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Graph" Version="6.9.0" />
     <PackageReference Include="Microsoft.Graph.Core" Version="4.0.1" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.91.1" />
-    <PackageReference Include="Microsoft.Identity.Client.Broker" Version="4.91.1" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.92.0" />
+    <PackageReference Include="Microsoft.Identity.Client.Broker" Version="4.92.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="SharpHook" Version="8.0.1" />
-    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="10.0.13" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="10.0.14" />
   </ItemGroup>
 
   <ItemGroup>
