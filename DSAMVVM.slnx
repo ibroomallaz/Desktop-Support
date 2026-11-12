@@ -5,6 +5,7 @@
     <Platform Name="x86" />
   </Configurations>
   <Project Path="DSAMVVM/DSAMVVM.csproj" />
+  <Project Path="DSA.Tests/DSA.Tests.csproj" />
   <Project Path="DSA.Installer/DSA.Installer.wixproj" Type="b7dd6f7e-def8-4e67-b5b7-07ef123db6f0">
     <Build Solution="*|*" Project="true" />
     <BuildDependency Project="DSAMVVM/DSAMVVM.csproj" />
