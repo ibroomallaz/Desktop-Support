@@ -1,4 +1,4 @@
-﻿using DSAMVVM.MVVM.View.Dialogs;
+using DSAMVVM.MVVM.View.Dialogs;
 using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Models;
@@ -761,6 +761,7 @@ namespace DSAMVVM.MVVM.ViewModel
                     SearchTarget.User => Glyphs.User,
                     SearchTarget.Computer => Glyphs.Computer,
                     SearchTarget.Group => Glyphs.Group,
+                    SearchTarget.Entra => Glyphs.Entra,
                     SearchTarget.Admin => Glyphs.Admin,
                     _ => Glyphs.Search
                 };
@@ -779,6 +780,7 @@ namespace DSAMVVM.MVVM.ViewModel
                             SearchTarget.User => () => _openUser?.Invoke(entry.Query),
                             SearchTarget.Computer => () => _openComputer?.Invoke(entry.Query),
                             SearchTarget.Group => () => _goGroups?.Invoke(),
+                            SearchTarget.Entra => () => _linkRouter?.RequestNavigation("entra", entry.Query),
                             _ => null
                         };
                         navAction?.Invoke();

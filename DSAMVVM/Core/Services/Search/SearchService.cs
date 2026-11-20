@@ -13,6 +13,7 @@ namespace DSAMVVM.Core.Services.Search
     {
         private readonly IADService _ad;
         private readonly IDepartmentService _dept;
+        private readonly IEntraService _entra;
         private readonly IApplicationStateService _appStateService;
 
         // History state
@@ -35,11 +36,13 @@ namespace DSAMVVM.Core.Services.Search
         public SearchService(
             IADService ad,
             IDepartmentService dept,
+            IEntraService entra,
             IApplicationStateService appStateService,
             AppSettings? settings = null)
         {
             _ad = ad ?? throw new ArgumentNullException(nameof(ad));
             _dept = dept ?? throw new ArgumentNullException(nameof(dept));
+            _entra = entra ?? throw new ArgumentNullException(nameof(entra));
             _appStateService = appStateService ?? throw new ArgumentNullException(nameof(appStateService));
 
             SearchHistory = new ReadOnlyObservableCollection<string>(_searchHistory);
@@ -107,6 +110,7 @@ namespace DSAMVVM.Core.Services.Search
                 SearchTarget.User => await _ad.GetUserAsync(context.Query),
                 SearchTarget.Computer => await _ad.GetComputerAsync(context.Query),
                 SearchTarget.Group => await _ad.GetGroupAsync(context.Query),
+                SearchTarget.Entra => await _entra.SearchDevicesAsync(context.Query),
                 SearchTarget.Admin => context.Mode switch
                 {
                     nameof(AdminSection.Department) => await _dept.GetDepartmentAsync(context.Query),

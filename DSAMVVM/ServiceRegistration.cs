@@ -1,4 +1,4 @@
-﻿using DSAMVVM.Core.Enums;
+using DSAMVVM.Core.Enums;
 using DSAMVVM.Core.Logging;
 using DSAMVVM.Core.Services.AD;
 using DSAMVVM.Core.Services.Graph;
@@ -38,6 +38,7 @@ public static class ServiceRegistration
 
             // Graph & Communications
             services.AddSingleton<IAuthenticationService, AuthenticationService>();
+            services.AddSingleton<IEntraService, EntraService>();
             services.AddSingleton<TeamsRoutingService>();
 
             // Integrations & External APIs

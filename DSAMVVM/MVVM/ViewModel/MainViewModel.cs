@@ -244,13 +244,14 @@ namespace DSAMVVM.MVVM.ViewModel
         /// <summary>
         /// Gets whether the currently active view supports global search.
         /// </summary>
-        public bool IsSearchEnabled => SelectedView is AppView.User or AppView.Computer or AppView.Group or AppView.Admin;
+        public bool IsSearchEnabled => SelectedView is AppView.User or AppView.Computer or AppView.Group or AppView.Entra or AppView.Admin;
 
         public string SearchWatermark => SelectedView switch
         {
             AppView.User => "Search Users...",
             AppView.Computer => "Search Computers...",
             AppView.Group => "Search Groups...",
+            AppView.Entra => "Search Entra Devices...",
             AppView.Admin => "Search Admin...",
             _ => "Select view to search..."
         };
@@ -959,6 +960,7 @@ namespace DSAMVVM.MVVM.ViewModel
             UserViewModel => SearchTarget.User,
             ComputerViewModel => SearchTarget.Computer,
             GroupViewModel => SearchTarget.Group,
+            EntraViewModel => SearchTarget.Entra,
             AdminViewModel => SearchTarget.Admin,
             _ => null
         };

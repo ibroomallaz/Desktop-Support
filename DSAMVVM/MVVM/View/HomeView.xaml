@@ -103,6 +103,10 @@
                                     <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.Admin.Bg}"/>
                                     <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.Admin.Border}"/>
                                 </DataTrigger>
+                                <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Entra}">
+                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.Pill.User.Bg}"/>
+                                    <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Pill.User.Border}"/>
+                                </DataTrigger>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter TargetName="Root" Property="BorderBrush" Value="#80FFFFFF"/>
                                 </Trigger>
@@ -389,6 +393,9 @@
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Admin}">
                                                                 <Setter Property="Foreground" Value="{DynamicResource Brush.Pill.Admin.Icon}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Target}" Value="{x:Static enums:SearchTarget.Entra}">
+                                                                <Setter Property="Foreground" Value="{DynamicResource Brush.Pill.User.Icon}"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>

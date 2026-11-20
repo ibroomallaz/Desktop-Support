@@ -5,9 +5,9 @@ using Microsoft.Kiota.Abstractions.Authentication;
 namespace DSAMVVM.Core.Services.Graph
 {
     /// <summary>
-    /// Implements a Kiota token provider delegating to <see cref="AuthenticationService"/>.
+    /// Implements a Kiota token provider delegating to <see cref="IAuthenticationService"/>.
     /// </summary>
-    public class InlineTokenProvider(AuthenticationService authService, string[] scopes) : IAccessTokenProvider
+    public class InlineTokenProvider(IAuthenticationService authService, string[] scopes) : IAccessTokenProvider
     {
         public AllowedHostsValidator AllowedHostsValidator { get; } = new AllowedHostsValidator();
 
